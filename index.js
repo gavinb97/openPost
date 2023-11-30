@@ -1,17 +1,15 @@
+const createGPTClient = require('./gptClient')
 const { Configuration, OpenAIApi } = require("openai");
 
 
 const createGPT = async () => {
-    const configuration = new Configuration({
-      apiKey: "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",
-    });
-    return new OpenAIApi(configuration)
+    return await createGPTClient()
 }
 
-let chatGpt = createGPT();
+
 
 const getArticleTopic = async () => {
-
+    let chatGpt = await createGPT();
     const getArticleTopicPrompt = 'Generate a concise and insightful talking point' 
                                 + 'related to kinesiology and sports performance from the perspective of an '
                                +  'expert personal trainer holding an NSCA CSCS certification. The topic should be relevant to '
@@ -22,6 +20,7 @@ const getArticleTopic = async () => {
         const chatCompletion = await chatGpt.createChatCompletion({
           model: "gpt-3.5-turbo",
          messages: [
+            {role: "system", content: 'You are an copywriter assistant'},
            {role: "user", content: getArticleTopicPrompt}
          ],
        });
@@ -36,7 +35,7 @@ const getArticleTopic = async () => {
 }
 
 const getArticleTitle = async (articleTopic) => {
-
+    let chatGpt = await createGPT();
     const getArticleTitlePrompt = `Create a captivating and clickbaity article title based on the following paragraph about kinesiology and sports performance: `
                                 + `[${articleTopic}] `
                                 + `Ensure the title is concise, attention-grabbing, reflects the expertise of an NSCA CSCS-certified personal trainer, and entices readers to explore the content for valuable insights into strength training, aerobic training, stretching/flexibility, nutrition, sports psychology, and performance-enhancing substances. `
@@ -60,7 +59,7 @@ const getArticleTitle = async (articleTopic) => {
 
 
 const getSubtopicPrompts = async (articleTopic, articleTitle) => {
-
+    let chatGpt = await createGPT();
     const getSubtopicPromptsPrompt = `Given the article title  [${articleTitle}]  and the article topic  [${articleTopic}] , please generate an array of subtopics, where each subtopic ` 
                                     + `consists of a name and an array of prompts. The subtopics should cover various aspects of kinesiology and sports performance, including but not limited to strength training, ` 
                                     + `aerobic training, stretching/flexibility, nutrition, sports psychology, and performance-enhancing substances. Ensure the breakdown is organized, insightful, and provides valuable information for readers seeking in-depth knowledge on the specified topic.`
@@ -87,62 +86,25 @@ const getSubtopicPrompts = async (articleTopic, articleTitle) => {
      }
 }
 
-const extractPrompts = (subtopicPrompts) => {
-    const regex = /\[.*?\]/s; // Match everything between the first '[' and the last ']'
-  
-    const match = subtopicPrompts.match(regex);
-    if (match) {
-      try {
-        const extractedArray = JSON.parse(match[0]);
-        return extractedArray;
-      } catch (error) {
-        console.error('Error parsing the extracted array:', error);
-        return null;
-      }
-    } else {
-      console.error('No array found in the response string.');
-      return null;
-    }
-  }
 
 const generateArticle = async () => {
-    const articleTopic = await getArticleTopic()
+    const articleTopicResponse = await getArticleTopic()
+    const articleTopic = articleTopicResponse.content
 
-    const articleTitle = await getArticleTitle(articleTopic)
+    const articleTitleResponse = await getArticleTitle(articleTopic)
+    const articleTitle = articleTitleResponse.content
+    
+    const subtopicResponse = await getSubtopicPrompts(articleTopic, articleTitle)
+    const subtopicPrompts = subtopicResponse.content
 
-    const subtopicPrompts = await getSubtopicPrompts(articleTopic, articleTitle)
-
+    
     if (subtopicPrompts) {
-        // need to extract the array of objects
-        const promptsArray = extractPrompts(subtopicPrompts)
-        console.log(promptsArray)
-    } else {
-        console.log('no subtopics what the heck')
+        const promtsObj = JSON.parse(subtopicPrompts)
+        console.log(promtsObj)
     }
+   
+   
 }
 
 generateArticle()
 
-  const createTweet = async (appDescription) => {
-    let openai = await setupConfig()
-
-    try {
-       const chatCompletion = await openai.createChatCompletion({
-         model: "gpt-3.5-turbo",
-        messages: [
-          {role: "system", content: "You are a braggart who likes to promote the applications you develop. You like to brag on twitter and as a result your response MUST" 
-        + " have less than 270 characters total including white space (it should be under 250 characters if possible). You want to create bubbly, click baity twitter posts that will get users to click on our profile  "
-        + " so that they can download our apps. Additionally, you'd like to create posts that will maximize user engagement (likes, retweets, shares). Use relevant hashtags to the app description given."
-        + " for example, if the user describes a therapy app you might want to focus on conveying its mental health benefits and use hashtags to get engagement and maybe follows. Change it up every so often."},
-          {role: "user", content: contentString}
-        ],
-      });
-      return chatCompletion.data.choices[0].message;
-    } catch (error){
-      if (error.response) {
-          return 'call failed';
-        } else {
-          return 'call failed, no error.response'
-        }
-    }
-  }
