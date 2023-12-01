@@ -121,7 +121,9 @@ const processSubtopicPrompts = async (array) => {
   
     for (const obj of array) {
       const { subtopic, prompts } = obj;
-  
+        console.log('current subtopic: ' + subtopic)
+
+        // TODO add subtopic to array then add paragraphs so i dont have multiple subtopoics 
       // Loop through each prompt within the subtopic
       for (const prompt of prompts) {
         console.log('getting paragraphs...')
@@ -129,8 +131,11 @@ const processSubtopicPrompts = async (array) => {
         const paragraphs = response.content
 
         // Add the paragraphs to the accumulated array
-        allParagraphs.push(
-          paragraphs
+        allParagraphs.push({
+            subtopic: subtopic,
+            paragraphs: [paragraphs]
+        }
+        //   paragraphs
         );
   
         // Do something with the obtained paragraphs, for example, log them
@@ -140,7 +145,7 @@ const processSubtopicPrompts = async (array) => {
     }
   
     // Now you can iterate over the accumulated paragraphs later
-    console.log('All Paragraphs:', allParagraphs);
+    return allParagraphs
   };
 
 const combineSubtopicParagraphs = async () => {
@@ -163,8 +168,11 @@ const generateArticle = async () => {
     if (subtopicPrompts) {
         const promtsObjArray = JSON.parse(subtopicPrompts)
         // for each subtopic, we want to make a call for each prompt
-        processSubtopicPrompts(promtsObjArray)
-    }
+        const arrayOfSubtopicParagraphs = await processSubtopicPrompts(promtsObjArray)
+        if (arrayOfSubtopicParagraphs) {
+            console.log('all done')
+        }
+    }   
    
 }
 
