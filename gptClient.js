@@ -7,7 +7,6 @@ const createGPTClient = async () => {
     const configuration = new Configuration({
       apiKey: process.env.GPT_KEY,
     });
-    console.log('made client')
     return new OpenAIApi(configuration)
   }
 

@@ -117,63 +117,162 @@ const getSubtopicParagraphs = async (subtopic, prompt) => {
 
 // this will call gpt to get subtopic paragraphs and return an array containing all of the paragraphs 
 const processSubtopicPrompts = async (array) => {
-    const allParagraphs = [];  // Array to accumulate all paragraphs
+    const paragraphsBySubtopic = [];  // Array to accumulate all paragraphs
   
     for (const obj of array) {
       const { subtopic, prompts } = obj;
         console.log('current subtopic: ' + subtopic)
 
-        // TODO add subtopic to array then add paragraphs so i dont have multiple subtopoics 
+        
+        const aggregatedParagraphs = []
       // Loop through each prompt within the subtopic
       for (const prompt of prompts) {
         console.log('getting paragraphs...')
         const response = await getSubtopicParagraphs(subtopic, prompt);
         const paragraphs = response.content
 
-        // Add the paragraphs to the accumulated array
-        allParagraphs.push({
-            subtopic: subtopic,
-            paragraphs: [paragraphs]
-        }
-        //   paragraphs
-        );
-  
-        // Do something with the obtained paragraphs, for example, log them
-        // console.log(`Subtopic: ${subtopic}, Prompt: ${prompt}, Paragraphs:`, paragraphs);
-        console.log(allParagraphs)
+        // Add the paragraphs to an array
+        aggregatedParagraphs.push(paragraphs);
       }
+
+      const subTopicAndParagraphs = {subtopic: subtopic, paragraphs: aggregatedParagraphs}
+      paragraphsBySubtopic.push(subTopicAndParagraphs)
     }
   
-    // Now you can iterate over the accumulated paragraphs later
-    return allParagraphs
+    // Returning array of objects containing subtopics and all the paragraphs about them
+    return paragraphsBySubtopic
   };
 
-const combineSubtopicParagraphs = async () => {
+const combineSubtopicParagraphs = async (articleTitle, subtopic, paragraphs) => {
     // copy all the paragraphs and combine them to form a more cohesive and less fragmented article
+
+    let chatGpt = await createGPT();
+    const paragraphsCount = paragraphs.length;
+
+    // Prepare the prompt based on the number of paragraphs
+    const promptHeader = `
+    Assembling an Article: ${articleTitle}
+
+    I have gathered insightful paragraphs on various subtopics related to ${subtopic}. Now, I seek your assistance in weaving these fragments into a cohesive article. Below are the paragraphs associated with a specific subtopic. Your task is to refine and connect them to create a flowing narrative.
+
+    ---`;
+
+    const paragraphSection = paragraphs.map((paragraph, index) => `
+    **Subtopic: ${subtopic}**
+
+    ${paragraph}`).join('\n\n');
+
+    const promptFooter = `
+    Please enhance the transitions between paragraphs, ensuring a logical and smooth progression. Integrate relevant information, maintain coherence, and elaborate where necessary. Feel free to rephrase or add connecting sentences. The goal is to produce a well-structured and engaging article.
+
+    Thank you for your expertise in crafting a seamless narrative around ${subtopic}.`;
+
+    const getSubtopicParagraphPrompt = paragraphsCount > 0
+        ? `${promptHeader}${paragraphSection}${promptFooter}`
+        : 'No paragraphs provided for the subtopic.';
+
+    try {
+        const chatCompletion = await chatGpt.createChatCompletion({
+          model: "gpt-3.5-turbo",
+         messages: [
+           {role: "user", content: getSubtopicParagraphPrompt}
+         ],
+       });
+       return chatCompletion.data.choices[0].message;
+     } catch (error){
+       if (error.response) {
+           return 'call failed';
+         } else {
+           return 'call failed, no error.response'
+         }
+     }
+}
+
+const finalizeParagraphs = async (articleTitle, paragraphs) => {
+    let chatGpt = await createGPT();
+
+    // Construct the dynamic prompt based on the number of paragraphs
+    let prompt = `
+    Compile Article: [Article Title]
+
+    I have gathered insightful paragraphs on various subtopics related to [${articleTitle}]. The goal now is to compile these cohesive paragraphs into a well-structured article. Each paragraph has been refined to flow logically with the others. Please review and enhance the transitions between paragraphs, ensuring a smooth progression.
+
+    ---`;
+
+    for (let i = 0; i < paragraphs.length; i++) {
+        prompt += `\n\n[${paragraphs[i]}]\n\n---`;
+    }
+
+    prompt += `
+    
+    Feel free to adjust the wording, add connecting sentences, or provide additional context where necessary. Your expertise in crafting a seamless article around [${articleTitle}] is highly appreciated.
+
+    Thank you for your contribution to this comprehensive exploration!`;
+
+    try {
+        const chatCompletion = await chatGpt.createChatCompletion({
+          model: "gpt-3.5-turbo",
+          messages: [
+            {role: "user", content: prompt}
+          ],
+        });
+        return chatCompletion.data.choices[0].message;
+    } catch (error) {
+        if (error.response) {
+            return 'call failed';
+        } else {
+            return 'call failed, no error.response';
+        }
+    }
+}
+
+const cleanAndCombineParagraphs = async (arrayOfSubtopicParagraphs, articleTitle) => {
+    let finalizedParagraphs = []
+    for (const obj of arrayOfSubtopicParagraphs) {
+        console.log(`cleaning paragraphs about: ${obj.subtopic}`)
+        const cleanedSubtopicParagraphs = await combineSubtopicParagraphs(articleTitle, obj.subtopic, obj.paragraphs)
+        if (cleanedSubtopicParagraphs) {
+            finalizedParagraphs.push(cleanedSubtopicParagraphs.content)
+        }
+    }
+    // when this is done we will have all paragraphs formatted and flowing logically. We now need to clean the entire article
+    // let finalizedArticle = []
+    // const paragraphsForArticle = await finalizeParagraphs(articleTitle, finalizedParagraphs)
+    // finalizedArticle.push(paragraphsForArticle)
+    // return finalizedArticle
+    return finalizedParagraphs
 }
 
 
 const generateArticle = async () => {
+    console.log('getting article topic')
     const articleTopicResponse = await getArticleTopic()
     const articleTopic = articleTopicResponse.content
 
+    console.log('getting article title')
     const articleTitleResponse = await getArticleTitle(articleTopic)
     const articleTitle = articleTitleResponse.content
     
+    console.log('getting subtopics and prompts')
     const subtopicResponse = await getSubtopicPrompts(articleTopic, articleTitle)
     const subtopicPrompts = subtopicResponse.content
 
 
 
     if (subtopicPrompts) {
+        console.log('getting paragraphs for each subtopic')
         const promtsObjArray = JSON.parse(subtopicPrompts)
         // for each subtopic, we want to make a call for each prompt
         const arrayOfSubtopicParagraphs = await processSubtopicPrompts(promtsObjArray)
         if (arrayOfSubtopicParagraphs) {
-            console.log('all done')
+            // now we have all our subtopics and paragraphs. Now need to clean up transitions
+            console.log('cleaning up paragraphs and finalizing article')
+            const articleArray = await cleanAndCombineParagraphs(arrayOfSubtopicParagraphs, articleTitle)
+            console.log(articleArray)
         }
     }   
    
+    console.log('all done')
 }
 
 generateArticle()
