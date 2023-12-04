@@ -264,7 +264,7 @@ const generateArticle = async () => {
     }   
 
     // write article to file
-    createAndWriteArticle(articleArray, 'outputArticle');
+    // createAndWriteArticle(articleArray, 'outputArticle');
     
     // Create draft post on Wix Blog
     const articleContent = articleArray.join('\n');
@@ -275,5 +275,11 @@ const generateArticle = async () => {
     console.log('all done')
 }
 
+// We will start generating an article as soon as we start the job
 generateArticle()
+
+// Executes every 4 hours
+const job = new  cronJob('0 */4 * * *', async () => {
+    generateArticle()
+})
 
