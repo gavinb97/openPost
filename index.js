@@ -1,6 +1,6 @@
 const createGPTClient = require('./gptClient')
 const { Configuration, OpenAIApi } = require("openai");
-
+const fs = require('fs');
 
 const createGPT = async () => {
     return await createGPTClient()
@@ -62,7 +62,7 @@ const getSubtopicPrompts = async (articleTopic, articleTitle) => {
     let chatGpt = await createGPT();
     const getSubtopicPromptsPrompt = `Given the article title  [${articleTitle}]  and the article topic  [${articleTopic}] , please generate an array of subtopics, where each subtopic ` 
                                     + `consists of a name and an array of prompts. The subtopics should cover various aspects of kinesiology and sports performance, including but not limited to strength training, ` 
-                                    + `aerobic training, stretching/flexibility, nutrition, sports psychology, and performance-enhancing substances. Ensure the breakdown is organized, insightful, and provides valuable information for readers seeking in-depth knowledge on the specified topic.`
+                                    + `aerobic training, stretching/flexibility, nutrition, sports psychology, and performance-enhancing substances. Ensure the breakdown is organized, insightful, and provides valuable information for readers seeking in-depth knowledge on the specified topic. Ensure all topics logically flow and are all related`
                                 + `The expected output should be an array of objects, where each object has the following structure: `
                                 + `{
                                     "subtopic": "Introduction to Recovery Importance",
@@ -96,11 +96,11 @@ const getSubtopicParagraphs = async (subtopic, prompt) => {
     **Question:**
     [${prompt}]
     
-    Please respond with one or more paragraphs, ensuring that the information is comprehensive, engaging, and aligns with your expertise as a knowledgeable personal trainer. Thank you for contributing to this exploration of [${subtopic}]!`
+    Please respond with one or more paragraphs, ensuring that the information is comprehensive, engaging, and aligns with your expertise as a knowledgeable personal trainer. Please only return paragraphs, Do not return any notes or additional headers, we want just text about the questions. Thank you for contributing to this exploration of [${subtopic}]!`
 
     try {
         const chatCompletion = await chatGpt.createChatCompletion({
-          model: "gpt-3.5-turbo",
+          model: "gpt-4",
          messages: [
            {role: "user", content: getSubtopicParagraphPrompt}
          ],
@@ -143,11 +143,13 @@ const processSubtopicPrompts = async (array) => {
     return paragraphsBySubtopic
   };
 
-const combineSubtopicParagraphs = async (articleTitle, subtopic, paragraphs) => {
+const combineSubtopicParagraphs = async (articleTitle, subtopic, paragraphs, nextTopic) => {
     // copy all the paragraphs and combine them to form a more cohesive and less fragmented article
 
     let chatGpt = await createGPT();
     const paragraphsCount = paragraphs.length;
+
+    const nextSubtopic = nextTopic || 'Conclude article'
 
     // Prepare the prompt based on the number of paragraphs
     const promptHeader = `
@@ -164,7 +166,8 @@ const combineSubtopicParagraphs = async (articleTitle, subtopic, paragraphs) => 
 
     const promptFooter = `
     Please enhance the transitions between paragraphs, ensuring a logical and smooth progression. Integrate relevant information, maintain coherence, and elaborate where necessary. Feel free to rephrase or add connecting sentences. The goal is to produce a well-structured and engaging article.
-
+    After talking about ${subtopic}, the next topic for discussion will be [${nextSubtopic}]. Please make sure we transition between topics seemlessly. If the next subtopic is given as 'Conclude article' then you should finalize the last paragraph of the article as an outro.
+    Please remove any extra headings or titles from the content that takes away from the overall flow or style of the article.
     Thank you for your expertise in crafting a seamless narrative around ${subtopic}.`;
 
     const getSubtopicParagraphPrompt = paragraphsCount > 0
@@ -173,7 +176,7 @@ const combineSubtopicParagraphs = async (articleTitle, subtopic, paragraphs) => 
 
     try {
         const chatCompletion = await chatGpt.createChatCompletion({
-          model: "gpt-3.5-turbo",
+          model: "gpt-4",
          messages: [
            {role: "user", content: getSubtopicParagraphPrompt}
          ],
@@ -211,7 +214,7 @@ const finalizeParagraphs = async (articleTitle, paragraphs) => {
 
     try {
         const chatCompletion = await chatGpt.createChatCompletion({
-          model: "gpt-3.5-turbo",
+          model: "gpt-4",
           messages: [
             {role: "user", content: prompt}
           ],
@@ -230,7 +233,14 @@ const cleanAndCombineParagraphs = async (arrayOfSubtopicParagraphs, articleTitle
     let finalizedParagraphs = []
     for (const obj of arrayOfSubtopicParagraphs) {
         console.log(`cleaning paragraphs about: ${obj.subtopic}`)
-        const cleanedSubtopicParagraphs = await combineSubtopicParagraphs(articleTitle, obj.subtopic, obj.paragraphs)
+        // get paragraph subtopic, then get next subtopic so we can transition nicely
+        const currentTopic = arrayOfSubtopicParagraphs.indexOf(obj)
+        let nextTopic
+        if (arrayOfSubtopicParagraphs[currentTopic + 1]){
+            nextTopic = arrayOfSubtopicParagraphs[currentTopic + 1].subtopic
+        }
+
+        const cleanedSubtopicParagraphs = await combineSubtopicParagraphs(articleTitle, obj.subtopic, obj.paragraphs, nextTopic)
         if (cleanedSubtopicParagraphs) {
             finalizedParagraphs.push(cleanedSubtopicParagraphs.content)
         }
@@ -238,9 +248,24 @@ const cleanAndCombineParagraphs = async (arrayOfSubtopicParagraphs, articleTitle
     // when this is done we will have all paragraphs formatted and flowing logically. We now need to clean the entire article
     // let finalizedArticle = []
     // const paragraphsForArticle = await finalizeParagraphs(articleTitle, finalizedParagraphs)
-    // finalizedArticle.push(paragraphsForArticle)
+    // finalizedArticle.push(paragraphsForArticle.content)
     // return finalizedArticle
     return finalizedParagraphs
+}
+
+
+const createAndWriteArticle = (articleArray, fileName) => {
+    // Join the array of strings to create a cohesive article
+    const articleContent = articleArray.join('\n');
+
+    // Write the article to a text file
+    fs.writeFile(fileName, articleContent, (err) => {
+        if (err) {
+            console.error('Error writing to file:', err);
+        } else {
+            console.log('Article has been written to', fileName);
+        }
+    });
 }
 
 
@@ -258,7 +283,7 @@ const generateArticle = async () => {
     const subtopicPrompts = subtopicResponse.content
 
 
-
+    let articleArray = []
     if (subtopicPrompts) {
         console.log('getting paragraphs for each subtopic')
         const promtsObjArray = JSON.parse(subtopicPrompts)
@@ -267,10 +292,13 @@ const generateArticle = async () => {
         if (arrayOfSubtopicParagraphs) {
             // now we have all our subtopics and paragraphs. Now need to clean up transitions
             console.log('cleaning up paragraphs and finalizing article')
-            const articleArray = await cleanAndCombineParagraphs(arrayOfSubtopicParagraphs, articleTitle)
+            articleArray = await cleanAndCombineParagraphs(arrayOfSubtopicParagraphs, articleTitle)
             console.log(articleArray)
         }
     }   
+
+    // write article to file
+    createAndWriteArticle(articleArray, 'outputArticle');
    
     console.log('all done')
 }
