@@ -38,7 +38,7 @@ const getArticleTopic = async () => {
 
 const getArticleTitle = async (articleTopic) => {
     let chatGpt = await createGPT();
-    const getArticleTitlePrompt = `Create a captivating and clickbaity article title based on the following paragraph about kinesiology and sports performance: `
+    const getArticleTitlePrompt = `Create a captivating and clickbaity article title under 100 characters based on the following paragraph about kinesiology and sports performance: `
                                 + `[${articleTopic}] `
                                 + `Ensure the title is concise, attention-grabbing, reflects the expertise of an NSCA CSCS-certified personal trainer, and entices readers to explore the content for valuable insights into strength training, aerobic training, stretching/flexibility, nutrition, sports psychology, and performance-enhancing substances. `
 
@@ -277,7 +277,11 @@ const generateArticle = async () => {
     const articleTopic = articleTopicResponse.content
 
     console.log('getting article title')
-    const articleTitleResponse = await getArticleTitle(articleTopic)
+    let articleTitleResponse = await getArticleTitle(articleTopic)
+    // make sure title is under 100 characters
+    if (articleTitleResponse.length > 100){
+        articleTitleResponse = await getArticleTitle(articleTopic)
+    }
     const articleTitle = articleTitleResponse.content
     
     console.log('getting subtopics and prompts')

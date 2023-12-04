@@ -70,6 +70,5 @@ const publishDraftPost = async (draftPostId) => {
     }
 }
 
-console.log('yoo')
-createDraftPost('Some blog title', 'content of this blog')
+
 module.exports = {createDraftPost, publishDraftPost}
