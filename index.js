@@ -283,3 +283,5 @@ const job = new  cronJob('0 */4 * * *', async () => {
     generateArticle()
 })
 
+job.start()
+
