@@ -279,7 +279,7 @@ const generateArticle = async () => {
     console.log('getting article title')
     let articleTitleResponse = await getArticleTitle(articleTopic)
     // make sure title is under 100 characters
-    if (articleTitleResponse.length > 100){
+    while (articleTitleResponse.length > 100){
         articleTitleResponse = await getArticleTitle(articleTopic)
     }
     const articleTitle = articleTitleResponse.content
