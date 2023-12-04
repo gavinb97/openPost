@@ -41,6 +41,7 @@ const createDraftPost = async (blogTitle, blogArticleText) => {
         });
 
         console.log('Draft post created successfully:', response.data);
+        return response.data.draftPost.id
         // grab the id so we can use it to publish the draft post
     } catch (error) {
         console.log(error)
@@ -64,11 +65,11 @@ const publishDraftPost = async (draftPostId) => {
         });
 
         console.log('Draft post published successfully:', response.data);
+
     } catch (error) {
         console.log(error)
         console.error('Error publishing draft post:', error.response ? error.response.data : error.message);
     }
 }
-
 
 module.exports = {createDraftPost, publishDraftPost}

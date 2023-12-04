@@ -1,6 +1,7 @@
 const createGPTClient = require('./gptClient')
 const { Configuration, OpenAIApi } = require("openai");
-const { createDraftPost } = require('./blogPost')
+const { createDraftPost, publishDraftPost } = require('./blogPost')
+const cronJob = require('cron').CronJob
 
 const fs = require('fs');
 
@@ -267,7 +268,10 @@ const generateArticle = async () => {
     
     // Create draft post on Wix Blog
     const articleContent = articleArray.join('\n');
-    createDraftPost(articleTitle, articleContent)
+    const draftID = await createDraftPost(articleTitle, articleContent)
+    if (draftID){
+        publishDraftPost(draftID)
+    }
     console.log('all done')
 }
 
