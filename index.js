@@ -1,5 +1,7 @@
 const createGPTClient = require('./gptClient')
 const { Configuration, OpenAIApi } = require("openai");
+const { createDraftPost } = require('./blogPost')
+
 const fs = require('fs');
 
 const createGPT = async () => {
@@ -299,7 +301,10 @@ const generateArticle = async () => {
 
     // write article to file
     createAndWriteArticle(articleArray, 'outputArticle');
-   
+    
+    // Create draft post on Wix Blog
+    const articleContent = articleArray.join('\n');
+    createDraftPost(articleTitle, articleContent)
     console.log('all done')
 }
 
