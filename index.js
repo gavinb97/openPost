@@ -41,7 +41,7 @@ const getArticleTitle = async (articleTopic) => {
     let chatGpt = await createGPT();
     const getArticleTitlePrompt = `Create a captivating and clickbaity article title under 80 characters based on the following paragraph about kinesiology and sports performance: `
                                 + `[${articleTopic}] `
-                                + `Ensure the title is concise, attention-grabbing, reflects the expertise of an NSCA CSCS-certified personal trainer, and entices readers to explore the content for valuable insights into strength training, aerobic training, stretching/flexibility, nutrition, sports psychology, and performance-enhancing substances. `
+                                + `Ensure the title is concise, attention-grabbing, reflects the expertise of an NSCA CSCS-certified personal trainer, and entices readers to explore the content for valuable insights into strength training, aerobic training, stretching/flexibility, nutrition, sports psychology, and performance-enhancing substances. Return just a string without any quotation marks surrounding the title`
 
     try {
         const chatCompletion = await chatGpt.createChatCompletion({
