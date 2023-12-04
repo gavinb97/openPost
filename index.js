@@ -193,43 +193,6 @@ const combineSubtopicParagraphs = async (articleTitle, subtopic, paragraphs, nex
      }
 }
 
-const finalizeParagraphs = async (articleTitle, paragraphs) => {
-    let chatGpt = await createGPT();
-
-    // Construct the dynamic prompt based on the number of paragraphs
-    let prompt = `
-    Compile Article: [Article Title]
-
-    I have gathered insightful paragraphs on various subtopics related to [${articleTitle}]. The goal now is to compile these cohesive paragraphs into a well-structured article. Each paragraph has been refined to flow logically with the others. Please review and enhance the transitions between paragraphs, ensuring a smooth progression.
-
-    ---`;
-
-    for (let i = 0; i < paragraphs.length; i++) {
-        prompt += `\n\n[${paragraphs[i]}]\n\n---`;
-    }
-
-    prompt += `
-    
-    Feel free to adjust the wording, add connecting sentences, or provide additional context where necessary. Your expertise in crafting a seamless article around [${articleTitle}] is highly appreciated.
-
-    Thank you for your contribution to this comprehensive exploration!`;
-
-    try {
-        const chatCompletion = await chatGpt.createChatCompletion({
-          model: "gpt-4",
-          messages: [
-            {role: "user", content: prompt}
-          ],
-        });
-        return chatCompletion.data.choices[0].message;
-    } catch (error) {
-        if (error.response) {
-            return 'call failed';
-        } else {
-            return 'call failed, no error.response';
-        }
-    }
-}
 
 const cleanAndCombineParagraphs = async (arrayOfSubtopicParagraphs, articleTitle) => {
     let finalizedParagraphs = []
@@ -247,11 +210,7 @@ const cleanAndCombineParagraphs = async (arrayOfSubtopicParagraphs, articleTitle
             finalizedParagraphs.push(cleanedSubtopicParagraphs.content)
         }
     }
-    // when this is done we will have all paragraphs formatted and flowing logically. We now need to clean the entire article
-    // let finalizedArticle = []
-    // const paragraphsForArticle = await finalizeParagraphs(articleTitle, finalizedParagraphs)
-    // finalizedArticle.push(paragraphsForArticle.content)
-    // return finalizedArticle
+
     return finalizedParagraphs
 }
 
