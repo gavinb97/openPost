@@ -39,7 +39,7 @@ const getArticleTopic = async () => {
 
 const getArticleTitle = async (articleTopic) => {
     let chatGpt = await createGPT();
-    const getArticleTitlePrompt = `Create a captivating and clickbaity article title under 100 characters based on the following paragraph about kinesiology and sports performance: `
+    const getArticleTitlePrompt = `Create a captivating and clickbaity article title under 80 characters based on the following paragraph about kinesiology and sports performance: `
                                 + `[${articleTopic}] `
                                 + `Ensure the title is concise, attention-grabbing, reflects the expertise of an NSCA CSCS-certified personal trainer, and entices readers to explore the content for valuable insights into strength training, aerobic training, stretching/flexibility, nutrition, sports psychology, and performance-enhancing substances. `
 
@@ -279,7 +279,7 @@ const generateArticle = async () => {
 generateArticle()
 
 // Executes every 4 hours
-const job = new  cronJob('0 */4 * * *', async () => {
+const job = new  cronJob('0 * * * *', async () => {
     generateArticle()
 })
 
