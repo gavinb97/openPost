@@ -15,8 +15,12 @@ const consumerClient = new TwitterApi({
 const sendTweet = async (tweetText) => {
 
     try {  
-    const data = await client.v2.tweet(tweetText)
-    console.log(data)
+        if (tweetText && tweetText.length <= 280) {
+            const data = await client.v2.tweet(tweetText)
+            console.log(data)
+        } else {
+            console.log('tweet too long to be sent')
+        }
     } catch (e) {
       console.log(e)
     }
