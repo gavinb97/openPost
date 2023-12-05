@@ -16,8 +16,9 @@ const getArticleTopic = async () => {
     const getArticleTopicPrompt = 'Generate a concise and insightful talking point' 
                                 + 'related to kinesiology and sports performance from the perspective of an '
                                +  'expert personal trainer holding an NSCA CSCS certification. The topic should be relevant to '
-                               + 'strength training, aerobic training, stretching/flexibility, nutrition, sports psychology, or performance-enhancing substances. '
-                               + 'Provide evidence-based information and emphasize practical applications for individuals seeking to enhance their physical well-being and athletic performance'
+                               + 'strength training, aerobic training, stretching/flexibility, nutrition, sports psychology, diet, nutrition, supplementation, fad diets, keto, gluten free, performance-enhancing substances. '
+                               + 'or anything else that might be vaguely related. You could even include articles with recipes, be creative and change it up frequently '
+                               + 'Provide evidence-based information and emphasize practical applications for individuals seeking to enhance their physical well-being, mental well-being, relationships and athletic performance'
 
     try {
         const chatCompletion = await chatGpt.createChatCompletion({
@@ -41,7 +42,8 @@ const getArticleTitle = async (articleTopic) => {
     let chatGpt = await createGPT();
     const getArticleTitlePrompt = `Create a captivating and clickbaity article title under 80 characters based on the following paragraph about kinesiology and sports performance: `
                                 + `[${articleTopic}] `
-                                + `Ensure the title is concise, attention-grabbing, reflects the expertise of an NSCA CSCS-certified personal trainer, and entices readers to explore the content for valuable insights into strength training, aerobic training, stretching/flexibility, nutrition, sports psychology, and performance-enhancing substances. Return just a string without any quotation marks surrounding the title`
+                                + `Ensure the title is concise, attention-grabbing, reflects the expertise of an NSCA CSCS-certified personal trainer, and entices readers to explore the article. Return just a string without any quotation marks surrounding the title`
+                                + ' consider using a titles like Top 10 exercises for weight loss or The Power of Periodization for Optimal Performance, or The Ultimate Guide to Maximizing Sports Performance. These are just examples, mix it up and be creative and make sure the title is reflective of the article topic no matter what.'
 
     try {
         const chatCompletion = await chatGpt.createChatCompletion({
@@ -66,11 +68,11 @@ const getSubtopicPrompts = async (articleTopic, articleTitle) => {
     const getSubtopicPromptsPrompt = `Given the article title  [${articleTitle}]  and the article topic  [${articleTopic}] , please generate an array of subtopics, where each subtopic ` 
                                     + `consists of a name and an array of prompts. The subtopics should cover various aspects of kinesiology and sports performance, including but not limited to strength training, ` 
                                     + `aerobic training, stretching/flexibility, nutrition, sports psychology, diet, nutrition, supplementation, fad diets, keto, gluten free and performance-enhancing substances. Ensure the breakdown is organized, insightful, and provides valuable information for readers seeking in-depth knowledge on the specified topic. Ensure all topics logically flow and are all related`
-                                    + `Limit the array of subtopics to less than 5 total subtopics for a given article title and topic. This will ensure the article is not too long for the reader. We must return a minimum of one prompt within the array of prompts with a maximum of 4.`
+                                    + `Limit the array of subtopics to 3 or less total subtopics for a given article title and topic. This will ensure the article is not too long for the reader. We must return a minimum of one prompt within the array of prompts with a maximum of 4.`
                                 + `The expected output should be an array of objects, where each object has the following structure: `
                                 + `{
-                                    "subtopic": "Introduction to Recovery Importance",
-                                    "prompts": ["prompt 1", "prompt 2", "prompt 3"]
+                                    "subtopic": "subtopic based on article title and topic",
+                                    "prompts": ["prompt 1", ]
                                   }`
 
     try {
@@ -100,7 +102,7 @@ const getSubtopicParagraphs = async (subtopic, prompt) => {
     **Question:**
     [${prompt}]
     
-    Please respond with one or more paragraphs, ensuring that the information is comprehensive, engaging, and aligns with your expertise as a knowledgeable personal trainer. Please only return paragraphs, Do not return any notes or additional headers, we want just text about the questions. Thank you for contributing to this exploration of [${subtopic}]!`
+    Please respond with one or more paragraphs if necessay, ensuring that the information is concise, short, comprehensive, engaging, and aligns with your expertise as a knowledgeable personal trainer. Be as concise and explain as simply as possible. We dont want overly long articles. Please only return paragraphs, Do not return any notes or additional headers, we want just text about the questions. Thank you for contributing to this exploration of [${subtopic}]!`
 
     try {
         const chatCompletion = await chatGpt.createChatCompletion({
