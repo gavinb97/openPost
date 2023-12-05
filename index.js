@@ -65,7 +65,8 @@ const getSubtopicPrompts = async (articleTopic, articleTitle) => {
     let chatGpt = await createGPT();
     const getSubtopicPromptsPrompt = `Given the article title  [${articleTitle}]  and the article topic  [${articleTopic}] , please generate an array of subtopics, where each subtopic ` 
                                     + `consists of a name and an array of prompts. The subtopics should cover various aspects of kinesiology and sports performance, including but not limited to strength training, ` 
-                                    + `aerobic training, stretching/flexibility, nutrition, sports psychology, and performance-enhancing substances. Ensure the breakdown is organized, insightful, and provides valuable information for readers seeking in-depth knowledge on the specified topic. Ensure all topics logically flow and are all related`
+                                    + `aerobic training, stretching/flexibility, nutrition, sports psychology, diet, nutrition, supplementation, fad diets, keto, gluten free and performance-enhancing substances. Ensure the breakdown is organized, insightful, and provides valuable information for readers seeking in-depth knowledge on the specified topic. Ensure all topics logically flow and are all related`
+                                    + `Limit the array of subtopics to less than 5 total subtopics for a given article title and topic. This will ensure the article is not too long for the reader. We must return a minimum of one prompt within the array of prompts with a maximum of 4.`
                                 + `The expected output should be an array of objects, where each object has the following structure: `
                                 + `{
                                     "subtopic": "Introduction to Recovery Importance",
@@ -230,6 +231,16 @@ const createAndWriteArticle = (articleArray, fileName) => {
     });
 }
 
+const removeQuotes = (str) => {
+    // Check if the string contains double quotation marks
+    if (str.includes('"')) {
+        // Remove double quotation marks using replace
+        str = str.replace(/"/g, '');
+    }
+    // Return the modified or original string
+    return str;
+}
+
 
 const generateArticle = async () => {
     console.log('getting article topic')
@@ -239,7 +250,7 @@ const generateArticle = async () => {
     console.log('getting article title')
     let articleTitleResponse = await getArticleTitle(articleTopic)
     // make sure title is under 100 characters
-    while (articleTitleResponse.length > 100){
+    while (articleTitleResponse.length > 95){
         articleTitleResponse = await getArticleTitle(articleTopic)
     }
     const articleTitle = articleTitleResponse.content
@@ -268,7 +279,8 @@ const generateArticle = async () => {
     
     // Create draft post on Wix Blog
     const articleContent = articleArray.join('\n');
-    const draftID = await createDraftPost(articleTitle, articleContent)
+    const finalTitle = removeQuotes(articleTitle)
+    const draftID = await createDraftPost(finalTitle, articleContent)
     if (draftID){
         publishDraftPost(draftID)
     }
