@@ -15,10 +15,10 @@ const getArticleTopic = async () => {
     let chatGpt = await createGPT();
     const getArticleTopicPrompt = 'Generate a concise and insightful talking point' 
                                 + 'related to kinesiology and sports performance from the perspective of an '
-                               +  'expert personal trainer holding an NSCA CSCS certification. The topic should be relevant to '
-                               + 'strength training, aerobic training, stretching/flexibility, nutrition, sports psychology, diet, nutrition, supplementation, fad diets, keto, gluten free, performance-enhancing substances. '
+                               +  'expert personal trainer and dietitian holding an NSCA CSCS certification and registered dietitian certified. The topic should be relevant to '
+                               + 'strength training, aerobic training, stretching/flexibility, nutrition, sports psychology, diet, nutrition, supplementation, fad diets, keto, gluten free, diabetes, diabetes educationm, health eating habits, micronutrients, macronutrients, performance-enhancing substances. '
                                + 'or anything else that might be vaguely related. You could even include articles with recipes, be creative and change it up frequently '
-                               + 'Provide evidence-based information and emphasize practical applications for individuals seeking to enhance their physical well-being, mental well-being, relationships and athletic performance'
+                               + 'Provide evidence-based information and emphasize practical applications for individuals seeking to enhance their physical well-being, mental well-being, relationships, health, diabetes, healthy weight and athletic performance'
 
     try {
         const chatCompletion = await chatGpt.createChatCompletion({
@@ -68,12 +68,13 @@ const getSubtopicPrompts = async (articleTopic, articleTitle) => {
     const getSubtopicPromptsPrompt = `Given the article title  [${articleTitle}]  and the article topic  [${articleTopic}] , please generate an array of subtopics, where each subtopic ` 
                                     + `consists of a name and an array of prompts. The subtopics should cover various aspects of kinesiology and sports performance, including but not limited to strength training, ` 
                                     + `aerobic training, stretching/flexibility, nutrition, sports psychology, diet, nutrition, supplementation, fad diets, keto, gluten free and performance-enhancing substances. Ensure the breakdown is organized, insightful, and provides valuable information for readers seeking in-depth knowledge on the specified topic. Ensure all topics logically flow and are all related`
-                                    + `Limit the array of subtopics to 3 or less total subtopics for a given article title and topic. This will ensure the article is not too long for the reader. We must return a minimum of one prompt within the array of prompts with a maximum of 4.`
-                                + `The expected output should be an array of objects, where each object has the following structure: `
+                                    + `Limit the array of subtopics to 3 or less total subtopic objects for a given article title and topic. This will ensure the article is not too long for the reader. We must return a minimum of one prompt within the array of prompts with a maximum of 4.`
+                                + `The expected output should be an array of subtopic objects, where each object has the following structure: `
                                 + `{
                                     "subtopic": "subtopic based on article title and topic",
                                     "prompts": ["prompt 1", ]
                                   }`
+                                  + `only return an array of these subtopic objects, do not deviate from that format`
 
     try {
         const chatCompletion = await chatGpt.createChatCompletion({
@@ -95,7 +96,7 @@ const getSubtopicPrompts = async (articleTopic, articleTitle) => {
 const getSubtopicParagraphs = async (subtopic, prompt) => {
     let chatGpt = await createGPT();
     const getSubtopicParagraphPrompt = `
-    As an expert personal trainer with NSCA CSCS certification, I'm seeking detailed insights on [${subtopic}]. My aim is to enrich my understanding and gather valuable information to share with fitness enthusiasts. [${subtopic}] falls within my broad expertise, covering strength training, aerobic training, stretching/flexibility, nutrition, sports psychology, and performance-enhancing substances.
+    As an expert personal trainer with NSCA CSCS certification and registered dietitian, I'm seeking detailed insights on [${subtopic}]. My aim is to enrich my understanding and gather valuable information to share with fitness enthusiasts. [${subtopic}] falls within my broad expertise, covering strength training, aerobic training, stretching/flexibility, nutrition, sports psychology, and performance-enhancing substances.
     
     Below, I've outlined a specific question/prompt related to [${subtopic}] that I would like you to elaborate on. Feel free to provide a thorough explanation, including scientific principles, practical applications, and any relevant examples.
     
@@ -106,7 +107,7 @@ const getSubtopicParagraphs = async (subtopic, prompt) => {
 
     try {
         const chatCompletion = await chatGpt.createChatCompletion({
-          model: "gpt-4",
+          model: "gpt-3.5-turbo",
          messages: [
            {role: "user", content: getSubtopicParagraphPrompt}
          ],
@@ -182,7 +183,7 @@ const combineSubtopicParagraphs = async (articleTitle, subtopic, paragraphs, nex
 
     try {
         const chatCompletion = await chatGpt.createChatCompletion({
-          model: "gpt-4",
+          model: "gpt-3.5-turbo",
          messages: [
            {role: "user", content: getSubtopicParagraphPrompt}
          ],
