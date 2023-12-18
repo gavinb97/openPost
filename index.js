@@ -1,6 +1,6 @@
 const createGPTClient = require('./gptClient')
 const { Configuration, OpenAIApi } = require("openai");
-const { createDraftPost, publishDraftPost } = require('./blogPost')
+const { createDraftPost, publishDraftPost, formatTopicsAndParagraphs } = require('./blogPost')
 const cronJob = require('cron').CronJob
 
 const fs = require('fs');
@@ -9,33 +9,41 @@ const createGPT = async () => {
     return await createGPTClient()
 }
 
+// TODO create client once instead of during every method call
+
+const makeGptCall = async (prompt) => {
+  let chatGpt = await createGPT();
+  const promptString = prompt
+try {
+  const chatCompletion = await chatGpt.chat.completions.create({
+    model: "gpt-3.5-turbo",
+    messages: [
+        {role: "system", content: 'You are an copywriter assistant'},
+        {role: "user", content: promptString}
+    ],
+  });
+   return chatCompletion.choices[0].message;
+} catch (error){
+  if (error.response) {
+      console.log('call failed')
+      return 'call failed';
+    } else {
+      return 'call failed, no error.response'
+    }
+}
+}
 
 
 const getArticleTopic = async () => {
-    let chatGpt = await createGPT();
     const getArticleTopicPrompt = 'Generate a concise and insightful talking point' 
                                 + 'related to kinesiology and sports performance from the perspective of an '
                                +  'expert personal trainer and dietitian holding an NSCA CSCS certification and registered dietitian certified. The topic should be relevant to '
                                + 'strength training, aerobic training, stretching/flexibility, nutrition, sports psychology, diet, nutrition, supplementation, fad diets, keto, gluten free, diabetes, diabetes educationm, health eating habits, micronutrients, macronutrients, performance-enhancing substances. '
                                + 'or anything else that might be vaguely related. You could even include articles with recipes, be creative and change it up frequently '
                                + 'Provide evidence-based information and emphasize practical applications for individuals seeking to enhance their physical well-being, mental well-being, relationships, health, diabetes, healthy weight and athletic performance'
-
-    try {
-        const chatCompletion = await chatGpt.chat.completions.create({
-          model: "gpt-3.5-turbo",
-         messages: [
-            {role: "system", content: 'You are an copywriter assistant'},
-           {role: "user", content: getArticleTopicPrompt}
-         ],
-       });
-       return chatCompletion.choices[0].message;
-     } catch (error){
-       if (error.response) {
-           return 'call failed';
-         } else {
-           return 'call failed, no error.response'
-         }
-     }
+  
+    const response = await makeGptCall(getArticleTopicPrompt)
+    return response
 }
 
 const getArticleTitle = async (articleTopic) => {
@@ -65,7 +73,6 @@ const getArticleTitle = async (articleTopic) => {
 
 
 const getSubtopicPrompts = async (articleTopic, articleTitle) => {
-    let chatGpt = await createGPT();
     const getSubtopicPromptsPrompt = `Given the article title  [${articleTitle}]  and the article topic  [${articleTopic}] , please generate an array of subtopics, where each subtopic ` 
                                     + `consists of a name and an array of prompts. The subtopics should cover various aspects of kinesiology and sports performance, including but not limited to strength training, ` 
                                     + `aerobic training, stretching/flexibility, nutrition, sports psychology, diet, nutrition, supplementation, fad diets, keto, gluten free and performance-enhancing substances. Ensure the breakdown is organized, insightful, and provides valuable information for readers seeking in-depth knowledge on the specified topic. Ensure all topics logically flow and are all related`
@@ -77,21 +84,8 @@ const getSubtopicPrompts = async (articleTopic, articleTitle) => {
                                   }`
                                   + `only return an array of these subtopic objects, do not deviate from that format`
 
-    try {
-        const chatCompletion = await chatGpt.chat.completions.create({
-          model: "gpt-3.5-turbo",
-         messages: [
-           {role: "user", content: getSubtopicPromptsPrompt}
-         ],
-       });
-       return chatCompletion.choices[0].message;
-     } catch (error){
-       if (error.response) {
-           return 'call failed';
-         } else {
-           return 'call failed, no error.response'
-         }
-     }
+    const response = await makeGptCall(getSubtopicPromptsPrompt)
+    return response
 }
 
 const getSubtopicParagraphs = async (subtopic, prompt) => {
@@ -106,21 +100,8 @@ const getSubtopicParagraphs = async (subtopic, prompt) => {
     
     Please respond with one or more paragraphs if necessay, ensuring that the information is concise, short, comprehensive, engaging, and aligns with your expertise as a knowledgeable personal trainer. Be as concise and explain as simply as possible. We dont want overly long articles. Please only return paragraphs, Do not return any notes or additional headers, we want just text about the questions. Thank you for contributing to this exploration of [${subtopic}]!`
 
-    try {
-        const chatCompletion = await chatGpt.chat.completions.create({
-          model: "gpt-3.5-turbo",
-         messages: [
-           {role: "user", content: getSubtopicParagraphPrompt}
-         ],
-       });
-       return chatCompletion.choices[0].message;
-     } catch (error){
-       if (error.response) {
-           return 'call failed';
-         } else {
-           return 'call failed, no error.response'
-         }
-     }
+    const response = await makeGptCall(getSubtopicParagraphPrompt)
+    return response
 }
 
 // this will call gpt to get subtopic paragraphs and return an array containing all of the paragraphs 
@@ -182,22 +163,8 @@ const combineSubtopicParagraphs = async (articleTitle, subtopic, paragraphs, nex
         ? `${promptHeader}${paragraphSection}${promptFooter}`
         : 'No paragraphs provided for the subtopic.';
 
-    try {
-        const chatCompletion = await chatGpt.chat.completions.create({
-          model: "gpt-3.5-turbo",
-         messages: [
-           {role: "user", content: getSubtopicParagraphPrompt}
-         ],
-       });
-       console.log(chatCompletion)
-       return chatCompletion.choices[0].message;
-     } catch (error){
-       if (error.response) {
-           return 'call failed';
-         } else {
-           return 'call failed, no error.response'
-         }
-     }
+        const response = await makeGptCall(getSubtopicParagraphPrompt)
+        return response
 }
 
 
@@ -301,23 +268,30 @@ const generateArticle = async () => {
     // createAndWriteArticle(articleArray, 'outputArticle');
     
     // Create draft post on Wix Blog
-    const articleContent = articleArray.join('\n');
+    // const articleContent = articleArray.join('\n');
+    
+    // TODO loop through articleArray and clean use cleanup methods to remove extra strings.
+      // create method to remove subtopic title from paragraphs because we will use that as a heading
+
+    // create richBodyObject which will format the article
+    // articleContent = formatTopicsAndParagraphs()
+
+
     console.log(articleTitle)
-    const finalTitle = removeQuotes(articleTitle)
-    const draftID = await createDraftPost(finalTitle, articleContent)
-    if (draftID){
-        publishDraftPost(draftID)
-    }
+    // const finalTitle = removeQuotes(articleTitle)
+    // const draftID = await createDraftPost(finalTitle, articleContent)
+    // if (draftID){
+    //     publishDraftPost(draftID)
+    // }
     console.log('all done')
 }
 
 // We will start generating an article as soon as we start the job
 generateArticle()
 
-// Executes every 4 hours
-const job = new  cronJob('0 * * * *', async () => {
-    generateArticle()
-})
+// // Executes every 4 hours
+// const job = new  cronJob('0 * * * *', async () => {
+//     generateArticle()
+// })
 
-job.start()
-
+// job.start()

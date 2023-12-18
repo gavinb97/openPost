@@ -126,6 +126,4 @@ const formatTopicsAndParagraphs = () => {
     return richContent
 }
 
-createDraftPost('ttile', '')
-
-module.exports = {createDraftPost, publishDraftPost}
+module.exports = {createDraftPost, publishDraftPost, formatTopicsAndParagraphs}
