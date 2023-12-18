@@ -21,14 +21,14 @@ const getArticleTopic = async () => {
                                + 'Provide evidence-based information and emphasize practical applications for individuals seeking to enhance their physical well-being, mental well-being, relationships, health, diabetes, healthy weight and athletic performance'
 
     try {
-        const chatCompletion = await chatGpt.createChatCompletion({
+        const chatCompletion = await chatGpt.chat.completions.create({
           model: "gpt-3.5-turbo",
          messages: [
             {role: "system", content: 'You are an copywriter assistant'},
            {role: "user", content: getArticleTopicPrompt}
          ],
        });
-       return chatCompletion.data.choices[0].message;
+       return chatCompletion.choices[0].message;
      } catch (error){
        if (error.response) {
            return 'call failed';
@@ -46,13 +46,14 @@ const getArticleTitle = async (articleTopic) => {
                                 + ' consider using a titles like Top 10 exercises for weight loss or The Power of Periodization for Optimal Performance, or The Ultimate Guide to Maximizing Sports Performance. These are just examples, mix it up and be creative and make sure the title is reflective of the article topic no matter what.'
 
     try {
-        const chatCompletion = await chatGpt.createChatCompletion({
+        const chatCompletion = await chatGpt.chat.completions.create({
           model: "gpt-3.5-turbo",
          messages: [
            {role: "user", content: getArticleTitlePrompt}
          ],
        });
-       return chatCompletion.data.choices[0].message;
+      //  console.log(chatCompletion.choices[0].message)
+       return chatCompletion.choices[0].message;
      } catch (error){
        if (error.response) {
            return 'call failed';
@@ -77,13 +78,13 @@ const getSubtopicPrompts = async (articleTopic, articleTitle) => {
                                   + `only return an array of these subtopic objects, do not deviate from that format`
 
     try {
-        const chatCompletion = await chatGpt.createChatCompletion({
+        const chatCompletion = await chatGpt.chat.completions.create({
           model: "gpt-3.5-turbo",
          messages: [
            {role: "user", content: getSubtopicPromptsPrompt}
          ],
        });
-       return chatCompletion.data.choices[0].message;
+       return chatCompletion.choices[0].message;
      } catch (error){
        if (error.response) {
            return 'call failed';
@@ -106,13 +107,13 @@ const getSubtopicParagraphs = async (subtopic, prompt) => {
     Please respond with one or more paragraphs if necessay, ensuring that the information is concise, short, comprehensive, engaging, and aligns with your expertise as a knowledgeable personal trainer. Be as concise and explain as simply as possible. We dont want overly long articles. Please only return paragraphs, Do not return any notes or additional headers, we want just text about the questions. Thank you for contributing to this exploration of [${subtopic}]!`
 
     try {
-        const chatCompletion = await chatGpt.createChatCompletion({
+        const chatCompletion = await chatGpt.chat.completions.create({
           model: "gpt-3.5-turbo",
          messages: [
            {role: "user", content: getSubtopicParagraphPrompt}
          ],
        });
-       return chatCompletion.data.choices[0].message;
+       return chatCompletion.choices[0].message;
      } catch (error){
        if (error.response) {
            return 'call failed';
@@ -182,13 +183,14 @@ const combineSubtopicParagraphs = async (articleTitle, subtopic, paragraphs, nex
         : 'No paragraphs provided for the subtopic.';
 
     try {
-        const chatCompletion = await chatGpt.createChatCompletion({
+        const chatCompletion = await chatGpt.chat.completions.create({
           model: "gpt-3.5-turbo",
          messages: [
            {role: "user", content: getSubtopicParagraphPrompt}
          ],
        });
-       return chatCompletion.data.choices[0].message;
+       console.log(chatCompletion)
+       return chatCompletion.choices[0].message;
      } catch (error){
        if (error.response) {
            return 'call failed';
@@ -235,6 +237,7 @@ const createAndWriteArticle = (articleArray, fileName) => {
 }
 
 const removeQuotes = (str) => {
+  if (str) {
     // Check if the string contains double quotation marks
     if (str.includes('"')) {
         // Remove double quotation marks using replace
@@ -242,6 +245,10 @@ const removeQuotes = (str) => {
     }
     // Return the modified or original string
     return str;
+  } else {
+    console.log('fuck')
+  }
+    
 }
 
 
@@ -282,6 +289,7 @@ const generateArticle = async () => {
     
     // Create draft post on Wix Blog
     const articleContent = articleArray.join('\n');
+    console.log(articleTitle)
     const finalTitle = removeQuotes(articleTitle)
     const draftID = await createDraftPost(finalTitle, articleContent)
     if (draftID){
