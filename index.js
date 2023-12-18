@@ -248,7 +248,20 @@ const removeQuotes = (str) => {
   } else {
     console.log('fuck')
   }
-    
+}
+
+const removeBrackets = (inputString) => {
+  return inputString.replace(/\[.*?\]/g, '');
+}
+
+const removeIntroAndConclusionStr = (inputString) => {
+   // Remove 'Conclusion:' and its variations
+   let result = inputString.replace(/(?:\bConclusion\b|\bconclusion\b|\bCONCLUSION\b)\s*:/g, '');
+
+   // Remove 'Introduction:' and its variations
+   result = result.replace(/(?:\bIntroduction\b|\bintroduction\b|\bINTRODUCTION\b)\s*:/g, '');
+ 
+   return result;
 }
 
 
