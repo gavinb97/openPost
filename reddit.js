@@ -15,33 +15,35 @@ const getPost = async () => {
     try{
         // lets grab 100 posts and return them in an array
         const redditPosts = await reddit.get('/r/stories', {limit: 100})
-        console.log(redditPosts.data.children[0])
+        // console.log(redditPosts.data.children[0])
         return redditPosts
     } catch (e) {
         console.log(e)
     }
 }
 
-const getPostBody = async () => {
+const getPostBodies = async () => {
     const arrayOfPosts = await getPost()
     const arrayOfPostBodies = []
 
     for (let i = 2; i < arrayOfPosts.data.children.length; i++) {
-        console.log(arrayOfPosts.data.children[i].data.title)
+        // console.log(arrayOfPosts.data.children[i].data.title)
         const postBody = arrayOfPosts.data.children[i].data.selftext
-        console.log(typeof(postBody))
+        // console.log(typeof(postBody))
         // console.log(postBody)
         arrayOfPostBodies.push(postBody)
     }
 
 
-    for (const postBody of arrayOfPostBodies) {
-        console.log(postBody)
-    }
+    // for (const postBody of arrayOfPostBodies) {
+    //     console.log(postBody)
+    // }
+
+    return arrayOfPostBodies
 
 }
 
-getPostBody()
+module.exports = getPostBodies
 
 
 

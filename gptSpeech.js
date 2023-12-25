@@ -11,17 +11,18 @@ const openai = new OpenAI({
 });
 
 
-const getSpeech = async () => {
+
+const getSpeech = async (textInput) => {
    
-    
+    const input = textInput
     const mp3 = await openai.audio.speech.create({
         model: "tts-1",
         voice: "alloy",
-        input: "Today is a wonderful day to build something people love!",
+        input: input,
       });
       console.log(speechFile);
       const buffer = Buffer.from(await mp3.arrayBuffer());
       await fs.promises.writeFile(speechFile, buffer);
 }
 
-getSpeech()
+module.exports = getSpeech
