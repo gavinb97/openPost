@@ -4,5 +4,6 @@ node_modules/
 videos/
 tempVideos/
 finalVideos/
+tempAudio/
 
 *.mp3

@@ -4,7 +4,7 @@ const path = require('path')
 const createGPTClient = require('./gptClient')
 const OpenAI = require("openai");
 
-const speechFile = path.resolve("./speech.mp3");
+const speechFile = path.resolve("tempAudio/speech.mp3");
 
 const openai = new OpenAI({
 	apiKey: process.env.GPT_KEY,

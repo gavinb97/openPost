@@ -4,7 +4,8 @@ const fs = require('fs');
 const path = require('path');
 const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path
 const ffmpeg = require('fluent-ffmpeg')
-const getMp3Duration = require('get-mp3-duration')
+const getMp3Duration = require('get-mp3-duration');
+const concat = require('ffmpeg-concat');
 ffmpeg.setFfmpegPath(ffmpegPath)
 
 
@@ -41,15 +42,18 @@ const editVideo = async () => {
 }
 
 const getAudioDuration = () => {
-    const rawAudio = fs.readFileSync('speech.mp3')
+    const rawAudio = fs.readFileSync('tempAudio/speech.mp3')
     const durationInMs = getMp3Duration(rawAudio)
     const durationInSeconds = Math.round(durationInMs / 1000)
+    console.log(durationInSeconds)
     return durationInSeconds
 }
 
-const getVideoDuration = async () => {
-    const duration = await getVideoDurationInSeconds('videos/ai1.mp4')
+const getVideoDuration = async (videoPath) => {
+    const path = videoPath
+    const duration = await getVideoDurationInSeconds(path)
     const durationInSeconds = Math.round(duration)
+    console.log(durationInSeconds)
     return durationInSeconds
 }
 
@@ -71,14 +75,50 @@ const selectRandomVideo = () => {
 
     // Return the full path of the randomly selected video
     const fullPath = path.join(videosFolder, randomVideo);
-    console.log(fullPath)
-    return fullPath;
+    const relativePath = path.relative(__dirname, fullPath).replace(/\\/g, '/');
+    return relativePath
 }
 
-const combineVideosToFillAudio = () => {
+const addAudioToFinalVideo = () => {
 
 }
-selectRandomVideo()
-// getVideoDuration()
+
+const getCombinedVideoPaths = async () => {
+    const arrayOfVideoPaths = []
+
+    // get length of audio
+    const audioDuration = getAudioDuration()
+
+    // get first video
+    const firstVideoPath = selectRandomVideo()
+    const durationOfFirstVideo = await getVideoDuration(firstVideoPath)
+    arrayOfVideoPaths.push(firstVideoPath)
+    let totalVideoDuration = durationOfFirstVideo
+    
+    // if first video is shorter than audio, grab path for another video
+    while (audioDuration > totalVideoDuration) {
+        const anotherVideoPath = selectRandomVideo()
+        const durationOfVideo = await getVideoDuration(anotherVideoPath)
+        totalVideoDuration = totalVideoDuration + durationOfVideo
+        arrayOfVideoPaths.push(anotherVideoPath)
+    }
+
+    return arrayOfVideoPaths
+}
+
+const combineVideosForFinalVideo = async () => {
+    const videoPaths = await getCombinedVideoPaths()
+    console.log(videoPaths)
+    const outputPath = 'finalVideos/someVideo.mp4'
+    await concat({
+        output: outputPath,
+        videos: videoPaths,
+        audio: 'tempAudio/speech.mp3'
+    })
+    console.log('done')
+}
+// selectRandomVideo()
+// getVideoDuration('videos/ai1.mp4')
 // getAudioDuration()
 // editVideo()
+combineVideosForFinalVideo()
