@@ -14,7 +14,7 @@ const reddit = new Reddit({
 const getPost = async () => {
     try{
         // lets grab 100 posts and return them in an array
-        const redditPosts = await reddit.get('/r/stories', {limit: 100})
+        const redditPosts = await reddit.get('/r/stories', {limit: 5})
         // console.log(redditPosts.data.children[0])
         return redditPosts
     } catch (e) {
