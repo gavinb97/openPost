@@ -41,8 +41,9 @@ const editVideo = async () => {
     //       .run()
 }
 
-const getAudioDuration = () => {
-    const rawAudio = fs.readFileSync('tempAudio/speech.mp3')
+const getAudioDuration = (relativePath) => {
+    const audioPath = relativePath
+    const rawAudio = fs.readFileSync(audioPath)
     const durationInMs = getMp3Duration(rawAudio)
     const durationInSeconds = Math.round(durationInMs / 1000)
     console.log(durationInSeconds)
@@ -79,15 +80,12 @@ const selectRandomVideo = () => {
     return relativePath
 }
 
-const addAudioToFinalVideo = () => {
-
-}
-
-const getCombinedVideoPaths = async () => {
+const getCombinedVideoPaths = async (relativePathAudio) => {
+    const audioPath = relativePathAudio
     const arrayOfVideoPaths = []
 
     // get length of audio
-    const audioDuration = getAudioDuration()
+    const audioDuration = getAudioDuration(audioPath)
 
     // get first video
     const firstVideoPath = selectRandomVideo()
@@ -106,19 +104,73 @@ const getCombinedVideoPaths = async () => {
     return arrayOfVideoPaths
 }
 
-const combineVideosForFinalVideo = async () => {
-    const videoPaths = await getCombinedVideoPaths()
+const getMP3FileName = (relativePath) => {
+    // Extract the filename from the path
+const fileNameWithExtension = relativePath.split('/').pop();
+
+// Remove the file extension
+const fileNameWithoutExtension = fileNameWithExtension.replace(/\.[^/.]+$/, "");
+
+return fileNameWithoutExtension;
+}
+
+const combineVideosForFinalVideo = async (audioPath) => {
+    const audioPathForVideo = audioPath
+    const videoPaths = await getCombinedVideoPaths(audioPathForVideo)
     console.log(videoPaths)
-    const outputPath = 'finalVideos/someVideo.mp4'
+    const audioName = getMP3FileName(audioPathForVideo)
+    const outputPath = `finalVideos/${audioName}.mp4`
     await concat({
         output: outputPath,
         videos: videoPaths,
-        audio: 'tempAudio/speech.mp3'
+        // audio: 'tempAudio/speech.mp3'
+        audio: audioPathForVideo
     })
     console.log('done')
 }
-// selectRandomVideo()
-// getVideoDuration('videos/ai1.mp4')
-// getAudioDuration()
-// editVideo()
-combineVideosForFinalVideo()
+
+const cutVideoToFinalLength = async (relativePath, relativePathAudio) => {
+    const videoPath = relativePath
+    const audioPath = relativePathAudio
+    const finalVideoName = getMP3FileName(audioPath)
+    const audioDuration = getAudioDuration(audioPath)
+
+        ffmpeg(videoPath)
+        .setStartTime('00:00:00')
+        .setDuration(10)
+        .output('newVideoDude.mp4')
+        .on('end', function(err) {
+            if(!err) { console.log('conversion Done') }
+          })
+          .on('error', err => console.log('error: ', err))
+          .run()
+}
+
+
+
+const createVideoForEachAudioFile = () => {
+    const audioFolder = path.join(__dirname, 'tempAudio'); 
+
+    // Read the contents of the folder
+    const audioFiles = fs.readdirSync(audioFolder);
+
+    // Check if there are any video files in the folder
+    if (audioFiles.length === 0) {
+        console.error('No audio files found in the "tempAudio" folder.');
+        return null;
+    }
+
+    for (audioFile of audioFiles) {
+        // get path of each file
+        const fullPath = path.join(audioFolder, audioFile);
+        const relativePath = path.relative(__dirname, fullPath).replace(/\\/g, '/');
+        console.log(relativePath)
+
+        // create video for each file
+        combineVideosForFinalVideo(relativePath)
+    }
+}
+createVideoForEachAudioFile()
+
+
+// combineVideosForFinalVideo()
