@@ -46,7 +46,6 @@ const getAudioDuration = (relativePath) => {
     const rawAudio = fs.readFileSync(audioPath)
     const durationInMs = getMp3Duration(rawAudio)
     const durationInSeconds = Math.round(durationInMs / 1000)
-    console.log(durationInSeconds)
     return durationInSeconds
 }
 
@@ -54,7 +53,7 @@ const getVideoDuration = async (videoPath) => {
     const path = videoPath
     const duration = await getVideoDurationInSeconds(path)
     const durationInSeconds = Math.round(duration)
-    console.log(durationInSeconds)
+    // console.log(durationInSeconds)
     return durationInSeconds
 }
 
@@ -120,25 +119,33 @@ const combineVideosForFinalVideo = async (audioPath) => {
     console.log(videoPaths)
     const audioName = getMP3FileName(audioPathForVideo)
     const outputPath = `finalVideos/${audioName}.mp4`
-    await concat({
-        output: outputPath,
-        videos: videoPaths,
-        // audio: 'tempAudio/speech.mp3'
-        audio: audioPathForVideo
-    })
+    console.log(outputPath)
+    console.log(audioPathForVideo)
+    try {
+        await concat({
+            output: outputPath,
+            videos: videoPaths,
+            audio: audioPathForVideo
+        })
+    } catch (error) {
+        console.log('damn')
+        console.log(error)
+    }
+    
     console.log('done')
 }
 
 const cutVideoToFinalLength = async (relativePath, relativePathAudio) => {
     const videoPath = relativePath
     const audioPath = relativePathAudio
-    const finalVideoName = getMP3FileName(audioPath)
+    const finalVideoName = getMP3FileName(audioPath) + '.mp4'
     const audioDuration = getAudioDuration(audioPath)
+    const finalDuration = audioDuration + 3
 
         ffmpeg(videoPath)
         .setStartTime('00:00:00')
-        .setDuration(10)
-        .output('newVideoDude.mp4')
+        .setDuration(finalDuration)
+        .output(finalVideoName)
         .on('end', function(err) {
             if(!err) { console.log('conversion Done') }
           })
@@ -148,7 +155,7 @@ const cutVideoToFinalLength = async (relativePath, relativePathAudio) => {
 
 
 
-const createVideoForEachAudioFile = () => {
+const createVideoForEachAudioFile = async () => {
     const audioFolder = path.join(__dirname, 'tempAudio'); 
 
     // Read the contents of the folder
@@ -165,9 +172,10 @@ const createVideoForEachAudioFile = () => {
         const fullPath = path.join(audioFolder, audioFile);
         const relativePath = path.relative(__dirname, fullPath).replace(/\\/g, '/');
         console.log(relativePath)
-
+        console.log('Creating video')
         // create video for each file
-        combineVideosForFinalVideo(relativePath)
+        // relative path is audio path
+        await combineVideosForFinalVideo(relativePath)
     }
 }
 createVideoForEachAudioFile()
