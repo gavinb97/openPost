@@ -113,19 +113,20 @@ const fileNameWithoutExtension = fileNameWithExtension.replace(/\.[^/.]+$/, "");
 return fileNameWithoutExtension;
 }
 
-const combineVideosForFinalVideo = async (audioPath) => {
+const combineVideosForTempVideo = async (audioPath) => {
     const audioPathForVideo = audioPath
     const videoPaths = await getCombinedVideoPaths(audioPathForVideo)
     console.log(videoPaths)
     const audioName = getMP3FileName(audioPathForVideo)
-    const outputPath = `finalVideos/${audioName}.mp4`
+    const outputPath = `tempVideos/${audioName}.mp4`
     console.log(outputPath)
-    console.log(audioPathForVideo)
+    console.log('putting the temp video with audio here ^^')
     try {
         await concat({
             output: outputPath,
             videos: videoPaths,
-            audio: audioPathForVideo
+            audio: audioPathForVideo,
+            frameFormat: 'png'
         })
     } catch (error) {
         console.log('damn')
@@ -133,24 +134,33 @@ const combineVideosForFinalVideo = async (audioPath) => {
     }
     
     console.log('done')
+    return outputPath
 }
 
 const cutVideoToFinalLength = async (relativePath, relativePathAudio) => {
+    console.log('cutting video to final length')
     const videoPath = relativePath
     const audioPath = relativePathAudio
     const finalVideoName = getMP3FileName(audioPath) + '.mp4'
     const audioDuration = getAudioDuration(audioPath)
     const finalDuration = audioDuration + 3
-
+    const finalVideoPath = `finalVideos/${finalVideoName}`
+    console.log('final video path ')
+    console.log(finalVideoPath)
         ffmpeg(videoPath)
-        .setStartTime('00:00:00')
         .setDuration(finalDuration)
-        .output(finalVideoName)
+        .output(finalVideoPath)
         .on('end', function(err) {
             if(!err) { console.log('conversion Done') }
           })
           .on('error', err => console.log('error: ', err))
           .run()
+}
+
+// delete extra long videos, use max of 3 minutes
+const isAudioTooLong = async () => {
+    // return boolean
+    
 }
 
 
@@ -175,10 +185,12 @@ const createVideoForEachAudioFile = async () => {
         console.log('Creating video')
         // create video for each file
         // relative path is audio path
-        await combineVideosForFinalVideo(relativePath)
+        const videoOutputPath =  await combineVideosForTempVideo(relativePath)
+        console.log('000000000')
+        console.log(videoOutputPath)
+        cutVideoToFinalLength(videoOutputPath, relativePath)
     }
 }
 createVideoForEachAudioFile()
 
 
-// combineVideosForFinalVideo()

@@ -22,7 +22,7 @@ const getSpeech = async (textInput) => {
         input: input,
       });
       // console.log(speechFile);
-      const fileName = textInput[0] + textInput[3] + textInput[9]
+      const fileName = textInput.slice(0, 15)
       // console.log(fileName)
       const finalPath = speechFile + '\\' + fileName + fileSuffix
       // console.log(finalPath)
