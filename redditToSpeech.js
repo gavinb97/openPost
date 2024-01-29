@@ -7,10 +7,11 @@ const redditToSpeech = async () => {
     // console.log(arrayOfPostBodies[0])
     const speechToTextInput = arrayOfPostBodies[0]
     for (textInput of arrayOfPostBodies) {
-        // console.log(textInput)
-        // getSpeech(textInput)
-        saveTextToFile(textInput)
-        // if file cant be saved then dont get audio of it
+        console.log('getting speech')
+        const gotSpeech = await getSpeech(textInput)
+        if (gotSpeech){
+            saveTextToFile(textInput)
+        }
     }
 }
 
@@ -37,7 +38,7 @@ const saveTextToFile = async (textInput) => {
             console.error('Error saving file:', err);
             return;
         }
-        console.log('File saved successfully:');
+        console.log('File saved successfully: ' + fileName);
     });
 }
 

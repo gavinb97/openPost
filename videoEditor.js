@@ -113,6 +113,18 @@ const fileNameWithoutExtension = fileNameWithExtension.replace(/\.[^/.]+$/, "");
 return fileNameWithoutExtension;
 }
 
+const removeSpecialCharacters = (str) => {
+    // Define the pattern to match special characters
+    const pattern = /[^\w\s]/gi; // Matches any character that is not a word character or whitespace
+
+    // Replace special characters with an empty string
+    return str.replace(pattern, '');
+}
+
+const removeSpaces = (str) => {
+  return str.replace(/\s/g, '');
+}
+
 const combineVideosForTempVideo = async (audioPath) => {
     const audioPathForVideo = audioPath
     const videoPaths = await getCombinedVideoPaths(audioPathForVideo)
@@ -136,6 +148,7 @@ const combineVideosForTempVideo = async (audioPath) => {
     console.log('done')
     return outputPath
 }
+
 
 const cutVideoToFinalLength = async (relativePath, relativePathAudio) => {
     console.log('cutting video to final length')
