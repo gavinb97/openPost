@@ -1,7 +1,7 @@
 const fs = require('fs');
 const { exec } = require('child_process');
 
-const createSRTFile = (subtitlesString, audioFilePath, filePath) => {
+const createSRTFile = async (subtitlesString, audioFilePath, filePath) => {
      // Get the duration of the audio file using ffprobe
      getAudioDuration(audioFilePath, (durationInSeconds) => {
         
@@ -87,7 +87,7 @@ const getAudioDuration = (audioFilePath, callback) => {
     });
 }
 
-const readTextFile = (filePath) => {
+const readTextFile = async (filePath) => {
     try {
         return fs.readFileSync(filePath, 'utf8');
     } catch (err) {
@@ -96,6 +96,11 @@ const readTextFile = (filePath) => {
     }
 }
 
-const textFileString = readTextFile('audioSubtitles\\Aboutayearagowhileattend.txt')
-console.log(textFileString)
-createSRTFile(textFileString, 'tempaudio\\Aboutayearagowhileattend.mp3', 'srtFiles\\subtitle.srt')
+module.exports = {
+    readTextFile,
+    createSRTFile
+}
+
+// const textFileString = readTextFile('audioSubtitles\\Aboutayearagowhileattend.txt')
+// console.log(textFileString)
+// createSRTFile(textFileString, 'tempaudio\\Aboutayearagowhileattend.mp3', 'srtFiles\\subtitle.srt')

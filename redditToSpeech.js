@@ -1,6 +1,7 @@
 const getSpeech = require('./gptSpeech')
 const getPostBodies = require('./reddit')
 const fs = require('fs');
+const { readTextFile, createSRTFile } = require('./createSubtitles')
 
 const redditToSpeech = async () => {
     const arrayOfPostBodies = await getPostBodies()
@@ -10,9 +11,32 @@ const redditToSpeech = async () => {
         console.log('getting speech')
         const gotSpeech = await getSpeech(textInput)
         if (gotSpeech){
-            saveTextToFile(textInput)
+            const txtFilePath = await saveTextToFile(textInput)
+            console.log(txtFilePath)
+            console.log('txt file path ^^')
+            if (txtFilePath) {
+                const fileString = await readTextFile(txtFilePath)
+                const fileName = getFileName(txtFilePath)
+                const audioFilePath =  `tempAudio\\${fileName}.mp3`
+                const outputFilePath = `srtFiles\\${fileName}.srt`
+                console.log('filestring: ' + fileString)
+                console.log('audio: ' + audioFilePath)
+                console.log('output: ' + outputFilePath)
+                await createSRTFile(fileString, audioFilePath, outputFilePath)
+                break;
+            }
         }
     }
+}
+
+const getFileName = (relativePath) => {
+    // Extract the filename from the path
+const fileNameWithExtension = relativePath.split('/').pop();
+
+// Remove the file extension
+const fileNameWithoutExtension = fileNameWithExtension.replace(/\.[^/.]+$/, "");
+
+return fileNameWithoutExtension;
 }
 
 const removeSpecialCharacters = (str) => {
@@ -36,10 +60,12 @@ const saveTextToFile = async (textInput) => {
     fs.writeFile(fileName, redditString, (err) => {
         if (err) {
             console.error('Error saving file:', err);
-            return;
         }
         console.log('File saved successfully: ' + fileName);
+        return fileName
     });
+
+    return fileName;
 }
 
 redditToSpeech()
