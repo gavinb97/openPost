@@ -8,8 +8,11 @@ const createSRTFile = (subtitlesString, audioFilePath, filePath) => {
 
         const subtitles = parseSubtitles(subtitlesString);
         console.log(subtitles.length)
-        const durationBetweenSubtitles = durationInSeconds / subtitles.length;
+        let durationBetweenSubtitles = durationInSeconds / subtitles.length;
+
         console.log(durationBetweenSubtitles)
+
+        durationBetweenSubtitles = durationBetweenSubtitles
         let srtContent = '';
 
         // Iterate over each subtitle entry
@@ -33,39 +36,23 @@ const createSRTFile = (subtitlesString, audioFilePath, filePath) => {
     });
 }
 
-const addNewLineToSentences = (inputString) => {
-    // Regular expression to match sentence endings (., !, ?) followed by zero or more spaces
-    const sentenceEndingsRegex = /([.!?])\s+(?=[A-Z])/g;
-
-    // Replace sentence endings with sentence ending + newline character
-    const stringWithNewLines = inputString.replace(sentenceEndingsRegex, '$1\n');
-
-    // Ensure there's a newline at the end of the string
-    return stringWithNewLines.trim() + '\n';
+const addNewLineToSentences = (inputString) => { 
+     // Regular expression to match every 6 words
+     const fourWordsRegex = /(?:\S+\s+){6}/g;
+ 
+     // Replace every 6 words with 6 words + newline character
+     let stringWithNewLines = inputString.replace(fourWordsRegex, '$&\n');
+ 
+     // Ensure there's a newline at the end of the string
+     return stringWithNewLines.trim() + '\n';
 }
 
-const parseSubtitles = (subtitlesString, durationBetweenSubtitles) => {
+const parseSubtitles = (subtitlesString) => {
     const subtitleStringFormatted = addNewLineToSentences(subtitlesString)
 
     // Split the subtitles string into individual lines
     const lines = subtitleStringFormatted.trim().split('\n');
-    // console.log(lines)
-    // Filter out empty lines
-    // const filteredLines = lines.filter(line => line.trim() !== '');
-
-    // const subtitles = [];
-
-    // Combine lines into subtitle entries
-    // let currentSubtitle = '';
-    // filteredLines.forEach((line, index) => {
-    //     currentSubtitle += line.trim() + ' ';
-    //     // If the next line is empty or it's the last line, consider the currentSubtitle as a complete subtitle
-    //     if (filteredLines[index + 1]?.trim() === '' || index === filteredLines.length - 1) {
-    //         subtitles.push(currentSubtitle.trim());
-    //         currentSubtitle = '';
-    //     }
-    // });
-    // console.log(subtitles)
+ 
     return lines;
 }
 
