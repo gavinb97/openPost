@@ -5,8 +5,9 @@ const { readTextFile, createSRTFile } = require('./createSubtitles')
 
 const redditToSpeech = async () => {
     const arrayOfPostBodies = await getPostBodies()
-    // console.log(arrayOfPostBodies[0])
-    const speechToTextInput = arrayOfPostBodies[0]
+  
+    // const speechToTextInput = arrayOfPostBodies[0]
+    
     for (textInput of arrayOfPostBodies) {
         console.log('getting speech')
         const gotSpeech = await getSpeech(textInput)
@@ -52,7 +53,7 @@ const removeSpaces = (str) => {
 }
 
 // gonna use this for subtitles
-const saveTextToFile = async (textInput) => {
+const saveTextToFile =  async (textInput) => {
     const cleanInput = removeSpecialCharacters(textInput.slice(0, 30))
     const fileName = 'audioSubtitles/' + removeSpaces(cleanInput) + '.txt'
 
@@ -68,4 +69,8 @@ const saveTextToFile = async (textInput) => {
     return fileName;
 }
 
+
 redditToSpeech()
+
+// const thing =readTextFiles('audioSubtitles/Youveprobablyheardmystory.txt')
+// console.log(thing)

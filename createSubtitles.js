@@ -1,4 +1,4 @@
-const fs = require('fs');
+const fs = require('fs').promises;
 const { exec } = require('child_process');
 
 const createSRTFile = async (subtitlesString, audioFilePath, filePath) => {
@@ -89,7 +89,7 @@ const getAudioDuration = (audioFilePath, callback) => {
 
 const readTextFile = async (filePath) => {
     try {
-        return fs.readFileSync(filePath, 'utf8');
+        return fs.readFile(filePath, 'utf-8');
     } catch (err) {
         console.error('Error reading file:', err);
         return null;
