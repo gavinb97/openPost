@@ -177,9 +177,9 @@ const isAudioTooLong = async () => {
 }
 
 const addSubtitles = () => {
-    ffmpeg('finalVideos\\Aboutayearagowhileattend.mp4')
+    ffmpeg('finalVideos\\Youveprobablyheardmystory.mp4')
         .outputOptions(
-            '-vf subtitles=./srtFiles/subtitle.srt'
+            '-vf subtitles=./srtFiles/Youveprobablyheardmystory.srt'
         )
         .on('error', function(err) {
             console.log(err)
