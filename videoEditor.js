@@ -176,18 +176,23 @@ const isAudioTooLong = async () => {
     
 }
 
-const addSubtitles = () => {
-    ffmpeg('finalVideos\\Youveprobablyheardmystory.mp4')
-        .outputOptions(
-            '-vf subtitles=./srtFiles/Youveprobablyheardmystory.srt'
-        )
-        .on('error', function(err) {
-            console.log(err)
-        })
-        .save('./moviewithsubtitle.mp4')
-        .on('end', function() {
-           console.log('done')
-        })
+const addSubtitles = (videoFilePath, subtitleFilePath, outputFilePath) => {
+    const inputVideoFilePath = `finalVideos\\${videoFilePath}.mp4`
+    const outputOptions = `-vf subtitles=./srtFiles/${subtitleFilePath}.srt`
+    const outputFileName = `videosWithSubtitles\\${outputFilePath}.mp4`
+
+    console.log()
+    // ffmpeg(inputVideoFilePath)
+    //     .outputOptions(
+    //         outputOptions
+    //     )
+    //     .on('error', function(err) {
+    //         console.log(err)
+    //     })
+    //     .save(outputFileName)
+    //     .on('end', function() {
+    //        console.log('done')
+    //     })
 }
 
 
