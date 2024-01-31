@@ -168,6 +168,7 @@ const cutVideoToFinalLength = async (relativePath, relativePathAudio) => {
           })
           .on('error', err => console.log('error: ', err))
           .run()
+    return finalVideoPath
 }
 
 // delete extra long videos, use max of 3 minutes
@@ -176,23 +177,40 @@ const isAudioTooLong = async () => {
     
 }
 
-const addSubtitles = (videoFilePath, subtitleFilePath, outputFilePath) => {
-    const inputVideoFilePath = `finalVideos\\${videoFilePath}.mp4`
-    const outputOptions = `-vf subtitles=./srtFiles/${subtitleFilePath}.srt`
-    const outputFileName = `videosWithSubtitles\\${outputFilePath}.mp4`
+const addSubtitles = (videoFilePath) => {
+    const videoName = getMP3FileName(videoFilePath)
+    const inputVideoFilePath = `finalVideos/${videoName}.mp4`
 
-    console.log()
-    // ffmpeg(inputVideoFilePath)
-    //     .outputOptions(
-    //         outputOptions
-    //     )
-    //     .on('error', function(err) {
-    //         console.log(err)
-    //     })
-    //     .save(outputFileName)
-    //     .on('end', function() {
-    //        console.log('done')
-    //     })
+    // const srtFileName = getMP3FileName(subtitleFilePath)
+    const outputOptions = `-vf subtitles=./srtFiles/${videoName}.srt`
+
+    const outputFileName = `videosWithSubtitles/${videoName}.mp4`
+
+    console.log(inputVideoFilePath)
+    console.log(outputOptions)
+    console.log(outputFileName)
+    ffmpeg(inputVideoFilePath)
+        .outputOptions(
+            outputOptions
+        )
+        .on('error', function(err) {
+            console.log(err)
+        })
+        .save(outputFileName)
+        .on('end', function() {
+           console.log('done')
+        })
+}
+
+const seeIfFileExists = (filePath) => {
+    try {
+        // Check if the file exists
+        fs.accessSync(filePath, fs.constants.F_OK);
+        return true;
+    } catch (err) {
+        // File does not exist or cannot be accessed
+        return false;
+    }
 }
 
 
@@ -220,11 +238,19 @@ const createVideoForEachAudioFile = async () => {
         const videoOutputPath =  await combineVideosForTempVideo(relativePath)
         console.log('000000000')
         console.log(videoOutputPath)
-        cutVideoToFinalLength(videoOutputPath, relativePath)
+        const finalVideoPath = await cutVideoToFinalLength(videoOutputPath, relativePath)
+        while (!seeIfFileExists(videoOutputPath)){
+            console.log('loading file...')
+        }
+        console.log('adding subtitles')
+        addSubtitles(finalVideoPath)
     }
 }
-// createVideoForEachAudioFile()
 
-addSubtitles()
+
+
+createVideoForEachAudioFile()
+
+// addSubtitles('tempVideos\Youveprobablyheardmystory.mp4', 'srtFiles\Youveprobablyheardmystory.srt', 'poop')
 
 
