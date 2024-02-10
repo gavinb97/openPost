@@ -3,8 +3,10 @@ const getPostBodies = require('./reddit')
 const fs = require('fs');
 const { readTextFile, createSRTFile } = require('./createSubtitles')
 
-const redditToSpeech = async () => {
-    const arrayOfPostBodies = await getPostBodies()
+
+
+const redditToSpeech = async (numberOfPosts) => {
+    const arrayOfPostBodies = await getPostBodies(numberOfPosts)
   
     // const speechToTextInput = arrayOfPostBodies[0]
     
@@ -24,7 +26,6 @@ const redditToSpeech = async () => {
                 console.log('audio: ' + audioFilePath)
                 console.log('output: ' + outputFilePath)
                 await createSRTFile(fileString, audioFilePath, outputFilePath)
-                break;
             }
         }
     }
@@ -70,7 +71,7 @@ const saveTextToFile =  async (textInput) => {
 }
 
 
-redditToSpeech()
+redditToSpeech(2)
 
 // const thing =readTextFiles('audioSubtitles/Youveprobablyheardmystory.txt')
 // console.log(thing)
