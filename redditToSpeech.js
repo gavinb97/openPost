@@ -71,7 +71,7 @@ const saveTextToFile =  async (textInput) => {
 }
 
 
-redditToSpeech(2)
+redditToSpeech(4)
 
 // const thing =readTextFiles('audioSubtitles/Youveprobablyheardmystory.txt')
 // console.log(thing)

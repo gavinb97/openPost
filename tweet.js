@@ -26,5 +26,26 @@ const sendTweet = async (tweetText) => {
     }
 }
 
+const sendTweetWithVideo = async (tweetText, mediaID) => {
+    try {  
+        if (tweetText && tweetText.length <= 280) {
+            const data = await client.v2.tweet(tweetText, { media: {media_ids: [mediaID]}})
+            console.log(data)
+        } else {
+            console.log('tweet too long to be sent')
+        }
+    } catch (e) {
+      console.log(e)
+    }
+}
+
+const uploadVideo = async (mediaPath) => {
+    try {
+        const mediaID = await client.v1.uploadMedia()
+    } catch (error) {
+        console.log(error)
+    }
+}
+
 
 module.exports = sendTweet
