@@ -48,8 +48,15 @@ const uploadVideo = async (mediaPath) => {
     }
 }
 
-// uploadVideo('videosWithSubtitles\\Alittledisclaimerthispost.mp4')
+// uploadVideo('videosWithSubtitles\\HisoI14Fandmysister.mp4')
 
-// sendTweetWithVideo('oooh weee', '1758008943236775936')
+// sendTweetWithVideo('oooh weee shee', '1758011697036468224')
+
+const uploadAndTweet = async (mediaPath) => {
+    const mediaID = await uploadVideo(mediaPath)
+    await sendTweetWithVideo('I cant even believe it bruv', mediaID)
+}
+
+// uploadAndTweet('videosWithSubtitles\\HisoI14Fandmysister.mp4')
 
 module.exports = sendTweet
