@@ -317,9 +317,9 @@ const createVideoForEachAudioFile = async () => {
 }
 
 
+module.exports = createVideoForEachAudioFile
 
 
-
-createVideoForEachAudioFile()
+// createVideoForEachAudioFile()
 
 // addSubtitles('finalVideos/Firstposthttpswwwreddit.mp4')

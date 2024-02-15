@@ -116,7 +116,7 @@ const getSubtopicParagraphs = async (subtopic, prompt) => {
     **Question:**
     [${prompt}]
     
-    Please respond with one or more paragraphs if necessay, ensuring that the information is concise, short, comprehensive, engaging, and aligns with your expertise as a knowledgeable personal trainer. Be as concise and explain as simply as possible. We dont want overly long articles. Please only return paragraphs, Do not return any notes or additional headers, we want just text about the questions. Thank you for contributing to this exploration of [${subtopic}]!`
+    Please respond with one paragraph, ensuring that the information is concise, short, comprehensive, engaging, and aligns with your expertise as a knowledgeable personal trainer. Be as concise and explain as simply as possible. We dont want overly long articles. Please only return paragraphs, Do not return any notes or additional headers, we want just text about the questions. Thank you for contributing to this exploration of [${subtopic}]!`
 
     const response = await makeGptCall(getSubtopicParagraphPrompt)
     return response
@@ -283,7 +283,7 @@ const generateArticle = async () => {
     }   
 
     // write article to file
-    // createAndWriteArticle(articleArray, 'outputArticle');
+    createAndWriteArticle(articleArray, 'outputArticle');
     
     // Create draft post on Wix Blog
     // const articleContent = articleArray.join('\n');

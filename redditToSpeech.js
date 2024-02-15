@@ -70,8 +70,9 @@ const saveTextToFile =  async (textInput) => {
     return fileName;
 }
 
+module.exports = redditToSpeech
 
-redditToSpeech(4)
+// redditToSpeech(4)
 
 // const thing =readTextFiles('audioSubtitles/Youveprobablyheardmystory.txt')
 // console.log(thing)

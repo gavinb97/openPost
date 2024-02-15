@@ -42,11 +42,14 @@ const sendTweetWithVideo = async (tweetText, mediaID) => {
 const uploadVideo = async (mediaPath) => {
     try {
         const mediaID = await client.v1.uploadMedia(mediaPath)
+        console.log(mediaID)
     } catch (error) {
         console.log(error)
     }
 }
 
-uploadVideo('videosWithSubtitles\Alittledisclaimerthispost.mp4')
+// uploadVideo('videosWithSubtitles\\Alittledisclaimerthispost.mp4')
+
+// sendTweetWithVideo('oooh weee', '1758008943236775936')
 
 module.exports = sendTweet
