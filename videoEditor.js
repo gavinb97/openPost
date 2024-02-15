@@ -1,4 +1,5 @@
 const getMP3Duration = require('get-mp3-duration')
+const { exec } = require('child_process');
 const { getVideoDurationInSeconds } = require('get-video-duration')
 const fs = require('fs');
 const path = require('path');
@@ -169,6 +170,22 @@ const cutVideoToFinalLength = async (relativePath, relativePathAudio) => {
           .on('error', err => console.log('error: ', err))
           .run()
 
+    // const ffmpegCommand = `ffmpeg -i ${videoPath} -t ${finalDuration} ${finalVideoPath}`;
+
+    // // Execute the ffmpeg command
+    // exec(ffmpegCommand, (error, stdout, stderr) => {
+    // if (error) {
+    //     console.error(`Error: ${error.message}`);
+    //     return;
+    // }
+    // if (stderr) {
+    //     console.error(`ffmpeg stderr: ${stderr}`);
+    //     return;
+    // }
+    // console.log('ffmpeg stdout:', stdout);
+    // console.log('Conversion complete!');
+    // });
+
     console.log('final video complete')
     return finalVideoPath
 }
@@ -199,6 +216,22 @@ const addSubtitles = async (videoFilePath) => {
         .on('end', function() {
            console.log('done')
         })
+
+    // const ffmpegCommand = `ffmpeg -i ${inputVideoFilePath} ${outputOptions} ${outputFileName}`;
+
+    // // Execute the ffmpeg command
+    // exec(ffmpegCommand, (error, stdout, stderr) => {
+    // if (error) {
+    //     console.error(`Error: ${error.message}`);
+    //     return;
+    // }
+    // if (stderr) {
+    //     console.error(`ffmpeg stderr: ${stderr}`);
+    //     return;
+    // }
+    // console.log('ffmpeg stdout:', stdout);
+    // console.log('Conversion complete!');
+    // });
 }
 
 const seeIfFileExists = async (filePath) => {
@@ -214,7 +247,30 @@ const seeIfFileExists = async (filePath) => {
 
 const sleep = async  (ms) => {
     return new Promise(resolve => setTimeout(resolve, ms));
-  }
+}
+
+
+const listenForString = (targetString) => {
+    return new Promise((resolve, reject) => {
+        const timeout = 120000; // Timeout in milliseconds
+        let timer;
+        
+        // Event listener for 'data' event emitted by process.stdout
+        process.stdout.on('data', (data) => {
+            const consoleOutput = data.toString();
+            if (consoleOutput.includes(targetString)) {
+                clearInterval(timer); // Stop the timer if the target string is found
+                resolve(true);
+            }
+        });
+
+        // Timer to reject the promise if the target string is not found within the timeout period
+        timer = setTimeout(() => {
+            process.stdout.removeAllListeners('data'); // Remove the event listener
+            reject(new Error(`Timeout: Target string '${targetString}' not found`));
+        }, timeout);
+    });
+}
 
 
 const createVideoForEachAudioFile = async () => {
@@ -250,23 +306,20 @@ const createVideoForEachAudioFile = async () => {
             }
         } while (!fileExists)
 
-        // console.log('sleeping whilst file is built...')
-        // await sleep(60000)
-        // console.log('okay its been a minute')
-        // await addSubtitles(finalVideoPath)
-        // break;
-        setTimeout(async () => {
-            console.log('adding subtitles...')
-            await addSubtitles(finalVideoPath)
-            console.log('done done')
-        }, 60000);
-        break;
+        console.log('sleeping whilst file is built...')
+        await sleep(120000)
+        console.log('okay its been a minute')
+        await addSubtitles(finalVideoPath)
+        console.log('subtitles have been added!!')
+        await sleep(120000)
     }
     console.log('broke out dog')
 }
 
 
 
+
+
 createVideoForEachAudioFile()
 
-// addSubtitles('finalVideos/BonusinfoImasinglemom.mp4')
+// addSubtitles('finalVideos/Firstposthttpswwwreddit.mp4')

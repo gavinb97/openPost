@@ -9,7 +9,7 @@ const SHA256 = require('crypto-js/sha256')
 
 app.use(cookieParser());
 app.use(cors());
-app.listen(process.env.PORT || 5000);
+// app.listen(process.env.PORT || 8080);
 
 const generateRandomString = (length) => {
     let result = '';
