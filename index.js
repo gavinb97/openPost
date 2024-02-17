@@ -39,6 +39,7 @@ try {
         Error-Free Writing: Provide content that is grammatically correct, free of spelling errors, and adheres to proper language conventions.`},
         {role: "user", content: promptString}
     ],
+    max_tokens: 4000
   });
    return chatCompletion.choices[0].message;
 } catch (error){
@@ -98,7 +99,7 @@ const getSubtopicPrompts = async (articleTopic, articleTitle) => {
                                 + `The expected output should be an array of subtopic objects, where each object has the following structure: `
                                 + `{
                                     "subtopic": "subtopic based on article title and topic",
-                                    "prompts": ["prompt 1", ]
+                                    "prompts": [subtopic]
                                   }`
                                   + `only return an array of these subtopic objects, do not deviate from that format`
 
@@ -173,8 +174,7 @@ const combineSubtopicParagraphs = async (articleTitle, subtopic, paragraphs, nex
 
     const promptFooter = `
     Please enhance the transitions between paragraphs, ensuring a logical and smooth progression. Integrate relevant information, maintain coherence, and elaborate where necessary. Feel free to rephrase or add connecting sentences. The goal is to produce a well-structured and engaging article.
-    After talking about ${subtopic}, the next topic for discussion will be [${nextSubtopic}]. Please make sure we transition between topics seemlessly. If the next subtopic is given as 'Conclude article' then you should finalize the last paragraph of the article as an outro.
-    Please remove any extra headings or titles from the content that takes away from the overall flow or style of the article.
+    After talking about ${subtopic}, the next topic for discussion will be [${nextSubtopic}]. Please make sure we transition between topics seemlessly.
     Thank you for your expertise in crafting a seamless narrative around ${subtopic}.`;
 
     const getSubtopicParagraphPrompt = paragraphsCount > 0

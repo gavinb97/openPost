@@ -7,38 +7,38 @@ const createDraftPost = async (blogTitle, blogArticleText) => {
     const siteID = process.env.WIX_SITE_ID;
     const accountID = process.env.WIX_ACCOUNT_ID;
     
-    // const richContent = {
-    //     "nodes": [
-    //         {
-    //             "type": 'HEADING',
-    //             "headingData": {
-    //                 "level": '2',
-    //             },
-    //             "nodes": [
-    //                 {
-    //                     "type": 'TEXT',
-    //                     "textData": {
-    //                         "text": 'this should be a header i hope',
-    //                         "decorations": []
-    //                     }
-    //                 }
-    //             ]
-    //         },
-    //         {
-    //             "type": 'PARAGRAPH',
-    //             "nodes": [
-    //                 {
-    //                 "type": 'TEXT',
-    //                 "textData": {
-    //                     "text": blogArticleText,
-    //                     "decorations": []
-    //                 }
-    //                 }
-    //             ]
-    //         }
-    //     ]
-    // }
-    const richContent = formatTopicsAndParagraphs()
+    const richContent = {
+        "nodes": [
+            // {
+            //     "type": 'HEADING',
+            //     "headingData": {
+            //         "level": '2',
+            //     },
+            //     "nodes": [
+            //         {
+            //             "type": 'TEXT',
+            //             "textData": {
+            //                 "text": 'this should be a header i hope',
+            //                 "decorations": []
+            //             }
+            //         }
+            //     ]
+            // },
+            {
+                "type": 'PARAGRAPH',
+                "nodes": [
+                    {
+                    "type": 'TEXT',
+                    "textData": {
+                        "text": blogArticleText,
+                        "decorations": []
+                    }
+                    }
+                ]
+            }
+        ]
+    }
+    // const richContent = formatTopicsAndParagraphs()
 
     try {
         const response = await axios.post(apiUrl, {

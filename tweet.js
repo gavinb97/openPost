@@ -1,4 +1,5 @@
 require('dotenv').config()
+const { path } = require('@ffmpeg-installer/ffmpeg')
 const { TwitterApi } = require("twitter-api-v2")
 
 const consumerClient = new TwitterApi({
@@ -43,6 +44,7 @@ const uploadVideo = async (mediaPath) => {
     try {
         const mediaID = await client.v1.uploadMedia(mediaPath)
         console.log(mediaID)
+        return mediaID
     } catch (error) {
         console.log(error)
     }
@@ -53,10 +55,15 @@ const uploadVideo = async (mediaPath) => {
 // sendTweetWithVideo('oooh weee shee', '1758011697036468224')
 
 const uploadAndTweet = async (mediaPath) => {
+    console.log(mediaPath)
     const mediaID = await uploadVideo(mediaPath)
+    do {
+        console.log('uploading...')
+    } while (!mediaID)
+
     await sendTweetWithVideo('I cant even believe it bruv', mediaID)
 }
 
-// uploadAndTweet('videosWithSubtitles\\HisoI14Fandmysister.mp4')
+// uploadAndTweet('videosWithSubtitles\\WhenIwasakidIwasobsesse.mp4')
 
 module.exports = sendTweet
