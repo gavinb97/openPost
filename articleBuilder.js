@@ -465,8 +465,7 @@ const generateAndPostArticle = async () => {
 
 const getRandomInterval = () => {
     // Get a random number between 5 minutes (300 seconds) and 3 hours (10800 seconds)
-    // return Math.floor(Math.random() * (10800 - 300 + 1)) + 300;
-    return Math.floor(Math.random() * (600 - 60 + 1)) + 60;
+    return Math.floor(Math.random() * (10800 - 300 + 1)) + 300;
 }
 
 const automaticallyGenerateAndPost = async () => {
