@@ -7,6 +7,7 @@ const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path
 const ffmpeg = require('fluent-ffmpeg')
 const getMp3Duration = require('get-mp3-duration');
 const concat = require('ffmpeg-concat');
+const deleteFilesInDirectory = require('./utils')
 ffmpeg.setFfmpegPath(ffmpegPath)
 
 
@@ -272,6 +273,14 @@ const listenForString = (targetString) => {
     });
 }
 
+const deleteTempFiles = () => {
+    deleteFilesInDirectory('srtFiles')
+    deleteFilesInDirectory('audioSubtitles')
+    deleteFilesInDirectory('finalVideos')
+    deleteFilesInDirectory('tempAudio')
+    deleteFilesInDirectory('tempVideos')
+}
+
 
 const createVideoForEachAudioFile = async () => {
     const audioFolder = path.join(__dirname, 'tempAudio'); 
@@ -313,13 +322,10 @@ const createVideoForEachAudioFile = async () => {
         console.log('subtitles have been added!!')
         await sleep(120000)
     }
-    console.log('broke out dog')
+    console.log('Deleting temporary files...')
+    deleteTempFiles()
 }
 
 
 module.exports = createVideoForEachAudioFile
 
-
-// createVideoForEachAudioFile()
-
-// addSubtitles('finalVideos/Firstposthttpswwwreddit.mp4')
