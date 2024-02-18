@@ -3,7 +3,7 @@ const redditToSpeech = require('./redditToSpeech')
 
 
 const createVideo = async () => {
-    await redditToSpeech(5)
+    await redditToSpeech(3)
     createVideoForEachAudioFile()
 }
 
