@@ -476,7 +476,7 @@ const automaticallyGenerateAndPost = async () => {
     // Schedule the job to run after the random interval
     setTimeout(async () => {
         await generateAndPostArticle();
-        scheduleNextExecution();
+        automaticallyGenerateAndPost()
     }, intervalInSeconds * 1000); 
 }
 
