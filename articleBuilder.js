@@ -1,8 +1,9 @@
 const createGPTClient = require('./gptClient')
 const { Configuration, OpenAIApi } = require("openai");
 const { createDraftPost, publishDraftPost, formatTopicsAndParagraphs } = require('./blogPost')
-
+const sendTweet = require('./tweet')
 const fs = require('fs');
+const { send } = require('process');
 
 const createGPT = async () => {
     return await createGPTClient()
@@ -449,23 +450,48 @@ const removeQuotes = (str) => {
     return str.replace(/[""]/g, '');
 }
 
+const removeTitlePrefix = (inputString) => {
+    // Regular expression to match 'title:' or any variation of it
+    const regex = /^(title:|title\s*:\s*|title\s*-\s*|title\s*—\s*)/i;
+
+    // Remove the prefix from the string
+    const newString = inputString.replace(regex, '');
+
+    return newString.trim(); // Trim any leading or trailing spaces
+};
+
 const generateAndPostArticle = async () => {
     console.log('Generating article')
     const topic = getRandomTopic(topicArray)
     const articleTitle = await makeGptCall(topic, systemPromptForGettingTitle)
     const finalArtitleTitle = removeQuotes(articleTitle)
-    const article = await makeGptCall(finalArtitleTitle, defaultSystemPrompt)
+    const finalFinalArticleTitle = removeTitlePrefix(finalArtitleTitle)
+    const article = await makeGptCall(finalFinalArticleTitle, defaultSystemPrompt)
     writeArticleToFile(article, 'output.txt')
     console.log('Posting article to blog...')
-    const draftID = await createDraftPost(finalArtitleTitle, article)
+    const draftID = await createDraftPost(finalFinalArticleTitle, article)
     if (draftID){
-        publishDraftPost(draftID)
+        await publishDraftPost(draftID)
+        await tweetAboutArticle(finalFinalArticleTitle)
     }
 }
 
+const formatString = (inputString) => {
+    return inputString.replace(/[^\w\s]/gi, '') // Remove special characters
+                      .replace(/\s+/g, '-')       // Replace spaces with '-'
+                      .toLowerCase();  
+}
+
+const tweetAboutArticle = async (finalArticleTitle) => {
+    const urlPostTitle = formatString(finalArticleTitle)
+    const postUrl = `www.bodycalcai.com/post/${urlPostTitle}`
+    const tweetText = `Just posted ${finalArticleTitle} on my blog, check it out when you get a chance. #health #fitness #blog #weightloss ${postUrl} `
+    await sendTweet(tweetText)
+}
+
 const getRandomInterval = () => {
-    // Get a random number between 5 minutes (300 seconds) and 3 hours (10800 seconds)
-    return Math.floor(Math.random() * (10800 - 300 + 1)) + 300;
+    // Get a random number between 3000s (50 min) and  30000s (8 hrs)
+    return Math.floor(Math.random() * (28800 - 3000 + 1)) + 300;
 }
 
 const automaticallyGenerateAndPost = async () => {
@@ -483,4 +509,8 @@ const automaticallyGenerateAndPost = async () => {
 
 
 console.log('Automatically generating and posting to blog...');
-automaticallyGenerateAndPost();
+// automaticallyGenerateAndPost();
+
+
+// on demand 
+generateAndPostArticle()

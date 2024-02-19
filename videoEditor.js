@@ -281,6 +281,17 @@ const deleteTempFiles = () => {
     deleteFilesInDirectory('tempVideos')
 }
 
+const listenForWord = (word, callback) => {
+    const consoleLog = console.log;
+    console.log = (message) => {
+        consoleLog.apply(console, arguments);
+        if (message.includes(word)) {
+            callback(true);
+            console.log = consoleLog; // Restore original console.log
+        }
+    };
+};
+
 
 const createVideoForEachAudioFile = async () => {
     const audioFolder = path.join(__dirname, 'tempAudio'); 
