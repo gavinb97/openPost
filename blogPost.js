@@ -94,9 +94,17 @@ const formatTopicsAndParagraphs = () => {
     const richContent = {
         "nodes": [
             {
-                "type": 'HEADING',
-                "headingData": {
-                    "level": '2',
+                "type": 'IMAGE',
+                "imageData": {
+                    "containerData": {},
+                    "image": {
+                        "src": {
+                            "private": false,
+                            "url": 'some url'
+                        },
+                        "width": 400,
+                        "height": 500
+                    }
                 },
                 "nodes": [
                     {

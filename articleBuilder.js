@@ -509,8 +509,8 @@ const automaticallyGenerateAndPost = async () => {
 
 
 console.log('Automatically generating and posting to blog...');
-// automaticallyGenerateAndPost();
+automaticallyGenerateAndPost();
 
 
 // on demand 
-generateAndPostArticle()
+// generateAndPostArticle()
