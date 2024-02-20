@@ -25,6 +25,62 @@ const publishDraftPost = async (draftPostId) => {
     }
 }
 
+const generateUploadUrl = async () => {
+    const apiUrl = 'https://www.wixapis.com/site-media/v1/files/generate-upload-url/'
+    const authToken = process.env.WIX_KEY;
+    const siteID = process.env.WIX_SITE_ID;
+    const accountID = process.env.WIX_ACCOUNT_ID;
+
+    const response = await axios.post(apiUrl, {
+        mimeType: 'image/png',
+        fileName: 'somefile.png'
+    },
+    {
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': authToken,
+            'wix-site-id': siteID,
+            'wix-account-id': accountID
+        }
+    })
+    console.log(response)
+}
+
+const uploadMedia = async (uploadUrl, ) => {
+    const params = {'filename':'my-audo-track.mp3'};
+    const headers = {
+    'Content-Type': 'application/octet-stream'
+  } 
+
+  const uploadResponse = await httpClient.put( uploadUrl, 'image/png', { headers, params } );
+  return uploadResponse;
+}
+
+const downloadGPTImage = async (url, filepath) => {
+    const response = await Axios({
+        url,
+        method: 'GET',
+        responseType: 'stream'
+    });
+    return new Promise((resolve, reject) => {
+        response.data.pipe(fs.createWriteStream(filepath))
+            .on('error', reject)
+            .once('close', () => resolve(filepath)); 
+    });
+}
+
+const generateFilename = () => {
+    const letters = 'abcdefghijklmnopqrstuvwxyz';
+    let filename = '';
+
+    for (let i = 0; i < 5; i++) {
+        filename += letters.charAt(Math.floor(Math.random() * letters.length));
+    }
+
+    return filename + '.png';
+};
+
+// generateUploadUrl()
 
 const createDraftPost = async (blogTitle, blogArticleText) => {
     const apiUrl = 'https://www.wixapis.com/blog/v3/draft-posts/';
@@ -32,13 +88,19 @@ const createDraftPost = async (blogTitle, blogArticleText) => {
     const siteID = process.env.WIX_SITE_ID;
     const accountID = process.env.WIX_ACCOUNT_ID;
 
-    const richContent = await formatTopicsAndParagraphs(blogTitle, blogArticleText)
+    const imageUrl = await generateImage(blogTitle)
+
+    const richContent = await formatTopicsAndParagraphs(imageUrl, blogArticleText)
 
     try {
         const response = await axios.post(apiUrl, {
             draftPost: {
                 title: blogTitle,
                 memberId: accountID,
+                media: {
+                    displayed: true,
+                    custom: false
+                },
                 richContent: richContent
             }
         }, {
@@ -60,8 +122,8 @@ const createDraftPost = async (blogTitle, blogArticleText) => {
 }
 
 // given a list of subtopic/paragraph objects, extract the topic and use as a heading and place the paragraph under it.
-const formatTopicsAndParagraphs = async (articleTitle, blogArticleText) => {
-    const imageUrl = await generateImage(articleTitle)
+const formatTopicsAndParagraphs = async (imageUrl, blogArticleText) => {
+    
     const richContent = {
         "nodes": [
             {
