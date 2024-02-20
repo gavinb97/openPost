@@ -1,44 +1,38 @@
 require('dotenv').config()
+const generateImage = require('./imageGenerator')
 const axios = require('axios');
+
+const publishDraftPost = async (draftPostId) => {
+    const apiUrl = `https://www.wixapis.com/blog/v3/draft-posts/${draftPostId}/publish`;
+    const authToken = process.env.WIX_KEY;
+    const siteID = process.env.WIX_SITE_ID
+    const accountID = process.env.WIX_ACCOUNT_ID;
+    try {
+        const response = await axios.post(apiUrl, {}, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': authToken,
+                'wix-site-id': siteID,
+                'wix-account-id': accountID
+            }
+        });
+
+        console.log('Draft post published successfully:', response.data);
+
+    } catch (error) {
+        console.log(error)
+        console.error('Error publishing draft post:', error.response ? error.response.data : error.message);
+    }
+}
+
 
 const createDraftPost = async (blogTitle, blogArticleText) => {
     const apiUrl = 'https://www.wixapis.com/blog/v3/draft-posts/';
     const authToken = process.env.WIX_KEY;
     const siteID = process.env.WIX_SITE_ID;
     const accountID = process.env.WIX_ACCOUNT_ID;
-    
-    const richContent = {
-        "nodes": [
-            // {
-            //     "type": 'HEADING',
-            //     "headingData": {
-            //         "level": '2',
-            //     },
-            //     "nodes": [
-            //         {
-            //             "type": 'TEXT',
-            //             "textData": {
-            //                 "text": 'this should be a header i hope',
-            //                 "decorations": []
-            //             }
-            //         }
-            //     ]
-            // },
-            {
-                "type": 'PARAGRAPH',
-                "nodes": [
-                    {
-                    "type": 'TEXT',
-                    "textData": {
-                        "text": blogArticleText,
-                        "decorations": []
-                    }
-                    }
-                ]
-            }
-        ]
-    }
-    // const richContent = formatTopicsAndParagraphs()
+
+    const richContent = await formatTopicsAndParagraphs(blogTitle, blogArticleText)
 
     try {
         const response = await axios.post(apiUrl, {
@@ -65,32 +59,9 @@ const createDraftPost = async (blogTitle, blogArticleText) => {
     }
 }
 
-const publishDraftPost = async (draftPostId) => {
-    const apiUrl = `https://www.wixapis.com/blog/v3/draft-posts/${draftPostId}/publish`;
-    const authToken = process.env.WIX_KEY;
-    const siteID = process.env.WIX_SITE_ID
-    const accountID = process.env.WIX_ACCOUNT_ID;
-    try {
-        const response = await axios.post(apiUrl, {}, {
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': authToken,
-                'wix-site-id': siteID,
-                'wix-account-id': accountID
-            }
-        });
-
-        console.log('Draft post published successfully:', response.data);
-
-    } catch (error) {
-        console.log(error)
-        console.error('Error publishing draft post:', error.response ? error.response.data : error.message);
-    }
-}
-
-
 // given a list of subtopic/paragraph objects, extract the topic and use as a heading and place the paragraph under it.
-const formatTopicsAndParagraphs = () => {
+const formatTopicsAndParagraphs = async (articleTitle, blogArticleText) => {
+    const imageUrl = await generateImage(articleTitle)
     const richContent = {
         "nodes": [
             {
@@ -100,21 +71,12 @@ const formatTopicsAndParagraphs = () => {
                     "image": {
                         "src": {
                             "private": false,
-                            "url": 'some url'
+                            "url": imageUrl
                         },
-                        "width": 400,
+                        "width": 1024,
                         "height": 500
                     }
-                },
-                "nodes": [
-                    {
-                        "type": 'TEXT',
-                        "textData": {
-                            "text": 'this should be a header i hope',
-                            "decorations": []
-                        }
-                    }
-                ]
+                }
             },
             {
                 "type": 'PARAGRAPH',
@@ -122,7 +84,7 @@ const formatTopicsAndParagraphs = () => {
                     {
                     "type": 'TEXT',
                     "textData": {
-                        "text": 'blogArticleText some text in a pararalkajsfkld jklasjlkf jasdl;kj fkl;asdj ;lkfjdaslk;fj lkasdfasdf asdfsadf',
+                        "text": blogArticleText,
                         "decorations": []
                     }
                     }
@@ -133,5 +95,7 @@ const formatTopicsAndParagraphs = () => {
 
     return richContent
 }
+
+// createDraftPost1('Unlocking Weight Management: The Impact of Strategic', 'the contents of the blog hakhah askjfhklasdj flasdjfkljasdklfj kasdljfklasdjfk;lasdjf;k lsda sadf')
 
 module.exports = {createDraftPost, publishDraftPost, formatTopicsAndParagraphs}

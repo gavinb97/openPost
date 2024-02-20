@@ -9,24 +9,24 @@ const openai = new OpenAI({
 });
 
 
-const generateImage = async () => {
-    // const client = await createGPTClient()
-    
+const generateImage = async (textPrompt) => {
     try {
         const response = await openai.images.generate({
             model: "dall-e-3",
-            prompt: 'fluffy calico cat with big belly and small ears',
+            prompt: textPrompt,
             n: 1,
             size: "1024x1024"
         })
         // image_url = response.data.data[0].url;
-        image_url = response
+        image_url = response.data[0].url
         console.log(image_url)
         return image_url
     } catch (e) {
         console.log(e)
     }
 }
+
+module.exports = generateImage
 
 // const downloadImage = async () => {
 
@@ -38,4 +38,4 @@ const generateImage = async () => {
 //                 + ` and I need a picture related to the article for the readers viewing pleasure `
 //                 + ` make up stuff related to this headline taken with ${imageStyle}`
 // generateImage(prompt)
-generateImage()
+generateImage('Journaling Journeys: Unveiling Emotional Wellness and Weight Management through the Power of Pen and Paper')
