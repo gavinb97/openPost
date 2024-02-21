@@ -29,37 +29,9 @@ const publishDraftPost = async (draftPostId) => {
     }
 }
 
-const generateUploadUrl = async (filename) => {
-    const apiUrl = 'https://www.wixapis.com/site-media/v1/files/generate-upload-url/'
-    const authToken = process.env.WIX_KEY;
-    const siteID = process.env.WIX_SITE_ID;
-    const accountID = process.env.WIX_ACCOUNT_ID;
 
-    const response = await axios.post(apiUrl, {
-        mimeType: 'image/png',
-        mediaType: 'IMAGE',
-        fileName: `${filename}`
-    },
-    {
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': authToken,
-            'wix-site-id': siteID,
-            'wix-account-id': accountID
-        }
-    })
-    // console.log(response.data)
-    return response.data.uploadUrl
-}
 
 const uploadMedia = async (uploadUrl, filename) => {
-//     const params = {'filename':`gptImages/${filename}`, 'mediaType': 'IMAGE'};
-//     const headers = {
-//     'Content-Type': 'application/octet-stream'
-//   } 
-
-//   const uploadResponse = await axios.put( uploadUrl, filename, { headers, params } );
-//   return uploadResponse;
 const wixClient = createClient({
     modules: { files },
     auth: ApiKeyStrategy({
@@ -69,8 +41,7 @@ const wixClient = createClient({
   });
 
   const response = await wixClient.files.importFile(uploadUrl, {displayName: filename, mediaType: 'IMAGE', mimeType: 'image/png' });
-  console.log(response)
-  console.log('response ^^^^^^^^^^^^^^')
+
   return response
 }
 
@@ -100,7 +71,7 @@ const generateFilename = () => {
     return filename + '.png';
 };
 
-// generateUploadUrl()
+
 
 const createDraftPost = async (blogTitle, blogArticleText) => {
     const apiUrl = 'https://www.wixapis.com/blog/v3/draft-posts/';
@@ -112,16 +83,13 @@ const createDraftPost = async (blogTitle, blogArticleText) => {
     const fileName = generateFilename()
 
     await downloadGPTImage(imageUrl, `gptimages/${fileName}`)
-    // const uploadUrl = await generateUploadUrl(fileName)
-    // console.log(uploadUrl)
-    // console.log('^^^^^^^^^^^^^^^^^^^^^')
+
     const uploadResponse = await uploadMedia(imageUrl, fileName)
     console.log(uploadResponse)
     
     const mediaId = uploadResponse.file._id
     const mediaUrl = uploadResponse.file.url
-    // console.log(mediaId)
-    // console.log(uploadResponse.data)
+
     const richContent = await formatTopicsAndParagraphs(mediaUrl, blogArticleText)
 
     try {
