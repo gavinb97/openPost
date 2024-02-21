@@ -28,9 +28,7 @@ const generateImage = async (textPrompt) => {
 
 module.exports = generateImage
 
-// const downloadImage = async () => {
 
-// }
 
 // const articleTitle = 'Level Up Your Game: The Secret to Crushing Your Workout and Achieving Top Performance'
 // const imageStyle = 'Sigma 85mm f/8'
@@ -38,4 +36,4 @@ module.exports = generateImage
 //                 + ` and I need a picture related to the article for the readers viewing pleasure `
 //                 + ` make up stuff related to this headline taken with ${imageStyle}`
 // generateImage(prompt)
-generateImage('Journaling Journeys: Unveiling Emotional Wellness and Weight Management through the Power of Pen and Paper')
+// generateImage('Journaling Journeys: Unveiling Emotional Wellness and Weight Management through the Power of Pen and Paper')
