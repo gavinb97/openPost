@@ -19,7 +19,7 @@ const generateImage = async (textPrompt) => {
         })
         // image_url = response.data.data[0].url;
         image_url = response.data[0].url
-        console.log(image_url)
+        // console.log(image_url)
         return image_url
     } catch (e) {
         console.log(e)

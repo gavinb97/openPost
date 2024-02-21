@@ -507,10 +507,12 @@ const automaticallyGenerateAndPost = async () => {
 }
 
 
-
-console.log('Automatically generating and posting to blog...');
-automaticallyGenerateAndPost();
-
-
 // on demand 
-// generateAndPostArticle()
+const job = async () => {
+    console.log('Starting job and generating first post...')
+    await generateAndPostArticle()
+    console.log('Automatically generating and posting to blog...');
+    await automaticallyGenerateAndPost();
+}
+
+job()

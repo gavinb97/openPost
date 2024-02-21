@@ -85,8 +85,7 @@ const createDraftPost = async (blogTitle, blogArticleText) => {
     await downloadGPTImage(imageUrl, `gptimages/${fileName}`)
 
     const uploadResponse = await uploadMedia(imageUrl, fileName)
-    console.log(uploadResponse)
-    
+
     const mediaId = uploadResponse.file._id
     const mediaUrl = uploadResponse.file.url
 
@@ -112,7 +111,7 @@ const createDraftPost = async (blogTitle, blogArticleText) => {
             }
         });
 
-        console.log('Draft post created successfully:', response.data);
+        // console.log('Draft post created successfully:', response.data);
         return response.data.draftPost.id
         // grab the id so we can use it to publish the draft post
     } catch (error) {
