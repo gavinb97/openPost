@@ -82,5 +82,7 @@ const job = async () => {
     console.log('creating first video')
     await createVideo(1)
     console.log('Starting auto post job...')
-    automaticallyGenerateAndPost()
+    await automaticallyGenerateAndPost()
 }
+
+job()
