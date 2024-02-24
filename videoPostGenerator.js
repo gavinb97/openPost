@@ -34,10 +34,13 @@ const makeGptCall = async (prompt, systemPrompt) => {
     }
 }
 
-const createVideo = async () => {
-    await redditToSpeech(2)
+const createVideo = async (numberOfVideos) => {
+    await redditToSpeech(numberOfVideos)
     await createVideoForEachAudioFile()
-    await createAndTweet()
+    for (let i = 0; i < numberOfVideos.length; i++){
+        await createAndTweet()
+    }
+    
 }
 
 const createAndTweet = async () => {
@@ -57,5 +60,4 @@ const createAndTweet = async () => {
     deleteFile(path)
 }
 
-// createVideo()
-createAndTweet()
+createVideo()
