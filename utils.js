@@ -36,5 +36,43 @@ const deleteFilesInDirectory = (directoryPath) => {
     });
 }
 
+const getRandomMp4PathInDirectory = directory => {
+    const files = fs.readdirSync(directory);
+    const mp4Files = files.filter(file => path.extname(file) === '.mp4');
 
-module.exports = deleteFilesInDirectory
+    if (mp4Files.length > 0) {
+        const randomIndex = Math.floor(Math.random() * mp4Files.length);
+        return path.join(directory, mp4Files[randomIndex]);
+    } else {
+        return null; // No .mp4 files found in the directory
+    }
+};
+
+const getFileName = (relativePath) => {
+    // console.log(relativePath)
+    // Extract the filename from the path
+const fileNameWithExtension = relativePath.split('/').pop();
+
+// Remove the file extension
+const fileNameWithoutExtension = fileNameWithExtension.replace(/\.[^/.]+$/, "");
+
+const fileName = fileNameWithoutExtension.split('\\').pop();
+
+return fileName;
+}
+
+const deleteFile = filePath => {
+    try {
+        fs.unlinkSync(filePath);
+        console.log(`File ${filePath} deleted successfully.`);
+    } catch (err) {
+        console.error(`Error deleting file ${filePath}:`, err);
+    }
+};
+
+module.exports ={
+    deleteFilesInDirectory, 
+    getRandomMp4PathInDirectory,
+    getFileName,
+    deleteFile
+} 

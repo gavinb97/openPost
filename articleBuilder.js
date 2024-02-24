@@ -1,7 +1,7 @@
 const createGPTClient = require('./gptClient')
 const { Configuration, OpenAIApi } = require("openai");
 const { createDraftPost, publishDraftPost, formatTopicsAndParagraphs } = require('./blogPost')
-const sendTweet = require('./tweet')
+const {sendTweet} = require('./tweet')
 const fs = require('fs');
 const { send } = require('process');
 

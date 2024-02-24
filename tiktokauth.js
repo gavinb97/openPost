@@ -78,6 +78,6 @@ const getAccessTokenAndOpenId = async (code, CLIENT_KEY, TIKTOK_CLIENT_SECRET) =
     };
   }
 
-app.listen(8080, () => {
+app.listen(3455, () => {
     console.log('running')
 })

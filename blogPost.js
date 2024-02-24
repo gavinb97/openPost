@@ -100,6 +100,16 @@ const createDraftPost = async (blogTitle, blogArticleText) => {
                     id: mediaId,
                     url: mediaUrl
                 },
+                media: {
+                    displayed: true,
+                    custom: true,
+                    wixMedia: {
+                        image: {
+                            id: mediaId,
+                            url: mediaUrl
+                        }
+                    }
+                },
                 richContent: richContent
             }
         }, {

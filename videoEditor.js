@@ -7,7 +7,7 @@ const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path
 const ffmpeg = require('fluent-ffmpeg')
 const getMp3Duration = require('get-mp3-duration');
 const concat = require('ffmpeg-concat');
-const deleteFilesInDirectory = require('./utils')
+const {deleteFilesInDirectory} = require('./utils')
 ffmpeg.setFfmpegPath(ffmpegPath)
 
 
