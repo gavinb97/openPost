@@ -4,6 +4,8 @@
   "description": "GPT Driven App that creates blog posts",
   "main": "index.js",
   "scripts": {
+    "startArticle": "node articleBuilder.js",
+    "startVideo": "node videoPostGenerator.js",
     "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
