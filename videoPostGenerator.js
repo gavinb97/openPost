@@ -70,7 +70,8 @@ const createAndTweet = async () => {
 
     do {
         tweetText = await makeGptCall('You are a tweetbot returning a tweet promoting a video. You will always return in tweet format, under 250 characters. I will give you the video name. You return a short message for a tweet, always under 200 characters. I will give you a partial file name, you can come up with a name for the video based on the file name. Make up the story based on the partial name and return a little tweet like a gen z person',
-        `This is the partial file name:${fileName}`)
+        `This is the partial file name:${fileName}
+        create a tweet promoting this video for me. `)
     } while (tweetText.length === 0 || tweetText.length > 280)
     console.log(tweetText)
     
