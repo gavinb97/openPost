@@ -34,6 +34,23 @@ const makeGptCall = async (prompt, systemPrompt) => {
     }
 }
 
+const getRandomInterval = () => {
+    // Get a random number between 3000s (50 min) and  30000s (8 hrs)
+    return Math.floor(Math.random() * (28800 - 3000 + 1)) + 300;
+}
+
+const automaticallyGenerateAndPost = async () => {
+    const intervalInSeconds = getRandomInterval();
+    const intervalInMinutes = intervalInSeconds / 60;
+    console.log(`Next execution will occur in ${intervalInMinutes} minutes`);
+    
+    // Schedule the job to run after the random interval
+    setTimeout(async () => {
+        await createVideo(1);
+        await automaticallyGenerateAndPost()
+    }, intervalInSeconds * 1000); 
+}
+
 const createVideo = async (numberOfVideos) => {
     await redditToSpeech(numberOfVideos)
     await createVideoForEachAudioFile()
@@ -61,4 +78,9 @@ const createAndTweet = async () => {
     deleteFile(path)
 }
 
-createVideo(3)
+const job = async () => {
+    console.log('creating first video')
+    await createVideo(1)
+    console.log('Starting auto post job...')
+    automaticallyGenerateAndPost()
+}
