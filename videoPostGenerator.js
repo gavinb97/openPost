@@ -88,7 +88,7 @@ const createAndTweet = async () => {
 
 const job = async () => {
     console.log('creating Batch of videos')
-    await createVideos(8)
+    await createVideos(10)
     
     console.log('Starting auto post job...')
     await automaticallyPost()
