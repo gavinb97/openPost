@@ -37,7 +37,8 @@ const makeGptCall = async (prompt, systemPrompt) => {
 const createVideo = async (numberOfVideos) => {
     await redditToSpeech(numberOfVideos)
     await createVideoForEachAudioFile()
-    for (let i = 0; i < numberOfVideos.length; i++){
+
+    for (let i = 0; i < numberOfVideos; i++){
         await createAndTweet()
     }
     
