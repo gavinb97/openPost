@@ -60,4 +60,4 @@ const createAndTweet = async () => {
     deleteFile(path)
 }
 
-createVideo()
+createVideo(3)
