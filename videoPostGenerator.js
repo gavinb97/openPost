@@ -61,11 +61,7 @@ const createVideos = async (numberOfVideos) => {
 }
 
 const postVideo = async () => {
-    // const numberOfVideos = countFilesInDirectory('videosWithSubtitles/')
-
-    // for (let i = 0; i < numberOfVideos; i++){
-        await createAndTweet()
-    // }
+    await createAndTweet()
 }
 
 const createAndTweet = async () => {
@@ -83,12 +79,12 @@ const createAndTweet = async () => {
     console.log(tweetText)
     
     await uploadAndTweet(path, tweetText)
-    deleteFile(path)
+    await deleteFile(path)
 }
 
 const job = async () => {
     console.log('creating Batch of videos')
-    await createVideos(15)
+    // await createVideos(15)
     
     console.log('Starting auto post job...')
     await automaticallyPost()

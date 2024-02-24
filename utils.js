@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const deleteFilesInDirectory = (directoryPath) => {
+const deleteFilesInDirectory = async (directoryPath) => {
     // Read the directory
     fs.readdir(directoryPath, (err, files) => {
         if (err) {
@@ -61,7 +61,7 @@ const fileName = fileNameWithoutExtension.split('\\').pop();
 return fileName;
 }
 
-const deleteFile = filePath => {
+const deleteFile = async (filePath) => {
     try {
         fs.unlinkSync(filePath);
         console.log(`File ${filePath} deleted successfully.`);

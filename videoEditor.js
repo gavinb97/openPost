@@ -273,12 +273,12 @@ const listenForString = (targetString) => {
     });
 }
 
-const deleteTempFiles = () => {
-    deleteFilesInDirectory('srtFiles')
-    deleteFilesInDirectory('audioSubtitles')
-    deleteFilesInDirectory('finalVideos')
-    deleteFilesInDirectory('tempAudio')
-    deleteFilesInDirectory('tempVideos')
+const deleteTempFiles = async () => {
+    await deleteFilesInDirectory('srtFiles')
+    await deleteFilesInDirectory('audioSubtitles')
+    await deleteFilesInDirectory('finalVideos')
+    await deleteFilesInDirectory('tempAudio')
+    await deleteFilesInDirectory('tempVideos')
 }
 
 const listenForWord = (word, callback) => {
@@ -334,7 +334,7 @@ const createVideoForEachAudioFile = async () => {
         await sleep(120000)
     }
     console.log('Deleting temporary files...')
-    deleteTempFiles()
+    await deleteTempFiles()
 }
 
 
