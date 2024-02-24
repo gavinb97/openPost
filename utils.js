@@ -70,9 +70,32 @@ const deleteFile = filePath => {
     }
 };
 
+const isFolderNotEmpty = (filePath) => {
+    try {
+        const files = fs.readdirSync(filePath);
+        return files.length > 0;
+    } catch (error) {
+        console.error("Error reading directory:", error);
+        return false; // Assume directory is empty if an error occurs
+    }
+};
+
+
+const countFilesInDirectory = directoryPath => {
+    try {
+        const files = fs.readdirSync(directoryPath);
+        return files.length;
+    } catch (error) {
+        console.error("Error reading directory:", error);
+        return -1; // Return -1 to indicate an error
+    }
+};
+
 module.exports ={
     deleteFilesInDirectory, 
     getRandomMp4PathInDirectory,
     getFileName,
-    deleteFile
+    deleteFile,
+    isFolderNotEmpty,
+    countFilesInDirectory
 } 

@@ -1,7 +1,7 @@
 const createVideoForEachAudioFile = require('./videoEditor')
 const redditToSpeech = require('./redditToSpeech')
 const {uploadAndTweet} = require('./tweet')
-const {getRandomMp4PathInDirectory, getFileName, deleteFile} = require('./utils')
+const {getRandomMp4PathInDirectory, getFileName, deleteFile, isFolderNotEmpty, countFilesInDirectory} = require('./utils')
 const createGPTClient = require('./gptClient')
 
 const createGPT = async () => {
@@ -39,26 +39,33 @@ const getRandomInterval = () => {
     return Math.floor(Math.random() * (28800 - 3000 + 1)) + 300;
 }
 
-const automaticallyGenerateAndPost = async () => {
+const automaticallyPost = async () => {
     const intervalInSeconds = getRandomInterval();
     const intervalInMinutes = intervalInSeconds / 60;
     console.log(`Next execution will occur in ${intervalInMinutes} minutes`);
     
     // Schedule the job to run after the random interval
     setTimeout(async () => {
-        await createVideo(1);
-        await automaticallyGenerateAndPost()
-    }, intervalInSeconds * 1000); 
+        if (isFolderNotEmpty('videosWithSubtitles/')) {
+            await postVideos()
+        } else {
+            console.log('No more files to process')
+        }
+        
+    }, 60 * 1000); 
 }
 
-const createVideo = async (numberOfVideos) => {
+const createVideos = async (numberOfVideos) => {
     await redditToSpeech(numberOfVideos)
     await createVideoForEachAudioFile()
+}
+
+const postVideos = async () => {
+    const numberOfVideos = countFilesInDirectory('videosWithSubtitles/')
 
     for (let i = 0; i < numberOfVideos; i++){
         await createAndTweet()
     }
-    
 }
 
 const createAndTweet = async () => {
@@ -80,10 +87,11 @@ const createAndTweet = async () => {
 }
 
 const job = async () => {
-    console.log('creating first video')
-    await createVideo(1)
+    console.log('creating Batch of videos')
+    await createVideos(8)
+    
     console.log('Starting auto post job...')
-    await automaticallyGenerateAndPost()
+    await automaticallyPost()
 }
 
 job()
