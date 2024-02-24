@@ -47,7 +47,7 @@ const automaticallyPost = async () => {
     // Schedule the job to run after the random interval
     setTimeout(async () => {
         if (isFolderNotEmpty('videosWithSubtitles/')) {
-            await postVideos()
+            await postVideo()
         } else {
             console.log('No more files to process')
         }
@@ -60,12 +60,12 @@ const createVideos = async (numberOfVideos) => {
     await createVideoForEachAudioFile()
 }
 
-const postVideos = async () => {
-    const numberOfVideos = countFilesInDirectory('videosWithSubtitles/')
+const postVideo = async () => {
+    // const numberOfVideos = countFilesInDirectory('videosWithSubtitles/')
 
-    for (let i = 0; i < numberOfVideos; i++){
+    // for (let i = 0; i < numberOfVideos; i++){
         await createAndTweet()
-    }
+    // }
 }
 
 const createAndTweet = async () => {
