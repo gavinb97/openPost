@@ -53,7 +53,7 @@ const automaticallyPost = async () => {
             console.log('No more files to process')
         }
         
-    }, 60 * 1000); 
+    }, intervalInSeconds * 1000); 
 }
 
 const createVideos = async (numberOfVideos) => {
