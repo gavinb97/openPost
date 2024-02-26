@@ -48,6 +48,7 @@ const automaticallyPost = async () => {
     setTimeout(async () => {
         if (isFolderNotEmpty('videosWithSubtitles/')) {
             await postVideo()
+            await automaticallyPost()
         } else {
             console.log('No more files to process')
         }
