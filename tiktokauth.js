@@ -161,7 +161,35 @@ const getAccessTokenAndOpenId = async (code) => {
     console.log(response.data.data)
   }
 
-queryCreatorInfo()
+  const initializePostRequest = async (accessToken) => {
+    let urlAccessToken = `https://open.tiktokapis.com/v2/post/publish/video/init/`;
+  
+    const response = await axios.post(urlAccessToken, {
+      post_info: {
+          privacy_level: 'privacy',
+          title: 'this is the video caption',
+          disable_duet: false,
+          disable_stitch: false,
+          disable_comment: false,
+          video_cover_timestamp_ms: '',
+          brand_content_toggle: false,
+          brand_organic_toggle: true
+      },
+      source_info: {
+          source: 'FILE_UPLOAD',
+          video_size: 'file size',
+          chunk_size: 'chunk size',
+          total_chunk_count: 'chunk count'
+      }
+    },
+    {
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json; charset=utf-8'
+      }
+    })
+    console.log(response.data.data)
+  }
 // app.listen(3455, () => {
 //     console.log('running')
 // })
