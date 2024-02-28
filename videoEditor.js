@@ -275,7 +275,7 @@ const listenForString = (targetString) => {
 
 const deleteTempFiles = async () => {
     await deleteFilesInDirectory('srtFiles')
-    await deleteFilesInDirectory('audioSubtitles')
+    // await deleteFilesInDirectory('audioSubtitles')
     await deleteFilesInDirectory('finalVideos')
     await deleteFilesInDirectory('tempAudio')
     await deleteFilesInDirectory('tempVideos')

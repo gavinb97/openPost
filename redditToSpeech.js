@@ -5,8 +5,8 @@ const { readTextFile, createSRTFile } = require('./createSubtitles')
 
 
 
-const redditToSpeech = async (numberOfPosts) => {
-    const arrayOfPostBodies = await getPostBodies(numberOfPosts)
+const redditToSpeech = async (numberOfPosts, subredditName) => {
+    const arrayOfPostBodies = await getPostBodies(numberOfPosts, subredditName)
   
     // const speechToTextInput = arrayOfPostBodies[0]
     
