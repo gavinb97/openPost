@@ -77,9 +77,8 @@ const createAndTweet = async () => {
     const fileData = await readTextFile(`audioSubtitles/${fileName}.txt`)
     if (fileData) {
         do {
-            tweetText = await makeGptCall('You are a tweetbot returning a tweet promoting a video. You will always return in tweet format, under 250 characters. I will provide you a transcript of the audio in text form and you will use that to create an engaging tweet about the video. Talk like you are a gen Z memelord, we want the tweets to be clever, funny, trendy and get engagement. You NEVER use emojis and you always use relevant and trending hashtags. You use slang like genz and chronically online millenial memelords and enjoy inuendos and spicy language',
-            `Heres the video transcript ${fileData}
-            create a tweet promoting this video for me. `)
+            tweetText = await makeGptCall(`You are GPT model specialized in generating viral tweets. You like to craft short, attention-grabbing tweets that capture the essence of Gen Z or Millennial culture. The tweets should be responses to various topics, videos, or trends. Focus on making them spicy, witty, and share-worthy. You understand internet slang and contemporary language usage. Train it to generate tweets that can potentially go viral and drive engagement.`,
+            `Turn this text transcript into a viral tweet: ${fileData}. Make it short, catchy, and packed with a spicy take or observation. Capture the essence of Gen Z or Millennial culture. Remember, the goal is to make it share-worthy and trend-worthy!`)
         } while (tweetText.length === 0 || tweetText.length > 280)
         console.log(tweetText)
         
@@ -103,11 +102,13 @@ const createAndTweet = async () => {
 }
 
 const job = async () => {
-    console.log('creating Batch of videos')
-    await createVideos(10, 'relationship_advice')
-    await createVideos(10, 'AITAH')
-    await createVideos(10, 'unpopularopinion')
-    
+    // console.log('creating Batch of videos')
+    // await createVideos(10, 'relationship_advice')
+    // await createVideos(10, 'AITAH')
+    // await createVideos(10, 'unpopularopinion')
+    console.log('posting random video on demand')
+    await createAndTweet()
+
     console.log('Starting auto post job...')
     await automaticallyPost()
 }
