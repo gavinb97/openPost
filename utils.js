@@ -91,11 +91,16 @@ const countFilesInDirectory = directoryPath => {
     }
 };
 
+const removeQuotes = (str) => {
+    return str.replace(/[""]/g, '');
+}
+
 module.exports ={
     deleteFilesInDirectory, 
     getRandomMp4PathInDirectory,
     getFileName,
     deleteFile,
     isFolderNotEmpty,
-    countFilesInDirectory
+    countFilesInDirectory,
+    removeQuotes
 } 

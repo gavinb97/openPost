@@ -1,7 +1,7 @@
 const createVideoForEachAudioFile = require('./videoEditor')
 const redditToSpeech = require('./redditToSpeech')
 const {uploadAndTweet} = require('./tweet')
-const {getRandomMp4PathInDirectory, getFileName, deleteFile, isFolderNotEmpty, countFilesInDirectory} = require('./utils')
+const {getRandomMp4PathInDirectory, getFileName, deleteFile, isFolderNotEmpty, countFilesInDirectory, removeQuotes} = require('./utils')
 const createGPTClient = require('./gptClient')
 const {readTextFile} = require('./createSubtitles')
 
@@ -95,9 +95,11 @@ const createAndTweet = async () => {
         let tweetText = ''
 
         do {
-            tweetText = await makeGptCall('You are a tweetbot returning a tweet promoting a video. You will always return in tweet format, under 250 characters. I will give you the video name. You return a short message for a tweet, always under 200 characters. I will give you a partial file name, you can come up with a name for the video based on the file name. Make up the story based on the partial name and return a little tweet like a gen z person',
+            gptResponse = await makeGptCall('You are a tweetbot returning a tweet promoting a video. You will always return in tweet format, under 250 characters. I will give you the video name. You return a short message for a tweet, always under 200 characters. I will give you a partial file name, you can come up with a name for the video based on the file name. Make up the story based on the partial name and return a little tweet like a gen z person',
             `This is the partial file name:${fileName}
             create a tweet promoting this video for me. `)
+            tweetText = removeQuotes(gptResponse)
+            
         } while (tweetText.length === 0 || tweetText.length > 280)
         console.log(tweetText)
     
