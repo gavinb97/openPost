@@ -3,6 +3,7 @@ const { Configuration, OpenAIApi } = require("openai");
 const { createDraftPost, publishDraftPost, formatTopicsAndParagraphs } = require('./blogPost')
 const {sendTweet} = require('./tweet')
 const fs = require('fs');
+const axios = require('axios');
 const { send } = require('process');
 
 const createGPT = async () => {
@@ -469,10 +470,36 @@ const generateAndPostArticle = async () => {
     const article = await makeGptCall(finalFinalArticleTitle, defaultSystemPrompt)
     writeArticleToFile(article, 'output.txt')
     console.log('Posting article to blog...')
-    const draftID = await createDraftPost(finalFinalArticleTitle, article)
+    const response = await createDraftPost(finalFinalArticleTitle, article)
+    const draftID = response.data.draftPost.id
     if (draftID){
-        await publishDraftPost(draftID)
-        await tweetAboutArticle(finalFinalArticleTitle)
+        const postId = await publishDraftPost(draftID)
+        const postName = await getPostUrl(postId)
+        await tweetAboutArticle(finalFinalArticleTitle, postName)
+    }
+}
+const getPostUrl = async (postId) => {
+    const id = postId.postId
+    
+    const apiUrl = `https://www.wixapis.com/blog/v3/posts/${id}`;
+    
+    const authToken = process.env.WIX_KEY;
+    const siteID = process.env.WIX_SITE_ID
+    const accountID = process.env.WIX_ACCOUNT_ID;
+    try {
+        const response = await axios.get(apiUrl, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': authToken,
+                'wix-site-id': siteID,
+                'wix-account-id': accountID
+            }
+        });
+        
+        return response.data.post.slug
+    } catch (error) {
+        console.log(error)
+        console.error('Error publishing draft post:', error.response ? error.response.data : error.message);
     }
 }
 
@@ -482,10 +509,17 @@ const formatString = (inputString) => {
                       .toLowerCase();  
 }
 
-const tweetAboutArticle = async (finalArticleTitle) => {
+const tweetAboutArticle = async (finalArticleTitle, postName) => {
     const urlPostTitle = formatString(finalArticleTitle)
-    const postUrl = `www.bodycalcai.com/post/${urlPostTitle}`
-    const tweetText = `Just posted ${finalArticleTitle} on my blog, check it out when you get a chance. #health #fitness #blog #weightloss ${postUrl} `
+    const fullUrl = `bodycalcai.com/post/${postName}`
+    let tweetText = ''
+    do {
+        tweetText = await makeGptCall(`You write tweets about my blog posts on twitter to get engagement, always 200 characters or less. You use gen z slang to craft tweets to promote the article and use relevant hashtags. I will provide you with the article name.`,
+    `The article title is ${urlPostTitle}. Give me a tweet for this.`)
+
+    tweetText = tweetText + ` ${fullUrl}`
+    } while (tweetText.length > 280 || tweetText.length == 0)
+  
     await sendTweet(tweetText)
 }
 

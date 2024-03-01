@@ -190,6 +190,8 @@ const getAccessTokenAndOpenId = async (code) => {
     })
     console.log(response.data.data)
   }
+
+  
 // app.listen(3455, () => {
 //     console.log('running')
 // })
