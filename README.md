@@ -5,7 +5,12 @@ npm run startArticle
 
 videoPostGenerator.js - Video Post Generator will create and post video to twitter.
 This requires that ffmpeg is installed on your machine - https://www.ffmpeg.org/download.html
+You must have a video within the `videos` folder for this job to work
+
 npm run startVideo
+
+
+
 
 Built using node v18.17.1
 npm v9.6.7
