@@ -5,6 +5,7 @@ const fs = require('fs');
 const axios = require('axios');
 const { createClient, ApiKeyStrategy } = require('@wix/sdk');
 const { files } = require('@wix/media');
+const {deleteFile} = require('./utils')
 
 const publishDraftPost = async (draftPostId) => {
     const apiUrl = `https://www.wixapis.com/blog/v3/draft-posts/${draftPostId}/publish`;
@@ -121,9 +122,11 @@ const createDraftPost = async (blogTitle, blogArticleText) => {
             }
         });
 
-        // console.log('Draft post created successfully:', response.data);
+        // delete the gpt image
+        await deleteFile(`gptimages/${fileName}`)
+        
         return response
-        // grab the id so we can use it to publish the draft post
+       
     } catch (error) {
         console.log(error)
         console.error('Error creating draft post:', error.response ? error.response.data : error.message);
@@ -169,6 +172,5 @@ const formatTopicsAndParagraphs = async (imageUrl, blogArticleText) => {
     return richContent
 }
 
-// createDraftPost1('Unlocking Weight Management: The Impact of Strategic', 'the contents of the blog hakhah askjfhklasdj flasdjfkljasdklfj kasdljfklasdjfk;lasdjf;k lsda sadf')
 
 module.exports = {createDraftPost, publishDraftPost, formatTopicsAndParagraphs}
