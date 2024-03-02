@@ -50,10 +50,6 @@ const uploadVideo = async (mediaPath) => {
     }
 }
 
-// uploadVideo('videosWithSubtitles\\HisoI14Fandmysister.mp4')
-
-// sendTweetWithVideo('oooh weee shee', '1758011697036468224')
-
 const uploadAndTweet = async (mediaPath, tweetText) => {
     console.log(mediaPath)
     const mediaID = await uploadVideo(mediaPath)
@@ -63,8 +59,6 @@ const uploadAndTweet = async (mediaPath, tweetText) => {
 
     await sendTweetWithVideo(tweetText, mediaID)
 }
-
-// uploadAndTweet('videosWithSubtitles\\WhenIwasakidIwasobsesse.mp4')
 
 module.exports = {
     sendTweet, 

@@ -95,6 +95,18 @@ const removeQuotes = (str) => {
     return str.replace(/[""]/g, '');
 }
 
+const removeSpecialCharacters = (str) => {
+    // Define the pattern to match special characters
+    const pattern = /[^\w\s]/gi; // Matches any character that is not a word character or whitespace
+  
+    // Replace special characters with an empty string
+    return str.replace(pattern, '');
+  }
+
+const removeSpaces = (str) => {
+    return str.replace(/\s/g, '');
+}
+
 module.exports ={
     deleteFilesInDirectory, 
     getRandomMp4PathInDirectory,
@@ -102,5 +114,7 @@ module.exports ={
     deleteFile,
     isFolderNotEmpty,
     countFilesInDirectory,
-    removeQuotes
+    removeQuotes,
+    removeSpecialCharacters,
+    removeSpaces
 } 

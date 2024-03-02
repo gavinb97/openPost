@@ -100,7 +100,3 @@ module.exports = {
     readTextFile,
     createSRTFile
 }
-
-// const textFileString = readTextFile('audioSubtitles\\Aboutayearagowhileattend.txt')
-// console.log(textFileString)
-// createSRTFile(textFileString, 'tempaudio\\Aboutayearagowhileattend.mp3', 'srtFiles\\subtitle.srt')

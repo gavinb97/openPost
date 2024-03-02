@@ -17,9 +17,9 @@ const generateImage = async (textPrompt) => {
             n: 1,
             size: "1024x1024"
         })
-        // image_url = response.data.data[0].url;
+   
         image_url = response.data[0].url
-        // console.log(image_url)
+        
         return image_url
     } catch (e) {
         console.log(e)
