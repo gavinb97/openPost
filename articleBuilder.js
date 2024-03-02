@@ -610,7 +610,7 @@ const tweetAboutArticle = async (finalArticleTitle, postName) => {
     do {
         tweetText = await makeGptCall(`You write tweets about my blog posts on twitter to get engagement, always 200 characters or less. You use gen z slang to craft tweets to promote the article and use relevant hashtags. I will provide you with the article name.`,
     `The article title is ${urlPostTitle}. Give me a tweet for this.`)
-
+        tweetText = removeQuotes(tweetText)
     tweetText = tweetText + ` ${fullUrl}`
     } while (tweetText.length > 280 || tweetText.length == 0)
   
