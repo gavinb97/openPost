@@ -5,12 +5,13 @@ const path = require('path');
 const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path
 const ffmpeg = require('fluent-ffmpeg')
 const getMp3Duration = require('get-mp3-duration');
-// const concat = require('ffmpeg-concat');
+const concat = require('ffmpeg-concat');
 const {deleteFilesInDirectory, getFileName, seeIfFileExists, deleteTempFiles, getMP3FileName} = require('./utils')
 ffmpeg.setFfmpegPath(ffmpegPath)
 
 
 const editVideo = async () => {
+    // this will stack videos vertically
     ffmpeg()
     .input("videos/2.MOV")
     .input("videos/ai2.mp4")
