@@ -1,4 +1,3 @@
-const getMP3Duration = require('get-mp3-duration')
 const { exec } = require('child_process');
 const { getVideoDurationInSeconds } = require('get-video-duration')
 const fs = require('fs');
@@ -6,8 +5,8 @@ const path = require('path');
 const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path
 const ffmpeg = require('fluent-ffmpeg')
 const getMp3Duration = require('get-mp3-duration');
-const concat = require('ffmpeg-concat');
-const {deleteFilesInDirectory} = require('./utils')
+// const concat = require('ffmpeg-concat');
+const {deleteFilesInDirectory, getFileName, seeIfFileExists, deleteTempFiles, getMP3FileName} = require('./utils')
 ffmpeg.setFfmpegPath(ffmpegPath)
 
 
@@ -105,28 +104,6 @@ const getCombinedVideoPaths = async (relativePathAudio) => {
     return arrayOfVideoPaths
 }
 
-const getMP3FileName = (relativePath) => {
-    console.log(relativePath)
-    // Extract the filename from the path
-const fileNameWithExtension = relativePath.split('/').pop();
-console.log(fileNameWithExtension)
-// Remove the file extension
-const fileNameWithoutExtension = fileNameWithExtension.replace(/\.[^/.]+$/, "");
-
-return fileNameWithoutExtension;
-}
-
-const removeSpecialCharacters = (str) => {
-    // Define the pattern to match special characters
-    const pattern = /[^\w\s]/gi; // Matches any character that is not a word character or whitespace
-
-    // Replace special characters with an empty string
-    return str.replace(pattern, '');
-}
-
-const removeSpaces = (str) => {
-  return str.replace(/\s/g, '');
-}
 
 const combineVideosForTempVideo = async (audioPath) => {
     const audioPathForVideo = audioPath
@@ -171,31 +148,44 @@ const cutVideoToFinalLength = async (relativePath, relativePathAudio) => {
           .on('error', err => console.log('error: ', err))
           .run()
 
-    // const ffmpegCommand = `ffmpeg -i ${videoPath} -t ${finalDuration} ${finalVideoPath}`;
-
-    // // Execute the ffmpeg command
-    // exec(ffmpegCommand, (error, stdout, stderr) => {
-    // if (error) {
-    //     console.error(`Error: ${error.message}`);
-    //     return;
-    // }
-    // if (stderr) {
-    //     console.error(`ffmpeg stderr: ${stderr}`);
-    //     return;
-    // }
-    // console.log('ffmpeg stdout:', stdout);
-    // console.log('Conversion complete!');
-    // });
 
     console.log('final video complete')
     return finalVideoPath
 }
 
 // delete extra long videos, use max of 3 minutes
-const isAudioTooLong = async () => {
-    // return boolean
-    
+const isAudioTooLong = async (audioPath) => {
+    const durationInSeconds = getAudioDuration(audioPath)
+    if (durationInSeconds > 180) {
+        console.log('Audio is longer than 3 minutes')
+        return true
+    } else {
+        return false
+    }
 }
+
+const mixAudio = async (music, voice, outputFileName) => {
+    outputFileName = `mixedAudio/${outputFileName}.mp3`
+    // console.log(outputFileName)
+    // total length will be length of first input with 2 second dropout transition
+    const ffmpegCommand = `ffmpeg -i ${voice} -i ${music} -filter_complex amix=inputs=2:duration=first:dropout_transition=1 ${outputFileName}`;
+    console.log(ffmpegCommand)
+    // Execute the ffmpeg command
+    exec(ffmpegCommand, (error, stdout, stderr) => {
+    if (error) {
+        console.error(`Error: ${error.message}`);
+        return;
+    }
+    if (stderr) {
+        console.error(`ffmpeg stderr: ${stderr}`);
+        return;
+    }
+    console.log('Audio Mixed...');
+    return outputFileName
+    });
+}
+
+// mixAudio('music', 'voice', 'someFileName')
 
 const addSubtitles = async (videoFilePath) => {
     const videoName = getMP3FileName(videoFilePath)
@@ -235,16 +225,6 @@ const addSubtitles = async (videoFilePath) => {
     // });
 }
 
-const seeIfFileExists = async (filePath) => {
-    try {
-        // Check if the file exists
-        fs.accessSync(filePath, fs.constants.F_OK);
-        return true;
-    } catch (err) {
-        // File does not exist or cannot be accessed
-        return false;
-    }
-}
 
 const sleep = async  (ms) => {
     return new Promise(resolve => setTimeout(resolve, ms));
@@ -273,13 +253,6 @@ const listenForString = (targetString) => {
     });
 }
 
-const deleteTempFiles = async () => {
-    await deleteFilesInDirectory('srtFiles')
-    // await deleteFilesInDirectory('audioSubtitles')
-    await deleteFilesInDirectory('finalVideos')
-    await deleteFilesInDirectory('tempAudio')
-    await deleteFilesInDirectory('tempVideos')
-}
 
 const listenForWord = (word, callback) => {
     const consoleLog = console.log;
@@ -310,13 +283,22 @@ const createVideoForEachAudioFile = async () => {
         const fullPath = path.join(audioFolder, audioFile);
         const relativePath = path.relative(__dirname, fullPath).replace(/\\/g, '/');
         console.log(relativePath)
-        console.log('Creating video...')
 
+        // TODO need to skip audio and delete audiofile and srt file if its too long
+        const tooLong = isAudioTooLong(relativePath)
+
+        // TODO here I want to create the mixed audio
+        const audioFileName = getFileName(relativePath)
+        const pathToBackgroundMusic = `backgroundMusic/someAudio.mp3`
+        const mixedAudioPath = await mixAudio(pathToBackgroundMusic , relativePath, audioFileName)
+        
+        
+        console.log('Creating video...')
         // create video for each file
         // relative path is audio path
-        const videoOutputPath =  await combineVideosForTempVideo(relativePath)
+        const videoOutputPath =  await combineVideosForTempVideo(mixedAudioPath)
         
-        const finalVideoPath = await cutVideoToFinalLength(videoOutputPath, relativePath)
+        const finalVideoPath = await cutVideoToFinalLength(videoOutputPath, mixedAudioPath)
         let fileExists = false;
         do {
             console.log('Waiting for file to be finished...')

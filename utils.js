@@ -49,7 +49,6 @@ const getRandomMp4PathInDirectory = directory => {
 };
 
 const getFileName = (relativePath) => {
-    // console.log(relativePath)
     // Extract the filename from the path
 const fileNameWithExtension = relativePath.split('/').pop();
 
@@ -107,6 +106,37 @@ const removeSpaces = (str) => {
     return str.replace(/\s/g, '');
 }
 
+const seeIfFileExists = async (filePath) => {
+    try {
+        // Check if the file exists
+        fs.accessSync(filePath, fs.constants.F_OK);
+        return true;
+    } catch (err) {
+        // File does not exist or cannot be accessed
+        return false;
+    }
+}
+
+const deleteTempFiles = async () => {
+    await deleteFilesInDirectory('srtFiles')
+    // await deleteFilesInDirectory('audioSubtitles')
+    await deleteFilesInDirectory('finalVideos')
+    await deleteFilesInDirectory('tempAudio')
+    await deleteFilesInDirectory('tempVideos')
+}
+
+
+const getMP3FileName = (relativePath) => {
+    console.log(relativePath)
+    // Extract the filename from the path
+    const fileNameWithExtension = relativePath.split('/').pop();
+    console.log(fileNameWithExtension)
+    // Remove the file extension
+    const fileNameWithoutExtension = fileNameWithExtension.replace(/\.[^/.]+$/, "");
+
+    return fileNameWithoutExtension;
+}
+
 module.exports ={
     deleteFilesInDirectory, 
     getRandomMp4PathInDirectory,
@@ -116,5 +146,8 @@ module.exports ={
     countFilesInDirectory,
     removeQuotes,
     removeSpecialCharacters,
-    removeSpaces
+    removeSpaces,
+    seeIfFileExists,
+    deleteTempFiles,
+    getMP3FileName
 } 
