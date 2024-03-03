@@ -8,9 +8,8 @@ const cookieParser = require('cookie-parser');
 app.use(cookieParser());
 app.use(cors());
 
-// const {google} = require('googleapis');
-// const apis = google.getSupportedAPIs();
-// console.log(apis)
+const uploadToYoutube = require('./youtube')
+
 const oauth2Client = new google.auth.OAuth2(
     process.env.YOUTUBE_CLIENT_ID,
     process.env.YOUTUBE_CLIENT_SECRET,
@@ -46,11 +45,13 @@ const oauth2Client = new google.auth.OAuth2(
     const code = req.query.code
     const {tokens} = await oauth2Client.getToken(code)
     console.log(tokens)
-    oauth2Client.setCredentials({
+    await oauth2Client.setCredentials({
       access_token: tokens.access_token,
       refresh_token: tokens.refresh_token
     });
     console.log(oauth2Client)
+    
+    uploadToYoutube(oauth2Client, 'videosWithSubtitles\Apromiseringisanemptypro.mp4')
   
     res.redirect('https://google.com');
 })
