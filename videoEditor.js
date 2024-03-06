@@ -169,8 +169,8 @@ const mixAudio = async (music, voice, outputFileName) => {
     outputFileName = `mixedAudio/${outputFileName}.mp3`
     // console.log(outputFileName)
     // total length will be length of first input with 2 second dropout transition
-    const ffmpegCommand = `ffmpeg -i ${voice} -i ${music} -filter_complex amix=inputs=2:duration=first:dropout_transition=1 ${outputFileName}`;
-    console.log(ffmpegCommand)
+    const ffmpegCommand = `ffmpeg -i ${voice} -i ${music} -filter_complex "[1:a]volume=0.25[a1];[0:a][a1]amix=inputs=2:duration=first:dropout_transition=1" ${outputFileName}`;
+   
     // Execute the ffmpeg command
     exec(ffmpegCommand, (error, stdout, stderr) => {
     if (error) {
@@ -186,7 +186,7 @@ const mixAudio = async (music, voice, outputFileName) => {
     });
 }
 
-// mixAudio('music', 'voice', 'someFileName')
+// mixAudio('backgroundMusic\\snowflake.mp3', 'tempAudio\\WhatisRedPowerWhatis.mp3', 'someFileName')
 
 const addSubtitles = async (videoFilePath) => {
     const videoName = getMP3FileName(videoFilePath)
