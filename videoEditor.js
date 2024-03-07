@@ -109,7 +109,7 @@ const getCombinedVideoPaths = async (relativePathAudio) => {
 const combineVideosForTempVideo = async (audioPath) => {
     const audioPathForVideo = audioPath
     const videoPaths = await getCombinedVideoPaths(audioPathForVideo)
-    console.log(videoPaths)
+   
     const audioName = getMP3FileName(audioPathForVideo)
     const outputPath = `tempVideos/${audioName}.mp4`
     console.log(outputPath)
@@ -164,15 +164,21 @@ const isAudioTooLong = async (audioPath) => {
         return false
     }
 }
+const replaceForwardSlash = (inputString) => {
+    return inputString.replace(/\//g, '\\\\');
+};
 
 const mixAudio = async (music, voice, outputFileName) => {
-    outputFileName = `mixedAudio/${outputFileName}.mp3`
-    // console.log(outputFileName)
+    output = `mixedAudio\\${outputFileName}.mp3`
+    
+    const formatVoice = replaceForwardSlash(voice)
+    console.log('format voice: ' + formatVoice)
+   
     // total length will be length of first input with 2 second dropout transition
-    const ffmpegCommand = `ffmpeg -i ${voice} -i ${music} -filter_complex "[1:a]volume=0.25[a1];[0:a][a1]amix=inputs=2:duration=first:dropout_transition=1" ${outputFileName}`;
+    const ffmpegCommand = `ffmpeg -i ${formatVoice} -i ${music} -filter_complex "[1:a]adelay=5000|5000,volume=0.40[a1];[0:a][a1]amix=inputs=2:duration=first:dropout_transition=1" ${output}`;
    
     // Execute the ffmpeg command
-    exec(ffmpegCommand, (error, stdout, stderr) => {
+   exec(ffmpegCommand, (error, stdout, stderr) => {
     if (error) {
         console.error(`Error: ${error.message}`);
         return;
@@ -182,11 +188,13 @@ const mixAudio = async (music, voice, outputFileName) => {
         return;
     }
     console.log('Audio Mixed...');
-    return outputFileName
+    return output
     });
+
+    return output
 }
 
-// mixAudio('backgroundMusic\\snowflake.mp3', 'tempAudio\\WhatisRedPowerWhatis.mp3', 'someFileName')
+
 
 const addSubtitles = async (videoFilePath) => {
     const videoName = getMP3FileName(videoFilePath)
@@ -209,21 +217,6 @@ const addSubtitles = async (videoFilePath) => {
            console.log('done')
         })
 
-    // const ffmpegCommand = `ffmpeg -i ${inputVideoFilePath} ${outputOptions} ${outputFileName}`;
-
-    // // Execute the ffmpeg command
-    // exec(ffmpegCommand, (error, stdout, stderr) => {
-    // if (error) {
-    //     console.error(`Error: ${error.message}`);
-    //     return;
-    // }
-    // if (stderr) {
-    //     console.error(`ffmpeg stderr: ${stderr}`);
-    //     return;
-    // }
-    // console.log('ffmpeg stdout:', stdout);
-    // console.log('Conversion complete!');
-    // });
 }
 
 
@@ -290,9 +283,11 @@ const createVideoForEachAudioFile = async () => {
 
         // TODO here I want to create the mixed audio
         const audioFileName = getFileName(relativePath)
-        const pathToBackgroundMusic = `backgroundMusic/someAudio.mp3`
+        const pathToBackgroundMusic = `backgroundMusic\\snowflake.mp3`
         const mixedAudioPath = await mixAudio(pathToBackgroundMusic , relativePath, audioFileName)
         
+        console.log('gonna wait before making video')
+        await sleep(60000)
         
         console.log('Creating video...')
         // create video for each file

@@ -55,8 +55,8 @@ const automaticallyPost = async () => {
             console.log('No more files to process...')
             console.log('creating Batch of videos')
             await createVideos(10, 'relationship_advice')
-            await createVideos(10, 'AITAH')
-            await createVideos(10, 'unpopularopinion')
+            // await createVideos(10, 'AITAH')
+            // await createVideos(10, 'unpopularopinion')
             await postVideo()
             await automaticallyPost()
         }
@@ -112,8 +112,8 @@ const createAndTweet = async () => {
 }
 
 const job = async () => {
-    console.log('posting random video on demand')
-    await createAndTweet()
+    // console.log('posting random video on demand')
+    // await createAndTweet()
 
     console.log('Starting auto post job...')
     await automaticallyPost()

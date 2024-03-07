@@ -123,14 +123,20 @@ const deleteTempFiles = async () => {
     await deleteFilesInDirectory('finalVideos')
     await deleteFilesInDirectory('tempAudio')
     await deleteFilesInDirectory('tempVideos')
+    await deleteFilesInDirectory('mixedAudio')
 }
 
 
 const getMP3FileName = (relativePath) => {
-    console.log(relativePath)
+    console.log(relativePath);
+
+    // Replace backslashes with forward slashes
+    const normalizedPath = relativePath.replace(/\\/g, '/');
+
     // Extract the filename from the path
-    const fileNameWithExtension = relativePath.split('/').pop();
-    console.log(fileNameWithExtension)
+    const fileNameWithExtension = normalizedPath.split('/').pop();
+    console.log(fileNameWithExtension);
+
     // Remove the file extension
     const fileNameWithoutExtension = fileNameWithExtension.replace(/\.[^/.]+$/, "");
 
