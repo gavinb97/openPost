@@ -44,12 +44,13 @@ const getRandomInterval = () => {
 const automaticallyPost = async () => {
     const intervalInSeconds = getRandomInterval();
     const intervalInMinutes = intervalInSeconds / 60;
-    console.log(`Next execution will occur in ${intervalInMinutes} minutes`);
 
     // If folder is empty, create some videos before starting the job
     if (!isFolderNotEmpty('videosWithSubtitles/')) {
         await createVideos(10, 'AITAH')
     }
+    
+    console.log(`Next execution will occur in ${intervalInMinutes} minutes`);
     
     // Schedule the job to run after the random interval
     setTimeout(async () => {
