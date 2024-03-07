@@ -175,7 +175,7 @@ const mixAudio = async (music, voice, outputFileName) => {
     console.log('format voice: ' + formatVoice)
    
     // total length will be length of first input with 2 second dropout transition
-    const ffmpegCommand = `ffmpeg -i ${formatVoice} -i ${music} -filter_complex "[1:a]adelay=5000|5000,volume=0.40[a1];[0:a][a1]amix=inputs=2:duration=first:dropout_transition=1" ${output}`;
+    const ffmpegCommand = `ffmpeg -i ${formatVoice} -i ${music} -filter_complex "[1:a]volume=0.40[a1];[0:a][a1]amix=inputs=2:duration=first:dropout_transition=1" ${output}`;
    
     // Execute the ffmpeg command
    exec(ffmpegCommand, (error, stdout, stderr) => {
