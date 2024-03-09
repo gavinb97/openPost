@@ -46,12 +46,12 @@ const automaticallyPost = async () => {
     const intervalInMinutes = intervalInSeconds / 60;
 
     // If folder is empty, create some videos before starting the job
-    if (!isFolderNotEmpty('videosWithSubtitles/')) {
-        await createVideos(10, 'AITAH')
-    }
+    // if (!isFolderNotEmpty('videosWithSubtitles/')) {
+    //     await createVideos(10, 'AITAH')
+    // }
     
     console.log(`Next execution will occur in ${intervalInMinutes} minutes`);
-    
+
     // Schedule the job to run after the random interval
     setTimeout(async () => {
         if (isFolderNotEmpty('videosWithSubtitles/')) {
@@ -60,6 +60,8 @@ const automaticallyPost = async () => {
         } else {
             console.log('No more files to process...')
             console.log('creating Batch of videos')
+            await createVideos(10, 'TwoHotTakes')
+            await createVideos(10, 'TrueOffMyChest')
             await createVideos(10, 'relationship_advice')
             await createVideos(10, 'AITAH')
             await createVideos(10, 'unpopularopinion')
