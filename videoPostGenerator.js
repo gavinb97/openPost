@@ -135,8 +135,8 @@ const createAndTweet = async (videoPath) => {
         } while (tweetText.length === 0 || tweetText.length > 280)
         console.log(tweetText)
     
-        await uploadAndTweet(path, tweetText)
-        await deleteFile(path)
+        await uploadAndTweet(videoPath, tweetText)
+        await deleteFile(videoPath)
     }
     
 }

@@ -111,9 +111,9 @@ const createClientAndUpload = async (filePath, videoTitle, videoDescription) => 
   
 }
 
-app.listen(3455, () => {
-  console.log('running')
-})
+// app.listen(3455, () => {
+//   console.log('running')
+// })
 
 // authorizeFirstTimeUrl()
 
