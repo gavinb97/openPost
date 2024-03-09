@@ -10,7 +10,7 @@ const {deleteFilesInDirectory, getFileName, seeIfFileExists, deleteTempFiles, ge
 ffmpeg.setFfmpegPath(ffmpegPath)
 
 
-const editVideo = async () => {
+const stackVideos = async () => {
     // this will stack videos vertically
     ffmpeg()
     .input("videos/2.MOV")
@@ -32,15 +32,18 @@ const editVideo = async () => {
     console.log("success");
     })
     .run();
-    // ffmpeg('videos/ai1.mp4')
-    //     .setStartTime('00:00:00')
-    //     .setDuration(10)
-    //     .output('newVideoDude.mp4')
-    //     .on('end', function(err) {
-    //         if(!err) { console.log('conversion Done') }
-    //       })
-    //       .on('error', err => console.log('error: ', err))
-    //       .run()
+}
+
+const cutVideoToUnder60s = async (videoPath, outputPath) => {
+       ffmpeg(videoPath)
+        .setStartTime('00:00:00')
+        .setDuration(55)
+        .output(outputPath)
+        .on('end', function(err) {
+            if(!err) { console.log('conversion Done') }
+          })
+          .on('error', err => console.log('error: ', err))
+          .run()
 }
 
 const getAudioDuration = (relativePath) => {
