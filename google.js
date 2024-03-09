@@ -10,6 +10,7 @@ const path = require('path');
 const readline = require('readline');
 app.use(cookieParser());
 app.use(cors());
+const {writeTextToFile} = require('./utils')
 
 const oauth2Client = new google.auth.OAuth2(
     process.env.YOUTUBE_CLIENT_ID,
@@ -51,8 +52,10 @@ const oauth2Client = new google.auth.OAuth2(
       access_token: tokens.access_token,
       refresh_token: tokens.refresh_token
     });
-    
-    await uploadToYoutube(oauth2Client, 'videosWithSubtitles\\SoIm28fandmyfianceis32.mp4')
+
+    const keyStrings = `accessToken: ${tokens.access_token}  refreshToken: ${tokens.refresh_token}`
+    writeTextToFile(keyStrings, 'keys.txt')
+    await uploadToYoutube(oauth2Client, 'videosWithSubtitles\\Thishappenedtonightattheg.mp4')
   
     res.redirect('https://google.com');
 })

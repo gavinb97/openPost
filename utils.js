@@ -143,6 +143,37 @@ const getMP3FileName = (relativePath) => {
     return fileNameWithoutExtension;
 }
 
+const writeTextToFile = (text, fileName) => {
+    fs.writeFile(fileName, text, (err) => {
+        if (err) {
+            console.error('Error writing to file:', err);
+        } else {
+            console.log('Article has been written to', fileName);
+        }
+    });
+}
+
+const readTokensFromFile = (filePath) => {
+    try {
+        const data = fs.readFileSync(filePath, 'utf8');
+        const tokens = {};
+        const regex = /accessToken:\s*(.*?)\s*refreshToken:\s*(.*)/;
+        const matches = data.match(regex);
+        
+        if (matches && matches.length >= 3) {
+            tokens.access_token = matches[1];
+            tokens.refresh_token = matches[2];
+        } else {
+            throw new Error('Access token and/or refresh token not found in the file.');
+        }
+        
+        return tokens;
+    } catch (err) {
+        console.error('Error reading tokens file:', err);
+        return null;
+    }
+}
+
 module.exports ={
     deleteFilesInDirectory, 
     getRandomMp4PathInDirectory,
@@ -155,5 +186,7 @@ module.exports ={
     removeSpaces,
     seeIfFileExists,
     deleteTempFiles,
-    getMP3FileName
+    getMP3FileName,
+    writeTextToFile,
+    readTokensFromFile
 } 
