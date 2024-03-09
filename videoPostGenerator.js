@@ -46,11 +46,6 @@ const automaticallyPost = async () => {
     const intervalInSeconds = getRandomInterval();
     const intervalInMinutes = intervalInSeconds / 60;
 
-    // If folder is empty, create some videos before starting the job
-    // if (!isFolderNotEmpty('videosWithSubtitles/')) {
-    //     await createVideos(10, 'AITAH')
-    // }
-    
     console.log(`Next execution will occur in ${intervalInMinutes} minutes`);
 
     // Schedule the job to run after the random interval
@@ -98,10 +93,10 @@ const postToYoutube = async (videoPath) => {
 const postVideo = async () => {
     const path = getRandomMp4PathInDirectory('videosWithSubtitles/')
     // create and upload tweet
-    // await createAndTweet(path)
+    await createAndTweet(path)
 
     // post video to youtube
-    await postToYoutube(path)
+    // await postToYoutube(path)
 
 }
 
@@ -121,8 +116,8 @@ const createAndTweet = async (videoPath) => {
         console.log(tweetText)
         
         await uploadAndTweet(videoPath, tweetText)
-        await deleteFile(videoPath)
-        await deleteFile(`audioSubtitles/${fileName}.txt`)
+        // await deleteFile(videoPath)
+        // await deleteFile(`audioSubtitles/${fileName}.txt`)
     } else {
         let tweetText = ''
 
@@ -136,18 +131,19 @@ const createAndTweet = async (videoPath) => {
         console.log(tweetText)
     
         await uploadAndTweet(videoPath, tweetText)
-        await deleteFile(videoPath)
+        // await deleteFile(videoPath)
     }
     
 }
 
 const job = async () => {
-    // console.log('posting random video on demand')
-    // await createAndTweet()
+    console.log('posting random video on demand')
+    const path = getRandomMp4PathInDirectory('videosWithSubtitles/')
+    await createAndTweet(path)
 
     console.log('Starting auto post job...')
     await automaticallyPost()
 }
-postVideo()
+// postVideo()
 
-// job()
+job()
