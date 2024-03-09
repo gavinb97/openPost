@@ -1,9 +1,10 @@
 const createVideoForEachAudioFile = require('./videoEditor')
 const redditToSpeech = require('./redditToSpeech')
 const {uploadAndTweet} = require('./tweet')
-const {getRandomMp4PathInDirectory, getFileName, deleteFile, isFolderNotEmpty, countFilesInDirectory, removeQuotes} = require('./utils')
+const {getRandomMp4PathInDirectory, getFileName, deleteFile, isFolderNotEmpty, countFilesInDirectory, removeQuotes, removeSpecialCharacters} = require('./utils')
 const createGPTClient = require('./gptClient')
 const {readTextFile} = require('./createSubtitles')
+const {createClientAndUpload} = require('./google')
 
 
 const createGPT = async () => {
@@ -77,29 +78,50 @@ const createVideos = async (numberOfVideos, subredditName) => {
     await createVideoForEachAudioFile()
 }
 
+const postToYoutube = async (videoPath) => {
+    const fileName = getFileName(videoPath)
+    const fileData = await readTextFile(`audioSubtitles/${fileName}.txt`)
+
+    const videoTitleRaw = await makeGptCall(`Based on this transcript: [${fileData}], Give me a title. Make it short, under 200 characters and do NOT use emoji`,`You are GPT model specialized in generating viral video titles. You like to craft short, attention-grabbing titles that capture the essence of Gen Z or Millennial culture. The title should be response to a transcript that I will provide. Focus on making them spicy, witty, and share-worthy. You understand internet slang and contemporary language usage. You like to generate titles that can potentially go viral and drive engagement. Never use emojis.`)
+    const videoTitle = removeSpecialCharacters(removeQuotes(videoTitleRaw))
+
+    const videoDescriptionRaw = await makeGptCall(`Based on this transcript: [${fileData}], Give me a description for youtube. DO NOT use emojis`,`You are GPT model specialized in generating viral video descriptions. You like to craft short, attention-grabbing descriptions that capture the essence of Gen Z or Millennial culture. The description should be response to a transcript that I will provide. Focus on making them spicy, witty, and share-worthy. You understand internet slang and contemporary language usage. You like to generate descriptions that can potentially go viral and drive engagement. Never use emojis.`)
+    const videoDescription = removeQuotes(videoDescriptionRaw)
+
+    console.log('title: ' + videoTitle)
+    console.log('description: ' + videoDescription)
+    await createClientAndUpload(videoPath, videoTitle, videoDescription)
+    console.log('uploaded video')
+    // TODO upload shorts version with #shorts as description and same title using short video
+}
+
 const postVideo = async () => {
-    await createAndTweet()
+    const path = getRandomMp4PathInDirectory('videosWithSubtitles/')
+    // create and upload tweet
+    // await createAndTweet(path)
+
+    // post video to youtube
+    await postToYoutube(path)
+
 }
 
 
 
-const createAndTweet = async () => {
-    const path = getRandomMp4PathInDirectory('videosWithSubtitles/')
-    console.log(path)
-    const fileName = getFileName(path)
+const createAndTweet = async (videoPath) => {
+    const fileName = getFileName(videoPath)
 
     const fileData = await readTextFile(`audioSubtitles/${fileName}.txt`)
     if (fileData) {
         let tweetText = ''
         do {
             tweetText = await makeGptCall(`You are GPT model specialized in generating viral tweets. You like to craft short, attention-grabbing tweets that capture the essence of Gen Z or Millennial culture. The tweets should be responses to various topics, videos, or trends. Focus on making them spicy, witty, and share-worthy. You understand internet slang and contemporary language usage. Train it to generate tweets that can potentially go viral and drive engagement.`,
-            `Turn this text transcript into a viral tweet: ${fileData}. Make it short, catchy, and packed with a spicy take or observation. Capture the essence of Gen Z or Millennial culture. Remember, the goal is to make it share-worthy and trend-worthy!`)
+            `Turn this text transcript into a viral tweet: ${fileData}. Make it short, catchy, and packed with a spicy take or observation. Capture the essence of Gen Z or Millennial culture. Remember, the goal is to make it share-worthy and trend-worthy! Never Use Emojis and Keep it short!`)
             tweetText = removeQuotes(tweetText)
         } while (tweetText.length === 0 || tweetText.length > 280)
         console.log(tweetText)
         
-        await uploadAndTweet(path, tweetText)
-        await deleteFile(path)
+        await uploadAndTweet(videoPath, tweetText)
+        await deleteFile(videoPath)
         await deleteFile(`audioSubtitles/${fileName}.txt`)
     } else {
         let tweetText = ''
@@ -126,5 +148,6 @@ const job = async () => {
     console.log('Starting auto post job...')
     await automaticallyPost()
 }
+postVideo()
 
-job()
+// job()

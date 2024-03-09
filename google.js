@@ -32,13 +32,12 @@ const authorizeFirstTimeUrl = async () => {
   });
 
   console.log(url)
-  
+  return oauth2Client
 }
 
   // callback endpoint will store access and refresh token in file
   app.get('/gcallback', async (req, res) => {
-    console.log('hitting the callback ooh wee')
-    // console.log(req.query)
+    const oauth2Client = await authorizeFirstTimeUrl()
     const code = req.query.code
     const {tokens} = await oauth2Client.getToken(code)
     console.log(tokens)
@@ -90,7 +89,7 @@ return res.data;
 }
 
 
-const createClientAndUpload = async () => {
+const createClientAndUpload = async (filePath, videoTitle, videoDescription) => {
   const oauthClient = new google.auth.OAuth2(
     process.env.YOUTUBE_CLIENT_ID,
     process.env.YOUTUBE_CLIENT_SECRET,
@@ -103,20 +102,23 @@ const createClientAndUpload = async () => {
     refresh_token: tokens.refresh_token
   })
 
-
-  await uploadToYoutube(oauthClient, 'videosWithSubtitles\\Somyhusbandbrokeupwithm.mp4', 'some title', 'some description')
-
+  try {
+    await uploadToYoutube(oauthClient, filePath, videoTitle, videoDescription)
+  } catch (e) {
+    console.log('error uploading to youtube')
+    console.log(e)
+  }
+  
 }
 
 app.listen(3455, () => {
   console.log('running')
 })
 
-
-
-createClientAndUpload()
+// authorizeFirstTimeUrl()
 
 
 module.exports = {
-  uploadToYoutube
+  uploadToYoutube,
+  createClientAndUpload
 }

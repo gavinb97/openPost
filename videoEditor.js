@@ -34,16 +34,18 @@ const stackVideos = async () => {
     .run();
 }
 
+// TODO update aspect ratio
 const cutVideoToUnder60s = async (videoPath, outputPath) => {
-       ffmpeg(videoPath)
-        .setStartTime('00:00:00')
-        .setDuration(55)
-        .output(outputPath)
-        .on('end', function(err) {
-            if(!err) { console.log('conversion Done') }
-          })
-          .on('error', err => console.log('error: ', err))
-          .run()
+    ffmpeg(videoPath)
+    .setStartTime('00:00:00')
+    .setDuration(55)
+    .outputOptions('-vf', 'scale=-1:16/9')
+    .output(outputPath)
+    .on('end', function(err) {
+        if (!err) { console.log('Conversion Done'); }
+    })
+    .on('error', err => console.log('Error: ', err))
+    .run();
 }
 
 const getAudioDuration = (relativePath) => {
