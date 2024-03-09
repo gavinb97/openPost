@@ -10,9 +10,11 @@ const path = require('path');
 const readline = require('readline');
 app.use(cookieParser());
 app.use(cors());
-const {writeTextToFile} = require('./utils')
+const {writeTextToFile, readTokensFromFile} = require('./utils')
 
-const oauth2Client = new google.auth.OAuth2(
+
+const authorizeFirstTimeUrl = async () => {
+  const oauth2Client = new google.auth.OAuth2(
     process.env.YOUTUBE_CLIENT_ID,
     process.env.YOUTUBE_CLIENT_SECRET,
     process.env.YOUTUBE_REDIRECT
@@ -30,18 +32,10 @@ const oauth2Client = new google.auth.OAuth2(
   });
 
   console.log(url)
+  
+}
 
-  oauth2Client.on('tokens', (tokens) => {
-    if (tokens.refresh_token) {
-      // store the refresh_token in my database!
-      console.log(tokens.refresh_token);
-      oauth2Client.setCredentials({
-        refresh_token: tokens.refresh_token
-      });
-    }
-    console.log(tokens.access_token);
-  });
-
+  // callback endpoint will store access and refresh token in file
   app.get('/gcallback', async (req, res) => {
     console.log('hitting the callback ooh wee')
     // console.log(req.query)
@@ -55,12 +49,10 @@ const oauth2Client = new google.auth.OAuth2(
 
     const keyStrings = `accessToken: ${tokens.access_token}  refreshToken: ${tokens.refresh_token}`
     writeTextToFile(keyStrings, 'keys.txt')
-    await uploadToYoutube(oauth2Client, 'videosWithSubtitles\\Thishappenedtonightattheg.mp4')
-  
     res.redirect('https://google.com');
 })
 
-const uploadToYoutube = async (client, fileName)  => {
+const uploadToYoutube = async (client, fileName, videoTitle, videoDescription)  => {
     const youtube = google.youtube({version:'v3', auth: client});
    
   const fileSize = fs.statSync(fileName).size;
@@ -70,8 +62,8 @@ const uploadToYoutube = async (client, fileName)  => {
     notifySubscribers: false,
     requestBody: {
       snippet: {
-        title: 'Node.js YouTube Upload Test',
-        description: 'Testing YouTube upload via Google APIs Node.js Client',
+        title: videoTitle,
+        description: videoDescription,
       },
       status: {
         privacyStatus: 'private',
@@ -97,6 +89,34 @@ console.log(res.data);
 return res.data;
 }
 
-  app.listen(3455, () => {
-    console.log('running')
+
+const createClientAndUpload = async () => {
+  const oauthClient = new google.auth.OAuth2(
+    process.env.YOUTUBE_CLIENT_ID,
+    process.env.YOUTUBE_CLIENT_SECRET,
+    process.env.YOUTUBE_REDIRECT
+  )
+
+  const tokens = readTokensFromFile('keys.txt')
+
+  oauthClient.setCredentials({
+    refresh_token: tokens.refresh_token
+  })
+
+
+  await uploadToYoutube(oauthClient, 'videosWithSubtitles\\Somyhusbandbrokeupwithm.mp4', 'some title', 'some description')
+
+}
+
+app.listen(3455, () => {
+  console.log('running')
 })
+
+
+
+createClientAndUpload()
+
+
+module.exports = {
+  uploadToYoutube
+}
