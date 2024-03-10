@@ -143,7 +143,7 @@ const getMP3FileName = (relativePath) => {
     return fileNameWithoutExtension;
 }
 
-const writeTextToFile = (text, fileName) => {
+const writeTextToFile = async (text, fileName) => {
     fs.writeFile(fileName, text, (err) => {
         if (err) {
             console.error('Error writing to file:', err);
@@ -202,6 +202,10 @@ const getFileSizeInBytes = (filePath) => {
     }
 }
 
+const sleep = async  (ms) => {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 module.exports ={
     deleteFilesInDirectory, 
     getRandomMp4PathInDirectory,
@@ -218,5 +222,6 @@ module.exports ={
     writeTextToFile,
     readTokensFromFile,
     getVideoChunkInfo,
-    getFileSizeInBytes
+    getFileSizeInBytes,
+    sleep
 } 

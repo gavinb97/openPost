@@ -5,6 +5,7 @@ const {getRandomMp4PathInDirectory, getFileName, deleteFile, isFolderNotEmpty, c
 const createGPTClient = require('./gptClient')
 const {readTextFile} = require('./createSubtitles')
 const {createClientAndUpload} = require('./google')
+const {uploadToTikTok} = require('./tiktokauth')
 
 
 const createGPT = async () => {
@@ -96,8 +97,10 @@ const postVideo = async () => {
     await createAndTweet(path)
 
     // post video to youtube
-    // await postToYoutube(path)
+    await postToYoutube(path)
 
+    // post video to tiktok
+    await uploadToTikTok(path)
 }
 
 
@@ -144,6 +147,6 @@ const job = async () => {
     console.log('Starting auto post job...')
     await automaticallyPost()
 }
-// postVideo()
+postVideo()
 
-job()
+// job()

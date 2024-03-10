@@ -6,7 +6,7 @@ const fetch = require('node-fetch');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const SHA256 = require('crypto-js/sha256')
-const {writeTextToFile, readTokensFromFile, getVideoChunkInfo, getFileSizeInBytes} = require('./utils')
+const {writeTextToFile, readTokensFromFile, getVideoChunkInfo, getFileSizeInBytes, sleep} = require('./utils')
 const fs = require('fs');
 app.use(cookieParser());
 app.use(cors());
@@ -186,36 +186,37 @@ const getAccessTokenAndOpenId = async (code) => {
     const videoSize = getFileSizeInBytes(filePath)
     const chunkInfo = getVideoChunkInfo(filePath)
 
-    console.log(videoSize)
-    console.log(chunkInfo)
-  
-    const response = await axios.post(urlAccessToken, {
-      post_info: {
-          privacy_level: 'SELF_ONLY',
-          // privacy_level: 'PUBLIC_TO_EVERYONE',
-          title: 'what the heckith',
-          disable_duet: false,
-          disable_stitch: false,
-          disable_comment: false,
-          video_cover_timestamp_ms: 1000,
-          brand_content_toggle: false,
-          brand_organic_toggle: true
+    if (chunkInfo.file_size < 67000000) {
+      const response = await axios.post(urlAccessToken, {
+        post_info: {
+            privacy_level: 'SELF_ONLY',
+            // privacy_level: 'PUBLIC_TO_EVERYONE',
+            title: 'what the heckith',
+            disable_duet: false,
+            disable_stitch: false,
+            disable_comment: false,
+            video_cover_timestamp_ms: 1000,
+            brand_content_toggle: false,
+            brand_organic_toggle: true
+        },
+        source_info: {
+            source: 'FILE_UPLOAD',
+            video_size: chunkInfo.file_size,
+            chunk_size: chunkInfo.file_size,
+            total_chunk_count: 1
+        }
       },
-      source_info: {
-          source: 'FILE_UPLOAD',
-          video_size: chunkInfo.file_size,
-          chunk_size: chunkInfo.file_size,
-          total_chunk_count: 1
-      }
-    },
-    {
-      headers: {
-        'Authorization': `Bearer ${accessToken}`,
-        'Content-Type': 'application/json; charset=utf-8'
-      }
-    })
-    console.log(response.data.data)
-    return response.data.data.upload_url
+      {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json; charset=utf-8'
+        }
+      })
+      // console.log(response.data.data)
+      return response.data.data.upload_url
+    } else {
+      console.log('video too large to be uploaded in a singular chunk')
+    }
   }
 
   const uploadVideoToTikTok = async (uploadUrl, filePath) => {
@@ -239,17 +240,36 @@ const getAccessTokenAndOpenId = async (code) => {
     }
   }
 
-
-
-const upload = async () => {
+const readAndRefreshToken = async () => {
+  // read token file
   const tokens = readTokensFromFile('tiktokkeys.txt')
   console.log(tokens)
-  // queryCreatorInfo(tokens.access_token) 
-  const uploadUrl = await initializePostRequest(tokens.access_token, 'shorts\\ToputitinanutshellIwas.mp4')
-  await uploadVideoToTikTok(uploadUrl, 'shorts\\ToputitinanutshellIwas.mp4')
+  try {
+    const freshTokens = await refreshAccessToken(tokens.refresh_token)
+    const keyStrings = `accessToken: ${freshTokens.accessToken}  refreshToken: ${freshTokens.refreshToken}`
+    await writeTextToFile(keyStrings, 'tiktokkeys.txt')
+    console.log(`Wrote to file: ${keyStrings}`)
+  } catch (e) {
+    console.log(e)
+  }
 }
 
-upload()
+const uploadToTikTok = async (videoPath) => {
+  // refresh access token on the quicks
+  await readAndRefreshToken()
+  await sleep(5000)
+  const freshTokens = await readTokensFromFile('tiktokkeys.txt')
+  console.log(freshTokens)
+ 
+  const uploadUrl = await initializePostRequest(freshTokens.access_token, videoPath)
+  await uploadVideoToTikTok(uploadUrl, videoPath)
+}
+
+module.exports = {
+  uploadToTikTok
+}
+
+// upload('shorts\\ToputitinanutshellIwas.mp4')
 // app.listen(3455, () => {
 //     console.log('running')
 // })
