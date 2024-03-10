@@ -148,7 +148,7 @@ const writeTextToFile = (text, fileName) => {
         if (err) {
             console.error('Error writing to file:', err);
         } else {
-            console.log('Article has been written to', fileName);
+            console.log('Data has been written to', fileName);
         }
     });
 }
@@ -174,6 +174,34 @@ const readTokensFromFile = (filePath) => {
     }
 }
 
+const getVideoChunkInfo = (filePath) => {
+    try {
+        const stats = fs.statSync(filePath);
+        const fileSize = stats.size;
+        const chunkSize = 10000000; // You can adjust this as per your requirements
+        const totalChunkCount = Math.ceil(fileSize / chunkSize);
+
+        return {
+            file_size: fileSize,
+            total_chunk_count: totalChunkCount,
+            chunk_size: chunkSize
+        };
+    } catch (err) {
+        console.error('Error getting video info for TikTok:', err);
+        return null; // Return null if an error occurs
+    }
+}
+
+const getFileSizeInBytes = (filePath) => {
+    try {
+        const stats = fs.statSync(filePath);
+        return stats.size; // returns the size of the file in bytes
+    } catch (err) {
+        console.error('Error getting file size:', err);
+        return null; // return null if an error occurs
+    }
+}
+
 module.exports ={
     deleteFilesInDirectory, 
     getRandomMp4PathInDirectory,
@@ -188,5 +216,7 @@ module.exports ={
     deleteTempFiles,
     getMP3FileName,
     writeTextToFile,
-    readTokensFromFile
+    readTokensFromFile,
+    getVideoChunkInfo,
+    getFileSizeInBytes
 } 

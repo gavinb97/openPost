@@ -35,17 +35,22 @@ const stackVideos = async () => {
 }
 
 // TODO update aspect ratio
-const cutVideoToUnder60s = async (videoPath, outputPath) => {
+const cutVideoToUnder60s = async (videoPath) => {
+    const videoName = getMP3FileName(videoPath)
+    const outputPath = `shorts/${videoName}.mp4`
+    console.log(outputPath)
     ffmpeg(videoPath)
     .setStartTime('00:00:00')
     .setDuration(55)
-    .outputOptions('-vf', 'scale=-1:16/9')
+    .outputOptions('-vf', 'scale=ih*9/16:ih')
     .output(outputPath)
     .on('end', function(err) {
-        if (!err) { console.log('Conversion Done'); }
+        if (!err) { console.log('Video cut and aspect ratio set'); }
     })
     .on('error', err => console.log('Error: ', err))
     .run();
+
+    return outputPath
 }
 
 const getAudioDuration = (relativePath) => {
@@ -222,6 +227,7 @@ const addSubtitles = async (videoFilePath) => {
            console.log('done')
         })
 
+    return outputFileName
 }
 
 
@@ -312,14 +318,19 @@ const createVideoForEachAudioFile = async () => {
         console.log('sleeping whilst file is built...')
         await sleep(120000)
         console.log('okay its been a minute')
-        await addSubtitles(finalVideoPath)
+        const videoWithSubtitlePath = await addSubtitles(finalVideoPath)
         console.log('subtitles have been added!!')
+        await sleep(120000)
+
+        // Create short version
+        console.log('gonna create short version...')
+        await sleep(25000)
+        await cutVideoToUnder60s(videoWithSubtitlePath)
         await sleep(120000)
     }
     console.log('Deleting temporary files...')
     await deleteTempFiles()
 }
-
 
 module.exports = createVideoForEachAudioFile
 
