@@ -206,6 +206,10 @@ const sleep = async  (ms) => {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+const getRandomNumberOneToFifteen = () => {
+    return Math.floor(Math.random() * 15) + 1;
+}
+
 module.exports ={
     deleteFilesInDirectory, 
     getRandomMp4PathInDirectory,
@@ -223,5 +227,6 @@ module.exports ={
     readTokensFromFile,
     getVideoChunkInfo,
     getFileSizeInBytes,
-    sleep
+    sleep,
+    getRandomNumberOneToFifteen
 } 

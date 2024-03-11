@@ -180,7 +180,7 @@ const getAccessTokenAndOpenId = async (code) => {
     console.log(response.data.data)
   }
 
-  const initializePostRequest = async (accessToken, filePath) => {
+  const initializePostRequest = async (accessToken, filePath, videoTitle) => {
     let urlAccessToken = `https://open.tiktokapis.com/v2/post/publish/video/init/`;
 
     const videoSize = getFileSizeInBytes(filePath)
@@ -191,7 +191,7 @@ const getAccessTokenAndOpenId = async (code) => {
         post_info: {
             privacy_level: 'SELF_ONLY',
             // privacy_level: 'PUBLIC_TO_EVERYONE',
-            title: 'what the heckith',
+            title: videoTitle,
             disable_duet: false,
             disable_stitch: false,
             disable_comment: false,
@@ -221,8 +221,8 @@ const getAccessTokenAndOpenId = async (code) => {
 
   const uploadVideoToTikTok = async (uploadUrl, filePath) => {
     const url = uploadUrl
-
-    try {
+    if (url) {
+      try {
         const fileSize = getFileSizeInBytes(filePath);
 
         const response = await axios.put(url, fs.readFileSync(filePath), {
@@ -238,6 +238,10 @@ const getAccessTokenAndOpenId = async (code) => {
     } catch (error) {
         console.error('Error uploading video to TikTok:', error);
     }
+    } else {
+      console.log('No url generated, not able to upload to tiktok')
+    }
+    
   }
 
 const readAndRefreshToken = async () => {
@@ -254,15 +258,19 @@ const readAndRefreshToken = async () => {
   }
 }
 
-const uploadToTikTok = async (videoPath) => {
+const uploadToTikTok = async (videoPath, videoTitle) => {
   // refresh access token on the quicks
   await readAndRefreshToken()
   await sleep(5000)
   const freshTokens = await readTokensFromFile('tiktokkeys.txt')
   console.log(freshTokens)
- 
-  const uploadUrl = await initializePostRequest(freshTokens.access_token, videoPath)
+ try {
+  const uploadUrl = await initializePostRequest(freshTokens.access_token, videoPath, videoTitle)
   await uploadVideoToTikTok(uploadUrl, videoPath)
+ } catch (e) {
+   console.log('uploadToTikTok failed')
+ }
+  
 }
 
 module.exports = {

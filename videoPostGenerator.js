@@ -1,12 +1,11 @@
 const createVideoForEachAudioFile = require('./videoEditor')
 const redditToSpeech = require('./redditToSpeech')
 const {uploadAndTweet} = require('./tweet')
-const {getRandomMp4PathInDirectory, getFileName, deleteFile, isFolderNotEmpty, countFilesInDirectory, removeQuotes, removeSpecialCharacters} = require('./utils')
+const {getRandomMp4PathInDirectory, getFileName, deleteFile, isFolderNotEmpty, countFilesInDirectory, removeQuotes, removeSpecialCharacters, getRandomNumberOneToFifteen} = require('./utils')
 const createGPTClient = require('./gptClient')
 const {readTextFile} = require('./createSubtitles')
 const {createClientAndUpload} = require('./google')
 const {uploadToTikTok} = require('./tiktokauth')
-
 
 const createGPT = async () => {
     return await createGPTClient()
@@ -91,16 +90,33 @@ const postToYoutube = async (videoPath) => {
     // TODO upload shorts version with #shorts as description and same title using short video
 }
 
+const postToTikTok = async (videoPath) => {
+    const fileName = getFileName(videoPath)
+    const fileData = await readTextFile(`audioSubtitles/${fileName}.txt`)
+
+    const getRandomPartNumber = getRandomNumberOneToFifteen()
+    const gptString = await makeGptCall(`Give me a short title for this transcript: ${fileData}`, `Give me a description that is short, fun, using gen z and millenial esque language. I'll provide the transcript for you to write the description. Return a string under 100 characters, it should be very brief`)
+    const titleString = `Part ${getRandomPartNumber} ${gptString}  #fyp #story`
+    const cleanTitle = removeQuotes(titleString)
+    try {
+        await uploadToTikTok(videoPath, cleanTitle)
+    } catch (e) {
+        console.log('error uploading to tiktok')
+    }
+    
+}
+
 const postVideo = async () => {
     const path = getRandomMp4PathInDirectory('videosWithSubtitles/')
     // create and upload tweet
-    await createAndTweet(path)
+    // await createAndTweet(path)
 
     // post video to youtube
-    await postToYoutube(path)
+    // await postToYoutube(path)
 
     // post video to tiktok
-    await uploadToTikTok(path)
+    await postToTikTok(path)
+    
 }
 
 
