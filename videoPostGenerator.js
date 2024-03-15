@@ -109,13 +109,13 @@ const postToTikTok = async (videoPath) => {
 const postVideo = async () => {
     const path = getRandomMp4PathInDirectory('videosWithSubtitles/')
     // create and upload tweet
-    // await createAndTweet(path)
+    await createAndTweet(path)
 
     // post video to youtube
     // await postToYoutube(path)
 
     // post video to tiktok
-    await postToTikTok(path)
+    // await postToTikTok(path)
     
 }
 
@@ -163,6 +163,6 @@ const job = async () => {
     console.log('Starting auto post job...')
     await automaticallyPost()
 }
-postVideo()
+// postVideo()
 
-// job()
+job()
