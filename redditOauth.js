@@ -315,6 +315,30 @@ const base64ToBlob = (base64String) => {
     return blob;
 }
 
+const sendMessageToUser = async (accessToken, username, subject, message) => {
+    const endpoint = 'https://oauth.reddit.com/api/compose';
+
+    const formData = new FormData();
+    formData.append('api_type', 'json');
+    formData.append('to', username);
+    formData.append('subject', subject);
+    formData.append('text', message);
+
+    try {
+        const response = await axios.post(endpoint, formData, {
+            headers: {
+                'Authorization': `Bearer ${accessToken}`,
+                'User-Agent': 'web:bodycalc:v1.0 (by /u/BugResponsible9056)'
+            }
+        });
+        console.log('Message sent successfully:', response.data);
+        return response.data;
+    } catch (error) {
+        console.error('Error sending message:', error);
+        throw error;
+    }
+}
+
 const uploadAndPostImage = async (accessToken, filePath) => {
     const { uploadURL, fields, listenWSUrl } = await getImageUrl(accessToken, filePath )
     const fileData = fs.readFileSync(filePath);
@@ -338,8 +362,10 @@ const testy = async () => {
   
     // const modhash = await getModhash(tokens.access_token)
     // await uploadAndPostImage(tokens.access_token, 'gptImages\\ykpsg.png')
-    await getTopPostOfSubreddit('aitah', tokens.access_token)
-    await getUsersWhoCommentedOnPost('1bg5hy4', tokens.access_token)
+    // await getTopPostOfSubreddit('aitah', tokens.access_token)
+    // await getUsersWhoCommentedOnPost('1bg5hy4', tokens.access_token)
+
+    await sendMessageToUser(tokens.access_token, 'Helpful_Alarm2362', 'some subject', 'this is a message')
 }
 
 testy()
