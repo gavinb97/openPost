@@ -8,9 +8,11 @@ const cors = require('cors');
 const SHA256 = require('crypto-js/sha256')
 const {writeTextToFile, readTokensFromFile, getVideoChunkInfo, getFileSizeInBytes, sleep, generateRandomString} = require('./utils')
 const fs = require('fs');
+const path = require('path')
 app.use(cookieParser());
 app.use(cors());
 const btoa = require('btoa');
+const {XMLParser} = require('fast-xml-parser')
 
 const redditAccessTokenUrl = 'https://www.reddit.com/api/v1/access_token'
 const redirect_uri = 'https://moral-kindly-fly.ngrok-free.app/redditcallback/'
@@ -160,16 +162,16 @@ const getSubredditSubmissionText = async (subredditName, accessToken) => {
     }
 };
 
-const getImageUrl = async (subredditName, accessToken, imageUrl) => {
-    const endpoint = `https://oauth.reddit.com/r/${subredditName}/api/upload_sr_img`
+const getImageUrl = async ( accessToken, imageUrl) => {
+    const endpoint = `https://oauth.reddit.com/api/media/asset.json`
+
+    const bodyForm = new FormData()
+    bodyForm.append('filepath', imageUrl)
+    bodyForm.append('mimetype', 'image/png')
+
     const uploadResponse = await axios.post(
         endpoint,
-        {
-            name: 'choobywoubyblou', // Choose a name for your image
-            upload_type: 'img',
-            img_url: imageUrl,
-            r: subredditName, // Subreddit where you want to upload the image
-        },
+        bodyForm,
         {
             headers: {
                 'Authorization': `Bearer ${accessToken}`,
@@ -178,21 +180,76 @@ const getImageUrl = async (subredditName, accessToken, imageUrl) => {
         }
     );
 
-    return uploadResponse.data.img_src
+    try {
+        const uploadURL = `https:${uploadResponse.data.args.action}`
+        const fields = uploadResponse.data.args.fields
+        const listenWSUrl = uploadResponse.data.asset.websocket_url
+    
+        return { uploadURL, fields, listenWSUrl }
+      } catch(e) {
+        console.error('Reddit API response:', uploadResponse)
+      }
+    
+    
 }
+
+const uploadToAWS = async (uploadURL, fields, file, filename, accessToken) => {
+    const bodyForm = new FormData()
+    fields.forEach(field => bodyForm.append(...Object.values(field)))
+    bodyForm.append('file', file, filename)
+    const basicAuth = `Basic ${btoa(`${process.env.REDDIT_APP_ID}:${process.env.REDDIT_SECRET}`)}`
+    const uploadResponse = await axios.post(
+        uploadURL,
+        bodyForm,
+    );
+
+        console.log(uploadResponse.data)
+
+  try {
+    const parser = new XMLParser()
+    const xml = parser.parse(uploadResponse.data)
+    const encodedURL = xml.PostResponse.Location
+    if (!encodedURL) throw 'No URL returned'
+    const imageURL = decodeURIComponent(encodedURL)
+    console.log(imageURL)
+    return imageURL
+  } catch(e) {
+    console.error('CDN Response:', uploadResponse)
+  }
+}
+
+const getModhash = async (accessToken) => {
+    try {
+        const response = await axios.get('https://oauth.reddit.com/api/me.json', {
+            headers: {
+                'Authorization': `Bearer ${accessToken}`,
+                'User-Agent': 'web:bodycalc:v1.0 (by /u/BugResponsible9056)' 
+            }
+        });
+
+        // Extract the modhash from the response data
+        
+        const modhash = response.data.data.modhash || 'no modhash';
+
+        return modhash;
+    } catch (error) {
+        console.error('Error fetching modhash:', error);
+        throw error;
+    }
+};
 
 const postImageToSubreddit = async (subredditName, accessToken, imageUrl) => {
     const endpoint = `https://oauth.reddit.com/api/submit`;
+
+    const bodyForm = new FormData()
+    bodyForm.append('title', 'the title of the')
+    bodyForm.append('sr', subredditName)
+    bodyForm.append('kind', 'image')
+    bodyForm.append('text', 'some text for the post')
+    bodyForm.append('url', imageUrl)
+
     try {
-        const response = await axios.post(endpoint, 
-        {
-            sr: subredditName,
-            title: 'some title',
-            kind: "image",
-            nsfw: false,
-            text: 'some text',
-            file: imageUrl
-        }, 
+        const response = await axios.post(endpoint, bodyForm,
         {
             headers: {
                 'Authorization': `Bearer ${accessToken}`,
@@ -207,17 +264,41 @@ const postImageToSubreddit = async (subredditName, accessToken, imageUrl) => {
     }
 };
 
-const uploadAndPostImage = async (accessToken) => {
-    const uploadUrl = await getImageUrl('lsgshitpost', accessToken, 'gptImages\\ykpsg.png' )
-    console.log(uploadUrl)
-    // await postImageToSubreddit('lsgshitpost', accessToken, uploadUrl)
+const base64ToBlob = (base64String) => {
+    // Decode base64 string into a Buffer
+    const buffer = Buffer.from(base64String, 'base64');
+    
+    // Create a Blob from the Buffer
+    const blob = new Blob([buffer], { type: 'image/png' }); // Adjust the MIME type according to your file type
+
+    return blob;
+};
+
+const uploadAndPostImage = async (accessToken, filePath) => {
+    const { uploadURL, fields, listenWSUrl } = await getImageUrl(accessToken, filePath )
+    console.log(uploadURL)
+    const fileData = fs.readFileSync(filePath);
+
+    // // Encode the file data to a base64 string
+    const base64String = fileData.toString('base64');
+    const file = base64ToBlob(base64String) 
+
+    const fileName = path.basename(base64String)
+
+    const imageUrl = await uploadToAWS(uploadURL, fields, file, fileName, accessToken )
+    console.log('image uploaded')
+    console.log(imageUrl)
+    console.log('sleeping while image is uploaded')
+    // await sleep(10000)
+    await postImageToSubreddit('r/lsgshitpost', accessToken, imageUrl)
 }
 
 const testy = async () => {
     const tokens = readTokensFromFile('redditKeys.txt')
     console.log(tokens)
-    await uploadAndPostImage(tokens.access_token)
-    // await getSubredditSubmissionText('AITAH', tokens.access_token)
+  
+    // const modhash = await getModhash(tokens.access_token)
+    await uploadAndPostImage(tokens.access_token, 'gptImages\\ykpsg.png')
 }
 
 testy()
