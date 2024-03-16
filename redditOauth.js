@@ -6,7 +6,7 @@ const fetch = require('node-fetch');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const SHA256 = require('crypto-js/sha256')
-const {writeTextToFile, readTokensFromFile, getVideoChunkInfo, getFileSizeInBytes, sleep, generateRandomString} = require('./utils')
+const {writeTextToFile, readTokensFromFile, sleep, generateRandomString, seeIfFileExists} = require('./utils')
 const fs = require('fs');
 const path = require('path')
 app.use(cookieParser());
@@ -19,9 +19,6 @@ const redirect_uri = 'https://moral-kindly-fly.ngrok-free.app/redditcallback/'
 const scopeSring = 'identity submit subscribe privatemessages edit mysubreddits read save'
 const stateString = generateRandomString(69)
 const loginUrl = `https://www.reddit.com/api/v1/authorize?client_id=${process.env.REDDIT_APP_ID}&response_type=code&state=${stateString}&redirect_uri=${redirect_uri}&duration=permanent&scope=${scopeSring}`
-console.log(loginUrl)
-
-
 
 app.get('/redditcallback', async (req, res) => {
     console.log('hitting the callback ooh wee')
@@ -35,6 +32,14 @@ app.get('/redditcallback', async (req, res) => {
 
     res.redirect('https://google.com');
 })
+
+// if we dont have keys, provide url for auth
+if (!seeIfFileExists('redditKeys.txt')) {
+    console.log(loginUrl)
+    app.listen(3455, () => {
+    console.log('running')
+    })
+}
 
 // returns array of subreddit names
 const extractSubbredditList = async (subredditResponse) => {
@@ -339,7 +344,48 @@ const sendMessageToUser = async (accessToken, username, subject, message) => {
     }
 }
 
+// const sendMessageWithImage = async (username, accessToken, message, subject, imageUrl) => {
+//     const endpoint = 'https://oauth.reddit.com/api/compose';
+//     try {
+//         // Read image file
+//         // const imageFile = fs.readFileSync(imageFilePath);
+
+//         // const base64String = imageFile.toString('base64');
+//         // const file = base64ToBlob(base64String) 
+        
+//         // Create form data
+//         const formData = new FormData();
+//         formData.append('api_type', 'json');
+//         formData.append('to', username);
+//         formData.append('subject', subject);
+//         formData.append('text', `${message}\n\n${imageUrl}`)
+//         // formData.append('file', file, { filename: 'ykpsg_11zon.png', mimetype: 'image/png' }); // Adjust filename and MIME type
+        
+//         // Make POST request
+//         const response = await axios.post(endpoint, formData, {
+//             headers: {
+//                 'Authorization': `Bearer ${accessToken}`,
+//                 'User-Agent': 'web:bodycalc:v1.0 (by /u/BugResponsible9056)'
+//             }
+//         });
+
+//         console.log('Message sent:', response.data);
+//         return response.data;
+//     } catch (error) {
+//         console.error('Error sending message:', error);
+//         throw error;
+//     }
+// }
+
 const uploadAndPostImage = async (accessToken, filePath) => {
+    const imageUrl = uploadImage(accessToken, filePath)
+   
+    const postToRedditResponse = await postImageToSubreddit('r/lsgshitpost', accessToken, imageUrl, 'gooblydoukleyubneydo', 'thisis the silly text')
+
+    console.log((postImageToSubreddit) ? 'reddit post created successfully' : 'shit got fucked')
+}
+
+const uploadImage = async (accessToken, filePath) => {
     const { uploadURL, fields, listenWSUrl } = await getImageUrl(accessToken, filePath )
     const fileData = fs.readFileSync(filePath);
 
@@ -350,10 +396,7 @@ const uploadAndPostImage = async (accessToken, filePath) => {
     const fileName = path.basename(base64String)
 
     const imageUrl = await uploadToAWS(uploadURL, fields, file, fileName, accessToken )
-   
-    const postToRedditResponse = await postImageToSubreddit('r/lsgshitpost', accessToken, imageUrl, 'gooblydoukleyubneydo', 'thisis the silly text')
-
-    console.log((postImageToSubreddit) ? 'reddit post created successfully' : 'shit got fucked')
+    return imageUrl
 }
 
 const testy = async () => {
@@ -365,11 +408,11 @@ const testy = async () => {
     // await getTopPostOfSubreddit('aitah', tokens.access_token)
     // await getUsersWhoCommentedOnPost('1bg5hy4', tokens.access_token)
 
-    await sendMessageToUser(tokens.access_token, 'Helpful_Alarm2362', 'some subject', 'this is a message')
+    // await sendMessageToUser(tokens.access_token, 'Helpful_Alarm2362', 'some subject', 'this is a message')
+    const url = await uploadImage(tokens.access_token, 'gptImages\\ykpsg_11zon.png')
+    await sendMessageWithImage('Helpful_Alarm2362', tokens.access_token, 'some meee', 'subjec', url)
 }
 
 testy()
 
-app.listen(3455, () => {
-    console.log('running')
-})
+
