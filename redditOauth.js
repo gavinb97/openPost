@@ -377,14 +377,6 @@ const sendMessageToUser = async (accessToken, username, subject, message) => {
 //     }
 // }
 
-const uploadAndPostImage = async (accessToken, filePath) => {
-    const imageUrl = uploadImage(accessToken, filePath)
-   
-    const postToRedditResponse = await postImageToSubreddit('r/lsgshitpost', accessToken, imageUrl, 'gooblydoukleyubneydo', 'thisis the silly text')
-
-    console.log((postImageToSubreddit) ? 'reddit post created successfully' : 'shit got fucked')
-}
-
 const uploadImage = async (accessToken, filePath) => {
     const { uploadURL, fields, listenWSUrl } = await getImageUrl(accessToken, filePath )
     const fileData = fs.readFileSync(filePath);
@@ -399,18 +391,29 @@ const uploadImage = async (accessToken, filePath) => {
     return imageUrl
 }
 
+
+const uploadAndPostImage = async (accessToken, filePath) => {
+    const imageUrl = await uploadImage(accessToken, filePath)
+   
+    const postToRedditResponse = await postImageToSubreddit('r/lsgshitpost', accessToken, imageUrl, 'gooblydoukleydafsdfubneydo', 'thisis thadfadfe silly text')
+
+    console.log((postToRedditResponse) ? 'reddit post created successfully' : 'shit got fucked')
+}
+
+
+
 const testy = async () => {
     const tokens = readTokensFromFile('redditKeys.txt')
     console.log(tokens)
   
     // const modhash = await getModhash(tokens.access_token)
-    // await uploadAndPostImage(tokens.access_token, 'gptImages\\ykpsg.png')
+    await uploadAndPostImage(tokens.access_token, 'gptImages\\ykpsg_11zon.png')
     // await getTopPostOfSubreddit('aitah', tokens.access_token)
     // await getUsersWhoCommentedOnPost('1bg5hy4', tokens.access_token)
 
     // await sendMessageToUser(tokens.access_token, 'Helpful_Alarm2362', 'some subject', 'this is a message')
-    const url = await uploadImage(tokens.access_token, 'gptImages\\ykpsg_11zon.png')
-    await sendMessageWithImage('Helpful_Alarm2362', tokens.access_token, 'some meee', 'subjec', url)
+    // const url = await uploadImage(tokens.access_token, 'gptImages\\ykpsg_11zon.png')
+    // await sendMessageWithImage('Helpful_Alarm2362', tokens.access_token, 'some meee', 'subjec', url)
 }
 
 testy()
