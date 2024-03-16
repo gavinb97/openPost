@@ -197,13 +197,11 @@ const uploadToAWS = async (uploadURL, fields, file, filename, accessToken) => {
     const bodyForm = new FormData()
     fields.forEach(field => bodyForm.append(...Object.values(field)))
     bodyForm.append('file', file, filename)
-    const basicAuth = `Basic ${btoa(`${process.env.REDDIT_APP_ID}:${process.env.REDDIT_SECRET}`)}`
+  
     const uploadResponse = await axios.post(
         uploadURL,
         bodyForm,
     );
-
-        console.log(uploadResponse.data)
 
   try {
     const parser = new XMLParser()
@@ -263,6 +261,50 @@ const postImageToSubreddit = async (subredditName, accessToken, imageUrl, title,
     }
 };
 
+const getTopPostOfSubreddit = async (subredditName, accessToken) => {
+    const endpoint = `https://oauth.reddit.com/r/${subredditName}/top.json?limit=1`;
+    try {
+        const response = await axios.get(endpoint, {
+            headers: {
+                'Authorization': `Bearer ${accessToken}`,
+                'User-Agent': 'web:bodycalc:v1.0 (by /u/BugResponsible9056)'
+            }
+        });
+        // console.log(response.data.data.children[0].data)
+        return response.data.data.children[0].data; // Return the top post object
+    } catch (error) {
+        console.error('Error fetching top post of subreddit:', error);
+        throw error;
+    }
+}
+
+const getAuthorsOfComments = (commentsData) => {
+    const authors = commentsData.map(comment => comment.data.author);
+    return authors;
+};
+
+// returns array of strings with all the users
+const getUsersWhoCommentedOnPost = async (postId, accessToken) => {
+    const endpoint = `https://oauth.reddit.com/comments/${postId}.json`;
+    try {
+        const response = await axios.get(endpoint, {
+            headers: {
+                'Authorization': `Bearer ${accessToken}`,
+                'User-Agent': 'web:bodycalc:v1.0 (by /u/BugResponsible9056)'
+            }
+        });
+       
+        const arrayOfAuthors = getAuthorsOfComments(response.data[1].data.children)
+        const cleanArrayOfAuthors = arrayOfAuthors.filter(item => item !== undefined);
+        console.log(cleanArrayOfAuthors)
+        // console.log(response.data[1].data)
+        return cleanArrayOfAuthors
+    } catch (error) {
+        console.error('Error fetching comments of post:', error);
+        throw error;
+    }
+};
+
 const base64ToBlob = (base64String) => {
     // Decode base64 string into a Buffer
     const buffer = Buffer.from(base64String, 'base64');
@@ -271,7 +313,7 @@ const base64ToBlob = (base64String) => {
     const blob = new Blob([buffer], { type: 'image/png' }); // Adjust the MIME type according to your file type
 
     return blob;
-};
+}
 
 const uploadAndPostImage = async (accessToken, filePath) => {
     const { uploadURL, fields, listenWSUrl } = await getImageUrl(accessToken, filePath )
@@ -295,7 +337,9 @@ const testy = async () => {
     console.log(tokens)
   
     // const modhash = await getModhash(tokens.access_token)
-    await uploadAndPostImage(tokens.access_token, 'gptImages\\ykpsg.png')
+    // await uploadAndPostImage(tokens.access_token, 'gptImages\\ykpsg.png')
+    await getTopPostOfSubreddit('aitah', tokens.access_token)
+    await getUsersWhoCommentedOnPost('1bg5hy4', tokens.access_token)
 }
 
 testy()
