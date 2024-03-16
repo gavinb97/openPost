@@ -211,7 +211,7 @@ const uploadToAWS = async (uploadURL, fields, file, filename, accessToken) => {
     const encodedURL = xml.PostResponse.Location
     if (!encodedURL) throw 'No URL returned'
     const imageURL = decodeURIComponent(encodedURL)
-    console.log(imageURL)
+
     return imageURL
   } catch(e) {
     console.error('CDN Response:', uploadResponse)
@@ -238,14 +238,14 @@ const getModhash = async (accessToken) => {
     }
 };
 
-const postImageToSubreddit = async (subredditName, accessToken, imageUrl) => {
+const postImageToSubreddit = async (subredditName, accessToken, imageUrl, title, text) => {
     const endpoint = `https://oauth.reddit.com/api/submit`;
 
     const bodyForm = new FormData()
-    bodyForm.append('title', 'the title of the')
+    bodyForm.append('title', title)
     bodyForm.append('sr', subredditName)
     bodyForm.append('kind', 'image')
-    bodyForm.append('text', 'some text for the post')
+    bodyForm.append('text', text)
     bodyForm.append('url', imageUrl)
 
     try {
@@ -256,8 +256,7 @@ const postImageToSubreddit = async (subredditName, accessToken, imageUrl) => {
                 'User-Agent': 'web:bodycalc:v1.0 (by /u/BugResponsible9056)'
             }
         });
-        console.log(response.data)
-        // return response.data;
+        return response.data;
     } catch (error) {
         console.error('Error fetching subreddit post requirements:', error);
         throw error;
@@ -276,7 +275,6 @@ const base64ToBlob = (base64String) => {
 
 const uploadAndPostImage = async (accessToken, filePath) => {
     const { uploadURL, fields, listenWSUrl } = await getImageUrl(accessToken, filePath )
-    console.log(uploadURL)
     const fileData = fs.readFileSync(filePath);
 
     // // Encode the file data to a base64 string
@@ -286,11 +284,10 @@ const uploadAndPostImage = async (accessToken, filePath) => {
     const fileName = path.basename(base64String)
 
     const imageUrl = await uploadToAWS(uploadURL, fields, file, fileName, accessToken )
-    console.log('image uploaded')
-    console.log(imageUrl)
-    console.log('sleeping while image is uploaded')
-    // await sleep(10000)
-    await postImageToSubreddit('r/lsgshitpost', accessToken, imageUrl)
+   
+    const postToRedditResponse = await postImageToSubreddit('r/lsgshitpost', accessToken, imageUrl, 'gooblydoukleyubneydo', 'thisis the silly text')
+
+    console.log((postImageToSubreddit) ? 'reddit post created successfully' : 'shit got fucked')
 }
 
 const testy = async () => {
