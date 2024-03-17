@@ -227,6 +227,34 @@ const writeArrayToJsonFile = (array, filename) => {
     console.log(`Array has been written to ${filename}`);
 }
 
+const appendOrWriteToJsonFile = (filename, newJsonObject) => {
+    let dataToWrite = '';
+    let existingJsonArray = [];
+
+    // Check if the file exists
+    if (fs.existsSync(filename)) {
+        // Read existing data from file
+        const existingData = fs.readFileSync(filename, 'utf8').trim();
+
+        // Parse existing data if it's not empty
+        if (existingData !== '') {
+            existingJsonArray = JSON.parse(existingData);
+        }
+    }
+
+    // Push new JSON object to the existing array
+    existingJsonArray.push(newJsonObject);
+
+    // Prepare data to write
+    dataToWrite = JSON.stringify(existingJsonArray, null, 2);
+
+    // Write data to file
+    fs.writeFileSync(filename, dataToWrite);
+
+    console.log(`Data has been written to ${filename}`);
+}
+
+
 module.exports ={
     deleteFilesInDirectory, 
     getRandomMp4PathInDirectory,
@@ -247,5 +275,6 @@ module.exports ={
     sleep,
     getRandomNumberOneToFifteen,
     generateRandomString,
-    writeArrayToJsonFile
+    writeArrayToJsonFile,
+    appendOrWriteToJsonFile
 } 

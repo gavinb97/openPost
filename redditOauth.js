@@ -6,7 +6,7 @@ const fetch = require('node-fetch');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const SHA256 = require('crypto-js/sha256')
-const {writeTextToFile, readTokensFromFile, sleep, generateRandomString, seeIfFileExists, writeArrayToJsonFile} = require('./utils')
+const {writeTextToFile, readTokensFromFile, sleep, generateRandomString, seeIfFileExists, writeArrayToJsonFile, appendOrWriteToJsonFile} = require('./utils')
 const fs = require('fs');
 const path = require('path')
 app.use(cookieParser());
@@ -289,8 +289,9 @@ const extractPostIdsFromRedditPosts = async (subredditResponse) => {
     return subredditResponse.map(child => child.data.id);
 }
 
-const getTop15PostsOfSubreddit = async (subredditName, accessToken) => {
-    const endpoint = `https://oauth.reddit.com/r/${subredditName}/top.json?limit=150`;
+const getTopPostsOfSubreddit = async (subredditName, accessToken, limit) => {
+
+    const endpoint = `https://oauth.reddit.com/r/${subredditName}/top.json?limit=${limit}`;
     try {
         const response = await axios.get(endpoint, {
             headers: {
@@ -423,6 +424,23 @@ const uploadAndPostImage = async (accessToken, filePath) => {
     console.log((postToRedditResponse) ? 'reddit post created successfully' : 'shit got fucked')
 }
 
+const getUsersAndWriteToFile = async (subreddit, tokens, numberOfPosts) => {
+    const arrayOfPostIds = await getTopPostsOfSubreddit(subreddit , tokens.access_token, numberOfPosts)
+    const userArray = []
+    for (postId of arrayOfPostIds) {
+        const arrayOfUsers = await getUsersWhoCommentedOnPost(postId, tokens.access_token)
+        console.log(arrayOfUsers)
+        userArray.push(...arrayOfUsers)
+    }
+    
+   const usersBySR = {
+    subredditName: subreddit,
+    arrayOfUsers: userArray
+   }
+    // writeArrayToJsonFile(usersBySR, 'redditUsers.json')
+
+    appendOrWriteToJsonFile('redditUsers.json', usersBySR)
+}
 
 
 const testy = async () => {
@@ -437,18 +455,7 @@ const testy = async () => {
     // await sendMessageToUser(tokens.access_token, 'Helpful_Alarm2362', 'some subject', 'this is a message')
     // const url = await uploadImage(tokens.access_token, 'gptImages\\ykpsg_11zon.png')
     // await sendMessageWithImage('Helpful_Alarm2362', tokens.access_token, 'some meee', 'subjec', url)
-    const arrayOfPostIds = await getTop15PostsOfSubreddit('aitah' , tokens.access_token)
-    const userArray = []
-    for (postId of arrayOfPostIds) {
-        const arrayOfUsers = await getUsersWhoCommentedOnPost(postId, tokens.access_token)
-        console.log(arrayOfUsers)
-        userArray.push(...arrayOfUsers)
-    }
-    await sleep(10000)
-    console.log(userArray.length)
-    console.log('length')
-    console.log(userArray)
-    writeArrayToJsonFile(userArray, 'redditUsers.json')
+    await getUsersAndWriteToFile('aitah', tokens, 1)
 }
 
 testy()
