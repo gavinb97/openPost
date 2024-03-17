@@ -416,10 +416,10 @@ const uploadImage = async (accessToken, filePath) => {
 }
 
 
-const uploadAndPostImage = async (accessToken, filePath) => {
+const uploadAndPostImage = async (accessToken, filePath, subredditName, title, text) => {
     const imageUrl = await uploadImage(accessToken, filePath)
-   
-    const postToRedditResponse = await postImageToSubreddit('r/lsgshitpost', accessToken, imageUrl, 'gooblydoukleydafsdfubneydo', 'thisis thadfadfe silly text')
+   // this takes an r/subreddit not just the name
+    const postToRedditResponse = await postImageToSubreddit(`r/${subredditName}`, accessToken, imageUrl, title, text)
 
     console.log((postToRedditResponse) ? 'reddit post created successfully' : 'shit got fucked')
 }
@@ -437,7 +437,6 @@ const getUsersAndWriteToFile = async (subreddit, tokens, numberOfPosts) => {
     subredditName: subreddit,
     arrayOfUsers: userArray
    }
-    // writeArrayToJsonFile(usersBySR, 'redditUsers.json')
 
     appendOrWriteToJsonFile('redditUsers.json', usersBySR)
 }
