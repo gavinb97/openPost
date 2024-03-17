@@ -290,23 +290,56 @@ const extractPostIdsFromRedditPosts = async (subredditResponse) => {
 }
 
 const getTopPostsOfSubreddit = async (subredditName, accessToken, limit) => {
+    let idArray = [];
 
-    const endpoint = `https://oauth.reddit.com/r/${subredditName}/top.json?limit=${limit}`;
-    try {
-        const response = await axios.get(endpoint, {
-            headers: {
+    if (limit > 100) {
+        let remainingLimit = limit;
+        let after = null;
+
+        while (remainingLimit > 0) {
+            const chunkSize = Math.min(remainingLimit, 100);
+            const endpoint = `https://oauth.reddit.com/r/${subredditName}/top.json?limit=${chunkSize}${after ? `&after=${after}` : ''}`;
+
+            try {
+                const response = await axios.get(endpoint, {
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`,
+                        'User-Agent': 'web:bodycalc:v1.0 (by /u/BugResponsible9056)'
+                    }
+                });
+
+                const chunkIds = await extractPostIdsFromRedditPosts(response.data.data.children);
+                idArray = idArray.concat(chunkIds);
+
+                // Update the 'after' parameter for pagination
+                after = response.data.data.after;
+                remainingLimit -= chunkSize;
+            } catch (error) {
+                console.error('Error fetching top post of subreddit:', error);
+                throw error;
+            }
+        }
+    } else {
+        const endpoint = `https://oauth.reddit.com/r/${subredditName}/top.json?limit=${limit}`;
+
+        try {
+            const response = await axios.get(endpoint, {
+                headers: {
                 'Authorization': `Bearer ${accessToken}`,
                 'User-Agent': 'web:bodycalc:v1.0 (by /u/BugResponsible9056)'
-            }
-        });
-        // console.log(response.data.data.children[0].data)
-        const idArray = await extractPostIdsFromRedditPosts(response.data.data.children)
+                }
+            });
+            // console.log(response.data.data.children[0].data)
+             idArray = await extractPostIdsFromRedditPosts(response.data.data.children)
         
-        return idArray; 
-    } catch (error) {
+            // return idArray; 
+        } catch (error) {
         console.error('Error fetching top post of subreddit:', error);
         throw error;
+        }
     }
+
+    return idArray
 }
 
 const getAuthorsOfComments = (commentsData) => {
@@ -401,6 +434,30 @@ const sendMessageToUser = async (accessToken, username, subject, message) => {
 //     }
 // }
 
+// takes an array of subreddit strings
+const getUsernamesFromFileBySubreddit = (filename, subredditNames) => {
+    // Read the JSON file
+    const jsonData = JSON.parse(fs.readFileSync(filename, 'utf8'));
+
+    // Initialize an empty array to store the combined usernames
+    const combinedUsernames = [];
+
+    // Iterate over the subreddit names
+    subredditNames.forEach(subredditName => {
+        // Find the subreddit object with the current name
+        const subreddit = jsonData.find(obj => obj.subredditName === subredditName);
+
+        // If subreddit is found, concatenate its usernames to the combinedUsernames array
+        if (subreddit && subreddit.arrayOfUsers) {
+            combinedUsernames.push(...subreddit.arrayOfUsers);
+        }
+    });
+
+    // Log and return the combined usernames array
+    console.log(combinedUsernames);
+    return combinedUsernames;
+}
+
 const uploadImage = async (accessToken, filePath) => {
     const { uploadURL, fields, listenWSUrl } = await getImageUrl(accessToken, filePath )
     const fileData = fs.readFileSync(filePath);
@@ -424,21 +481,101 @@ const uploadAndPostImage = async (accessToken, filePath, subredditName, title, t
     console.log((postToRedditResponse) ? 'reddit post created successfully' : 'shit got fucked')
 }
 
+const getSubredditNamesFromFile = (filename) => {
+    // Read the JSON file
+    const jsonData = JSON.parse(fs.readFileSync(filename, 'utf8'));
+
+    // Extract subreddit names from each object
+    const subredditNames = jsonData.map(obj => obj.subredditName);
+
+    // Return the array of subreddit names
+    return subredditNames;
+}
+
+const extractOriginalPostersFromRedditPosts = (posts) => {
+    return posts.map(post => post.data.author);
+}
+
+const getSubredditPosters = async (subredditName, accessToken, limit) => {
+    let posterArray = [];
+
+    if (limit > 100) {
+        let remainingLimit = limit;
+        let after = null;
+
+        while (remainingLimit > 0) {
+            const chunkSize = Math.min(remainingLimit, 100);
+            const endpoint = `https://oauth.reddit.com/r/${subredditName}/new.json?limit=${chunkSize}${after ? `&after=${after}` : ''}`;
+
+            try {
+                const response = await axios.get(endpoint, {
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`,
+                        'User-Agent': 'web:bodycalc:v1.0 (by /u/BugResponsible9056)'
+                    }
+                });
+
+                const chunkPosters = extractOriginalPostersFromRedditPosts(response.data.data.children);
+                posterArray = posterArray.concat(chunkPosters);
+
+                // Update the 'after' parameter for pagination
+                after = response.data.data.after;
+                remainingLimit -= chunkSize;
+            } catch (error) {
+                console.error('Error fetching original posters of new posts:', error);
+                throw error;
+            }
+        }
+    } else {
+        const endpoint = `https://oauth.reddit.com/r/${subredditName}/new.json?limit=${limit}`;
+
+        try {
+            const response = await axios.get(endpoint, {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`,
+                    'User-Agent': 'web:bodycalc:v1.0 (by /u/BugResponsible9056)'
+                }
+            });
+
+            posterArray = extractOriginalPostersFromRedditPosts(response.data.data.children);
+        } catch (error) {
+            console.error('Error fetching original posters of new posts:', error);
+            throw error;
+        }
+    }
+
+    return posterArray;
+}
+
 const getUsersAndWriteToFile = async (subreddit, tokens, numberOfPosts) => {
     const arrayOfPostIds = await getTopPostsOfSubreddit(subreddit , tokens.access_token, numberOfPosts)
     const userArray = []
+    
     for (postId of arrayOfPostIds) {
         const arrayOfUsers = await getUsersWhoCommentedOnPost(postId, tokens.access_token)
         console.log(arrayOfUsers)
         userArray.push(...arrayOfUsers)
     }
-    
+    console.log(arrayOfPostIds.length)
+    console.log(userArray.length)
    const usersBySR = {
     subredditName: subreddit,
     arrayOfUsers: userArray
    }
 
-    appendOrWriteToJsonFile('redditUsers.json', usersBySR)
+    appendOrWriteToJsonFile('redditCommenters.json', usersBySR)
+}
+
+
+const getPostersAndWriteToFile = async (subreddit, tokens, numberOfPosts) => {
+    const postersArray = await getSubredditPosters(subreddit, tokens.access_token, numberOfPosts)
+
+    const postersBySubreddit = {
+        subredditName: subreddit,
+        arrayOfUsers: postersArray
+       }
+
+       appendOrWriteToJsonFile('redditPosters.json', postersBySubreddit)
 }
 
 
@@ -454,7 +591,14 @@ const testy = async () => {
     // await sendMessageToUser(tokens.access_token, 'Helpful_Alarm2362', 'some subject', 'this is a message')
     // const url = await uploadImage(tokens.access_token, 'gptImages\\ykpsg_11zon.png')
     // await sendMessageWithImage('Helpful_Alarm2362', tokens.access_token, 'some meee', 'subjec', url)
-    await getUsersAndWriteToFile('aitah', tokens, 1)
+    // await getUsersAndWriteToFile('Onlyfans101', tokens, 4)
+    // const postersArray = await getSubredditPosters('Onlyfans101', tokens.access_token, 5)
+    // console.log(postersArray)
+    // await getPostersAndWriteToFile('DaughterTraining', tokens, 600)
+
+    // getUsernamesFromFileBySubreddit('redditPosters.json', ['onlyfans101', 'DaughterTraining'])
+
+    console.log(getSubredditNamesFromFile('redditPosters.json'))
 }
 
 testy()
