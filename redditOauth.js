@@ -6,7 +6,7 @@ const fetch = require('node-fetch');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const SHA256 = require('crypto-js/sha256')
-const {writeTextToFile, readTokensFromFile, sleep, generateRandomString, seeIfFileExists} = require('./utils')
+const {writeTextToFile, readTokensFromFile, sleep, generateRandomString, seeIfFileExists, writeArrayToJsonFile} = require('./utils')
 const fs = require('fs');
 const path = require('path')
 app.use(cookieParser());
@@ -19,6 +19,8 @@ const redirect_uri = 'https://moral-kindly-fly.ngrok-free.app/redditcallback/'
 const scopeSring = 'identity submit subscribe privatemessages edit mysubreddits read save'
 const stateString = generateRandomString(69)
 const loginUrl = `https://www.reddit.com/api/v1/authorize?client_id=${process.env.REDDIT_APP_ID}&response_type=code&state=${stateString}&redirect_uri=${redirect_uri}&duration=permanent&scope=${scopeSring}`
+console.log(loginUrl)
+
 
 app.get('/redditcallback', async (req, res) => {
     console.log('hitting the callback ooh wee')
@@ -283,6 +285,29 @@ const getTopPostOfSubreddit = async (subredditName, accessToken) => {
     }
 }
 
+const extractPostIdsFromRedditPosts = async (subredditResponse) => {
+    return subredditResponse.map(child => child.data.id);
+}
+
+const getTop15PostsOfSubreddit = async (subredditName, accessToken) => {
+    const endpoint = `https://oauth.reddit.com/r/${subredditName}/top.json?limit=150`;
+    try {
+        const response = await axios.get(endpoint, {
+            headers: {
+                'Authorization': `Bearer ${accessToken}`,
+                'User-Agent': 'web:bodycalc:v1.0 (by /u/BugResponsible9056)'
+            }
+        });
+        // console.log(response.data.data.children[0].data)
+        const idArray = await extractPostIdsFromRedditPosts(response.data.data.children)
+        
+        return idArray; 
+    } catch (error) {
+        console.error('Error fetching top post of subreddit:', error);
+        throw error;
+    }
+}
+
 const getAuthorsOfComments = (commentsData) => {
     const authors = commentsData.map(comment => comment.data.author);
     return authors;
@@ -301,8 +326,6 @@ const getUsersWhoCommentedOnPost = async (postId, accessToken) => {
        
         const arrayOfAuthors = getAuthorsOfComments(response.data[1].data.children)
         const cleanArrayOfAuthors = arrayOfAuthors.filter(item => item !== undefined);
-        console.log(cleanArrayOfAuthors)
-        // console.log(response.data[1].data)
         return cleanArrayOfAuthors
     } catch (error) {
         console.error('Error fetching comments of post:', error);
@@ -407,13 +430,25 @@ const testy = async () => {
     console.log(tokens)
   
     // const modhash = await getModhash(tokens.access_token)
-    await uploadAndPostImage(tokens.access_token, 'gptImages\\ykpsg_11zon.png')
+    // await uploadAndPostImage(tokens.access_token, 'gptImages\\ykpsg_11zon.png')
     // await getTopPostOfSubreddit('aitah', tokens.access_token)
     // await getUsersWhoCommentedOnPost('1bg5hy4', tokens.access_token)
 
     // await sendMessageToUser(tokens.access_token, 'Helpful_Alarm2362', 'some subject', 'this is a message')
     // const url = await uploadImage(tokens.access_token, 'gptImages\\ykpsg_11zon.png')
     // await sendMessageWithImage('Helpful_Alarm2362', tokens.access_token, 'some meee', 'subjec', url)
+    const arrayOfPostIds = await getTop15PostsOfSubreddit('aitah' , tokens.access_token)
+    const userArray = []
+    for (postId of arrayOfPostIds) {
+        const arrayOfUsers = await getUsersWhoCommentedOnPost(postId, tokens.access_token)
+        console.log(arrayOfUsers)
+        userArray.push(...arrayOfUsers)
+    }
+    await sleep(10000)
+    console.log(userArray.length)
+    console.log('length')
+    console.log(userArray)
+    writeArrayToJsonFile(userArray, 'redditUsers.json')
 }
 
 testy()

@@ -220,6 +220,13 @@ const generateRandomString = (length) => {
     return result;
 }
 
+const writeArrayToJsonFile = (array, filename) => {
+    const jsonData = JSON.stringify(array, null, 2); // Convert array to JSON string with indentation
+
+    fs.writeFileSync(filename, jsonData); // Write JSON string to file
+    console.log(`Array has been written to ${filename}`);
+}
+
 module.exports ={
     deleteFilesInDirectory, 
     getRandomMp4PathInDirectory,
@@ -239,5 +246,6 @@ module.exports ={
     getFileSizeInBytes,
     sleep,
     getRandomNumberOneToFifteen,
-    generateRandomString
+    generateRandomString,
+    writeArrayToJsonFile
 } 
