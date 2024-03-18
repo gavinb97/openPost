@@ -94,23 +94,36 @@ const refreshToken = async (refreshToken) => {
 }
 
 const getSubreddits = async (accessToken) => {
-    const getSubredditsUrl = 'https://oauth.reddit.com/subreddits/mine/subscriber'
-    try {
-       
-        const response = await axios.get(getSubredditsUrl, {
-            headers: {
-                'Authorization': `Bearer ${accessToken}`,
-                'User-Agent': 'web:bodycalc:v1.0 (by /u/BugResponsible9056)'
-            }
-        });
-        
-        const subredditArray = await extractSubbredditList(response.data.data)
-        return subredditArray
+    let after = ''; // Initialize the 'after' parameter for pagination
+    const subredditArray = []; // Array to store subreddit names
 
-    } catch (e) {
-        // console.log(e.response.data);
-        console.log('fucked fucked')
-        throw e; // Re-throwing the error for handling in the caller
+    try {
+        // Make requests until all subreddits are fetched
+        while (true) {
+            const getSubredditsUrl = `https://oauth.reddit.com/subreddits/mine/subscriber?limit=100&after=${after}`;
+            const response = await axios.get(getSubredditsUrl, {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`,
+                    'User-Agent': 'web:bodycalc:v1.0 (by /u/BugResponsible9056)'
+                }
+            });
+
+            // Extract subreddit names from the current response
+            const subreddits = await extractSubbredditList(response.data.data);
+            subredditArray.push(...subreddits);
+
+            // Check if there are more subreddits to fetch
+            if (response.data.data.after) {
+                after = response.data.data.after; // Update the 'after' parameter for the next request
+            } else {
+                break; // Break the loop if there are no more subreddits
+            }
+        }
+
+        return subredditArray;
+    } catch (error) {
+        console.error('Error fetching subreddits:', error);
+        throw error;
     }
 }
 
@@ -598,7 +611,11 @@ const testy = async () => {
 
     // getUsernamesFromFileBySubreddit('redditPosters.json', ['onlyfans101', 'DaughterTraining'])
 
-    console.log(getSubredditNamesFromFile('redditPosters.json'))
+    // console.log(getSubredditNamesFromFile('redditCommenters.json'))
+
+    const subbredditsIsubscribeto = await getSubreddits(tokens.access_token)
+    console.log(subbredditsIsubscribeto)
+    console.log(subbredditsIsubscribeto.length)
 }
 
 testy()
