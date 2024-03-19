@@ -714,7 +714,7 @@ const autoPostToRedditNSFW = async (tokens) => {
     for (subreddit of cleanedSubreddits) {
         await uploadAndPostImage(tokens.access_token, imagePath, subreddit, title, null)
         console.log(`posted image to ${subreddit}`)
-        console.log('waiting 5 minutes between posts')
+        console.log('waiting 1 minute between posts')
         await sleep(6000)
     }
 }
@@ -731,7 +731,7 @@ const autoPostToRedditSFW = async (tokens) => {
         console.log(subreddit)
         await uploadAndPostImage(tokens.access_token, imagePath, subreddit, title, null)
         console.log(`posted image to ${subreddit}`)
-        console.log('waiting 5 minutes between posts')
+        console.log('waiting 1 minute between posts')
         await sleep(6000)
     }
 }
