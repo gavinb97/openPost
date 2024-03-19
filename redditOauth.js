@@ -740,8 +740,8 @@ const automaticallyPost = async () => {
     // get tokens
     const tokens = readTokensFromFile('redditKeys.txt')
     
-    await autoPostToRedditSFW(tokens)
     await autoPostToRedditNSFW(tokens)
+    await autoPostToRedditSFW(tokens)
     
     // repeat
     await automaticallyPost()
