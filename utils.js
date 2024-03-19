@@ -254,6 +254,30 @@ const appendOrWriteToJsonFile = (filename, newJsonObject) => {
     console.log(`Data has been written to ${filename}`);
 }
 
+const selectRandomStrings = (stringArray, count) => {
+    const numberOfRandomStrings = count
+    const randomStrings = [];
+    
+    // Ensure the input array has more than 15 elements
+    if (stringArray.length <= numberOfRandomStrings) {
+        return stringArray;
+    }
+
+    // Generate 15 random indices and select strings from the array
+    for (let i = 0; i < numberOfRandomStrings; i++) {
+        const randomIndex = Math.floor(Math.random() * stringArray.length);
+        randomStrings.push(stringArray[randomIndex]);
+        stringArray.splice(randomIndex, 1); // Remove the selected string to prevent duplicates
+    }
+
+    return randomStrings;
+}
+
+const getRandomInterval = () => {
+    // Get a random number between 3000s (50 min) and  30000s (8 hrs)
+    return Math.floor(Math.random() * (15000 - 1500 + 1)) + 300;
+}
+
 
 module.exports ={
     deleteFilesInDirectory, 
@@ -276,5 +300,7 @@ module.exports ={
     getRandomNumberOneToFifteen,
     generateRandomString,
     writeArrayToJsonFile,
-    appendOrWriteToJsonFile
+    appendOrWriteToJsonFile,
+    selectRandomStrings,
+    getRandomInterval
 } 

@@ -6,7 +6,7 @@ const fetch = require('node-fetch');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const SHA256 = require('crypto-js/sha256')
-const {writeTextToFile, readTokensFromFile, sleep, generateRandomString, seeIfFileExists, writeArrayToJsonFile, appendOrWriteToJsonFile} = require('./utils')
+const {writeTextToFile, readTokensFromFile, sleep, generateRandomString, seeIfFileExists, writeArrayToJsonFile, appendOrWriteToJsonFile, selectRandomStrings, getRandomInterval} = require('./utils')
 const fs = require('fs');
 const path = require('path')
 app.use(cookieParser());
@@ -126,6 +126,83 @@ const getSubreddits = async (accessToken) => {
         throw error;
     }
 }
+
+const getSubredditsWithNSFWTag = async (accessToken) => {
+    let after = ''; // Initialize the 'after' parameter for pagination
+    const subredditArray = []; // Array to store subreddit names
+
+    try {
+        // Make requests until all subreddits are fetched
+        while (true) {
+            const getSubredditsUrl = `https://oauth.reddit.com/subreddits/mine/subscriber?limit=100&after=${after}`;
+            const response = await axios.get(getSubredditsUrl, {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`,
+                    'User-Agent': 'web:bodycalc:v1.0 (by /u/BugResponsible9056)'
+                }
+            });
+
+            // Filter out subreddits that have the NSFW tag
+            const nsfwSubreddits = response.data.data.children.filter(child => child.data.over18);
+
+            // Extract only the subreddit names
+            const nsfwSubredditNames = await extractSubbredditList({ children: nsfwSubreddits });
+
+            subredditArray.push(...nsfwSubredditNames);
+
+            // Check if there are more subreddits to fetch
+            if (response.data.data.after) {
+                after = response.data.data.after; // Update the 'after' parameter for the next request
+            } else {
+                break; // Break the loop if there are no more subreddits
+            }
+        }
+
+        return subredditArray;
+    } catch (error) {
+        console.error('Error fetching subreddits:', error);
+        throw error;
+    }
+}
+
+const getSafeForWorkSubreddits = async (accessToken) => {
+    let after = ''; // Initialize the 'after' parameter for pagination
+    const subredditArray = []; // Array to store subreddit names
+
+    try {
+        // Make requests until all subreddits are fetched
+        while (true) {
+            const getSubredditsUrl = `https://oauth.reddit.com/subreddits/mine/subscriber?limit=100&after=${after}`;
+            const response = await axios.get(getSubredditsUrl, {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`,
+                    'User-Agent': 'web:bodycalc:v1.0 (by /u/BugResponsible9056)'
+                }
+            });
+
+            // Filter out subreddits that have the NSFW tag
+            const sfwSubreddits = response.data.data.children.filter(child => !child.data.over18);
+
+            // Extract only the subreddit names
+            const nsfwSubredditNames = await extractSubbredditList({ children: sfwSubreddits });
+
+            subredditArray.push(...nsfwSubredditNames);
+
+            // Check if there are more subreddits to fetch
+            if (response.data.data.after) {
+                after = response.data.data.after; // Update the 'after' parameter for the next request
+            } else {
+                break; // Break the loop if there are no more subreddits
+            }
+        }
+
+        return subredditArray;
+    } catch (error) {
+        console.error('Error fetching subreddits:', error);
+        throw error;
+    }
+}
+
 
 const getUserName = async (accessToken) => {
     console.log('in get user name')
@@ -579,6 +656,40 @@ const getUsersAndWriteToFile = async (subreddit, tokens, numberOfPosts) => {
     appendOrWriteToJsonFile('redditCommenters.json', usersBySR)
 }
 
+const getRandomPngFilePath = (nsfwFlag) => {
+    let directoryPath = ''
+    if (nsfwFlag){
+        directoryPath = './diffusionPics/NSFW/';
+    } else {
+        directoryPath = './diffusionPics/SFW/';
+    }
+    
+
+    try {
+        // Read the contents of the directory
+        const files = fs.readdirSync(directoryPath);
+
+        // Filter out only PNG files
+        const pngFiles = files.filter(file => path.extname(file).toLowerCase() === '.png');
+
+        // Select a random PNG file
+        if (pngFiles.length > 0) {
+            const randomIndex = Math.floor(Math.random() * pngFiles.length);
+            const randomPngFile = pngFiles[randomIndex];
+            return path.join(directoryPath, randomPngFile);
+        } else {
+            console.log('No PNG files found in the directory');
+            return null;
+        }
+    } catch (error) {
+        console.error('Error reading directory:', error);
+        return null;
+    }
+}
+
+const removePrefix = (subredditNames) => {
+    return subredditNames.map(name => name.replace(/^r\//, ''));
+}
 
 const getPostersAndWriteToFile = async (subreddit, tokens, numberOfPosts) => {
     const postersArray = await getSubredditPosters(subreddit, tokens.access_token, numberOfPosts)
@@ -591,6 +702,64 @@ const getPostersAndWriteToFile = async (subreddit, tokens, numberOfPosts) => {
        appendOrWriteToJsonFile('redditPosters.json', postersBySubreddit)
 }
 
+const autoPostToRedditNSFW = async (tokens) => {
+    const subbredditsIsubscribeTo = await getSubredditsWithNSFWTag(tokens.access_token)
+    
+    const randomSubreddits = selectRandomStrings(subbredditsIsubscribeTo, 5)
+    
+    const cleanedSubreddits = removePrefix(randomSubreddits)
+    console.log(cleanedSubreddits)
+    // get a random picture to post to these subreddits
+    const imagePath = getRandomPngFilePath(true)
+    for (subreddit of cleanedSubreddits) {
+        console.log(subreddit)
+        await uploadAndPostImage(tokens.access_token, imagePath, subreddit, '20f, its bubblegum pink', 'yum yum')
+        console.log(`posted image to ${subreddit}`)
+        await sleep(8000)
+    }
+}
+
+const autoPostToRedditSFW = async (tokens) => {
+    const subbredditsIsubscribeTo = await getSafeForWorkSubreddits(tokens.access_token)
+    
+    const randomSubreddits = selectRandomStrings(subbredditsIsubscribeTo, 1)
+    
+    const cleanedSubreddits = removePrefix(randomSubreddits)
+    console.log(cleanedSubreddits)
+    // get a random picture to post to these subreddits
+    const imagePath = getRandomPngFilePath(false)
+    for (subreddit of cleanedSubreddits) {
+        console.log(subreddit)
+        await uploadAndPostImage(tokens.access_token, imagePath, subreddit, '20f, what do you think?', 'go easy on me')
+        console.log(`posted image to ${subreddit}`)
+        
+        
+    }
+}
+
+const automaticallyPost = async () => {
+    const intervalInSeconds = getRandomInterval();
+    const intervalInMinutes = intervalInSeconds / 60;
+
+    console.log(`Next execution will occur in ${intervalInMinutes} minutes`);
+
+    // get tokens
+    const tokens = readTokensFromFile('redditKeys.txt')
+    // Schedule the job to run after the random interval
+    setTimeout(async () => {
+        await autoPostToRedditNSFW(tokens)
+        await autoPostToRedditSFW(tokens)
+        console.log('posted batch of posts')
+        await automaticallyPost()
+    }, intervalInSeconds * 1000); 
+}
+
+const job = async () => {
+    console.log('Starting reddit autopost job...')
+    await automaticallyPost()
+}
+
+job()
 
 const testy = async () => {
     const tokens = readTokensFromFile('redditKeys.txt')
@@ -613,11 +782,12 @@ const testy = async () => {
 
     // console.log(getSubredditNamesFromFile('redditCommenters.json'))
 
-    const subbredditsIsubscribeto = await getSubreddits(tokens.access_token)
-    console.log(subbredditsIsubscribeto)
-    console.log(subbredditsIsubscribeto.length)
+    // await autoPostToRedditOF(tokens)
+    await autoPostToRedditSFW(tokens)
+    await autoPostToRedditNSFW(tokens)
+    // console.log(await getSafeForWorkSubreddits(tokens.access_token))
 }
 
-testy()
+// testy()
 
 
