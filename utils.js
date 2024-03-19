@@ -278,6 +278,11 @@ const getRandomInterval = () => {
     return Math.floor(Math.random() * (15000 - 1500 + 1)) + 300;
 }
 
+const getRandomStringFromStringArray = (arr) => {
+    const randomIndex = Math.floor(Math.random() * arr.length);
+    return arr[randomIndex];
+  }
+
 
 module.exports ={
     deleteFilesInDirectory, 
@@ -302,5 +307,6 @@ module.exports ={
     writeArrayToJsonFile,
     appendOrWriteToJsonFile,
     selectRandomStrings,
-    getRandomInterval
+    getRandomInterval,
+    getRandomStringFromStringArray
 } 

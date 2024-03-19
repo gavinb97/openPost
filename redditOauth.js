@@ -6,13 +6,14 @@ const fetch = require('node-fetch');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const SHA256 = require('crypto-js/sha256')
-const {writeTextToFile, readTokensFromFile, sleep, generateRandomString, seeIfFileExists, writeArrayToJsonFile, appendOrWriteToJsonFile, selectRandomStrings, getRandomInterval} = require('./utils')
+const {writeTextToFile, readTokensFromFile, sleep, generateRandomString, seeIfFileExists, writeArrayToJsonFile, appendOrWriteToJsonFile, selectRandomStrings, getRandomInterval, getRandomStringFromStringArray} = require('./utils')
 const fs = require('fs');
 const path = require('path')
 app.use(cookieParser());
 app.use(cors());
 const btoa = require('btoa');
 const {XMLParser} = require('fast-xml-parser')
+const {redditNSFWPostTitles, redditSFWPostTitles} = require('./strings')
 
 const redditAccessTokenUrl = 'https://www.reddit.com/api/v1/access_token'
 const redirect_uri = 'https://moral-kindly-fly.ngrok-free.app/redditcallback/'
@@ -340,7 +341,7 @@ const postImageToSubreddit = async (subredditName, accessToken, imageUrl, title,
     bodyForm.append('title', title)
     bodyForm.append('sr', subredditName)
     bodyForm.append('kind', 'image')
-    bodyForm.append('text', text)
+    bodyForm.append('text', text || null)
     bodyForm.append('url', imageUrl)
 
     try {
@@ -705,53 +706,45 @@ const getPostersAndWriteToFile = async (subreddit, tokens, numberOfPosts) => {
 const autoPostToRedditNSFW = async (tokens) => {
     const subbredditsIsubscribeTo = await getSubredditsWithNSFWTag(tokens.access_token)
     
-    const randomSubreddits = selectRandomStrings(subbredditsIsubscribeTo, 5)
+    const cleanedSubreddits = removePrefix(subbredditsIsubscribeTo)
     
-    const cleanedSubreddits = removePrefix(randomSubreddits)
-    console.log(cleanedSubreddits)
     // get a random picture to post to these subreddits
     const imagePath = getRandomPngFilePath(true)
+    const title = getRandomStringFromStringArray(redditNSFWPostTitles)
     for (subreddit of cleanedSubreddits) {
-        console.log(subreddit)
-        await uploadAndPostImage(tokens.access_token, imagePath, subreddit, '20f, its bubblegum pink', 'yum yum')
+        await uploadAndPostImage(tokens.access_token, imagePath, subreddit, title, null)
         console.log(`posted image to ${subreddit}`)
-        await sleep(8000)
+        console.log('waiting 5 minutes between posts')
+        await sleep(6000)
     }
 }
 
 const autoPostToRedditSFW = async (tokens) => {
     const subbredditsIsubscribeTo = await getSafeForWorkSubreddits(tokens.access_token)
     
-    const randomSubreddits = selectRandomStrings(subbredditsIsubscribeTo, 1)
+    const cleanedSubreddits = removePrefix(subbredditsIsubscribeTo)
     
-    const cleanedSubreddits = removePrefix(randomSubreddits)
-    console.log(cleanedSubreddits)
     // get a random picture to post to these subreddits
     const imagePath = getRandomPngFilePath(false)
+    const title = getRandomStringFromStringArray(redditSFWPostTitles)
     for (subreddit of cleanedSubreddits) {
         console.log(subreddit)
-        await uploadAndPostImage(tokens.access_token, imagePath, subreddit, '20f, what do you think?', 'go easy on me')
+        await uploadAndPostImage(tokens.access_token, imagePath, subreddit, title, null)
         console.log(`posted image to ${subreddit}`)
-        
-        
+        console.log('waiting 5 minutes between posts')
+        await sleep(6000)
     }
 }
 
 const automaticallyPost = async () => {
-    const intervalInSeconds = getRandomInterval();
-    const intervalInMinutes = intervalInSeconds / 60;
-
-    console.log(`Next execution will occur in ${intervalInMinutes} minutes`);
-
     // get tokens
     const tokens = readTokensFromFile('redditKeys.txt')
-    // Schedule the job to run after the random interval
-    setTimeout(async () => {
-        await autoPostToRedditNSFW(tokens)
-        await autoPostToRedditSFW(tokens)
-        console.log('posted batch of posts')
-        await automaticallyPost()
-    }, intervalInSeconds * 1000); 
+    
+    await autoPostToRedditSFW(tokens)
+    await autoPostToRedditNSFW(tokens)
+    
+    // repeat
+    await automaticallyPost()
 }
 
 const job = async () => {
@@ -764,28 +757,9 @@ job()
 const testy = async () => {
     const tokens = readTokensFromFile('redditKeys.txt')
     console.log(tokens)
-  
-    // const modhash = await getModhash(tokens.access_token)
-    // await uploadAndPostImage(tokens.access_token, 'gptImages\\ykpsg_11zon.png')
-    // await getTopPostOfSubreddit('aitah', tokens.access_token)
-    // await getUsersWhoCommentedOnPost('1bg5hy4', tokens.access_token)
-
-    // await sendMessageToUser(tokens.access_token, 'Helpful_Alarm2362', 'some subject', 'this is a message')
-    // const url = await uploadImage(tokens.access_token, 'gptImages\\ykpsg_11zon.png')
-    // await sendMessageWithImage('Helpful_Alarm2362', tokens.access_token, 'some meee', 'subjec', url)
-    // await getUsersAndWriteToFile('Onlyfans101', tokens, 4)
-    // const postersArray = await getSubredditPosters('Onlyfans101', tokens.access_token, 5)
-    // console.log(postersArray)
-    // await getPostersAndWriteToFile('DaughterTraining', tokens, 600)
-
-    // getUsernamesFromFileBySubreddit('redditPosters.json', ['onlyfans101', 'DaughterTraining'])
-
-    // console.log(getSubredditNamesFromFile('redditCommenters.json'))
-
-    // await autoPostToRedditOF(tokens)
-    await autoPostToRedditSFW(tokens)
-    await autoPostToRedditNSFW(tokens)
-    // console.log(await getSafeForWorkSubreddits(tokens.access_token))
+    const sr = await getSubredditsWithNSFWTag(tokens.access_token)
+    console.log(sr)
+    console.log(sr.length)
 }
 
 // testy()
