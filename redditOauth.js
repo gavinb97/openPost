@@ -6,7 +6,7 @@ const fetch = require('node-fetch');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const SHA256 = require('crypto-js/sha256')
-const {writeTextToFile, readTokensFromFile, sleep, generateRandomString, seeIfFileExists, writeArrayToJsonFile, appendOrWriteToJsonFile, selectRandomStrings, getRandomInterval, getRandomStringFromStringArray} = require('./utils')
+const {writeTextToFile, readTokensFromFile, sleep, generateRandomString, shuffleArray, seeIfFileExists, writeArrayToJsonFile, appendOrWriteToJsonFile, selectRandomStrings, getRandomInterval, getRandomStringFromStringArray} = require('./utils')
 const fs = require('fs');
 const path = require('path')
 app.use(cookieParser());
@@ -707,11 +707,11 @@ const autoPostToRedditNSFW = async (tokens) => {
     const subbredditsIsubscribeTo = await getSubredditsWithNSFWTag(tokens.access_token)
     
     const cleanedSubreddits = removePrefix(subbredditsIsubscribeTo)
-    
+    const shuffledArray = shuffleArray(cleanedSubreddits)
     // get a random picture to post to these subreddits
     const imagePath = getRandomPngFilePath(true)
     const title = getRandomStringFromStringArray(redditNSFWPostTitles)
-    for (subreddit of cleanedSubreddits) {
+    for (subreddit of shuffledArray) {
         await uploadAndPostImage(tokens.access_token, imagePath, subreddit, title, 'Check my bio for the goods')
         console.log(`posted image to ${subreddit}`)
         console.log('waiting 1 minute between posts')
