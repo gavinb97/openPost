@@ -712,7 +712,7 @@ const autoPostToRedditNSFW = async (tokens) => {
     const imagePath = getRandomPngFilePath(true)
     const title = getRandomStringFromStringArray(redditNSFWPostTitles)
     for (subreddit of cleanedSubreddits) {
-        await uploadAndPostImage(tokens.access_token, imagePath, subreddit, title, null)
+        await uploadAndPostImage(tokens.access_token, imagePath, subreddit, title, 'Check my bio for the goods')
         console.log(`posted image to ${subreddit}`)
         console.log('waiting 1 minute between posts')
         await sleep(60000)
@@ -729,7 +729,7 @@ const autoPostToRedditSFW = async (tokens) => {
     const title = getRandomStringFromStringArray(redditSFWPostTitles)
     for (subreddit of cleanedSubreddits) {
         console.log(subreddit)
-        await uploadAndPostImage(tokens.access_token, imagePath, subreddit, title, null)
+        await uploadAndPostImage(tokens.access_token, imagePath, subreddit, title, 'What do you think?')
         console.log(`posted image to ${subreddit}`)
         console.log('waiting 1 minute between posts')
         await sleep(60000)
