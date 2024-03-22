@@ -6,7 +6,7 @@ const fetch = require('node-fetch');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const SHA256 = require('crypto-js/sha256')
-const {writeTextToFile, readTokensFromFile, sleep, generateRandomString, shuffleArray, seeIfFileExists, writeArrayToJsonFile, appendOrWriteToJsonFile, selectRandomStrings, getRandomInterval, getRandomStringFromStringArray} = require('./utils')
+const {writeTextToFile, readTokensFromFile, sleep, generateRandomString, shuffleArray, deleteFile, seeIfFileExists, writeArrayToJsonFile, appendOrWriteToJsonFile, selectRandomStrings, getRandomInterval, getRandomStringFromStringArray} = require('./utils')
 const fs = require('fs');
 const path = require('path')
 app.use(cookieParser());
@@ -22,7 +22,6 @@ const stateString = generateRandomString(69)
 const loginUrl = `https://www.reddit.com/api/v1/authorize?client_id=${process.env.REDDIT_APP_ID}&response_type=code&state=${stateString}&redirect_uri=${redirect_uri}&duration=permanent&scope=${scopeSring}`
 console.log(loginUrl)
 
-
 app.get('/redditcallback', async (req, res) => {
     console.log('hitting the callback ooh wee')
     const codeFromCallback = req.query.code
@@ -30,6 +29,9 @@ app.get('/redditcallback', async (req, res) => {
 
     // write access token and refresh token to file
     const tokenText = `accessToken: ${getAccessTokenResponse.access_token} refreshToken: ${getAccessTokenResponse.refresh_token}`
+    if(await seeIfFileExists('redditKeys.txt')){
+        await deleteFile('redditKeys.txt')
+    }
     await writeTextToFile(tokenText, 'redditKeys.txt')
     await sleep(5000)
 
@@ -37,7 +39,8 @@ app.get('/redditcallback', async (req, res) => {
 })
 
 // if we dont have keys, provide url for auth
-if (!seeIfFileExists('redditKeys.txt')) {
+if (!await seeIfFileExists('redditKeys.txt')) {
+    console.log('Producing URL to login')
     console.log(loginUrl)
     app.listen(3455, () => {
     console.log('running')
@@ -86,6 +89,12 @@ const refreshToken = async (refreshToken) => {
             }
         });
         console.log('token refreshed')
+        console.log('deleting old file')
+        await deleteFile('redditKeys.txt')
+        console.log('deleted redditKeys.txt. About to regenerate')
+        const tokenText = `accessToken: ${response.data.access_token} refreshToken: ${response.data.refresh_token}`
+        await writeTextToFile(tokenText, 'redditKeys.txt')
+        
         return response.data;
     } catch (e) {
         // console.log(e.response.data);
@@ -714,8 +723,8 @@ const autoPostToRedditNSFW = async (tokens) => {
     for (subreddit of shuffledArray) {
         await uploadAndPostImage(tokens.access_token, imagePath, subreddit, title, 'Check my bio for the goods')
         console.log(`posted image to ${subreddit}`)
-        console.log('waiting 1 minute between posts')
-        await sleep(60000)
+        console.log('waiting 2 minute between posts')
+        await sleep(120000)
     }
 }
 
@@ -740,8 +749,16 @@ const automaticallyPost = async () => {
     // get tokens
     const tokens = readTokensFromFile('redditKeys.txt')
     
-    await autoPostToRedditNSFW(tokens)
-    await autoPostToRedditSFW(tokens)
+    try {
+        await autoPostToRedditNSFW(tokens)
+        await autoPostToRedditSFW(tokens)
+    } catch (error) {
+        // token probably expired
+        console.log(error)
+        console.log('Token has expired, gonna refresh')
+        await refreshToken(tokens.refresh_token)
+    }
+    
     
     // repeat
     await automaticallyPost()
