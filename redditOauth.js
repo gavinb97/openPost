@@ -29,7 +29,8 @@ app.get('/redditcallback', async (req, res) => {
 
     // write access token and refresh token to file
     const tokenText = `accessToken: ${getAccessTokenResponse.access_token} refreshToken: ${getAccessTokenResponse.refresh_token}`
-    if(await seeIfFileExists('redditKeys.txt')){
+    const fileExists = await seeIfFileExists('redditKeys.txt')
+    if(fileExists){
         await deleteFile('redditKeys.txt')
     }
     await writeTextToFile(tokenText, 'redditKeys.txt')
@@ -39,7 +40,9 @@ app.get('/redditcallback', async (req, res) => {
 })
 
 // if we dont have keys, provide url for auth
-if (!await seeIfFileExists('redditKeys.txt')) {
+const hasAuth = seeIfFileExists('redditKeys.txt')
+
+if (!hasAuth) {
     console.log('Producing URL to login')
     console.log(loginUrl)
     app.listen(3455, () => {
@@ -343,6 +346,28 @@ const getModhash = async (accessToken) => {
     }
 };
 
+const commentOnPost = async (accessToken, postId, commentText) => {
+    const endpoint = `https://oauth.reddit.com/api/comment`;
+
+    const bodyForm = new FormData();
+    bodyForm.append('api_type', 'json');
+    bodyForm.append('text', commentText);
+    bodyForm.append('thing_id', postId);
+
+    try {
+        const response = await axios.post(endpoint, bodyForm, {
+            headers: {
+                'Authorization': `Bearer ${accessToken}`,
+                'User-Agent': 'web:bodycalc:v1.0 (by /u/BugResponsible9056)',
+            }
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error commenting on post:', error);
+        throw error;
+    }
+}
+
 const postImageToSubreddit = async (subredditName, accessToken, imageUrl, title, text) => {
     const endpoint = `https://oauth.reddit.com/api/submit`;
 
@@ -573,11 +598,14 @@ const uploadImage = async (accessToken, filePath) => {
 }
 
 
-const uploadAndPostImage = async (accessToken, filePath, subredditName, title, text) => {
+const uploadAndPostImage = async (accessToken, filePath, subredditName, title, text, comment) => {
     const imageUrl = await uploadImage(accessToken, filePath)
    // this takes an r/subreddit not just the name
     const postToRedditResponse = await postImageToSubreddit(`r/${subredditName}`, accessToken, imageUrl, title, text)
-
+    if (comment) {
+        // post comment under same post
+        await commentOnPost(accessToken, postToRedditResponse.id, comment)
+    }
     console.log((postToRedditResponse) ? 'reddit post created successfully' : 'shit got fucked')
 }
 
