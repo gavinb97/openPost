@@ -40,15 +40,15 @@ app.get('/redditcallback', async (req, res) => {
 })
 
 // if we dont have keys, provide url for auth
-const hasAuth = seeIfFileExists('redditKeys.txt')
+// const hasAuth = seeIfFileExists('redditKeys.txt')
 
-if (!hasAuth) {
-    console.log('Producing URL to login')
-    console.log(loginUrl)
-    app.listen(3455, () => {
-    console.log('running')
-    })
-}
+// if (!hasAuth) {
+    // console.log('Producing URL to login')
+    // console.log(loginUrl)
+    // app.listen(3455, () => {
+    // console.log('running')
+    // })
+// }
 
 // returns array of subreddit names
 const extractSubbredditList = async (subredditResponse) => {
@@ -97,7 +97,7 @@ const refreshToken = async (refreshToken) => {
         console.log('deleted redditKeys.txt. About to regenerate')
         const tokenText = `accessToken: ${response.data.access_token} refreshToken: ${response.data.refresh_token}`
         await writeTextToFile(tokenText, 'redditKeys.txt')
-        
+        await sleep(5000)
         return response.data;
     } catch (e) {
         // console.log(e.response.data);
@@ -751,9 +751,10 @@ const autoPostToRedditNSFW = async (tokens) => {
     for (subreddit of shuffledArray) {
         await uploadAndPostImage(tokens.access_token, imagePath, subreddit, title, 'Check my bio for the goods')
         console.log(`posted image to ${subreddit}`)
-        console.log('waiting 2 minute between posts')
-        await sleep(120000)
+        console.log('waiting 1 minute between posts')
+        await sleep(60000)
     }
+    console.log(`Posted to ${cleanedSubreddits.length} NSFW subreddits`)
 }
 
 const autoPostToRedditSFW = async (tokens) => {
@@ -771,6 +772,7 @@ const autoPostToRedditSFW = async (tokens) => {
         console.log('waiting 1 minute between posts')
         await sleep(60000)
     }
+    console.log(`Posted to ${cleanedSubreddits.length} SFW subreddits`)
 }
 
 const automaticallyPost = async () => {

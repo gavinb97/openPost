@@ -486,7 +486,7 @@ const topicArray = [
     
 
     const redditNSFWPostTitles = [
-        "Can I handle all of this?",
+        "Can you handle all of this?",
         "Do you think I can handle it?",
         "Where would you put your hands on me?",
         "Can you handle my curves?",
