@@ -32,9 +32,19 @@ app.post('/upload', upload.single('file'), async (req, res) => {
   
       // Extract filename
     const fileName = req.file.filename;
-  
+
+    let categories;
+    if (req.body.categories) {
+       categories = req.body.categories; 
+    }
+    
       // Respond with success status
-      res.status(200).send(`File ${fileName} uploaded successfully.`);
+      const responseObj = {
+        file: fileName,
+        status: 'Success',
+        categories: categories || []
+      }
+      res.status(200).send(responseObj);
     } catch (error) {
       // Error handling
       console.error('Error uploading file:', error);
