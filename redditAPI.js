@@ -30,12 +30,11 @@ app.post('/upload', upload.single('file'), async (req, res) => {
       // File uploaded successfully
       console.log('File uploaded:', req.file);
   
-      // Example: Read the uploaded file
-      const data = await fs.readFile(req.file.path);
-      console.log('File content:', data.toString());
+      // Extract filename
+    const fileName = req.file.filename;
   
       // Respond with success status
-      res.status(200).send('File uploaded successfully.');
+      res.status(200).send(`File ${fileName} uploaded successfully.`);
     } catch (error) {
       // Error handling
       console.error('Error uploading file:', error);
