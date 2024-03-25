@@ -8,31 +8,28 @@ import SocialsLoginScreen from './screens/SocialsLoginScreen';
 import RegistrationScreen from './screens/RegistrationScreen';
 
 function App() {
-  // return (
-  //   // <UploadScreen></UploadScreen>
-  //   // <SocialsLoginScreen></SocialsLoginScreen>
-  //   <RegistrationScreen></RegistrationScreen>
-  // );
-// }
-const router = createBrowserRouter([
-  {
-    path: '/',
-    element: <RegistrationScreen></RegistrationScreen>
-  },
-  {
-    path: 'uploadMedia',
-    element: <UploadScreen></UploadScreen>
-  },
-  {
-    path: 'authorizeSocials',
-    element: <SocialsLoginScreen></SocialsLoginScreen>
-  }
-])
+ 
+  const router = createBrowserRouter([
+    {
+      path: '/',
+      element: <RegistrationScreen></RegistrationScreen>
+    },
+    {
+      path: 'uploadMedia',
+      element: <UploadScreen></UploadScreen>
+    },
+    {
+      path: 'authorizeSocials',
+      element: <SocialsLoginScreen></SocialsLoginScreen>
+    }
+  ])
 
-ReactDom.createRoot(document.getElementById('root')).render(
-  <React.StrictMode>
-    <RouterProvider router={router}></RouterProvider>
-  </React.StrictMode>
-)
+  ReactDom.createRoot(document.getElementById('root')).render(
+    <React.StrictMode>
+      <RouterProvider router={router}></RouterProvider>
+    </React.StrictMode>
+  )
 }
+
+
 export default App;
