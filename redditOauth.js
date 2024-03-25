@@ -45,9 +45,9 @@ app.get('/redditcallback', async (req, res) => {
 // if (!hasAuth) {
     // console.log('Producing URL to login')
     // console.log(loginUrl)
-    // app.listen(3455, () => {
-    // console.log('running')
-    // })
+    app.listen(3455, () => {
+    console.log('running')
+    })
 // }
 
 // returns array of subreddit names
@@ -799,7 +799,7 @@ const job = async () => {
     await automaticallyPost()
 }
 
-job()
+// job()
 
 const testy = async () => {
     const tokens = readTokensFromFile('redditKeys.txt')
