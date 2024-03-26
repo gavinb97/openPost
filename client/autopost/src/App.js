@@ -6,13 +6,23 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import UploadScreen from './screens/UploadScreen'
 import SocialsLoginScreen from './screens/SocialsLoginScreen';
 import RegistrationScreen from './screens/RegistrationScreen';
+import HomeScreen from './screens/HomeScreen';
+import LoginScreen from './screens/LoginScreen';
 
 function App() {
  
   const router = createBrowserRouter([
     {
       path: '/',
+      element: <HomeScreen></HomeScreen>
+    },
+    {
+      path: '/registration',
       element: <RegistrationScreen></RegistrationScreen>
+    },
+    {
+      path: '/login',
+      element: <LoginScreen></LoginScreen>
     },
     {
       path: 'uploadMedia',
