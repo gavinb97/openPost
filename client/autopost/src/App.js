@@ -8,6 +8,7 @@ import SocialsLoginScreen from './screens/SocialsLoginScreen';
 import RegistrationScreen from './screens/RegistrationScreen';
 import HomeScreen from './screens/HomeScreen';
 import LoginScreen from './screens/LoginScreen';
+import UserLandingScreen from './screens/UserLandingScreen';
 
 function App() {
  
@@ -31,6 +32,10 @@ function App() {
     {
       path: 'authorizeSocials',
       element: <SocialsLoginScreen></SocialsLoginScreen>
+    },
+    {
+      path: 'landing',
+      element: <UserLandingScreen></UserLandingScreen>
     }
   ])
 

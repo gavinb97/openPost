@@ -2,8 +2,10 @@ import logo from './../logo.svg';
 import './../App.css';
 import React, { useState } from 'react';
 import {uploadFile} from '../service/redditService'
+import { useNavigate } from 'react-router-dom'
 
 function RegistrationScreen() {
+    const navigate = useNavigate()
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -22,7 +24,9 @@ function RegistrationScreen() {
 
     const handleSubmit = (event) => {
         event.preventDefault();
+      
         // Your registration logic goes here
+        navigate('/landing')
     };
 
     return (
