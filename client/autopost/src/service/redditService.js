@@ -48,3 +48,16 @@ export const uploadFile = async (file, fileName) => {
     };
 };
 
+
+export const fetchAllFiles = async () => {
+    const endpoint = 'http://localhost:3455/files';
+    try {
+      const response = await axios.get(endpoint);
+      
+      return response.data
+    } catch (error) {
+      console.error('Error fetching files:', error);
+      // Handle errors, such as displaying an error message to the user
+    }
+  };
+

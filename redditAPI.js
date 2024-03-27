@@ -13,12 +13,20 @@ const path = require('path');
 // Multer storage configuration
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-      cb(null, 'uploads/'); // Destination folder for storing uploaded files
+      // Check file type
+      if (file.mimetype.startsWith('image')) {
+        cb(null, 'uploads/photos/');
+      } else if (file.mimetype.startsWith('video')) {
+        cb(null, 'uploads/videos/');
+      } else {
+        // Invalid file type, handle accordingly
+        cb(new Error('Invalid file type'));
+      }
     },
     filename: function (req, file, cb) {
-      cb(null, Date.now() + '-' + file.originalname); // Rename file with timestamp
+      cb(null, Date.now() + '-' + file.originalname);
     }
-})
+  })
 
 
 
@@ -55,19 +63,38 @@ app.post('/upload', upload.single('file'), async (req, res) => {
 
 // Endpoint to get the names of all files within the uploads folder
 app.get('/files', async (req, res) => {
-    const uploadsFolder = path.join(__dirname, 'uploads');
+    const uploadsFolder = path.join(__dirname, 'uploads', 'photos');
     try {
-      // Read the contents of the uploads folder
-      const files = await fs.readdir(uploadsFolder);
-  
-      // Send the list of file names as the response
-      res.status(200).json({ files });
+        // Read the contents of the uploads folder
+        const files = await fs.readdir(uploadsFolder);
+        
+        // Array to store file objects with name and data
+        const fileObjects = [];
+
+        // Iterate through each file in the folder
+        for (const file of files) {
+            const filePath = path.join(uploadsFolder, file);
+            // Read file data asynchronously
+            const fileData = await fs.readFile(filePath);
+            // Convert file data to base64-encoded string
+            const base64Data = fileData.toString('base64');
+            // Create file object with name and data
+            const fileObject = {
+                fileName: file,
+                fileData: base64Data
+            };
+            // Push file object to the array
+            fileObjects.push(fileObject);
+        }
+
+        // Send the array of file objects as the response
+        res.status(200).json(fileObjects);
     } catch (error) {
-      // Error handling
-      console.error('Error reading files:', error);
-      res.status(500).send('Error reading files.');
+        // Error handling
+        console.error('Error reading files:', error);
+        res.status(500).send('Error reading files.');
     }
-  })
+});
 
 
 
