@@ -61,3 +61,17 @@ export const fetchAllFiles = async () => {
     }
   };
 
+export const deleteByName = async (fileNames) => {
+    console.log(fileNames)
+    try {
+        const response = await axios.post('http://localhost:3455/deletebyname', fileNames,
+        {
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        console.log(response.data);
+    } catch (error) {
+        console.error('Error deleting files:', error.response.data);
+    }
+}

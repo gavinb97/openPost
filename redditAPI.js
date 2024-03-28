@@ -1,10 +1,12 @@
 require("dotenv").config();
 const express = require('express');
+const bodyParser = require('body-parser');
 const app = express();
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
 app.use(cookieParser());
 app.use(cors());
+app.use(bodyParser.json());
 const multer = require('multer');
 const fs = require('fs').promises;
 const path = require('path');
@@ -94,6 +96,34 @@ app.get('/files', async (req, res) => {
         console.error('Error reading files:', error);
         res.status(500).send('Error reading files.');
     }
+});
+
+app.post('/deletebyname', async (req, res) => {
+    const fileNames = req.body; // Assuming body contains either a single string or an array of strings
+    console.log(fileNames);
+    // Ensure fileNames is an array
+    const filesToDelete = Array.isArray(fileNames) ? fileNames : [fileNames];
+    console.log(filesToDelete);
+    const uploadsFolder = path.join(__dirname, 'uploads', 'photos');
+    // Loop through each filename and delete if found in uploads/photos folder
+    for (const fileName of filesToDelete) {
+        console.log('in loop');
+        console.log(fileName);
+        const filePath = path.join(uploadsFolder, fileName);
+        console.log(filePath);
+        try {
+            // Check if file exists
+            await fs.stat(filePath);
+            // File exists, delete it
+            await fs.unlink(filePath);
+            console.log(`File "${fileName}" deleted successfully.`);
+        } catch (err) {
+            // File does not exist or error occurred during deletion
+            console.error(`Error deleting file "${fileName}":`, err);
+        }
+    }
+
+    res.status(200).send('Files deletion request received.');
 });
 
 
