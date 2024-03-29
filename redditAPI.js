@@ -181,6 +181,32 @@ app.post('/deletebyname', async (req, res) => {
     res.json(metadata);
 });
 
+// POST endpoint to update photo metadata
+app.post('/updatephotometadata', async (req, res) => {
+    try {
+        const newData = req.body; // Array of new photo data objects
+        const existingData = await readPhotoDataFromFile(); // Read existing photo data from file
+
+        // Update existing data with new data
+        newData.forEach(newObj => {
+            const index = existingData.findIndex(obj => obj.name === newObj.name);
+            if (index !== -1) {
+                existingData[index] = newObj;
+            } else {
+                existingData.push(newObj); // Add new object if it doesn't exist
+            }
+        });
+
+        // Write updated data to file
+        await writePhotoDataToFile(existingData);
+
+        res.status(200).json({ message: 'Photo metadata updated successfully.' });
+    } catch (error) {
+        console.error('Error updating photo metadata:', error);
+        res.status(500).json({ error: 'An error occurred while updating photo metadata.' });
+    }
+});
+
 // Function to read photo data from file
 const readPhotoDataFromFile = async () => {
     try {
@@ -189,6 +215,16 @@ const readPhotoDataFromFile = async () => {
     } catch (error) {
         console.error('Error reading photo data:', error);
         return [];
+    }
+};
+
+// Function to write photo data to file
+const writePhotoDataToFile = async (data) => {
+    try {
+        await fs.writeFile('photodata.txt', JSON.stringify(data, null, 2), 'utf8');
+    } catch (error) {
+        console.error('Error writing photo data:', error);
+        throw error;
     }
 };
 

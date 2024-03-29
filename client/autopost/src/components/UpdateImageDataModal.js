@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 
-
-const UpdateImageDataModal = ({ imageData, closeModal }) => {
+const UpdateImageDataModal = ({ imageData, closeModal, updatePhotoMetadata }) => {
   const [updatedData, setUpdatedData] = useState(imageData);
 
   const handleChange = (e, index) => {
@@ -14,9 +13,10 @@ const UpdateImageDataModal = ({ imageData, closeModal }) => {
   const handleSave = () => {
     // Perform save operation with updatedData
     console.log(updatedData);
+    // Call updatePhotoMetadata function to update data
+    updatePhotoMetadata(updatedData); // Pass updatedData to the function
     // Close modal
     closeModal();
-    // Implement your save operation logic here
   };
 
   return (
@@ -25,20 +25,24 @@ const UpdateImageDataModal = ({ imageData, closeModal }) => {
       <div className="UpdateImageDataModal">
         <h2>Update Image Data</h2>
         {updatedData.map((item, index) => (
-          <div key={index}>
-            <label>Name:</label>
-            <p>{item.name}</p>
-            <div>
-              <label>Description:</label>
-              <input
-                type="text"
+          <div key={index} >
+            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
+                <label style={{ marginRight: '10px' }}>Name:</label>
+                <p>{item.name}</p>
+            </div>
+            
+            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
+              <label style={{marginRight: 5}}>Description:   </label>
+              
+              <textarea
                 name="description"
                 value={item.description}
                 onChange={(e) => handleChange(e, index)}
+                style={{ minHeight: '50px', resize: 'vertical' }} // Set flexible height
               />
             </div>
-            <div>
-              <label>Categories:</label>
+            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
+              <label style={{marginRight: 10}}>Categories:</label>
               <input
                 type="text"
                 name="categories"

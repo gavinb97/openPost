@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { fetchAllFiles, deleteByName, getPhotoMetadata } from '../service/redditService';
+import { fetchAllFiles, deleteByName, getPhotoMetadata, updatePhotoMetadata } from '../service/redditService';
 import UpdateImageDataModal from './UpdateImageDataModal';
 import './../App.css';
 
@@ -72,14 +72,14 @@ const UploadedMediaContainer = () => {
         setShowModal(false); // Function to close the modal
     };
 
-    const renderDeleteButton = () => {
+    const renderPhotoActionButtons = () => {
         return (
             <div style={{ display: 'flex', justifyContent: 'center'}}>
                 <button style={{ backgroundColor: 'red', color: 'white', marginTop: '10px' }} onClick={handleDeleteClick}>
                     Delete
                 </button>
                 <button style={{ backgroundColor: 'blue', color: 'white', marginTop: '10px', marginLeft: '5px' }} onClick={handleEditClick}>
-                    Edit
+                    View / Edit
                 </button>
             </div>
         );
@@ -150,15 +150,14 @@ const UploadedMediaContainer = () => {
 
     return (
         <div>
-            <h1>Hi mam</h1>
-            <h2>hi to yo mama too</h2>
-            <button onClick={handleButtonClick}>Click to say hi to ya mum</button>
+            <h1>Uploaded Photos</h1>
+            <h3>Select one or more to view, edit or delete</h3>
             
-            {selectedImages.length > 0 && renderDeleteButton()} {/* Render delete and edit buttons */}
+            {selectedImages.length > 0 && renderPhotoActionButtons()} {/* Render delete and edit buttons */}
             
             {mediaFiles.length > 0 && <RenderImages fileObjects={mediaFiles} />} {/* Render images */}
             <div>
-                {showModal && <UpdateImageDataModal imageData={imageMetadata} closeModal={closeModal} />} 
+                {showModal && <UpdateImageDataModal imageData={imageMetadata} closeModal={closeModal} updatePhotoMetadata={updatePhotoMetadata} />} 
             </div>
             
         </div>

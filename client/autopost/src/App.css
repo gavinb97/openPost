@@ -84,6 +84,12 @@
   background-color: white;
   border-radius: 8px;
   padding: 20px;
-  z-index: 1000; /* Ensure modal is above the backdrop */
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); /* Add shadow effect */
+  margin-top: auto;
+  margin-bottom: auto;
+  z-index: 1000;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  max-height: 75vh; /* Set maximum height to 75% of viewport height */
+  overflow-y: auto; /* Enable vertical scrolling when content exceeds max-height */
+  width: 75%; /* Set width to 75% of viewport width */
+  max-width: 500px; /* Set maximum width */
 }

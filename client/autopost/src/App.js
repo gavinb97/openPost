@@ -1,9 +1,8 @@
 import logo from './logo.svg';
 import './App.css';
-import React, { useState } from 'react';
-import ReactDom from 'react-dom/client'
-import { createBrowserRouter, RouterProvider } from 'react-router-dom'
-import UploadScreen from './screens/UploadScreen'
+import React from 'react';
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import UploadScreen from './screens/UploadScreen';
 import SocialsLoginScreen from './screens/SocialsLoginScreen';
 import RegistrationScreen from './screens/RegistrationScreen';
 import HomeScreen from './screens/HomeScreen';
@@ -11,40 +10,40 @@ import LoginScreen from './screens/LoginScreen';
 import UserLandingScreen from './screens/UserLandingScreen';
 
 function App() {
- 
   const router = createBrowserRouter([
     {
       path: '/',
-      element: <HomeScreen></HomeScreen>
+      element: <HomeScreen />
     },
     {
       path: '/registration',
-      element: <RegistrationScreen></RegistrationScreen>
+      element: <RegistrationScreen />
     },
     {
       path: '/login',
-      element: <LoginScreen></LoginScreen>
+      element: <LoginScreen />
     },
     {
-      path: 'uploadMedia',
-      element: <UploadScreen></UploadScreen>
+      path: '/uploadMedia', // Corrected path with '/'
+      element: <UploadScreen />
     },
     {
-      path: 'authorizeSocials',
-      element: <SocialsLoginScreen></SocialsLoginScreen>
+      path: '/authorizeSocials', // Corrected path with '/'
+      element: <SocialsLoginScreen />
     },
     {
-      path: 'landing',
-      element: <UserLandingScreen></UserLandingScreen>
+      path: '/landing', // Corrected path with '/'
+      element: <UserLandingScreen />
     }
-  ])
+  ]);
 
-  ReactDom.createRoot(document.getElementById('root')).render(
-    <React.StrictMode>
-      <RouterProvider router={router}></RouterProvider>
-    </React.StrictMode>
-  )
+  return (
+    <RouterProvider router={router}>
+      <div className="App">
+        {/* Add any global components here */}
+      </div>
+    </RouterProvider>
+  );
 }
-
 
 export default App;

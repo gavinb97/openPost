@@ -87,3 +87,12 @@ export const getPhotoMetadata = async (fileNames) => {
         return null;
     }
 };
+
+export const updatePhotoMetadata = async (newData) => {
+    try {
+        const response = await axios.post('http://localhost:3455/updatephotometadata', newData);
+        console.log(response.data); // Log success message
+    } catch (error) {
+        console.error('Error updating photo metadata:', error.response.data.error);
+    }
+};
