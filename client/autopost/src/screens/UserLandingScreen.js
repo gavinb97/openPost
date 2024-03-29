@@ -5,6 +5,7 @@ import './../App.css';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom'
 import UploadedMediaContainer from '../components/UploadedMediaContainer'
+import UploadPictureBox from '../components/UploadPictureBox';
 
 
 function UserLandingScreen() {
@@ -20,6 +21,7 @@ function UserLandingScreen() {
                 </div>
 
             </header>
+            <UploadPictureBox></UploadPictureBox>
             <UploadedMediaContainer></UploadedMediaContainer>
         </div>
     );
