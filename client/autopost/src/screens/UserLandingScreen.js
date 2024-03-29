@@ -4,7 +4,7 @@ import otherLogo from './../onlypostsNoBackground.png'
 import './../App.css';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom'
-import UploadedMediaContainer from '../components/UploadedMediaContainer';
+import UploadedMediaContainer from '../components/UploadedMediaContainer'
 
 
 function UserLandingScreen() {

@@ -86,7 +86,6 @@ const UploadedMediaContainer = () => {
     };
 
     const RenderImages = ({ fileObjects }) => {
-        const [selectedImages, setSelectedImages] = useState([]);
     
         const imagesPerRow = 4; // Maximum number of images per row
     
