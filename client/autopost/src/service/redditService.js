@@ -75,3 +75,15 @@ export const deleteByName = async (fileNames) => {
         console.error('Error deleting files:', error.response.data);
     }
 }
+
+export const getPhotoMetadata = async (fileNames) => {
+    console.log('called metadatacall')
+    const endpoint = 'http://localhost:3455/getphotometadata'
+    try {
+        const response = await axios.post(endpoint, fileNames);
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching photo metadata:', error);
+        return null;
+    }
+};

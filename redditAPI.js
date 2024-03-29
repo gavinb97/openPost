@@ -169,6 +169,30 @@ app.post('/deletebyname', async (req, res) => {
     }
   })
 
+  app.post('/getphotometadata', async (req, res) => {
+    console.log('getting metadata')
+    console.log(req.body)
+    const fileNames = req.body; // Array of file names
+    const photoData = await readPhotoDataFromFile(); // Read photo data from file
+
+    // Filter photoData to include only objects with names in the request body
+    const metadata = photoData.filter(obj => fileNames.includes(obj.name));
+
+    res.json(metadata);
+});
+
+// Function to read photo data from file
+const readPhotoDataFromFile = async () => {
+    try {
+        const data = await fs.readFile('photoData.txt', 'utf8');
+        return JSON.parse(data);
+    } catch (error) {
+        console.error('Error reading photo data:', error);
+        return [];
+    }
+};
+
+
 // Endpoint to get the names of all files within the uploads folder
 app.get('/setSchedule', async (req, res) => {
     

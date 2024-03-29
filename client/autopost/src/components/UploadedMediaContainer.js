@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom'
-import { fetchAllFiles, deleteByName } from '../service/redditService'
+import { useNavigate } from 'react-router-dom';
+import { fetchAllFiles, deleteByName, getPhotoMetadata } from '../service/redditService';
+import UpdateImageDataModal from './UpdateImageDataModal';
+import './../App.css';
 
 const UploadedMediaContainer = () => {
-    const navigate = useNavigate()
+    const navigate = useNavigate();
     const [mediaFiles, setMediaFiles] = useState([]);
     const [selectedImages, setSelectedImages] = useState([]);
+    const [showModal, setShowModal] = useState(false); // State variable to track whether the modal should be displayed or not
+    const [imageMetadata, setImageMetadata] = useState([]);
 
     useEffect(() => {
         const getAllMedia = async () => {
@@ -16,9 +20,30 @@ const UploadedMediaContainer = () => {
         getAllMedia();
     }, []);
 
+    useEffect(() => {
+        if (selectedImages.length > 0) {
+            // Fetch photo metadata when selected images change
+            fetchPhotoMetadata(selectedImages);
+        } else {
+            // Clear metadata when no images are selected
+            setImageMetadata([]);
+        }
+    }, [selectedImages]);
+
+    const fetchPhotoMetadata = async (selectedImageIndexes) => {
+        try {
+            const selectedFileNames = selectedImageIndexes.map(index => mediaFiles[index].fileName);
+            // Call getPhotoMetadata method to fetch metadata based on selected file names
+            const metadata = await getPhotoMetadata(selectedFileNames);
+            setImageMetadata(metadata);
+        } catch (error) {
+            console.error('Error fetching photo metadata:', error);
+        }
+    };
+
     const handleButtonClick = async () => {
         // Handle button click event
-    }
+    };
 
     const handleDeleteClick = async () => {
         // Make a database call to delete selected files
@@ -37,14 +62,28 @@ const UploadedMediaContainer = () => {
         }
     };
 
-    const renderDeleteButton = () => {
+    const handleEditClick = () => {
+        console.log("Edit clicked");
+        // Implement edit logic here
+        setShowModal(true); // Set showModal state to true to display the modal
+    };
 
-        return(
-            <button style={{ backgroundColor: 'red', color: 'white', marginTop: '10px' }} onClick={handleDeleteClick}>
+    const closeModal = () => {
+        setShowModal(false); // Function to close the modal
+    };
+
+    const renderDeleteButton = () => {
+        return (
+            <div style={{ display: 'flex', justifyContent: 'center'}}>
+                <button style={{ backgroundColor: 'red', color: 'white', marginTop: '10px' }} onClick={handleDeleteClick}>
                     Delete
-            </button>
-        )
-    }
+                </button>
+                <button style={{ backgroundColor: 'blue', color: 'white', marginTop: '10px', marginLeft: '5px' }} onClick={handleEditClick}>
+                    Edit
+                </button>
+            </div>
+        );
+    };
 
     const RenderImages = ({ fileObjects }) => {
         // const [selectedImages, setSelectedImages] = useState([]);
@@ -114,18 +153,16 @@ const UploadedMediaContainer = () => {
             <h1>Hi mam</h1>
             <h2>hi to yo mama too</h2>
             <button onClick={handleButtonClick}>Click to say hi to ya mum</button>
-
+            
+            {selectedImages.length > 0 && renderDeleteButton()} {/* Render delete and edit buttons */}
+            
+            {mediaFiles.length > 0 && <RenderImages fileObjects={mediaFiles} />} {/* Render images */}
             <div>
-            {selectedImages.length > 0 && renderDeleteButton()}
-            </div>
-
-            <div>
-                {mediaFiles.length > 0 &&
-                <RenderImages fileObjects={mediaFiles} />}
+                {showModal && <UpdateImageDataModal imageData={imageMetadata} closeModal={closeModal} />} 
             </div>
             
         </div>
-    )
+    );
 }
 
 export default UploadedMediaContainer;
