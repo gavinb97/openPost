@@ -10,7 +10,7 @@ app.use(bodyParser.json());
 const multer = require('multer');
 const fs = require('fs').promises;
 const path = require('path');
-
+const {appendOrWriteToJsonFile, deleteFromPhotoData} = require('./utils')
 
 // Multer storage configuration
 const storage = multer.diskStorage({
@@ -37,30 +37,46 @@ const upload = multer({ storage: storage })
 // Endpoint for handling file uploads
 app.post('/upload', upload.single('file'), async (req, res) => {
     try {
-      // File uploaded successfully
-      console.log('File uploaded:', req.file);
-  
-      // Extract filename
-    const fileName = req.file.filename;
+        // File uploaded successfully
+        console.log('File uploaded:', req.file);
 
-    let categories;
-    if (req.body.categories) {
-       categories = req.body.categories; 
-    }
-    
-      // Respond with success status
-      const responseObj = {
-        file: fileName,
-        status: 'Success',
-        categories: categories || []
-      }
-      res.status(200).send(responseObj);
+        // Extract filename
+        const fileName = req.file.filename;
+        console.log(req.body.categories)
+
+        let description = '';
+        if (req.body.description) {
+            description = req.body.description;
+        }
+
+        let categories = []
+        if (req.body.categories) {
+            categories = JSON.parse(req.body.categories)
+        }
+
+        // Construct the metadata object
+        const metadata = {
+            name: fileName,
+            description: description,
+            categories: categories
+        };
+
+        // Append metadata to the JSON file
+        appendOrWriteToJsonFile('photoData.txt', metadata);
+
+        // Respond with success status
+        const responseObj = {
+            file: fileName,
+            status: 'Success',
+            description: description
+        };
+        res.status(200).send(responseObj);
     } catch (error) {
-      // Error handling
-      console.error('Error uploading file:', error);
-      res.status(500).send('Error uploading file.');
+        // Error handling
+        console.error('Error uploading file:', error);
+        res.status(500).send('Error uploading file.');
     }
-})
+});
 
 
 // Endpoint to get the names of all files within the uploads folder
@@ -121,6 +137,8 @@ app.post('/deletebyname', async (req, res) => {
             // File does not exist or error occurred during deletion
             console.error(`Error deleting file "${fileName}":`, err);
         }
+
+        deleteFromPhotoData(filesToDelete)
     }
 
     res.status(200).send('Files deletion request received.');

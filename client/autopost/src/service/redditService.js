@@ -27,7 +27,7 @@ export const uploadFile = async (file, fileName) => {
         // Create FormData object
         const bodyForm = new FormData();
         bodyForm.append('file', blob, fileName);
-        bodyForm.append('categories', JSON.stringify(['cat', 'god'])); // Convert categories array to JSON string
+        bodyForm.append('categories', JSON.stringify([])); // Convert categories array to JSON string
 
         try {
             const uploadResponse = await axios.post(

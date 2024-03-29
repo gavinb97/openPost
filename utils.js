@@ -291,6 +291,29 @@ const shuffleArray = array => {
     return array;
 }
 
+const deleteFromPhotoData = (fileNamesToDelete) => {
+    try {
+        // Read the contents of the file
+        const fileContents = fs.readFileSync('photoData.txt', 'utf8');
+        
+        // Parse the contents as JSON
+        let photoData = JSON.parse(fileContents);
+        
+        // Filter out objects with names matching fileNamesToDelete
+        photoData = photoData.filter(obj => !fileNamesToDelete.includes(obj.name));
+        
+        // Convert back to JSON string
+        const newData = JSON.stringify(photoData, null, 2);
+        
+        // Write the updated data back to the file
+        fs.writeFileSync('photoData.txt', newData);
+        
+        console.log('File names deleted successfully from photoData.txt');
+    } catch (error) {
+        console.error('Error deleting file names from photoData.txt:', error);
+    }
+}
+
 
 module.exports ={
     deleteFilesInDirectory, 
@@ -317,5 +340,6 @@ module.exports ={
     selectRandomStrings,
     getRandomInterval,
     getRandomStringFromStringArray,
-    shuffleArray
+    shuffleArray,
+    deleteFromPhotoData
 } 

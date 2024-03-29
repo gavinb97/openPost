@@ -8,3 +8,5 @@ node_modules/
 *.mp3
 *.png
 *.json
+*.jpg
+*.webp
