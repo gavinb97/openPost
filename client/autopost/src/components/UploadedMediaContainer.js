@@ -86,7 +86,7 @@ const UploadedMediaContainer = () => {
     };
 
     const RenderImages = ({ fileObjects }) => {
-        // const [selectedImages, setSelectedImages] = useState([]);
+        const [selectedImages, setSelectedImages] = useState([]);
     
         const imagesPerRow = 4; // Maximum number of images per row
     
@@ -107,16 +107,9 @@ const UploadedMediaContainer = () => {
             let newSelectedImages = [];
     
             if (selectedIndex === -1) {
-                newSelectedImages = newSelectedImages.concat(selectedImages, index);
-            } else if (selectedIndex === 0) {
-                newSelectedImages = newSelectedImages.concat(selectedImages.slice(1));
-            } else if (selectedIndex === selectedImages.length - 1) {
-                newSelectedImages = newSelectedImages.concat(selectedImages.slice(0, -1));
-            } else if (selectedIndex > 0) {
-                newSelectedImages = newSelectedImages.concat(
-                    selectedImages.slice(0, selectedIndex),
-                    selectedImages.slice(selectedIndex + 1),
-                );
+                newSelectedImages = [...selectedImages, index];
+            } else {
+                newSelectedImages = selectedImages.filter((item) => item !== index);
             }
     
             setSelectedImages(newSelectedImages);
@@ -127,19 +120,21 @@ const UploadedMediaContainer = () => {
                 {rows.map((row, rowIndex) => (
                     <div key={rowIndex} style={{ display: 'flex', justifyContent: 'center' }}>
                         {row.map((fileObject, imageIndex) => (
-                            <div key={imageIndex} className="image-box" style={{ margin: '10px', textAlign: 'center', width: '200px' }}>
+                            <div key={imageIndex} className={`image-box ${selectedImages.includes(rowIndex * imagesPerRow + imageIndex) ? 'selected' : ''}`} style={{ margin: '10px', textAlign: 'center', width: '200px' }} onClick={() => handleImageSelect(rowIndex, imageIndex)}>
                                 <input
                                     type="checkbox"
                                     checked={selectedImages.includes(rowIndex * imagesPerRow + imageIndex)}
                                     onChange={() => handleImageSelect(rowIndex, imageIndex)}
                                 />
-                                <img
-                                    src={`data:image/png;base64,${fileObject.fileData}`} // Assuming the images are PNG format
-                                    alt={fileObject.fileName}
-                                    className="image"
-                                    style={{ width: '100%', height: 'auto', maxWidth: '100%' }}
-                                />
-                                <p className="image-name">{fileObject.fileName}</p>
+                                <div className="image-wrapper">
+                                    <img
+                                        src={`data:image/png;base64,${fileObject.fileData}`} // Assuming the images are PNG format
+                                        alt={fileObject.fileName}
+                                        className="image"
+                                        style={{ width: '100%', height: 'auto', maxWidth: '100%' }}
+                                    />
+                                    {/* <p className="image-name">{fileObject.fileName}</p> */}
+                                </div>
                             </div>
                         ))}
                     </div>
@@ -147,7 +142,6 @@ const UploadedMediaContainer = () => {
             </div>
         );
     };
-
     return (
         <div>
             <h1>Uploaded Photos</h1>

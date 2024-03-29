@@ -93,3 +93,22 @@
   width: 75%; /* Set width to 75% of viewport width */
   max-width: 500px; /* Set maximum width */
 }
+
+.image-box {
+  /* Add other styles */
+  border: 1px solid transparent; /* Initially set to transparent */
+}
+
+.image-box.selected {
+  border-color: lightgrey; /* Change border color when selected */
+}
+
+.image-name {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: rgba(255, 255, 255, 0.7);
+  padding: 5px;
+  margin: 0;
+}
