@@ -108,18 +108,21 @@ const UploadedMediaContainerSmall = () => {
             </div>
         );
     };
-    if(mediaFiles) {
-            return (
+
+    const handleImageClick = (index) => {
+        if (selectedImages.includes(index)) {
+            setSelectedImages(selectedImages.filter(item => item !== index));
+        } else {
+            setSelectedImages([...selectedImages, index]);
+        }
+    };
+
+    return (
         <div>
             <div className="image-container-outer" style={{ overflowX: 'scroll', height: '17vw', width: '100vw', display: 'flex', justifyContent: 'flex-start', border: '10px solid #ccc', padding: '10px'}}>
                 <div className="image-container" style={{ display: 'flex', flexWrap: 'nowrap'}}>
                     {mediaFiles.map((fileObject, index) => (
-                        <div key={index} className={`image-box ${selectedImages.includes(index) ? 'selected' : ''}`} style={{ margin: '0 10px', textAlign: 'center', width: '200px' }} onClick={() => setSelectedImages(prev => prev.includes(index) ? prev.filter(item => item !== index) : [...prev, index])}>
-                            <input
-                                type="checkbox"
-                                checked={selectedImages.includes(index)}
-                                onChange={() => setSelectedImages(prev => prev.includes(index) ? prev.filter(item => item !== index) : [...prev, index])}
-                            />
+                        <div key={index} className={`image-box ${selectedImages.includes(index) ? 'selected' : ''}`} style={{ margin: '0 10px', textAlign: 'center', width: '200px' }} onClick={() => handleImageClick(index)}>
                             <div className="image-wrapper">
                                 <img
                                     src={`data:image/png;base64,${fileObject.fileData}`} // Assuming the images are PNG format
@@ -127,7 +130,7 @@ const UploadedMediaContainerSmall = () => {
                                     className="image"
                                     style={{ width: '100%', height: 'auto', maxWidth: '100%' }}
                                 />
-                                {/* <p className="image-name">{fileObject.fileName}</p> */}
+                                <div className="image-number">{selectedImages.indexOf(index) !== -1 ? selectedImages.indexOf(index) + 1 : ''}</div>
                             </div>
                         </div>
                     ))}
@@ -138,15 +141,11 @@ const UploadedMediaContainerSmall = () => {
                 {selectedImages.length > 0 && renderPhotoActionButtons()}
             </div>
             <div>
-            {showModal && <UpdateImageDataModal imageData={imageMetadata} closeModal={closeModal} updatePhotoMetadata={updatePhotoMetadata} />}
-            {showScheduleModal && <SetScheduleModal closeModal={closeModal}></SetScheduleModal>} 
+                {showModal && <UpdateImageDataModal imageData={imageMetadata} closeModal={closeModal} updatePhotoMetadata={updatePhotoMetadata} />}
+                {showScheduleModal && <SetScheduleModal closeModal={closeModal}></SetScheduleModal>} 
             </div>
         </div>
-        );
-    }
-
-    
-    
+    );
 }
 
 export default UploadedMediaContainerSmall;

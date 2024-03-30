@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-
+import TagInputComponent from './TagInputComponent'; // Import the TagInputComponent
 import './../App.css';
 
 const SetScheduleModal = ({ closeModal }) => {
@@ -32,6 +32,34 @@ const SetScheduleModal = ({ closeModal }) => {
             <option value="instagram">Instagram</option>
             <option value="facebook">Facebook</option>
             <option value="reddit">Reddit</option>
+          </select>
+        </div>
+        {/* Conditionally render the TagInputComponent when Twitter is selected */}
+        {selectedWebsite === 'twitter' && <label>Tags: </label>}
+        {selectedWebsite === 'twitter' && <TagInputComponent />}
+    
+        <br></br>
+        <div className="input-group">
+        <label>Picture post order: </label>
+          <select
+            id="postOrderSelect"
+            // value={selectedWebsite}
+            // onChange={handleWebsiteChange}
+          >
+            <option value="random">Random</option>
+            <option value="select">Select Post Order</option>
+          </select>
+        </div>
+
+        <div className="input-group">
+        <label>Schedule Type: </label>
+          <select
+            id="postOrderSelect"
+            // value={selectedWebsite}
+            // onChange={handleWebsiteChange}
+          >
+            <option value="random">Random</option>
+            <option value="predetermined">Predetermined</option>
           </select>
         </div>
         <button onClick={handleSave}>Save</button>

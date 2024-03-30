@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
-import TagInput from 'react-tag-input';
-import 'react-tag-input/example/reactTags.css'
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
+import {WithOutContext as TagInput} from 'react-tag-input';
+// import 'react-tag-input/example/reactTags.css'
 
 const TagInputComponent = () => {
     const [tags, setTags] = useState([]);
@@ -14,13 +16,14 @@ const TagInputComponent = () => {
     };
   
     return (
-      <TagInput
-        tags={tags}
-        handleAddition={handleAddition}
-        handleDelete={handleDelete}
-      />
+      <DndProvider backend={HTML5Backend}>
+        <TagInput
+          tags={tags}
+          handleAddition={handleAddition}
+          handleDelete={handleDelete}
+        />
+      </DndProvider>
     );
-  };
-  
+};
 
-  export default TagInputComponent;
+export default TagInputComponent;
