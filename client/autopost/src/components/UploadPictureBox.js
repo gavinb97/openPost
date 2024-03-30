@@ -48,10 +48,7 @@ const UploadPictureBox = () => {
         }
     };
 
-    useEffect(() => {
-        // Restore the scroll position after the page reloads
-        window.scrollTo(0, scrollPosition);
-    }, [scrollPosition]);
+    
 
     return (
         <div className="upload-box-container">

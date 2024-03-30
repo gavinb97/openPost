@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { fetchAllFiles, deleteByName, getPhotoMetadata, updatePhotoMetadata } from '../service/redditService';
 import UpdateImageDataModal from './UpdateImageDataModal';
+import SetScheduleModal from '../components/SetScheduleModal';
 import './../App.css';
 
 const UploadedMediaContainerSmall = () => {
@@ -9,6 +10,7 @@ const UploadedMediaContainerSmall = () => {
     const [mediaFiles, setMediaFiles] = useState([]);
     const [selectedImages, setSelectedImages] = useState([]);
     const [showModal, setShowModal] = useState(false); // State variable to track whether the modal should be displayed or not
+    const [showScheduleModal, setShowScheduleModal] = useState(false)
     const [imageMetadata, setImageMetadata] = useState([]);
 
     useEffect(() => {
@@ -57,6 +59,7 @@ const UploadedMediaContainerSmall = () => {
             const updatedFiles = mediaFiles.filter((file, index) => !selectedImages.includes(index));
             setMediaFiles(updatedFiles);
             setSelectedImages([]); // Clear selected images after deletion
+            window.location.reload();
         } catch (error) {
             console.error("Error deleting files:", error);
         }
@@ -70,9 +73,24 @@ const UploadedMediaContainerSmall = () => {
 
     const closeModal = () => {
         setShowModal(false); // Function to close the modal
+        setShowScheduleModal(false);
     };
 
+    const handleScheduleClick = () => {
+        setShowScheduleModal(true)
+    }
+
     const renderPhotoActionButtons = () => {
+        const handleSelectAll = () => {
+            if (selectedImages.length === mediaFiles.length) {
+                // If all images are already selected, unselect all
+                setSelectedImages([]);
+            } else {
+                // Select all images
+                setSelectedImages(mediaFiles.map((_, index) => index));
+            }
+        };
+    
         return (
             <div style={{ display: 'flex', justifyContent: 'center'}}>
                 <button style={{ backgroundColor: 'red', color: 'white', marginTop: '10px' }} onClick={handleDeleteClick}>
@@ -81,34 +99,53 @@ const UploadedMediaContainerSmall = () => {
                 <button style={{ backgroundColor: 'blue', color: 'white', marginTop: '10px', marginLeft: '5px' }} onClick={handleEditClick}>
                     View / Edit
                 </button>
+                <button style={{ backgroundColor: 'green', color: 'white', marginTop: '10px', marginLeft: '5px' }} onClick={handleScheduleClick}>
+                    Schedule
+                </button>
+                <button style={{ backgroundColor: 'purple', color: 'white', marginTop: '10px', marginLeft: '5px' }} onClick={handleSelectAll}>
+                    {selectedImages.length === mediaFiles.length ? 'Unselect All' : 'Select All'}
+                </button>
             </div>
         );
     };
-
-    return (
-        <div className="image-container-outer" style={{ overflowX: 'scroll', height: '17vw', width: '100vw', display: 'flex', justifyContent: 'flex-start', border: '10px solid #ccc', padding: '10px'}}>
-            <div className="image-container" style={{ display: 'flex', flexWrap: 'nowrap'}}>
-                {mediaFiles.map((fileObject, index) => (
-                    <div key={index} className={`image-box ${selectedImages.includes(index) ? 'selected' : ''}`} style={{ margin: '0 10px', textAlign: 'center', width: '200px' }} onClick={() => setSelectedImages(prev => prev.includes(index) ? prev.filter(item => item !== index) : [...prev, index])}>
-                        <input
-                            type="checkbox"
-                            checked={selectedImages.includes(index)}
-                            onChange={() => setSelectedImages(prev => prev.includes(index) ? prev.filter(item => item !== index) : [...prev, index])}
-                        />
-                        <div className="image-wrapper">
-                            <img
-                                src={`data:image/png;base64,${fileObject.fileData}`} // Assuming the images are PNG format
-                                alt={fileObject.fileName}
-                                className="image"
-                                style={{ width: '100%', height: 'auto', maxWidth: '100%' }}
+    if(mediaFiles) {
+            return (
+        <div>
+            <div className="image-container-outer" style={{ overflowX: 'scroll', height: '17vw', width: '100vw', display: 'flex', justifyContent: 'flex-start', border: '10px solid #ccc', padding: '10px'}}>
+                <div className="image-container" style={{ display: 'flex', flexWrap: 'nowrap'}}>
+                    {mediaFiles.map((fileObject, index) => (
+                        <div key={index} className={`image-box ${selectedImages.includes(index) ? 'selected' : ''}`} style={{ margin: '0 10px', textAlign: 'center', width: '200px' }} onClick={() => setSelectedImages(prev => prev.includes(index) ? prev.filter(item => item !== index) : [...prev, index])}>
+                            <input
+                                type="checkbox"
+                                checked={selectedImages.includes(index)}
+                                onChange={() => setSelectedImages(prev => prev.includes(index) ? prev.filter(item => item !== index) : [...prev, index])}
                             />
-                            {/* <p className="image-name">{fileObject.fileName}</p> */}
+                            <div className="image-wrapper">
+                                <img
+                                    src={`data:image/png;base64,${fileObject.fileData}`} // Assuming the images are PNG format
+                                    alt={fileObject.fileName}
+                                    className="image"
+                                    style={{ width: '100%', height: 'auto', maxWidth: '100%' }}
+                                />
+                                {/* <p className="image-name">{fileObject.fileName}</p> */}
+                            </div>
                         </div>
-                    </div>
-                ))}
+                    ))}
+                </div>
+            </div>
+            {/* Render photo action buttons below the main container */}
+            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '10px' }}>
+                {selectedImages.length > 0 && renderPhotoActionButtons()}
+            </div>
+            <div>
+            {showModal && <UpdateImageDataModal imageData={imageMetadata} closeModal={closeModal} updatePhotoMetadata={updatePhotoMetadata} />}
+            {showScheduleModal && <SetScheduleModal closeModal={closeModal}></SetScheduleModal>} 
             </div>
         </div>
-    );
+        );
+    }
+
+    
     
 }
 
