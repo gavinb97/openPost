@@ -6,6 +6,7 @@ import './../App.css';
 const UploadPictureBox = () => {
     const [pictureFiles, setPictureFiles] = useState([]);
     const [videoFiles, setVideoFiles] = useState([]);
+    const [scrollPosition, setScrollPosition] = useState(0); 
     const navigate = useNavigate();
 
     const handleFileSelect = (event, fileType) => {
@@ -36,10 +37,21 @@ const UploadPictureBox = () => {
             // Reset the file inputs after uploading files
             pictureInput.value = '';
             videoInput.value = '';
+            
+            // Store the current scroll position before reloading the page
+            setScrollPosition(window.pageYOffset || document.documentElement.scrollTop);
+            
+            // Reload the page after uploading files
+            window.location.reload();
         } else {
             console.log('No files selected');
         }
     };
+
+    useEffect(() => {
+        // Restore the scroll position after the page reloads
+        window.scrollTo(0, scrollPosition);
+    }, [scrollPosition]);
 
     return (
         <div className="upload-box-container">
