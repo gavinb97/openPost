@@ -4,7 +4,7 @@ import './../App.css';
 
 const daysOfWeek = ['S', 'M', 'T', 'W', 'Th', 'F', 'Sa'];
 
-const SetScheduleModal = ({ closeModal }) => {
+const SetScheduleModal = ({ closeModal, selectedImages }) => {
   const [selectedWebsite, setSelectedWebsite] = useState('twitter'); // State for selected website
   const [picturePostOrder, setPicturePostOrder] = useState('random'); // State for picture post order
   const [scheduleType, setScheduleType] = useState('random'); // State for schedule type
@@ -48,15 +48,16 @@ const SetScheduleModal = ({ closeModal }) => {
     setHourInterval(parseInt(e.target.value));
   };
 
+  const handleAddTime = () => {
+    setTimesOfDay([...timesOfDay, { hour: '1', minute: '00', ampm: 'am' }]);
+  };
+  
   const handleTimeChange = (index, field, value) => {
     const updatedTimesOfDay = [...timesOfDay];
     updatedTimesOfDay[index][field] = value;
     setTimesOfDay(updatedTimesOfDay);
   };
-
-  const handleAddTime = () => {
-    setTimesOfDay([...timesOfDay, { hour: '', minute: '', ampm: 'am' }]);
-  };
+  
 
   const handleRemoveTime = (index) => {
     const updatedTimesOfDay = [...timesOfDay];
@@ -65,12 +66,21 @@ const SetScheduleModal = ({ closeModal }) => {
   };
 
   const handleSave = () => {
-    // Handle save operation here
-    console.log('Selected website:', selectedWebsite);
-    console.log('Picture post order:', picturePostOrder);
-    console.log('Schedule type:', scheduleType);
-    console.log('Schedule interval:', scheduleInterval);
-    console.log('Hour interval:', hourInterval);
+    // Create JSON object with all the state data
+    const scheduleData = {
+      selectedWebsite,
+      picturePostOrder,
+      scheduleType,
+      scheduleInterval,
+      hourInterval,
+      timesOfDay,
+      selectedDays,
+      selectedImages
+    };
+  
+    // Log the JSON object
+    console.log('Schedule Data:', scheduleData);
+  
     // Close modal
     closeModal();
   };

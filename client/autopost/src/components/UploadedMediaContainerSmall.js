@@ -9,13 +9,12 @@ const UploadedMediaContainerSmall = () => {
     const navigate = useNavigate();
     const [mediaFiles, setMediaFiles] = useState([]);
     const [selectedImages, setSelectedImages] = useState([]);
-    const [showModal, setShowModal] = useState(false); // State variable to track whether the modal should be displayed or not
-    const [showScheduleModal, setShowScheduleModal] = useState(false)
+    const [showModal, setShowModal] = useState(false);
+    const [showScheduleModal, setShowScheduleModal] = useState(false);
     const [imageMetadata, setImageMetadata] = useState([]);
 
     useEffect(() => {
         const getAllMedia = async () => {
-            // Fetch media files
             const files = await fetchAllFiles();
             setMediaFiles(files);
         };
@@ -24,10 +23,8 @@ const UploadedMediaContainerSmall = () => {
 
     useEffect(() => {
         if (selectedImages.length > 0) {
-            // Fetch photo metadata when selected images change
             fetchPhotoMetadata(selectedImages);
         } else {
-            // Clear metadata when no images are selected
             setImageMetadata([]);
         }
     }, [selectedImages]);
@@ -35,7 +32,6 @@ const UploadedMediaContainerSmall = () => {
     const fetchPhotoMetadata = async (selectedImageIndexes) => {
         try {
             const selectedFileNames = selectedImageIndexes.map(index => mediaFiles[index].fileName);
-            // Call getPhotoMetadata method to fetch metadata based on selected file names
             const metadata = await getPhotoMetadata(selectedFileNames);
             setImageMetadata(metadata);
         } catch (error) {
@@ -43,22 +39,14 @@ const UploadedMediaContainerSmall = () => {
         }
     };
 
-    const handleButtonClick = async () => {
-        // Handle button click event
-    };
-
     const handleDeleteClick = async () => {
-        // Make a database call to delete selected files
         try {
             const selectedFileNames = selectedImages.map(index => mediaFiles[index].fileName);
             console.log("Deleting files:", selectedFileNames);
-            // Call the deleteByName method from redditService
             await deleteByName(selectedFileNames);
-            
-            // Remove deleted files from the screen
             const updatedFiles = mediaFiles.filter((file, index) => !selectedImages.includes(index));
             setMediaFiles(updatedFiles);
-            setSelectedImages([]); // Clear selected images after deletion
+            setSelectedImages([]);
             window.location.reload();
         } catch (error) {
             console.error("Error deleting files:", error);
@@ -67,26 +55,23 @@ const UploadedMediaContainerSmall = () => {
 
     const handleEditClick = () => {
         console.log("Edit clicked");
-        // Implement edit logic here
-        setShowModal(true); // Set showModal state to true to display the modal
+        setShowModal(true);
     };
 
     const closeModal = () => {
-        setShowModal(false); // Function to close the modal
+        setShowModal(false);
         setShowScheduleModal(false);
     };
 
     const handleScheduleClick = () => {
-        setShowScheduleModal(true)
+        setShowScheduleModal(true);
     }
 
     const renderPhotoActionButtons = () => {
         const handleSelectAll = () => {
             if (selectedImages.length === mediaFiles.length) {
-                // If all images are already selected, unselect all
                 setSelectedImages([]);
             } else {
-                // Select all images
                 setSelectedImages(mediaFiles.map((_, index) => index));
             }
         };
@@ -117,6 +102,9 @@ const UploadedMediaContainerSmall = () => {
         }
     };
 
+    // Extract filenames of selected images
+    const selectedImageNames = selectedImages.map(index => mediaFiles[index]?.fileName);
+
     return (
         <div>
             <div className="image-container-outer" style={{ overflowX: 'scroll', height: '17vw', width: '100vw', display: 'flex', justifyContent: 'flex-start', border: '10px solid #ccc', padding: '10px'}}>
@@ -136,13 +124,13 @@ const UploadedMediaContainerSmall = () => {
                     ))}
                 </div>
             </div>
-            {/* Render photo action buttons below the main container */}
             <div style={{ display: 'flex', justifyContent: 'center', marginTop: '10px' }}>
                 {selectedImages.length > 0 && renderPhotoActionButtons()}
             </div>
             <div>
+                {/* Pass selected image names to SetScheduleModal */}
                 {showModal && <UpdateImageDataModal imageData={imageMetadata} closeModal={closeModal} updatePhotoMetadata={updatePhotoMetadata} />}
-                {showScheduleModal && <SetScheduleModal closeModal={closeModal}></SetScheduleModal>} 
+                {showScheduleModal && <SetScheduleModal closeModal={closeModal} selectedImages={selectedImageNames}></SetScheduleModal>} 
             </div>
         </div>
     );
