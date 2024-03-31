@@ -51,11 +51,6 @@ const UpdateImageDataModal = ({ imageData, closeModal, updatePhotoMetadata }) =>
                 handleDelete={(indexToRemove) => handleChange({ target: { name: 'categories', value: item.categories.filter((_, i) => i !== indexToRemove) } }, index)}
               />
               </div>
-              {/* <TagInputComponent 
-                tags={item.categories.map(category => ({ id: category, text: category }))}
-                handleAddition={(tag) => handleChange({ target: { name: 'categories', value: [...item.categories, tag.text] } }, index)}
-                handleDelete={(indexToRemove) => handleChange({ target: { name: 'categories', value: item.categories.filter((_, i) => i !== indexToRemove) } }, index)}
-              /> */}
             </div>
           </div>
         ))}
