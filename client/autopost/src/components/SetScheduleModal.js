@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import TagInputComponent from './TagInputComponent'; // Import the TagInputComponent
 import './../App.css';
 
+const daysOfWeek = ['S', 'M', 'T', 'W', 'Th', 'F', 'Sa'];
+
 const SetScheduleModal = ({ closeModal }) => {
   const [selectedWebsite, setSelectedWebsite] = useState('twitter'); // State for selected website
   const [picturePostOrder, setPicturePostOrder] = useState('random'); // State for picture post order
@@ -9,7 +11,22 @@ const SetScheduleModal = ({ closeModal }) => {
   const [scheduleInterval, setScheduleInterval] = useState(''); // State for schedule interval if schedule type is "scheduled"
   const [hourInterval, setHourInterval] = useState(1); // State for hour interval
   const [timesOfDay, setTimesOfDay] = useState([{ hour: '', minute: '', ampm: 'am' }]);
+  const [selectedDays, setSelectedDays] = useState({
+    S: false,
+    M: false,
+    T: false,
+    W: false,
+    Th: false,
+    F: false,
+    Sa: false
+  });
 
+  const handleDayClick = (day) => {
+    setSelectedDays(prevState => ({
+      ...prevState,
+      [day]: !prevState[day]
+    }));
+  };
 
   const handleWebsiteChange = (e) => {
     setSelectedWebsite(e.target.value);
@@ -141,16 +158,16 @@ const SetScheduleModal = ({ closeModal }) => {
                   onChange={(e) => handleTimeChange(index, 'hour', e.target.value)}
                 >
                   {[...Array(12)].map((_, index) => (
-                <option key={index} value={index + 1}>{index + 1}</option>
-              ))}
+                    <option key={index} value={index + 1}>{index + 1}</option>
+                  ))}
                 </select>
                 <select
                   value={time.minute}
                   onChange={(e) => handleTimeChange(index, 'minute', e.target.value)}
                 >
                   {[...Array(60)].map((_, index) => (
-                <option key={index} value={index }>{index < 10 ? `0${index}` : index}</option>
-              ))}
+                    <option key={index} value={index }>{index < 10 ? `0${index}` : index}</option>
+                  ))}
                 </select>
                 <select
                   value={time.ampm}
@@ -165,6 +182,20 @@ const SetScheduleModal = ({ closeModal }) => {
               </div>
             ))}
             <button onClick={handleAddTime}>Add Time</button>
+          </div>
+        )}
+
+        {scheduleType === 'scheduled' && scheduleInterval === 'set' && (
+          <div className="input-group">
+            {daysOfWeek.map((day, index) => (
+              <button
+                key={index}
+                className={selectedDays[day] ? 'selected-day' : ''}
+                onClick={() => handleDayClick(day)}
+              >
+                {day}
+              </button>
+            ))}
           </div>
         )}
 
