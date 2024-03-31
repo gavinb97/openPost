@@ -20,15 +20,18 @@ const TagInputComponent = ({ tags, handleAddition, handleDelete }) => {
   const handleTagDelete = (indexToRemove) => {
     handleDelete(indexToRemove); // Pass the index of the deleted tag to the handleDelete function
   };
-  
 
   return (
     <DndProvider backend={HTML5Backend}>
-      <TagInput
-        tags={inputTags.map(tag => tag.text)} // Extract text from each tag object
-        handleAddition={handleTagAddition}
-        handleDelete={handleTagDelete}
-      />
+      <div style={{ display: 'flex', alignItems: 'left' }}>
+          <TagInput 
+            tags={inputTags.map(tag => tag.text)} // Extract text from each tag object
+            handleAddition={handleTagAddition}
+            handleDelete={handleTagDelete}
+            inputFieldPosition='top'
+          />
+       
+      </div>
     </DndProvider>
   );
 };
