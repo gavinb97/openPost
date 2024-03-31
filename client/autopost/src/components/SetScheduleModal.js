@@ -23,6 +23,7 @@ const SetScheduleModal = ({ closeModal }) => {
         <h2>Set Posting Schedule</h2>
         <div className="input-group">
           <label htmlFor="website">Website:</label>
+          
           <select
             id="website"
             value={selectedWebsite}
@@ -47,7 +48,7 @@ const SetScheduleModal = ({ closeModal }) => {
             // onChange={handleWebsiteChange}
           >
             <option value="random">Random</option>
-            <option value="select">Select Post Order</option>
+            <option value="order">In order</option>
           </select>
         </div>
 

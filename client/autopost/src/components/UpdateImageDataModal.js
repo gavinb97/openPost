@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import TagInputComponent from './TagInputComponent'; 
 
 const UpdateImageDataModal = ({ imageData, closeModal, updatePhotoMetadata }) => {
   const [updatedData, setUpdatedData] = useState(imageData);
@@ -9,6 +10,7 @@ const UpdateImageDataModal = ({ imageData, closeModal, updatePhotoMetadata }) =>
     newData[index][name] = value;
     setUpdatedData(newData);
   };
+  
 
   const handleSave = () => {
     // Perform save operation with updatedData
@@ -43,16 +45,10 @@ const UpdateImageDataModal = ({ imageData, closeModal, updatePhotoMetadata }) =>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
               <label style={{marginRight: 10}}>Categories:</label>
-              <input
-                type="text"
-                name="categories"
-                value={item.categories.join(', ')} // Convert array to string for display
-                onChange={(e) =>
-                  handleChange(
-                    { target: { name: 'categories', value: e.target.value.split(', ') } }, // Convert string back to array
-                    index
-                  )
-                }
+              <TagInputComponent 
+                tags={item.categories.map(category => ({ id: category, text: category }))} // Populate existing categories
+                handleAddition={(tag) => handleChange({ target: { name: 'categories', value: [...item.categories, tag.text] } }, index)} // Add new category
+                handleDelete={(indexToRemove) => handleChange({ target: { name: 'categories', value: item.categories.filter((_, i) => i !== indexToRemove) } }, index)} // Remove category
               />
             </div>
           </div>
