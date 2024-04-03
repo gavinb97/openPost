@@ -144,7 +144,7 @@ const getMP3FileName = (relativePath) => {
 }
 
 const writeTextToFile = async (text, fileName) => {
-    fs.writeFile(fileName, text, (err) => {
+    fs.promises.writeFile(fileName, text, (err) => {
         if (err) {
             console.error('Error writing to file:', err);
         } else {
@@ -314,6 +314,16 @@ const deleteFromPhotoData = (fileNamesToDelete) => {
     }
 }
 
+const readTxtFile = async (filePath) => {
+    try {
+        const fileContent = await fs.promises.readFile(filePath, 'utf8');
+        return fileContent;
+    } catch (error) {
+        console.error('Error reading file:', error);
+        throw error; // Throw the error to handle it outside
+    }
+}
+
 
 module.exports ={
     deleteFilesInDirectory, 
@@ -341,5 +351,6 @@ module.exports ={
     getRandomInterval,
     getRandomStringFromStringArray,
     shuffleArray,
-    deleteFromPhotoData
+    deleteFromPhotoData,
+    readTxtFile
 } 

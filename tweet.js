@@ -60,6 +60,8 @@ const uploadAndTweet = async (mediaPath, tweetText) => {
     await sendTweetWithVideo(tweetText, mediaID)
 }
 
+// sendTweet('some tweeeet')
+
 module.exports = {
     sendTweet, 
     sendTweetWithVideo,
