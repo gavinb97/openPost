@@ -17,9 +17,9 @@ const storage = multer.diskStorage({
     destination: function (req, file, cb) {
       // Check file type
       if (file.mimetype.startsWith('image')) {
-        cb(null, 'uploads/photos/');
+        cb(null, 'apiresources/uploads/photos/');
       } else if (file.mimetype.startsWith('video')) {
-        cb(null, 'uploads/videos/');
+        cb(null, 'apiresources/uploads/videos/');
       } else {
         // Invalid file type, handle accordingly
         cb(new Error('Invalid file type'));
@@ -81,7 +81,7 @@ app.post('/upload', upload.single('file'), async (req, res) => {
 
 // Endpoint to get the names of all files within the uploads folder
 app.get('/files', async (req, res) => {
-    const uploadsFolder = path.join(__dirname, 'uploads', 'photos');
+    const uploadsFolder = path.join(__dirname, 'apiresources', 'uploads', 'photos');
     try {
         // Read the contents of the uploads folder
         const files = await fs.readdir(uploadsFolder);
@@ -120,7 +120,7 @@ app.post('/deletebyname', async (req, res) => {
     // Ensure fileNames is an array
     const filesToDelete = Array.isArray(fileNames) ? fileNames : [fileNames];
     console.log(filesToDelete);
-    const uploadsFolder = path.join(__dirname, 'uploads', 'photos');
+    const uploadsFolder = path.join(__dirname, 'apiresources', 'uploads', 'photos');
     // Loop through each filename and delete if found in uploads/photos folder
     for (const fileName of filesToDelete) {
         console.log('in loop');
@@ -148,7 +148,7 @@ app.post('/deletebyname', async (req, res) => {
 
   // Endpoint to return all file names along with their actual files
   app.get('/filesWithContent', async (req, res) => {
-    const uploadsFolder = path.join(__dirname, 'uploads');
+    const uploadsFolder = path.join(__dirname, 'apiresources', 'uploads');
     try {
       // Read the contents of the uploads folder
       const files = await fs.readdir(uploadsFolder);
