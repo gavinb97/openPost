@@ -1,59 +1,18 @@
 require("dotenv").config();
-const express = require('express');
 const axios = require('axios');
-const app = express();
-const fetch = require('node-fetch');
-const cookieParser = require('cookie-parser');
-const cors = require('cors');
 const SHA256 = require('crypto-js/sha256')
-const {writeTextToFile, readTokensFromFile, getVideoChunkInfo, getFileSizeInBytes, sleep, generateRandomString} = require('./utils')
+const {writeTextToFile, readTokensFromFile, getVideoChunkInfo, getFileSizeInBytes, sleep, generateRandomString} = require('../utils')
 const fs = require('fs');
-app.use(cookieParser());
-app.use(cors());
 
 
-const generateRandomString = (length) => {
-    let result = '';
-    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~';
-    const charactersLength = characters.length;
-    for (let i = 0; i < length; i++) {
-      result += characters.charAt(Math.floor(Math.random() * charactersLength));
-    }
-    return result;
-}
-
-const CLIENT_KEY = process.env.TIK_TOK_CLIENT_KEY // this value can be found in app's developer portal
-const SERVER_ENDPOINT_REDIRECT = 'https://moral-kindly-fly.ngrok-free.app/callback/' // redirect URI should be registered in developer portal
-const CODE_VERIFIER = generateRandomString(69)
-console.log('Code verifier ' + CODE_VERIFIER)
-const CODE_CHALLENGE = SHA256(CODE_VERIFIER).toString();
-console.log('Code challenge ' + CODE_CHALLENGE)
-const TIKTOK_CLIENT_SECRET = process.env.TIK_TOK_CLIENT_SECRET
-
-
-// app.get('/oauth', (req, res) => {
-//     try {
-//     const csrfState = Math.random().toString(36).substring(2);
-//     res.cookie('csrfState', csrfState, { maxAge: 60000 });
-
-//     let url = `https://www.tiktok.com/v2/auth/authorize/`;
-
-//     // the following params need to be in `application/x-www-form-urlencoded` format.
-//     url += `?client_key=${CLIENT_KEY}`;
-//     url += `&scope=user.info.basic,video.publish`;
-//     url += `&response_type=code`;
-//     url += `&redirect_uri=${SERVER_ENDPOINT_REDIRECT}`;
-//     url += `&state=` + csrfState;
-//     url += `&code_challenge=${CODE_CHALLENGE}`;
-//     url += `&code_challenge_method=S256`
-
-//     res.redirect(url);
-
-//     } catch (err) {
-//         console.log(err)
-//     }
-    
-// })
+const getTikTokLoginUrl = async () => {
+    const CLIENT_KEY = process.env.TIK_TOK_CLIENT_KEY // this value can be found in app's developer portal
+    const SERVER_ENDPOINT_REDIRECT = 'https://moral-kindly-fly.ngrok-free.app/callback/' // redirect URI should be registered in developer portal
+    const CODE_VERIFIER = generateRandomString(69)
+    console.log('Code verifier ' + CODE_VERIFIER)
+    const CODE_CHALLENGE = SHA256(CODE_VERIFIER).toString();
+    console.log('Code challenge ' + CODE_CHALLENGE)
+    const TIKTOK_CLIENT_SECRET = process.env.TIK_TOK_CLIENT_SECRET
 
     const csrfState = Math.random().toString(36).substring(2);
     // res.cookie('csrfState', csrfState, { maxAge: 60000 });
@@ -69,32 +28,8 @@ const TIKTOK_CLIENT_SECRET = process.env.TIK_TOK_CLIENT_SECRET
     url += `&code_challenge=${CODE_CHALLENGE}`;
     url += `&code_challenge_method=S256`
 
-    console.log(url)
-
-app.get('/callback', async (req, res) => {
-    console.log('hitting the callback ooh wee')
- 
-    const code = req.query.code
-  
-    const response = await getAccessTokenAndOpenId(code, CLIENT_KEY, TIKTOK_CLIENT_SECRET);
-    console.log(response)
-
-    const keyStrings = `accessToken: ${response.accessToken}  refreshToken: ${response.refreshToken}`
-    writeTextToFile(keyStrings, 'tiktokkeys.txt')
-    // console.log('gonna refresh token')
-    // const refresh = await refreshAccessToken(response.refreshToken)
-    // console.log(refresh)
-
-    // console.log('gonna revoke')
-    // await revokeAccess(response.accessToken)
-
-    // await queryCreatorInfo(response.accessToken)
-
-    res.redirect('https://google.com');
-})
-
-
-
+    return url
+}
 
 const getAccessTokenAndOpenId = async (code) => {
     let urlAccessToken = `https://open.tiktokapis.com/v2/oauth/token/`;
@@ -274,10 +209,7 @@ const uploadToTikTok = async (videoPath, videoTitle) => {
 }
 
 module.exports = {
-  uploadToTikTok
+  uploadToTikTok,
+  getTikTokLoginUrl,
+  getAccessTokenAndOpenId
 }
-
-// upload('shorts\\ToputitinanutshellIwas.mp4')
-// app.listen(3455, () => {
-//     console.log('running')
-// })

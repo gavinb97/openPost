@@ -1,9 +1,7 @@
 import axios from 'axios';
 
-
-
-export const getRedditLoginUrl = async () => {
-    const endpoint = 'http://localhost:3455/redditloginurl';
+export const getTikTokLoginUrl = async () => {
+    const endpoint = 'http://localhost:3455/tiktokloginurl';
     try {
       const response = await axios.get(endpoint);
       return response.data;

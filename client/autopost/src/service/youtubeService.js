@@ -2,8 +2,8 @@ import axios from 'axios';
 
 
 
-export const getRedditLoginUrl = async () => {
-    const endpoint = 'http://localhost:3455/redditloginurl';
+export const getYoutubeLoginUrl = async () => {
+    const endpoint = 'http://localhost:3455/googleloginurl';
     try {
       const response = await axios.get(endpoint);
       return response.data;
