@@ -45,7 +45,7 @@ app.get('/loginurl', async (req, res) => {
     console.log('sending login url')
     try {
       const loginUrl = await generateTwitterAuthUrl()
-      res.redirect(loginUrl)
+      res.send(loginUrl)
     } catch (error) {
       // Handle errors
       console.error('Error:', error);

@@ -13,7 +13,7 @@ const base64ToBlob = (base64String) => {
 }
 
 export const uploadFile = async (file, fileName) => {
-    const endpoint = 'http://localhost:3455/upload';
+    const endpoint = 'http://localhost:3456/upload';
 
     // Convert file to base64
     const reader = new FileReader();
@@ -50,7 +50,7 @@ export const uploadFile = async (file, fileName) => {
 
 
 export const fetchAllFiles = async () => {
-    const endpoint = 'http://localhost:3455/files';
+    const endpoint = 'http://localhost:3456/files';
     try {
       const response = await axios.get(endpoint);
       
@@ -61,10 +61,25 @@ export const fetchAllFiles = async () => {
     }
   };
 
+
+  export const getRedditLoginUrl = async () => {
+    const endpoint = 'http://localhost:3455/loginurl';
+    try {
+      const response = await axios.get(endpoint);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching login URL:', error);
+      // Handle errors, such as displaying an error message to the user
+      throw error; // Re-throw the error to propagate it further if needed
+    }
+  };
+
+
+
 export const deleteByName = async (fileNames) => {
     console.log(fileNames)
     try {
-        const response = await axios.post('http://localhost:3455/deletebyname', fileNames,
+        const response = await axios.post('http://localhost:3456/deletebyname', fileNames,
         {
             headers: {
                 'Content-Type': 'application/json'
@@ -78,7 +93,7 @@ export const deleteByName = async (fileNames) => {
 
 export const getPhotoMetadata = async (fileNames) => {
     console.log('called metadatacall')
-    const endpoint = 'http://localhost:3455/getphotometadata'
+    const endpoint = 'http://localhost:3456/getphotometadata'
     try {
         const response = await axios.post(endpoint, fileNames);
         return response.data;
@@ -90,7 +105,7 @@ export const getPhotoMetadata = async (fileNames) => {
 
 export const updatePhotoMetadata = async (newData) => {
     try {
-        const response = await axios.post('http://localhost:3455/updatephotometadata', newData);
+        const response = await axios.post('http://localhost:3456/updatephotometadata', newData);
         console.log(response.data); // Log success message
     } catch (error) {
         console.error('Error updating photo metadata:', error.response.data.error);
