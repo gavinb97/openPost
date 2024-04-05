@@ -1,7 +1,7 @@
 import logo from './../logo.svg';
 import './../App.css';
 import React, { useState } from 'react';
-import {uploadFile} from '../service/redditService'
+import {uploadFile} from '../service/userMediaService'
 
 function UploadScreen() {
     const [pictureFiles, setPictureFiles] = useState([]);

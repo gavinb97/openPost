@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { uploadFile } from '../service/redditService';
+import { uploadFile } from '../service/userMediaService';
 import './../App.css';
 
 const UploadPictureBox = () => {

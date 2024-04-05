@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { fetchAllFiles, deleteByName, getPhotoMetadata, updatePhotoMetadata } from '../service/redditService';
+import { fetchAllFiles, deleteByName, getPhotoMetadata, updatePhotoMetadata } from '../service/userMediaService';
 import UpdateImageDataModal from './UpdateImageDataModal';
 import SetScheduleModal from '../components/SetScheduleModal';
 import './../App.css';
@@ -52,7 +52,7 @@ const UploadedMediaContainer = () => {
         try {
             const selectedFileNames = selectedImages.map(index => mediaFiles[index].fileName);
             console.log("Deleting files:", selectedFileNames);
-            // Call the deleteByName method from redditService
+            // Call the deleteByName method from userMediaService
             await deleteByName(selectedFileNames);
             
             // Remove deleted files from the screen

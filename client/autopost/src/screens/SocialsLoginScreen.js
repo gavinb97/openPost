@@ -1,12 +1,13 @@
 import logo from './../logo.svg';
 import './../App.css';
 import React, { useState } from 'react';
-import {uploadFile, getRedditLoginUrl} from '../service/redditService'
+import {uploadFile} from '../service/userMediaService'
+import {getTwitterLoginUrl} from '../service/twitterService'
 
 function SocialsLoginScreen() {
 
-const navigateToRedditLogin = async () => {
-    const url = await getRedditLoginUrl()
+const navigateToTwitterLogin = async () => {
+    const url = await getTwitterLoginUrl()
     window.location.href = url
 }
  
@@ -19,8 +20,8 @@ const navigateToRedditLogin = async () => {
                 </p>
             
                 <div>
-                    <label htmlFor="pictureUpload">Sign in to Reddit:</label>
-                    <button onClick={navigateToRedditLogin}>Login To Reddit</button>
+                    <label htmlFor="pictureUpload">Sign in to X:</label>
+                    <button onClick={navigateToTwitterLogin}>Login To X</button>
                 </div>
                
                 

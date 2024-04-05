@@ -41,7 +41,7 @@ app.get('/xcallback', async (req, res) => {
   });
 
 
-app.get('/loginurl', async (req, res) => {
+app.get('/twitterloginurl', async (req, res) => {
     console.log('sending login url')
     try {
       const loginUrl = await generateTwitterAuthUrl()

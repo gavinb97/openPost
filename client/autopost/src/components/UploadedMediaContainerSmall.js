@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { fetchAllFiles, deleteByName, getPhotoMetadata, updatePhotoMetadata } from '../service/redditService';
+import { fetchAllFiles, deleteByName, getPhotoMetadata, updatePhotoMetadata } from '../service/userMediaService';
 import UpdateImageDataModal from './UpdateImageDataModal';
 import SetScheduleModal from '../components/SetScheduleModal';
 import './../App.css';
