@@ -227,32 +227,52 @@ const writeArrayToJsonFile = (array, filename) => {
     console.log(`Array has been written to ${filename}`);
 }
 
-const appendOrWriteToJsonFile = (filename, newJsonObject) => {
+const appendOrWriteToJsonFile = async (filename, newJsonObject) => {
     let dataToWrite = '';
     let existingJsonArray = [];
 
-    // Check if the file exists
-    if (fs.existsSync(filename)) {
-        // Read existing data from file
-        const existingData = fs.readFileSync(filename, 'utf8').trim();
+    try {
+        // Check if the file exists
+        if (await fs.promises.access(filename).then(() => true).catch(() => false)) {
+            // Read existing data from file
+            const existingData = await fs.promises.readFile(filename, 'utf8');
 
-        // Parse existing data if it's not empty
-        if (existingData !== '') {
-            existingJsonArray = JSON.parse(existingData);
+            // Parse existing data if it's not empty
+            if (existingData !== '') {
+                existingJsonArray = JSON.parse(existingData);
+            }
         }
+
+        // Push new JSON object to the existing array
+        existingJsonArray.push(newJsonObject);
+
+        // Prepare data to write
+        dataToWrite = JSON.stringify(existingJsonArray, null, 2);
+
+        // Write data to file
+        await fs.promises.writeFile(filename, dataToWrite);
+
+        console.log(`Data has been written to ${filename}`);
+    } catch (error) {
+        console.error('Error appending or writing to JSON file:', error);
+        throw error;
     }
+};
 
-    // Push new JSON object to the existing array
-    existingJsonArray.push(newJsonObject);
+const writeJsonToFile = async (filename, jsonObject) => {
+    try {
+        // Prepare data to write
+        const dataToWrite = JSON.stringify(jsonObject, null, 2);
 
-    // Prepare data to write
-    dataToWrite = JSON.stringify(existingJsonArray, null, 2);
+        // Write data to file asynchronously
+        await fs.promises.writeFile(filename, dataToWrite);
 
-    // Write data to file
-    fs.writeFileSync(filename, dataToWrite);
-
-    console.log(`Data has been written to ${filename}`);
-}
+        console.log(`Data has been written to ${filename}`);
+    } catch (error) {
+        console.error('Error writing JSON to file:', error);
+        throw error;
+    }
+};
 
 const selectRandomStrings = (stringArray, count) => {
     const numberOfRandomStrings = count
@@ -324,6 +344,106 @@ const readTxtFile = async (filePath) => {
     }
 }
 
+const updateTwitterTokens = async (filePath, twitterTokens) => {
+    try {
+        // Read the existing JSON data from the file
+        const jsonData = JSON.parse(await fs.promises.readFile(filePath, 'utf8'));
+        
+        // Update the twitterTokens property with the new tokens
+        jsonData.twitterTokens = twitterTokens;
+
+        // Write the updated JSON data back to the file
+        await fs.promises.writeFile(filePath, JSON.stringify(jsonData, null, 2));
+
+        console.log(`Twitter tokens have been updated in ${filePath}`);
+    } catch (error) {
+        console.error('Error updating Twitter tokens:', error);
+        throw error;
+    }
+}
+
+const extractObjectFromFile = async (filePath, objectName) => {
+    try {
+        // Read the JSON data from the file
+        const jsonData = JSON.parse(await fs.promises.readFile(filePath, 'utf8'));
+
+        // Extract and return the specified object
+        return jsonData[objectName];
+    } catch (error) {
+        console.error('Error extracting object from file:', error);
+        throw error;
+    }
+};
+
+const updateUserTokens = async (filePath, username, fieldToUpdate, newObject) => {
+    try {
+        // Read the existing JSON data from the file
+        let jsonData = await fs.promises.readFile(filePath, 'utf8');
+        jsonData = JSON.parse(jsonData);
+
+        // Find the index of the object with the specified username
+        const index = jsonData.findIndex(obj => obj.user === username);
+
+        if (index !== -1) {
+            // Check if the specified field exists for the user
+            if (!jsonData[index].hasOwnProperty(fieldToUpdate)) {
+                // If the field doesn't exist, create it and assign the new object
+                jsonData[index][fieldToUpdate] = newObject;
+            } else {
+                // If the field exists, update it with the new object
+                jsonData[index][fieldToUpdate] = newObject;
+            }
+
+            // Write the updated JSON data back to the file
+            await fs.promises.writeFile(filePath, JSON.stringify(jsonData, null, 2));
+
+            console.log(`User ${fieldToUpdate} updated for ${username}`);
+        } else {
+            console.log(`User ${username} not found in the file.`);
+        }
+    } catch (error) {
+        console.error('Error updating user tokens:', error);
+        throw error;
+    }
+};
+
+const writeUserCreds = async (filename, newJsonObject) => {
+    try {
+        let existingJsonArray = []; // Define outside of the if block
+
+        // Check if the file exists
+        if (await fs.promises.access(filename).then(() => true).catch(() => false)) {
+            // Read existing data from file
+            const existingData = await fs.promises.readFile(filename, 'utf8');
+
+            // Parse existing data if it's not empty
+            if (existingData !== '') {
+                existingJsonArray = JSON.parse(existingData);
+            }
+
+            // Check if a user with the same name already exists
+            const duplicateIndex = existingJsonArray.findIndex(obj => obj.user === newJsonObject.user);
+            if (duplicateIndex !== -1) {
+                console.log(`Duplicate entry found for user: ${newJsonObject.user}`);
+                return; // Exit the function without appending the duplicate entry
+            }
+        }
+
+        // Append the new JSON object to the existing array
+        existingJsonArray.push(newJsonObject);
+
+        // Prepare data to write
+        const dataToWrite = JSON.stringify(existingJsonArray, null, 2);
+
+        // Write data to file
+        await fs.promises.writeFile(filename, dataToWrite);
+
+        console.log(`Data has been written to ${filename}`);
+    } catch (error) {
+        console.error('Error appending or writing to JSON file:', error);
+        throw error;
+    }
+};
 
 module.exports ={
     deleteFilesInDirectory, 
@@ -352,5 +472,10 @@ module.exports ={
     getRandomStringFromStringArray,
     shuffleArray,
     deleteFromPhotoData,
-    readTxtFile
+    readTxtFile,
+    writeJsonToFile,
+    updateTwitterTokens,
+    extractObjectFromFile,
+    updateUserTokens,
+    writeUserCreds
 } 

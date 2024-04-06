@@ -276,8 +276,3 @@ const uploadToTikTok = async (videoPath, videoTitle) => {
 module.exports = {
   uploadToTikTok
 }
-
-// upload('shorts\\ToputitinanutshellIwas.mp4')
-// app.listen(3455, () => {
-//     console.log('running')
-// })

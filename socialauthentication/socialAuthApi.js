@@ -3,6 +3,7 @@ const express = require('express');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const {writeTextToFile} = require('../utils')
+const bodyParser = require('body-parser');
 const {
     generateTwitterAuthUrl,
     getAccessToken,
@@ -24,6 +25,8 @@ const {getTikTokLoginUrl, getAccessTokenAndOpenId} = require('./tiktokService')
 const app = express();
 app.use(cookieParser());
 app.use(cors());
+app.use(bodyParser.json()); // Parse JSON bodies
+app.use(bodyParser.urlencoded({ extended: true })); // Parse URL-encoded bodies
 
 app.listen(3455, () => {
     console.log('running')
@@ -34,15 +37,12 @@ app.get('/xcallback', async (req, res) => {
     console.log('ooh wee')
     try {
         const code = req.query.code
+        const state = req.query.state
         console.log(req.query)
         console.log(code)
-        const tokens = await getAccessToken(code)
+        const tokens = await getAccessToken(code, state)
         console.log(tokens)
 
-        console.log('getting new tokens')
-        const newTokens = await refreshAccessToken(tokens.refresh_token)
-        console.log(newTokens)
-        console.log('woooot')
 
         res.redirect('http://localhost:3000/landing');
     } catch (error) {
@@ -53,10 +53,12 @@ app.get('/xcallback', async (req, res) => {
   });
 
 
-app.get('/twitterloginurl', async (req, res) => {
-    console.log('sending login url')
+app.post('/twitterloginurl', async (req, res) => {
+    console.log('sending twitter login url')
+    
+    const username = req.body.username || 'someUser'
     try {
-      const loginUrl = await generateTwitterAuthUrl()
+      const loginUrl = await generateTwitterAuthUrl(username)
       res.send(loginUrl)
     } catch (error) {
       // Handle errors

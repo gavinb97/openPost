@@ -34,7 +34,7 @@ const navigateToTikTokLogin = async () => {
             <header className="App-header">
                 {/* <img src={logo} className="App-logo" alt="logo" /> */}
                 <p>
-                    Whaddup foo
+                    Login to start AutoPosting
                 </p>
             
                 <div>

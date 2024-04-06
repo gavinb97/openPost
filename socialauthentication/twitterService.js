@@ -1,20 +1,29 @@
 require('dotenv').config({ path: '../.env' });
-const {writeTextToFile, readTxtFile, sleep, generateRandomString} = require('../utils')
+const {writeTextToFile, readTxtFile, sleep, generateRandomString, writeUserCreds, appendOrWriteToJsonFile, writeJsonToFile, updateTwitterTokens, extractObjectFromFile, updateUserTokens} = require('../utils')
 const axios = require('axios');
 const crypto = require('crypto');
 
 
-const generateTwitterAuthUrl = async () => {
+const generateTwitterAuthUrl = async (username) => {
+    console.log(username)
+    
     // Define OAuth parameters
     const oauthUrl = 'https://twitter.com/i/oauth2/authorize';
     const responseType = 'code';
     const scope = 'tweet.read tweet.write follows.read follows.write offline.access like.write'; // Add all required scopes here
-    const state = generateRandomString(69); // Optional: state parameter for security
+    const state = username; // Optional: state parameter for security
     
     const codeChallengeMethod = 'plain'; // PKCE method
     const codeVerifier = generateRandomString(69); // Generate code verifier
     // const codeChallenge = SHA256(codeVerifier).toString();
     
+    const userTokens = {
+        user: username,
+        twitterTokens: {
+        }
+    }
+
+    await writeUserCreds('authData\\creds.json', userTokens)
     await writeTextToFile(codeVerifier, 'codeVerifier.json')
    
     const clientId = process.env.CLIENT_ID
@@ -22,11 +31,11 @@ const generateTwitterAuthUrl = async () => {
     const redirectUri = 'https://moral-kindly-fly.ngrok-free.app/xcallback'
     // Construct the authorization URL
     const authUrl = `${oauthUrl}?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=${responseType}&scope=${encodeURIComponent(scope)}&state=${encodeURIComponent(state)}&code_challenge=${encodeURIComponent(codeVerifier)}&code_challenge_method=${encodeURIComponent(codeChallengeMethod)}`;
-    console.log(authUrl)
+   
     return authUrl;
 };
 
-const getAccessToken = async (code) => {
+const getAccessToken = async (code, state) => {
 
     const codeVerifierFromFile = await readTxtFile('codeVerifier.json')
     console.log('from file: ' + codeVerifierFromFile)
@@ -46,8 +55,14 @@ const getAccessToken = async (code) => {
                 }
             }
         );
-
-        console.log(response.data);
+        // write tokens to file
+        const tokens = {
+            access_token: response.data.access_token,
+            refresh_token: response.data.refresh_token || ''
+        }
+        await updateUserTokens(`authData\\creds.json`, state, 'twitterTokens', tokens)
+        // await updateTwitterTokens(`authData\\${state}.json`, twitterTokens)
+       
         return response.data;
     } catch (error) {
         console.error('Error exchanging code for access token:', error);
