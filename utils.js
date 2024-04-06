@@ -421,12 +421,16 @@ const writeUserCreds = async (filename, newJsonObject) => {
                 existingJsonArray = JSON.parse(existingData);
             }
 
-            // Find the index of the object with the same user name as the newJsonObject
+            // Check if the newJsonObject has a name that matches an existing user
             const index = existingJsonArray.findIndex(obj => obj.user === newJsonObject.user);
 
             if (index !== -1) {
-                // Merge the existing object with the new object
-                Object.assign(existingJsonArray[index], newJsonObject);
+                // Merge the existing object with the new object only for non-empty fields
+                for (const key in newJsonObject) {
+                    if (newJsonObject.hasOwnProperty(key) && newJsonObject[key] && !existingJsonArray[index][key]) {
+                        existingJsonArray[index][key] = newJsonObject[key];
+                    }
+                }
                 console.log(`User ${newJsonObject.user} already exists in the file. Merging data.`);
             } else {
                 // Check if a user with the same name already exists
@@ -456,6 +460,7 @@ const writeUserCreds = async (filename, newJsonObject) => {
         throw error;
     }
 };
+
 
 module.exports ={
     deleteFilesInDirectory, 
