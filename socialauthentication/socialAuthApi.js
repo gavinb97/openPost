@@ -141,7 +141,7 @@ app.post('/googleloginurl', async (req, res) => {
 
 // tik tok auth
 app.get('/callback', async (req, res) => {
-    console.log('hitting the callback ooh wee')
+    console.log('hitting the tiktok callback ooh wee')
  
     const code = req.query.code
     const state = req.query.state
@@ -156,7 +156,7 @@ app.get('/callback', async (req, res) => {
 })
 
 app.post('/tiktokloginurl', async (req, res) => {
-    console.log('sending login url')
+    console.log('sending tiktok login url')
     const username = req.body.username || 'somedude'
     try {
       const loginUrl = await getTikTokLoginUrl(username)

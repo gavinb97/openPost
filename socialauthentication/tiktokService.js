@@ -36,7 +36,7 @@ const getTikTokLoginUrl = async (username) => {
       tiktokTokens: {
       }
     }
-    console.log(username)
+    
     await writeUserCreds('authData\\creds.json', userTokens)
 
     return url
@@ -45,9 +45,7 @@ const getTikTokLoginUrl = async (username) => {
 const getAccessTokenAndOpenId = async (code, state) => {
     let urlAccessToken = `https://open.tiktokapis.com/v2/oauth/token/`;
     const SERVER_ENDPOINT_REDIRECT = 'https://moral-kindly-fly.ngrok-free.app/callback/'
-    console.log('deeeeeeeeeeze daa keeeeeeeeeeeyz')
-    console.log(process.env.TIK_TOK_CLIENT_KEY)
-    console.log(process.env.TIK_TOK_CLIENT_SECRET)
+    
     const response = await axios.post(urlAccessToken, new URLSearchParams({
       client_key: process.env.TIK_TOK_CLIENT_KEY,
       client_secret: process.env.TIK_TOK_CLIENT_SECRET,
