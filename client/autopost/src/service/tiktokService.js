@@ -3,7 +3,7 @@ import axios from 'axios';
 export const getTikTokLoginUrl = async () => {
     const endpoint = 'http://localhost:3455/tiktokloginurl';
     try {
-      const response = await axios.get(endpoint);
+      const response = await axios.post(endpoint, {username: 'somedude'});
       return response.data;
     } catch (error) {
       console.error('Error fetching login URL:', error);

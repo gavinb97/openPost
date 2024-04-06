@@ -1,21 +1,24 @@
 require("dotenv").config();
 const axios = require('axios');
 const SHA256 = require('crypto-js/sha256')
-const {writeTextToFile, readTokensFromFile, getVideoChunkInfo, getFileSizeInBytes, sleep, generateRandomString} = require('../utils')
+const {writeTextToFile, readTokensFromFile, getVideoChunkInfo, getFileSizeInBytes, sleep, generateRandomString, writeUserCreds, updateUserTokens} = require('../utils')
 const fs = require('fs');
 
+const CODE_VERIFIER = generateRandomString(69)
 
-const getTikTokLoginUrl = async () => {
+const getTikTokLoginUrl = async (username) => {
     const CLIENT_KEY = process.env.TIK_TOK_CLIENT_KEY // this value can be found in app's developer portal
     const SERVER_ENDPOINT_REDIRECT = 'https://moral-kindly-fly.ngrok-free.app/callback/' // redirect URI should be registered in developer portal
-    const CODE_VERIFIER = generateRandomString(69)
+    // const CODE_VERIFIER = generateRandomString(69)
     console.log('Code verifier ' + CODE_VERIFIER)
     const CODE_CHALLENGE = SHA256(CODE_VERIFIER).toString();
     console.log('Code challenge ' + CODE_CHALLENGE)
     const TIKTOK_CLIENT_SECRET = process.env.TIK_TOK_CLIENT_SECRET
 
-    const csrfState = Math.random().toString(36).substring(2);
-    // res.cookie('csrfState', csrfState, { maxAge: 60000 });
+    // const csrfState = username
+    const csrfState = username;
+    
+    
 
     let url = `https://www.tiktok.com/v2/auth/authorize/`;
 
@@ -28,15 +31,26 @@ const getTikTokLoginUrl = async () => {
     url += `&code_challenge=${CODE_CHALLENGE}`;
     url += `&code_challenge_method=S256`
 
+    const userTokens = {
+      user: username,
+      tiktokTokens: {
+      }
+    }
+    console.log(username)
+    await writeUserCreds('authData\\creds.json', userTokens)
+
     return url
 }
 
-const getAccessTokenAndOpenId = async (code) => {
+const getAccessTokenAndOpenId = async (code, state) => {
     let urlAccessToken = `https://open.tiktokapis.com/v2/oauth/token/`;
-  
+    const SERVER_ENDPOINT_REDIRECT = 'https://moral-kindly-fly.ngrok-free.app/callback/'
+    console.log('deeeeeeeeeeze daa keeeeeeeeeeeyz')
+    console.log(process.env.TIK_TOK_CLIENT_KEY)
+    console.log(process.env.TIK_TOK_CLIENT_SECRET)
     const response = await axios.post(urlAccessToken, new URLSearchParams({
-      client_key: CLIENT_KEY,
-      client_secret: TIKTOK_CLIENT_SECRET,
+      client_key: process.env.TIK_TOK_CLIENT_KEY,
+      client_secret: process.env.TIK_TOK_CLIENT_SECRET,
       code: code,
       grant_type: 'authorization_code',
       redirect_uri: SERVER_ENDPOINT_REDIRECT,
@@ -47,7 +61,15 @@ const getAccessTokenAndOpenId = async (code) => {
         'Content-Type': 'application/x-www-form-urlencoded'
       }
     })
-    // console.log(response)
+      
+    // write tokens to file
+    const tokens = {
+      access_token: response.data.access_token,
+      refresh_token: response.data.refresh_token || '',
+      openId: response.data.open_id
+  }
+  await updateUserTokens(`authData\\creds.json`, state, 'tiktokTokens', tokens)
+
     return {
         accessToken: response.data.access_token,
         openId: response.data.open_id,

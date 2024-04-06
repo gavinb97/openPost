@@ -144,8 +144,9 @@ app.get('/callback', async (req, res) => {
     console.log('hitting the callback ooh wee')
  
     const code = req.query.code
-  
-    const response = await getAccessTokenAndOpenId(code, CLIENT_KEY, TIKTOK_CLIENT_SECRET);
+    const state = req.query.state
+
+    const response = await getAccessTokenAndOpenId(code, state);
     console.log(response)
 
     const keyStrings = `accessToken: ${response.accessToken}  refreshToken: ${response.refreshToken}`
@@ -154,10 +155,11 @@ app.get('/callback', async (req, res) => {
     res.redirect('https://google.com');
 })
 
-app.get('/tiktokloginurl', async (req, res) => {
+app.post('/tiktokloginurl', async (req, res) => {
     console.log('sending login url')
+    const username = req.body.username || 'somedude'
     try {
-      const loginUrl = await getTikTokLoginUrl()
+      const loginUrl = await getTikTokLoginUrl(username)
       res.send(loginUrl)
     } catch (error) {
       // Handle errors

@@ -50,7 +50,7 @@ const automaticallyPost = async () => {
 
     // Schedule the job to run after the random interval
     setTimeout(async () => {
-        if (isFolderNotEmpty('videosWithSubtitles/')) {
+        if (isFolderNotEmpty('resources/videosWithSubtitles/')) {
             await postVideo()
             await automaticallyPost()
         } else {
@@ -65,7 +65,7 @@ const automaticallyPost = async () => {
             await automaticallyPost()
         }
         
-    }, intervalInSeconds * 1000); 
+    }, 5 * 1000); 
 }
 
 const createVideos = async (numberOfVideos, subredditName) => {
@@ -75,7 +75,7 @@ const createVideos = async (numberOfVideos, subredditName) => {
 
 const postToYoutube = async (videoPath) => {
     const fileName = getFileName(videoPath)
-    const fileData = await readTextFile(`audioSubtitles/${fileName}.txt`)
+    const fileData = await readTextFile(`resources/audioSubtitles/${fileName}.txt`)
 
     const videoTitleRaw = await makeGptCall(`Based on this transcript: [${fileData}], Give me a title. Make it short, under 200 characters and do NOT use emoji`,`You are GPT model specialized in generating viral video titles. You like to craft short, attention-grabbing titles that capture the essence of Gen Z or Millennial culture. The title should be response to a transcript that I will provide. Focus on making them spicy, witty, and share-worthy. You understand internet slang and contemporary language usage. You like to generate titles that can potentially go viral and drive engagement. Never use emojis.`)
     const videoTitle = removeSpecialCharacters(removeQuotes(videoTitleRaw))
@@ -92,7 +92,7 @@ const postToYoutube = async (videoPath) => {
 
 const postToTikTok = async (videoPath) => {
     const fileName = getFileName(videoPath)
-    const fileData = await readTextFile(`audioSubtitles/${fileName}.txt`)
+    const fileData = await readTextFile(`resources/audioSubtitles/${fileName}.txt`)
 
     const getRandomPartNumber = getRandomNumberOneToFifteen()
     const gptString = await makeGptCall(`Give me a short title for this transcript: ${fileData}`, `Give me a description that is short, fun, using gen z and millenial esque language. I'll provide the transcript for you to write the description. Return a string under 100 characters, it should be very brief`)
@@ -107,15 +107,15 @@ const postToTikTok = async (videoPath) => {
 }
 
 const postVideo = async () => {
-    const path = getRandomMp4PathInDirectory('videosWithSubtitles/')
+    const path = getRandomMp4PathInDirectory('resources/videosWithSubtitles/')
     // create and upload tweet
-    await createAndTweet(path)
+    // await createAndTweet(path)
 
     // post video to youtube
     // await postToYoutube(path)
 
     // post video to tiktok
-    // await postToTikTok(path)
+    await postToTikTok(path)
     
 }
 
@@ -124,7 +124,7 @@ const postVideo = async () => {
 const createAndTweet = async (videoPath) => {
     const fileName = getFileName(videoPath)
 
-    const fileData = await readTextFile(`audioSubtitles/${fileName}.txt`)
+    const fileData = await readTextFile(`resources/audioSubtitles/${fileName}.txt`)
     if (fileData) {
         let tweetText = ''
         do {
@@ -157,8 +157,8 @@ const createAndTweet = async (videoPath) => {
 
 const job = async () => {
     console.log('posting random video on demand')
-    const path = getRandomMp4PathInDirectory('videosWithSubtitles/')
-    await createAndTweet(path)
+    const path = getRandomMp4PathInDirectory('resources\\videosWithSubtitles/')
+    // await createAndTweet(path)
 
     console.log('Starting auto post job...')
     await automaticallyPost()
