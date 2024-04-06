@@ -10,11 +10,11 @@ const path = require('path');
 const readline = require('readline');
 app.use(cookieParser());
 app.use(cors());
-const {writeTextToFile, readTokensFromFile} = require('../utils')
+const {writeTextToFile, readTokensFromFile, writeUserCreds, updateUserTokens} = require('../utils')
 
 
 
-const authorizeFirstGoogleTimeUrl = async () => {
+const authorizeFirstGoogleTimeUrl = async (username) => {
     const oauth2Client = new google.auth.OAuth2(
       process.env.YOUTUBE_CLIENT_ID,
       process.env.YOUTUBE_CLIENT_SECRET,
@@ -29,12 +29,22 @@ const authorizeFirstGoogleTimeUrl = async () => {
     const url = oauth2Client.generateAuthUrl({
       // 'online' (default) or 'offline' (gets refresh_token)
       access_type: 'offline',
-      scope: scopes
+      scope: scopes,
+      state: username
     });
+
   
-    console.log(url)
+
+    const userTokens = {
+      user: username,
+      youtubeTokens: {
+      }
+    }
+
+    await writeUserCreds('authData\\creds.json', userTokens)
+    
     return {url, oauth2Client}
-    // return oauth2Client
+    
   }
 
   const uploadToYoutube = async (client, fileName, videoTitle, videoDescription)  => {

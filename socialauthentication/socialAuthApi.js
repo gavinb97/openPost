@@ -2,7 +2,7 @@ require('dotenv').config({ path: '../.env' });
 const express = require('express');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
-const {writeTextToFile} = require('../utils')
+const {writeTextToFile, updateUserTokens} = require('../utils')
 const bodyParser = require('body-parser');
 const {
     generateTwitterAuthUrl,
@@ -72,24 +72,21 @@ app.post('/twitterloginurl', async (req, res) => {
   app.get('/redditcallback', async (req, res) => {
     console.log('hitting the callback ooh wee')
     const codeFromCallback = req.query.code
-    const getAccessTokenResponse = await getRedditAccessToken(codeFromCallback)
+    const state = req.query.state
+    
+    const getAccessTokenResponse = await getRedditAccessToken(codeFromCallback, state)
 
-    // write access token and refresh token to file
-    const tokenText = `accessToken: ${getAccessTokenResponse.access_token} refreshToken: ${getAccessTokenResponse.refresh_token}`
-    const fileExists = await seeIfFileExists('redditKeys.txt')
-    if(fileExists){
-        await deleteFile('redditKeys.txt')
-    }
-    await writeTextToFile(tokenText, 'redditKeys.json')
-    await sleep(5000)
 
-    res.redirect('https://google.com');
+    res.redirect('http://localhost:3000/landing');
 })
 
-app.get('/redditloginurl', async (req, res) => {
+app.post('/redditloginurl', async (req, res) => {
     console.log('sending login url')
+
+    const username = req.body.username || 'someUser'
     try {
-      const loginUrl = await getRedditLoginUrl()
+      const loginUrl = await getRedditLoginUrl(username)
+
       res.send(loginUrl)
     } catch (error) {
       // Handle errors
@@ -102,24 +99,36 @@ app.get('/redditloginurl', async (req, res) => {
 
   // youtube callback endpoint to handle user tokens
   app.get('/gcallback', async (req, res) => {
-    const {url, oauth2Client} = await authorizeFirstTimeUrl()
+    const {url, oauth2Client} = await authorizeFirstGoogleTimeUrl()
     const code = req.query.code
+    const state = req.query.state
+    
     const {tokens} = await oauth2Client.getToken(code)
-    console.log(tokens)
-    await oauth2Client.setCredentials({
-      access_token: tokens.access_token,
-      refresh_token: tokens.refresh_token
-    });
+    
+    // oauth2Client.setCredentials({
+    //   access_token: tokens.access_token,
+    //   refresh_token: tokens.refresh_token
+    // });
 
-    const keyStrings = `accessToken: ${tokens.access_token}  refreshToken: ${tokens.refresh_token}`
-    writeTextToFile(keyStrings, 'keys.txt')
-    res.redirect('https://google.com');
+    // write tokens to file
+    const youtubeTokens = {
+        access_token: tokens.access_token,
+        refresh_token: tokens.refresh_token || ''
+    }
+
+    await updateUserTokens(`authData\\creds.json`, state, 'youtubeTokens', youtubeTokens)
+
+
+    
+    res.redirect('http://localhost:3000/landing');
 })
 
-app.get('/googleloginurl', async (req, res) => {
+app.post('/googleloginurl', async (req, res) => {
     console.log('sending login url')
+
+    const username = req.body.username || 'somedude'
     try {
-      const loginUrl = await authorizeFirstGoogleTimeUrl()
+      const loginUrl = await authorizeFirstGoogleTimeUrl(username)
       res.send(loginUrl.url)
     } catch (error) {
       // Handle errors

@@ -6,7 +6,7 @@ const fetch = require('node-fetch');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const SHA256 = require('crypto-js/sha256')
-const {writeTextToFile, readTokensFromFile, sleep, generateRandomString, shuffleArray, deleteFile, seeIfFileExists, writeArrayToJsonFile, appendOrWriteToJsonFile, selectRandomStrings, getRandomInterval, getRandomStringFromStringArray} = require('../utils')
+const {writeTextToFile, readTokensFromFile, sleep, writeUserCreds, updateUserTokens, generateRandomString, shuffleArray, deleteFile, seeIfFileExists, writeArrayToJsonFile, appendOrWriteToJsonFile, selectRandomStrings, getRandomInterval, getRandomStringFromStringArray} = require('../utils')
 const fs = require('fs');
 const path = require('path')
 app.use(cookieParser());
@@ -16,12 +16,21 @@ const {XMLParser} = require('fast-xml-parser')
 const {redditNSFWPostTitles, redditSFWPostTitles} = require('../strings')
 
 const redditAccessTokenUrl = 'https://www.reddit.com/api/v1/access_token'
+const redirect_uri = 'https://moral-kindly-fly.ngrok-free.app/redditcallback/'
 
-
-const getRedditLoginUrl = async () => {
-   const redirect_uri = 'https://moral-kindly-fly.ngrok-free.app/redditcallback/'
+const getRedditLoginUrl = async (username) => {
+//    const redirect_uri = 'https://moral-kindly-fly.ngrok-free.app/redditcallback/'
     const scopeSring = 'identity submit subscribe privatemessages edit mysubreddits read save'
-    const stateString = generateRandomString(69)
+    const stateString = username
+
+    const userTokens = {
+        user: username,
+        redditTokens: {
+        }
+    }
+
+    await writeUserCreds('authData\\creds.json', userTokens)
+
     const loginUrl = `https://www.reddit.com/api/v1/authorize?client_id=${process.env.REDDIT_APP_ID}&response_type=code&state=${stateString}&redirect_uri=${redirect_uri}&duration=permanent&scope=${scopeSring}`
     return loginUrl
 }
@@ -32,7 +41,7 @@ const extractSubbredditList = async (subredditResponse) => {
     return subredditResponse.children.map(child => child.data.display_name_prefixed);
 }
 
-const getRedditAccessToken = async (codeFromCallback) => {
+const getRedditAccessToken = async (codeFromCallback, state) => {
     try {
         const authHeader = `Basic ${btoa(`${process.env.REDDIT_APP_ID}:${process.env.REDDIT_SECRET}`)}`;
         
@@ -46,6 +55,13 @@ const getRedditAccessToken = async (codeFromCallback) => {
                 'Content-Type': 'application/x-www-form-urlencoded'
             }
         });
+
+         // write tokens to file
+         const tokens = {
+            access_token: response.data.access_token,
+            refresh_token: response.data.refresh_token || ''
+        }
+        await updateUserTokens(`authData\\creds.json`, state, 'redditTokens', tokens)
 
         return response.data;
     } catch (e) {

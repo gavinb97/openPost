@@ -421,16 +421,28 @@ const writeUserCreds = async (filename, newJsonObject) => {
                 existingJsonArray = JSON.parse(existingData);
             }
 
-            // Check if a user with the same name already exists
-            const duplicateIndex = existingJsonArray.findIndex(obj => obj.user === newJsonObject.user);
-            if (duplicateIndex !== -1) {
-                console.log(`Duplicate entry found for user: ${newJsonObject.user}`);
-                return; // Exit the function without appending the duplicate entry
-            }
-        }
+            // Find the index of the object with the same user name as the newJsonObject
+            const index = existingJsonArray.findIndex(obj => obj.user === newJsonObject.user);
 
-        // Append the new JSON object to the existing array
-        existingJsonArray.push(newJsonObject);
+            if (index !== -1) {
+                // Merge the existing object with the new object
+                Object.assign(existingJsonArray[index], newJsonObject);
+                console.log(`User ${newJsonObject.user} already exists in the file. Merging data.`);
+            } else {
+                // Check if a user with the same name already exists
+                const duplicateIndex = existingJsonArray.findIndex(obj => obj.user === newJsonObject.user);
+                if (duplicateIndex !== -1) {
+                    console.log(`Duplicate entry found for user: ${newJsonObject.user}`);
+                    return; // Exit the function without appending the duplicate entry
+                }
+                
+                // Append the new JSON object to the existing array if it's not a duplicate
+                existingJsonArray.push(newJsonObject);
+            }
+        } else {
+            // If the file does not exist, append the new JSON object to the existing array
+            existingJsonArray.push(newJsonObject);
+        }
 
         // Prepare data to write
         const dataToWrite = JSON.stringify(existingJsonArray, null, 2);

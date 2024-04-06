@@ -3,7 +3,7 @@ import axios from 'axios';
 export const getTwitterLoginUrl = async () => {
     const endpoint = 'http://localhost:3455/twitterloginurl';
     try {
-      const response = await axios.post(endpoint, {username: 'somedude'});
+      const response = await axios.post(endpoint, {username: 'anotherGuy'});
       return response.data;
     } catch (error) {
       console.error('Error fetching login URL:', error);
