@@ -50,22 +50,11 @@ function UploadScreen() {
     return (
         <div className="App">
             <Navbar></Navbar>
-            <header className="App-header">
-                <br></br>
-                <div>
-                    <label htmlFor="pictureUpload">Upload Pictures:</label>
-                    <input type="file" id="pictureUpload" name="uploadPic" accept="image/*" onChange={(event) => handleFileSelect(event, 'picture')} multiple/>
-                </div>
-                <div> 
-                    <label htmlFor="videoUpload">Upload Videos:</label>
-                    <input type="file" id="videoUpload" name="uploadVideo" accept="video/*" onChange={(event) => handleFileSelect(event, 'video')} multiple/>
-                </div>
-                <div>
-                <button type="button" onClick={handleUploadClick}>Upload Files</button>
-                </div>
-                {/* <UploadPictureBox></UploadPictureBox> */}
-                <UploadedMediaContainer></UploadedMediaContainer>
+            <header className="Login-header">
+            <UploadPictureBox></UploadPictureBox>
             </header>
+            
+            <UploadedMediaContainer></UploadedMediaContainer>
         </div>
     );
 }
