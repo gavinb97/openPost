@@ -8,6 +8,7 @@ import RegistrationScreen from './screens/RegistrationScreen';
 import HomeScreen from './screens/HomeScreen';
 import LoginScreen from './screens/LoginScreen';
 import UserLandingScreen from './screens/UserLandingScreen';
+import Jobs from './screens/Jobs';
 import Navbar from './components/Navbar'
 
 function App() {
@@ -35,6 +36,10 @@ function App() {
     {
       path: '/landing', // Corrected path with '/'
       element: <UserLandingScreen />
+    },
+    {
+      path: '/jobs', // Corrected path with '/'
+      element: <Jobs />
     }
   ]);
 

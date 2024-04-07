@@ -10,6 +10,7 @@ const Navbar = () => {
         <li><Link to="/uploadMedia">Upload Media</Link></li>
         <li><Link to="/authorizeSocials">Authorize Socials</Link></li>
         <li><Link to="/landing">User Landing</Link></li>
+        <li><Link to="/jobs">Jobs</Link></li>
       </ul>
       
       {/* Right section */}

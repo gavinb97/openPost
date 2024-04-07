@@ -100,9 +100,9 @@ const UploadedMediaContainer = () => {
                 <button style={{ backgroundColor: 'blue', color: 'white', marginTop: '10px', marginLeft: '5px' }} onClick={handleEditClick}>
                     View / Edit
                 </button>
-                <button style={{ backgroundColor: 'green', color: 'white', marginTop: '10px', marginLeft: '5px' }} onClick={handleScheduleClick}>
+                {/* <button style={{ backgroundColor: 'green', color: 'white', marginTop: '10px', marginLeft: '5px' }} onClick={handleScheduleClick}>
                     Schedule
-                </button>
+                </button> */}
                 <button style={{ backgroundColor: 'purple', color: 'white', marginTop: '10px', marginLeft: '5px' }} onClick={handleSelectAll}>
                     {selectedImages.length === mediaFiles.length ? 'Unselect All' : 'Select All'}
                 </button>
@@ -223,8 +223,8 @@ const UploadedMediaContainer = () => {
     };
     return (
         <div>
-            <h1>Uploaded Photos</h1>
-            <h3>Select one or more to view, edit or delete</h3>
+            <h2>Uploaded Photos</h2>
+            {/* <h3>Select one or more to view, edit or delete</h3> */}
             
             {selectedImages.length > 0 && renderPhotoActionButtons()} {/* Render delete and edit buttons */}
             
