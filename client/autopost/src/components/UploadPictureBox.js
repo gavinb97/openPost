@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { uploadFile } from '../service/userMediaService';
 import './../App.css';
 
+
 const UploadPictureBox = () => {
     const [pictureFiles, setPictureFiles] = useState([]);
     const [videoFiles, setVideoFiles] = useState([]);
@@ -15,6 +16,7 @@ const UploadPictureBox = () => {
             setPictureFiles([...pictureFiles, ...selectedFiles]);
         } else if (fileType === 'video') {
             setVideoFiles([...videoFiles, ...selectedFiles]);
+            console.log('saved it')
         }
     };
 
@@ -26,7 +28,7 @@ const UploadPictureBox = () => {
         const videoFiles = Array.from(videoInput.files || []);
 
         const files = [...pictureFiles, ...videoFiles];
-
+        console.log(files)
         if (files.length > 0) {
             for (let i = 0; i < files.length; i++) {
                 const file = files[i];
@@ -42,7 +44,8 @@ const UploadPictureBox = () => {
             setScrollPosition(window.pageYOffset || document.documentElement.scrollTop);
             
             // Reload the page after uploading files
-            window.location.reload();
+            console.log('uploaded')
+            // window.location.reload();
         } else {
             console.log('No files selected');
         }

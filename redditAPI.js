@@ -15,10 +15,11 @@ const {appendOrWriteToJsonFile, deleteFromPhotoData} = require('./utils')
 // Multer storage configuration
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-      // Check file type
-      if (file.mimetype.startsWith('image')) {
+      // Get file extension
+      const ext = path.extname(file.originalname).toLowerCase();
+      if (ext === '.jpg' || ext === '.jpeg' || ext === '.png' || ext === '.gif') {
         cb(null, 'apiresources/uploads/photos/');
-      } else if (file.mimetype.startsWith('video')) {
+      } else if (ext === '.mp4' || ext === '.mov' || ext === '.avi' || ext === '.mkv') {
         cb(null, 'apiresources/uploads/videos/');
       } else {
         // Invalid file type, handle accordingly
@@ -28,8 +29,7 @@ const storage = multer.diskStorage({
     filename: function (req, file, cb) {
       cb(null, Date.now() + '-' + file.originalname);
     }
-  })
-
+  });
 
 
 const upload = multer({ storage: storage })
