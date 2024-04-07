@@ -40,12 +40,11 @@ const UploadPictureBox = () => {
             pictureInput.value = '';
             videoInput.value = '';
             
-            // Store the current scroll position before reloading the page
-            setScrollPosition(window.pageYOffset || document.documentElement.scrollTop);
+          
             
             // Reload the page after uploading files
             console.log('uploaded')
-            window.location.reload();
+            // window.location.reload();
         } else {
             console.log('No files selected');
         }

@@ -13,12 +13,17 @@ const UploadedMediaContainer = () => {
     const [imageMetadata, setImageMetadata] = useState([]);
     const [showScheduleModal, setShowScheduleModal] = useState(false)
 
-    useEffect(() => {
-        const getAllMedia = async () => {
+    const getAllMedia = async () => {
+        try {
             // Fetch media files
             const files = await fetchAllFiles();
             setMediaFiles(files);
-        };
+        } catch (error) {
+            console.error('Error fetching media:', error);
+        }
+    };
+
+    useEffect(() => {
         getAllMedia();
     }, []);
 
@@ -90,6 +95,9 @@ const UploadedMediaContainer = () => {
         }
     };
 
+    const handleRefreshClick = () => {
+        getAllMedia();
+    };
 
     const renderPhotoActionButtons = () => {
         return (
@@ -221,9 +229,13 @@ const UploadedMediaContainer = () => {
             </div>
         );
     };
+
     return (
-        <div>
-            <h2>Uploaded Photos</h2>
+        <div style={{ textAlign: 'center' }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center' }}>
+                <button onClick={handleRefreshClick}>Refresh</button>
+                <h2 style={{ marginLeft: '1rem', marginRight: '1rem' }}>Uploaded Photos</h2>
+            </div>
             
             {selectedImages.length > 0 && renderPhotoActionButtons()} {/* Render delete and edit buttons */}
             
@@ -235,6 +247,8 @@ const UploadedMediaContainer = () => {
             
         </div>
     );
+    
+    
 }
 
 export default UploadedMediaContainer;
