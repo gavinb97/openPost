@@ -45,7 +45,7 @@ const UploadPictureBox = () => {
             
             // Reload the page after uploading files
             console.log('uploaded')
-            // window.location.reload();
+            window.location.reload();
         } else {
             console.log('No files selected');
         }
