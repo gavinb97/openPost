@@ -1,6 +1,6 @@
 import logo from './../logo.svg';
 import './../App.css';
-import React, { useState } from 'react';
+import React, { useState, useRef  } from 'react';
 import {uploadFile} from '../service/userMediaService'
 import Navbar from '../components/Navbar'
 import UploadedMediaContainer from '../components/UploadedMediaContainer'
@@ -9,6 +9,15 @@ import UploadPictureBox from '../components/UploadPictureBox';
 function UploadScreen() {
     const [pictureFiles, setPictureFiles] = useState([]);
     const [videoFiles, setVideoFiles] = useState([]);
+
+    const uploadedMediaContainerRef = useRef(null);
+
+    const handleFileUploadSuccess = async () => {
+        // Call handleRefreshClick from UploadedMediaContainer
+        console.log('fuk')
+        uploadedMediaContainerRef.current.handleRefreshClick();
+    };
+
 
     const handleFileSelect = (event, fileType) => {
         console.log('in hanldefileselect method')
@@ -51,10 +60,10 @@ function UploadScreen() {
         <div className="App">
             <Navbar></Navbar>
             <header className="Login-header">
-            <UploadPictureBox></UploadPictureBox>
+            <UploadPictureBox onSuccessUpload={handleFileUploadSuccess} ></UploadPictureBox>
             </header>
             
-            <UploadedMediaContainer></UploadedMediaContainer>
+            <UploadedMediaContainer ref={uploadedMediaContainerRef}></UploadedMediaContainer>
         </div>
     );
 }

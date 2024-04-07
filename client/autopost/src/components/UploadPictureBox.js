@@ -4,7 +4,7 @@ import { uploadFile } from '../service/userMediaService';
 import './../App.css';
 
 
-const UploadPictureBox = () => {
+const UploadPictureBox = ({ onSuccessUpload  }) => {
     const [pictureFiles, setPictureFiles] = useState([]);
     const [videoFiles, setVideoFiles] = useState([]);
     const [scrollPosition, setScrollPosition] = useState(0); 
@@ -44,7 +44,7 @@ const UploadPictureBox = () => {
             
             // Reload the page after uploading files
             console.log('uploaded')
-            // window.location.reload();
+            onSuccessUpload()
         } else {
             console.log('No files selected');
         }

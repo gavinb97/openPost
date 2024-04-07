@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { fetchAllFiles, deleteByName, getPhotoMetadata, updatePhotoMetadata } from '../service/userMediaService';
 import UpdateImageDataModal from './UpdateImageDataModal';
 import SetScheduleModal from '../components/SetScheduleModal';
 import './../App.css';
 
-const UploadedMediaContainer = () => {
+const UploadedMediaContainer = forwardRef((props, ref) => {
     const navigate = useNavigate();
     const [mediaFiles, setMediaFiles] = useState([]);
     const [selectedImages, setSelectedImages] = useState([]);
@@ -98,6 +98,13 @@ const UploadedMediaContainer = () => {
     const handleRefreshClick = () => {
         getAllMedia();
     };
+
+    // Expose handleRefreshClick method
+    useImperativeHandle(ref, () => ({
+        handleRefreshClick: () => {
+            handleRefreshClick();
+        }
+    }));
 
     const renderPhotoActionButtons = () => {
         return (
@@ -249,6 +256,6 @@ const UploadedMediaContainer = () => {
     );
     
     
-}
+})
 
 export default UploadedMediaContainer;
