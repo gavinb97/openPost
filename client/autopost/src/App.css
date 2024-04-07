@@ -183,3 +183,45 @@
   cursor: pointer;
 }
 
+.navbar {
+  background-color: #333; /* Background color of the navbar */
+  overflow: hidden; /* Ensure contents don't overflow */
+}
+
+.navbar ul {
+  list-style-type: none; /* Remove bullet points from the list */
+  padding: 0; /* Remove default padding */
+  margin: 0; /* Remove default margin */
+}
+
+.navbar li {
+  float: left; /* Float the list items to the left */
+}
+
+.navbar li a {
+  display: block; /* Display the links as block elements */
+  color: white; /* Text color */
+  text-align: center; /* Center-align text */
+  padding: 14px 16px; /* Padding around the text */
+  text-decoration: none; /* Remove underline from links */
+}
+
+.navbar li a:hover {
+  background-color: #ddd; /* Background color on hover */
+  color: black; /* Text color on hover */
+}
+.navbar {
+  display: flex;
+  justify-content: space-between;
+}
+
+.left-section,
+.right-section {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+.right-section {
+  text-align: right;
+}

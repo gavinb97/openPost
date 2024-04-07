@@ -8,6 +8,7 @@ import UploadedMediaContainer from '../components/UploadedMediaContainer'
 import UploadPictureBox from '../components/UploadPictureBox';
 import UploadedMediaContainerSmall from '../components/UploadedMediaContainerSmall';
 import SetScheduleModal from '../components/SetScheduleModal';
+import Navbar from '../components/Navbar'
 
 function UserLandingScreen() {
     const navigate = useNavigate();
@@ -23,6 +24,7 @@ function UserLandingScreen() {
     
     return (
         <div className="App">
+            <Navbar></Navbar>
             <header className="App-header">
                 <img src={otherLogo} className="App-logo" alt="logo" />
                 <h1>Were in fool</h1>

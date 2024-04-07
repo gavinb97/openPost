@@ -6,6 +6,7 @@ import {getTwitterLoginUrl} from '../service/twitterService'
 import {getRedditLoginUrl} from '../service/redditService'
 import {getYoutubeLoginUrl} from '../service/youtubeService'
 import { getTikTokLoginUrl } from '../service/tiktokService';
+import Navbar from '../components/Navbar'
 
 function SocialsLoginScreen() {
 
@@ -31,6 +32,7 @@ const navigateToTikTokLogin = async () => {
  
     return (
         <div className="App">
+            <Navbar></Navbar>
             <header className="App-header">
                 {/* <img src={logo} className="App-logo" alt="logo" /> */}
                 <p>

@@ -22,6 +22,8 @@ const {
 
 const {getTikTokLoginUrl, getAccessTokenAndOpenId} = require('./tiktokService')
 
+const {getUserByUsername} = require('./authService')
+
 const app = express();
 app.use(cookieParser());
 app.use(cors());
@@ -167,3 +169,17 @@ app.post('/tiktokloginurl', async (req, res) => {
       res.status(500).json({ error: 'error creating login url' });
     }
   })
+
+
+  // get user credentials endpoint
+app.post('/usercreds', async (req, res) => {
+  console.log('getting the creds')
+  const username = req.body.username || 'somedude'
+  try {
+    const creds = await getUserByUsername('authData/creds.json', 'somedude')
+    res.send(creds)
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).json({ error: 'error getting credentials' });
+  }
+})

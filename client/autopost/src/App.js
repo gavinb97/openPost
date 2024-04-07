@@ -1,13 +1,14 @@
 import logo from './logo.svg';
 import './App.css';
 import React from 'react';
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { createBrowserRouter, RouterProvider, Link  } from 'react-router-dom';
 import UploadScreen from './screens/UploadScreen';
 import SocialsLoginScreen from './screens/SocialsLoginScreen';
 import RegistrationScreen from './screens/RegistrationScreen';
 import HomeScreen from './screens/HomeScreen';
 import LoginScreen from './screens/LoginScreen';
 import UserLandingScreen from './screens/UserLandingScreen';
+import Navbar from './components/Navbar'
 
 function App() {
   const router = createBrowserRouter([
@@ -38,9 +39,12 @@ function App() {
   ]);
 
   return (
+    
     <RouterProvider router={router}>
       <div className="App">
         {/* Add any global components here */}
+  
+       
       </div>
     </RouterProvider>
   );

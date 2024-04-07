@@ -2,6 +2,7 @@ import logo from './../logo.svg';
 import './../App.css';
 import React, { useState } from 'react';
 import {uploadFile} from '../service/userMediaService'
+import Navbar from '../components/Navbar'
 
 function UploadScreen() {
     const [pictureFiles, setPictureFiles] = useState([]);
@@ -46,6 +47,7 @@ function UploadScreen() {
 
     return (
         <div className="App">
+            <Navbar></Navbar>
             <header className="App-header">
                 <img src={logo} className="App-logo" alt="logo" />
                 <p>

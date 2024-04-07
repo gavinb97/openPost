@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom'
+import Navbar from '../components/Navbar'
 
 function LoginScreen() {
     const navigate = useNavigate()
@@ -22,6 +23,7 @@ function LoginScreen() {
 
     return (
         <div className="App">
+            <Navbar></Navbar>
             <header className="App-header">
                 <p>Login</p>
 

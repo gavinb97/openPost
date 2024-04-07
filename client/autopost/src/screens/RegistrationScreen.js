@@ -3,6 +3,7 @@ import './../App.css';
 import React, { useState } from 'react';
 import {uploadFile} from '../service/userMediaService'
 import { useNavigate } from 'react-router-dom'
+import Navbar from '../components/Navbar'
 
 function RegistrationScreen() {
     const navigate = useNavigate()
@@ -31,6 +32,7 @@ function RegistrationScreen() {
 
     return (
         <div className="App">
+            <Navbar></Navbar>
             <header className="App-header">
                 <p>Registration</p>
 
