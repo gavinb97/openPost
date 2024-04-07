@@ -6,7 +6,7 @@ const Navbar = () => {
     <nav className="navbar">
       {/* Left section */}
       <ul className="left-section">
-        <li><Link to="/">Home</Link></li>
+        {/* <li><Link to="/">Home</Link></li> */}
         <li><Link to="/uploadMedia">Upload Media</Link></li>
         <li><Link to="/authorizeSocials">Authorize Socials</Link></li>
         <li><Link to="/landing">User Landing</Link></li>

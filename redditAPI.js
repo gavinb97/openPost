@@ -8,7 +8,7 @@ app.use(cookieParser());
 app.use(cors());
 app.use(bodyParser.json());
 const multer = require('multer');
-const fs = require('fs').promises;
+const fs = require('fs');
 const path = require('path');
 const {appendOrWriteToJsonFile, deleteFromPhotoData} = require('./utils')
 
@@ -62,7 +62,7 @@ app.post('/upload', upload.single('file'), async (req, res) => {
         };
 
         // Append metadata to the JSON file
-        appendOrWriteToJsonFile('photoData.txt', metadata);
+        appendOrWriteToJsonFile('apiresources/uploads/photoMetadata/photoData.txt', metadata);
 
         // Respond with success status
         const responseObj = {
@@ -84,7 +84,7 @@ app.get('/files', async (req, res) => {
     const uploadsFolder = path.join(__dirname, 'apiresources', 'uploads', 'photos');
     try {
         // Read the contents of the uploads folder
-        const files = await fs.readdir(uploadsFolder);
+        const files = await fs.promises.readdir(uploadsFolder);
         
         // Array to store file objects with name and data
         const fileObjects = [];
@@ -93,7 +93,7 @@ app.get('/files', async (req, res) => {
         for (const file of files) {
             const filePath = path.join(uploadsFolder, file);
             // Read file data asynchronously
-            const fileData = await fs.readFile(filePath);
+            const fileData = await fs.promises.readFile(filePath);
             // Convert file data to base64-encoded string
             const base64Data = fileData.toString('base64');
             // Create file object with name and data
@@ -129,9 +129,9 @@ app.post('/deletebyname', async (req, res) => {
         console.log(filePath);
         try {
             // Check if file exists
-            await fs.stat(filePath);
+            await fs.promises.stat(filePath);
             // File exists, delete it
-            await fs.unlink(filePath);
+            await fs.promises.unlink(filePath);
             console.log(`File "${fileName}" deleted successfully.`);
         } catch (err) {
             // File does not exist or error occurred during deletion
@@ -151,12 +151,12 @@ app.post('/deletebyname', async (req, res) => {
     const uploadsFolder = path.join(__dirname, 'apiresources', 'uploads');
     try {
       // Read the contents of the uploads folder
-      const files = await fs.readdir(uploadsFolder);
+      const files = await fs.promises.readdir(uploadsFolder);
   
       // Read the content of each file
       const filesWithContent = await Promise.all(files.map(async (file) => {
         const filePath = path.join(uploadsFolder, file);
-        const fileContent = await fs.readFile(filePath, 'utf8');
+        const fileContent = await fs.promises.readFile(filePath, 'utf8');
         return { fileName: file, content: fileContent };
       }));
   
@@ -210,7 +210,7 @@ app.post('/updatephotometadata', async (req, res) => {
 // Function to read photo data from file
 const readPhotoDataFromFile = async () => {
     try {
-        const data = await fs.readFile('photoData.txt', 'utf8');
+        const data = await fs.promises.readFile('apiresources/uploads/photoMetadata/photoData.txt', 'utf8');
         return JSON.parse(data);
     } catch (error) {
         console.error('Error reading photo data:', error);
@@ -221,7 +221,7 @@ const readPhotoDataFromFile = async () => {
 // Function to write photo data to file
 const writePhotoDataToFile = async (data) => {
     try {
-        await fs.writeFile('photodata.txt', JSON.stringify(data, null, 2), 'utf8');
+        await fs.promises.writeFile('apiresources/uploads/photoMetadata/photoData.txt', JSON.stringify(data, null, 2), 'utf8');
     } catch (error) {
         console.error('Error writing photo data:', error);
         throw error;

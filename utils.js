@@ -314,7 +314,7 @@ const shuffleArray = array => {
 const deleteFromPhotoData = (fileNamesToDelete) => {
     try {
         // Read the contents of the file
-        const fileContents = fs.readFileSync('photoData.txt', 'utf8');
+        const fileContents = fs.readFileSync('apiresources/uploads/photoMetadata/photoData.txt', 'utf8');
         
         // Parse the contents as JSON
         let photoData = JSON.parse(fileContents);
@@ -326,7 +326,7 @@ const deleteFromPhotoData = (fileNamesToDelete) => {
         const newData = JSON.stringify(photoData, null, 2);
         
         // Write the updated data back to the file
-        fs.writeFileSync('photoData.txt', newData);
+        fs.writeFileSync('apiresources/uploads/photoMetadata/photoData.txt', newData);
         
         console.log('File names deleted successfully from photoData.txt');
     } catch (error) {

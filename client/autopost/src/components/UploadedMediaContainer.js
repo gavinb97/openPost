@@ -224,7 +224,6 @@ const UploadedMediaContainer = () => {
     return (
         <div>
             <h2>Uploaded Photos</h2>
-            {/* <h3>Select one or more to view, edit or delete</h3> */}
             
             {selectedImages.length > 0 && renderPhotoActionButtons()} {/* Render delete and edit buttons */}
             
