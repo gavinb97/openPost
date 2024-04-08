@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
 import { uploadFile } from '../service/userMediaService';
 import './../App.css';
 
@@ -7,9 +6,7 @@ import './../App.css';
 const UploadPictureBox = ({ onSuccessUpload  }) => {
     const [pictureFiles, setPictureFiles] = useState([]);
     const [videoFiles, setVideoFiles] = useState([]);
-    const [scrollPosition, setScrollPosition] = useState(0); 
-    const navigate = useNavigate();
-
+  
     const handleFileSelect = (event, fileType) => {
         const selectedFiles = event.target.files;
         if (fileType === 'picture') {
@@ -34,8 +31,7 @@ const UploadPictureBox = ({ onSuccessUpload  }) => {
                 const file = files[i];
                 console.log('Uploading file:', file.name);
                 try {
-                    const uploadFileResponse = await uploadFile(file, file.name);
-                    
+                    await uploadFile(file, file.name);
                 } catch (error) {
                     console.error('Error uploading file:', error);
                 }
