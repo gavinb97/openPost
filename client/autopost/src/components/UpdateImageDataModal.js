@@ -44,7 +44,7 @@ const getImageSrc = (file) => {
         {updatedData.map((item, index) => (
           <div key={index}>
             <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px', margin: '5px' }}>
-            <img src={`data:image/png;base64,${mediaFiles.find(file => file.fileName === item.name).fileData}`} alt={item.name} style={{ width: '50%', height: 'auto', marginRight: '10px' }} />
+            <img src={`data:image;base64,${mediaFiles.find(file => file.fileName === item.name).fileData}`} alt={item.name} style={{ width: '50%', height: 'auto', marginRight: '10px' }} />
                 <label style={{ marginRight: '10px' }}>Name:</label>
                 <p>{item.name}</p>
             </div>
