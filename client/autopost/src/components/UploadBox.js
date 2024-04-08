@@ -18,7 +18,7 @@ const UploadBox = () => {
     };
 
     const handleUploadClick = async () => {
-        
+        console.log('in handleuploadclick in uploadbox')
         const pictureInput = document.getElementById('pictureUpload');
         const fileInput = document.getElementById('videoUpload');
 
@@ -32,7 +32,12 @@ const UploadBox = () => {
             for (let i = 0; i < files.length; i++) {
                 const file = files[i];
                 console.log('Uploading file:', file.name);
-                await uploadFile(file, file.name);
+
+                const uploadResponse = await uploadFile(file, file.name);
+                console.log(uploadResponse)
+                do {
+                  console.log('waiting on response')
+                } while (uploadResponse)
             }
 
             // Reset the file input after uploading files

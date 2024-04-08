@@ -1,6 +1,7 @@
 import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { fetchAllFiles, deleteByName, getPhotoMetadata, updatePhotoMetadata } from '../service/userMediaService';
+
 import UpdateImageDataModal from './UpdateImageDataModal';
 import SetScheduleModal from '../components/SetScheduleModal';
 import './../App.css';
@@ -95,8 +96,9 @@ const UploadedMediaContainer = forwardRef((props, ref) => {
         }
     };
 
-    const handleRefreshClick = () => {
-        getAllMedia();
+    const handleRefreshClick = async () => {
+        console.log('in uploadedmediacontainer fuckidy fuck fuck')
+        await getAllMedia();
     };
 
     // Expose handleRefreshClick method

@@ -12,41 +12,45 @@ const base64ToBlob = (base64String) => {
     return blob;
 }
 
-export const uploadFile = async (file, fileName) => {
-    const endpoint = 'http://localhost:3456/upload';
+export const uploadFile = (file, fileName) => {
+    return new Promise((resolve, reject) => {
+        const endpoint = 'http://localhost:3456/upload';
 
-    // Convert file to base64
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    
-    reader.onload = async () => {
-        // Convert base64 string to Blob
-        const base64String = reader.result.split(',')[1]; // Remove data URL prefix
-        const blob = base64ToBlob(base64String);
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
 
-        // Create FormData object
-        const bodyForm = new FormData();
-        bodyForm.append('file', blob, fileName);
-        bodyForm.append('categories', JSON.stringify([])); // Convert categories array to JSON string
+        reader.onload = async () => {
+            const base64String = reader.result.split(',')[1];
+            const blob = base64ToBlob(base64String);
 
-        try {
-            const uploadResponse = await axios.post(
-                endpoint,
-                bodyForm, {
-                    headers: {
-                        'Content-Type': 'multipart/form-data', // Ensure proper Content-Type header
-                    },
-                }
-            );
-            console.log(uploadResponse.data);
-            return uploadResponse.data;
-        } catch (error) {
-            // Handle error
-            console.error('Error uploading file:', error);
-            throw error;
-        }
-    };
+            const bodyForm = new FormData();
+            bodyForm.append('file', blob, fileName);
+            bodyForm.append('categories', JSON.stringify([]));
+
+            try {
+                const uploadResponse = await axios.post(
+                    endpoint,
+                    bodyForm, {
+                        headers: {
+                            'Content-Type': 'multipart/form-data',
+                        },
+                    }
+                );
+                console.log(uploadResponse.data);
+                resolve(uploadResponse.data); // Resolve the promise with the response data
+            } catch (error) {
+                console.error('Error uploading file:', error);
+                reject(error); // Reject the promise with the error
+            }
+        };
+
+        reader.onerror = (error) => {
+            console.error('Error reading file:', error);
+            reject(error); // Reject the promise with the error
+        };
+    });
 };
+
 
 
 export const fetchAllFiles = async () => {

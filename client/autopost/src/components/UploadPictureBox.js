@@ -33,18 +33,20 @@ const UploadPictureBox = ({ onSuccessUpload  }) => {
             for (let i = 0; i < files.length; i++) {
                 const file = files[i];
                 console.log('Uploading file:', file.name);
-                await uploadFile(file, file.name);
+                try {
+                    const uploadFileResponse = await uploadFile(file, file.name);
+                    
+                } catch (error) {
+                    console.error('Error uploading file:', error);
+                }
             }
-
+    
             // Reset the file inputs after uploading files
             pictureInput.value = '';
             videoInput.value = '';
-            
-          
-            
-            // Reload the page after uploading files
-            console.log('uploaded')
-            onSuccessUpload()
+    
+            console.log('uploaded');
+            onSuccessUpload();
         } else {
             console.log('No files selected');
         }

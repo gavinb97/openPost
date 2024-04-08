@@ -14,8 +14,9 @@ function UploadScreen() {
 
     const handleFileUploadSuccess = async () => {
         // Call handleRefreshClick from UploadedMediaContainer
-        console.log('fuk')
-        uploadedMediaContainerRef.current.handleRefreshClick();
+        console.log('fuk')  
+        // window.location.reload();
+        await uploadedMediaContainerRef.current.handleRefreshClick();
     };
 
 
