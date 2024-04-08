@@ -11,6 +11,7 @@ const multer = require('multer');
 const fs = require('fs');
 const path = require('path');
 const {appendOrWriteToJsonFile, deleteFromPhotoData} = require('./utils')
+const sharp = require('sharp');
 
 // Multer storage configuration
 const storage = multer.diskStorage({
@@ -96,10 +97,13 @@ app.get('/files', async (req, res) => {
             const fileData = await fs.promises.readFile(filePath);
             // Convert file data to base64-encoded string
             const base64Data = fileData.toString('base64');
+
+            // const thumbnail = await generateThumbnail(filePath);/
             // Create file object with name and data
             const fileObject = {
                 fileName: file,
-                fileData: base64Data
+                fileData: base64Data,
+                // thumbnail: thumbnail
             };
             // Push file object to the array
             fileObjects.push(fileObject);
@@ -113,6 +117,19 @@ app.get('/files', async (req, res) => {
         res.status(500).send('Error reading files.');
     }
 });
+
+// async function generateThumbnail(filePath) {
+//     // Use sharp library to generate thumbnail
+//     try {
+//         const thumbnailBuffer = await sharp(filePath)
+//             .resize({ width: 100, height: 100 })
+//             .toBuffer();
+//         return thumbnailBuffer.toString('base64');
+//     } catch (error) {
+//         console.error('Error generating thumbnail:', error);
+//         return null;
+//     }
+// }
 
 app.post('/deletebyname', async (req, res) => {
     const fileNames = req.body; // Assuming body contains either a single string or an array of strings
@@ -131,7 +148,17 @@ app.post('/deletebyname', async (req, res) => {
             // Check if file exists
             await fs.promises.stat(filePath);
             // File exists, delete it
-            await fs.promises.unlink(filePath);
+            await new Promise((resolve, reject) => {
+                fs.unlink(filePath, (err) => {
+                    if (err) {
+                        console.error(`Error deleting file "${fileName}":`, err);
+                        reject(err);
+                    } else {
+                        console.log(`File "${fileName}" deleted successfully.`);
+                        resolve();
+                    }
+                });
+            });
             console.log(`File "${fileName}" deleted successfully.`);
         } catch (err) {
             // File does not exist or error occurred during deletion

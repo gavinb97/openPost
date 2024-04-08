@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import TagInputComponent from './TagInputComponent'; 
 
-const UpdateImageDataModal = ({ imageData, closeModal, updatePhotoMetadata }) => {
+const UpdateImageDataModal = ({ imageData, closeModal, updatePhotoMetadata, mediaFiles }) => {
   const [updatedData, setUpdatedData] = useState(imageData);
+ 
 
   const handleChange = (e, index) => {
     const { name, value } = e.target;
@@ -10,6 +11,7 @@ const UpdateImageDataModal = ({ imageData, closeModal, updatePhotoMetadata }) =>
     newData[index][name] = value;
     setUpdatedData(newData);
   };
+
 
   const handleSave = () => {
     // Perform save operation with updatedData
@@ -20,6 +22,20 @@ const UpdateImageDataModal = ({ imageData, closeModal, updatePhotoMetadata }) =>
     closeModal();
   };
 
+  const getFileExtension = (fileName) => {
+    return fileName.split('.').pop().toLowerCase();
+  };
+
+const getImageSrc = (file) => {
+    const { fileName, fileData } = file;
+    const extension = getFileExtension(fileName);
+    const imageFormat = extension === 'jpg' || extension === 'jpeg' || extension === 'png' || extension === 'gif'
+        ? `image/${extension}`
+        : 'image/png'; // Default to PNG if extension is not recognized
+    
+    return `data:${imageFormat};base64,${fileData}`;
+};
+
   return (
     <div className="modal-container">
       <div className="modal-backdrop" onClick={closeModal}></div>
@@ -28,6 +44,7 @@ const UpdateImageDataModal = ({ imageData, closeModal, updatePhotoMetadata }) =>
         {updatedData.map((item, index) => (
           <div key={index}>
             <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px', margin: '5px' }}>
+            <img src={`data:image/png;base64,${mediaFiles.find(file => file.fileName === item.name).fileData}`} alt={item.name} style={{ width: '50%', height: 'auto', marginRight: '10px' }} />
                 <label style={{ marginRight: '10px' }}>Name:</label>
                 <p>{item.name}</p>
             </div>

@@ -66,7 +66,9 @@ export const fetchAllFiles = async () => {
   };
 
 
+export const getPhotoFilesByName = async () => {
 
+}
 
 
 export const deleteByName = async (fileNames) => {

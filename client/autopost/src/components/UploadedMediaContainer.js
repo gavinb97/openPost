@@ -207,7 +207,7 @@ const UploadedMediaContainer = forwardRef((props, ref) => {
             } else {
                 newSelectedImages = selectedImages.filter((item) => item !== index);
             }
-    
+            console.log(newSelectedImages)
             setSelectedImages(newSelectedImages);
         };
     
@@ -250,7 +250,7 @@ const UploadedMediaContainer = forwardRef((props, ref) => {
             
             {mediaFiles.length > 0 && <RenderImages fileObjects={mediaFiles} />} {/* Render images */}
             <div>
-                {showModal && <UpdateImageDataModal imageData={imageMetadata} closeModal={closeModal} updatePhotoMetadata={updatePhotoMetadata} />} 
+                {showModal && <UpdateImageDataModal imageData={imageMetadata} mediaFiles={mediaFiles} closeModal={closeModal} updatePhotoMetadata={updatePhotoMetadata} />} 
                 {showScheduleModal && <SetScheduleModal closeModal={closeModal}></SetScheduleModal>}
             </div>
             
