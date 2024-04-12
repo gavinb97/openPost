@@ -65,7 +65,7 @@ const UpdateImageDataModal = ({ imageData, closeModal, updatePhotoMetadata, medi
 
 
 
-if (updatedData && media.length > 0) {
+if (updatedData.length > 0 && media.length > 0) {
   console.log('must be greater than')
   console.log(media)
   return (
