@@ -141,10 +141,16 @@
 
 .upload-section label {
   margin-right: 10px;
+  text-decoration-color: white;
 }
 
 .upload-section button {
   margin-top: 10px;
+  text-decoration-color: white;
+}
+
+.upload-color {
+  color: white;
 }
 
 /* CSS styles for SetScheduleModal */

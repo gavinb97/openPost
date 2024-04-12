@@ -73,12 +73,12 @@ const UploadPictureBox = ({ onSuccessUpload  }) => {
         <div className="upload-box-container">
         {showUpdateModal && <UpdateImageDataModal uploadedFileNames={namesOfFiles} imageData={imageMetadata} mediaFiles={pictureFiles} closeModal={closeModal} updatePhotoMetadata={updatePhotoMetadata} />} 
             <div className="upload-section">
-                <label htmlFor="pictureUpload">Upload Pictures:</label>
-                <input type="file" id="pictureUpload" name="uploadPic" accept="image/*" onChange={(event) => handleFileSelect(event, 'picture')} multiple />
+                <label className="upload-color" htmlFor="pictureUpload">Upload Pictures:</label>
+                <input className="upload-color" type="file" id="pictureUpload" name="uploadPic" accept="image/*" onChange={(event) => handleFileSelect(event, 'picture')} multiple />
             </div>
             <div className="upload-section">
-                <label htmlFor="videoUpload">Upload Videos:</label>
-                <input type="file" id="videoUpload" name="uploadVideo" accept="video/*" onChange={(event) => handleFileSelect(event, 'video')} multiple />
+                <label className="upload-color" htmlFor="videoUpload">Upload Videos:</label>
+                <input className="upload-color" type="file" id="videoUpload" name="uploadVideo" accept="video/*" onChange={(event) => handleFileSelect(event, 'video')} multiple />
             </div>
             <div className="upload-section">
                 <button type="button" onClick={handleUploadClick}>Upload Files</button>
