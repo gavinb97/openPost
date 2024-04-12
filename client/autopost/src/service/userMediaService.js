@@ -12,6 +12,55 @@ const base64ToBlob = (base64String) => {
     return blob;
 }
 
+const convertFileToBase64 = (file) => new Promise((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.onload = (event) => {
+        const base64String = event.target.result.split(',')[1];  // Remove 'data:image;base64,' prefix
+        resolve(base64String);
+    };
+    reader.onerror = (error) => reject(error);
+
+    reader.readAsDataURL(file);
+});
+
+export const updateFileNamesAsync = async (files, uploadedFileNames) => {
+    const renamedFiles = [];
+
+    console.log('Initial files:', files);
+    console.log('Uploaded file names:', uploadedFileNames);
+
+    files.forEach(async file => {
+        console.log('Processing file:', file.name);
+        // Find the filename with the identifier in the uploadedFileNames array
+        const matchingFileName = uploadedFileNames.find(name => name.endsWith(file.name));
+
+        // Only include the file if a matching file name is found and it's different from the original
+        if (matchingFileName && matchingFileName !== file.name) {
+            console.log('Matched file name:', matchingFileName);
+            // Create a new file object with the updated name
+            const updatedFile = new File([file], matchingFileName, { type: file.type, lastModified: file.lastModified });
+            
+            const base64file = await convertFileToBase64(updatedFile)
+            
+            const fileObject = {
+                fileName: matchingFileName,
+                fileData: base64file
+            }
+
+            renamedFiles.push(fileObject);
+        } else {
+            console.log('No matching file name found for:', file.name);
+        }
+    });
+
+    console.log('Renamed files:', renamedFiles);
+    return renamedFiles;
+};
+
+
+
+
 export const uploadFile = (file, fileName) => {
     return new Promise((resolve, reject) => {
         const endpoint = 'http://localhost:3456/upload';
@@ -36,7 +85,6 @@ export const uploadFile = (file, fileName) => {
                         },
                     }
                 );
-                console.log(uploadResponse.data);
                 resolve(uploadResponse.data); // Resolve the promise with the response data
             } catch (error) {
                 console.error('Error uploading file:', error);
