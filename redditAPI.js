@@ -59,7 +59,8 @@ app.post('/upload', upload.single('file'), async (req, res) => {
         const metadata = {
             name: fileName,
             description: description,
-            categories: categories
+            categories: categories,
+            NSFW: true
         };
 
         // Append metadata to the JSON file
