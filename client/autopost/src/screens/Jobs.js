@@ -6,7 +6,7 @@ import { useAuth } from '../service/authContext';
 function Jobs() {
     const navigate = useNavigate()
    const { user } = useAuth()
-    console.log(user.user)
+    console.log(user)
     console.log('user ^^')
     return (
         <div className="App">

@@ -208,14 +208,11 @@ app.post('/register', async (req, res) => {
     );
 
     const returnUserObj = {
-      username: username
-    }
-
-    res.status(201).json({
-      message: 'User registered successfully',
-      user: returnUserObj,
+      username: username,
       jwt: token
-    });
+    }
+    console.log(`${username} registered successfully`)
+    res.status(201).json(returnUserObj);
   } catch (error) {
     console.log(error);
     res.status(500).json({
@@ -243,12 +240,13 @@ app.post('/login', async (req, res) => {
       { expiresIn: '168h' }  // expires in 24 hours
     );
 
-    console.log(`User ${username} logged in successfully.`);
-    res.status(200).json({
-      message: 'Login successful',
+    const returnUserObj = {
       username: username,
       jwt: token
-    });
+    }
+
+    console.log(`User ${username} logged in successfully.`);
+    res.status(200).json(returnUserObj);
   } catch (error) {
     console.log(error);
     res.status(401).json({ message: 'Invalid credentials' });
