@@ -210,7 +210,7 @@ app.post('/register', async (req, res) => {
     res.status(201).json({
       message: 'User registered successfully',
       user: newUser,
-      token
+      jwt: token
     });
   } catch (error) {
     console.log(error);
@@ -242,7 +242,8 @@ app.post('/login', async (req, res) => {
     console.log(`User ${username} logged in successfully.`);
     res.status(200).json({
       message: 'Login successful',
-      token
+      username: username,
+      jwt: token
     });
   } catch (error) {
     console.log(error);

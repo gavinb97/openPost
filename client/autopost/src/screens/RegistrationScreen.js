@@ -5,12 +5,15 @@ import {uploadFile} from '../service/userMediaService'
 import { useNavigate } from 'react-router-dom'
 import Navbar from '../components/Navbar'
 import { register } from '../service/userService';
+import { useAuth } from '../service/authContext'
 
 function RegistrationScreen() {
     const navigate = useNavigate()
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+
+    const { user, loginContext } = useAuth()
 
     const handleUsernameChange = (event) => {
         setUsername(event.target.value);
@@ -27,7 +30,11 @@ function RegistrationScreen() {
     const handleSubmit = async (event) => {
         event.preventDefault();
         try {
-            await register(username, password, email)
+            const registerResponse = await register(username, password, email)
+            console.log('register response: ' + registerResponse)
+            console.log(registerResponse)
+            // set context
+            loginContext(registerResponse)
             navigate('/landing')
         } catch (e) {
             console.log('failed to login')

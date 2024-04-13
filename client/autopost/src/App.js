@@ -8,6 +8,7 @@ import RegistrationScreen from './screens/RegistrationScreen';
 import HomeScreen from './screens/HomeScreen';
 import LoginScreen from './screens/LoginScreen';
 import UserLandingScreen from './screens/UserLandingScreen';
+import About from './screens/About';
 import Jobs from './screens/Jobs';
 import Navbar from './components/Navbar'
 import { AuthProvider } from './service/authContext';
@@ -41,6 +42,10 @@ function App() {
     {
       path: '/jobs', // Corrected path with '/'
       element: <Jobs />
+    },
+    {
+      path: '/about',
+      element: <About />
     }
   ]);
 

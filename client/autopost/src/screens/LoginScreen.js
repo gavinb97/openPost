@@ -2,12 +2,14 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom'
 import Navbar from '../components/Navbar'
 import { login } from '../service/userService';
-import { loginContext } from '../service/authContext'
+import { useAuth } from '../service/authContext'
 
 function LoginScreen() {
     const navigate = useNavigate()
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+
+    const { user, logoutContext, loginContext } = useAuth()
 
     const handleUsernameChange = (event) => {
         setUsername(event.target.value);
@@ -20,7 +22,10 @@ function LoginScreen() {
     const handleSubmit = async (event) => {
         event.preventDefault();
         try {
-            await login(username, password)
+            const loginResponse = await login(username, password)
+            console.log(loginResponse)
+            // set context  
+            loginContext(loginResponse)
             navigate('/landing')
         } catch (e) {
             console.log(e)
