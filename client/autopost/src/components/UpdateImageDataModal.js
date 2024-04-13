@@ -12,16 +12,17 @@ const UpdateImageDataModal = ({ imageData, closeModal, updatePhotoMetadata, medi
   const handleChange = (e, index) => {
     const { name, value } = e.target;
     let actualValue = value;
-    
+    let fieldName = name.split('-')[0];  // This will extract 'NSFW' from 'NSFW-0'
+
     // If the change is from radio buttons for NSFW, convert value to boolean
-    if (name === 'NSFW') {
-      actualValue = value === 'true'; // Converts the string 'true'/'false' to boolean
+    if (fieldName === 'NSFW') {
+        actualValue = value === 'true'; // Converts the string 'true'/'false' to boolean
     }
   
     const newData = [...updatedData];
-    newData[index][name] = actualValue;
+    newData[index][fieldName] = actualValue;
     setUpdatedData([...newData]);
-  };
+};
   
   
 
@@ -114,24 +115,25 @@ if (updatedData.length > 0 && media.length > 0) {
             <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px', border: '1px solid grey', margin: '5px' }}>
                 <label style={{ marginRight: 10 }}>NSFW:</label>
                 <input
-                    type="radio"
-                    name="NSFW"
-                    value="true"
-                    checked={item.NSFW === true}
-                    onChange={(e) => handleChange(e, index)}
-                    style={{ marginRight: 5 }}
+                  type="radio"
+                  name={`NSFW-${index}`}  // Unique name for each set
+                  value="true"
+                  checked={item.NSFW === true}
+                  onChange={(e) => handleChange(e, index)}
+                  style={{ marginRight: 5 }}
                 />
                 <label style={{ marginRight: 10 }}>Yes</label>
                 <input
-                    type="radio"
-                    name="NSFW"
-                    value="false"
-                    checked={item.NSFW === false}
-                    onChange={(e) => handleChange(e, index)}
-                    style={{ marginRight: 5 }}
+                  type="radio"
+                  name={`NSFW-${index}`}  // Unique name for each set
+                  value="false"
+                  checked={item.NSFW === false}
+                  onChange={(e) => handleChange(e, index)}
+                  style={{ marginRight: 5 }}
                 />
-                  <label>No</label>
+                <label>No</label>
               </div>
+              
           </div>
         ))}
         <button onClick={handleSave}>Save</button>
