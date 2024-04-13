@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import {uploadFile} from '../service/userMediaService'
 import { useNavigate } from 'react-router-dom'
 import Navbar from '../components/Navbar'
+import { register } from '../service/userService';
 
 function RegistrationScreen() {
     const navigate = useNavigate()
@@ -23,11 +24,15 @@ function RegistrationScreen() {
         setPassword(event.target.value);
     };
 
-    const handleSubmit = (event) => {
+    const handleSubmit = async (event) => {
         event.preventDefault();
-      
-        // Your registration logic goes here
-        navigate('/landing')
+        try {
+            await register(username, password, email)
+            navigate('/landing')
+        } catch (e) {
+            console.log('failed to login')
+        }
+        
     };
 
     return (

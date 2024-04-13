@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom'
 import Navbar from '../components/Navbar'
+import { login } from '../service/userService';
 
 function LoginScreen() {
     const navigate = useNavigate()
@@ -15,10 +16,15 @@ function LoginScreen() {
         setPassword(event.target.value);
     };
 
-    const handleSubmit = (event) => {
-        // event.preventDefault();
-        // Your login logic goes here
-        navigate('/landing')
+    const handleSubmit = async (event) => {
+        event.preventDefault();
+        try {
+            await login(username, password)
+            navigate('/landing')
+        } catch (e) {
+            console.log(e)
+        }
+        
     };
 
     return (
