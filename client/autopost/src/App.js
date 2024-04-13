@@ -10,6 +10,7 @@ import LoginScreen from './screens/LoginScreen';
 import UserLandingScreen from './screens/UserLandingScreen';
 import Jobs from './screens/Jobs';
 import Navbar from './components/Navbar'
+import { AuthProvider } from './service/authContext';
 
 function App() {
   const router = createBrowserRouter([
@@ -44,14 +45,16 @@ function App() {
   ]);
 
   return (
-    
-    <RouterProvider router={router}>
-      <div className="App">
-        {/* Add any global components here */}
+    <AuthProvider>
+        <RouterProvider router={router}>
+            <div className="App">
+              {/* Add any global components here */}
   
        
-      </div>
-    </RouterProvider>
+            </div>
+        </RouterProvider>
+    </AuthProvider>
+    
   );
 }
 
