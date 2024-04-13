@@ -4,6 +4,10 @@ const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const {writeTextToFile, updateUserTokens} = require('../utils')
 const bodyParser = require('body-parser');
+
+const jwt = require('jsonwebtoken');
+const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key'; 
+
 const {
     generateTwitterAuthUrl,
     getAccessToken,
@@ -22,7 +26,7 @@ const {
 
 const {getTikTokLoginUrl, getAccessTokenAndOpenId} = require('./tiktokService')
 
-const {getUserByUsername} = require('./authService')
+const {getUserByUsername, registerUser, authenticateUser, authenticateToken} = require('./authService')
 
 const app = express();
 app.use(cookieParser());
@@ -31,7 +35,7 @@ app.use(bodyParser.json()); // Parse JSON bodies
 app.use(bodyParser.urlencoded({ extended: true })); // Parse URL-encoded bodies
 
 app.listen(3455, () => {
-    console.log('running')
+    console.log('running on 3455')
 })
 
 // twitter callback endpoint to handle successful login
@@ -183,3 +187,65 @@ app.post('/usercreds', async (req, res) => {
     res.status(500).json({ error: 'error getting credentials' });
   }
 })
+
+app.post('/register', async (req, res) => {
+  const { username, email, password } = req.body;
+
+  if (!username || !email || !password) {
+      return res.status(400).json({ message: 'Username, email, and password are required.' });
+  }
+
+  const newUser = { username, email, password };
+
+  try {
+    await registerUser(newUser);
+
+    // Create a token
+    const token = jwt.sign(
+      { username: newUser.username },
+      JWT_SECRET,
+      { expiresIn: '168h' }  // expires in 24 hours
+    );
+
+    res.status(201).json({
+      message: 'User registered successfully',
+      user: newUser,
+      token
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      message: 'Registration failed',
+      user: newUser
+    });
+  }
+});
+
+
+app.post('/login', async (req, res) => {
+  const { username, password } = req.body;
+
+  if (!username || !password) {
+      return res.status(400).json({ message: 'Username and password are required.' });
+  }
+
+  try {
+    const user = await authenticateUser(username, password);
+
+    // Create a token
+    const token = jwt.sign(
+      { username: user.username },
+      JWT_SECRET,
+      { expiresIn: '168h' }  // expires in 24 hours
+    );
+
+    console.log(`User ${username} logged in successfully.`);
+    res.status(200).json({
+      message: 'Login successful',
+      token
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(401).json({ message: 'Invalid credentials' });
+  }
+});

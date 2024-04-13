@@ -78,12 +78,12 @@ const UploadedMediaContainerSmall = () => {
     
         return (
             <div style={{ display: 'flex', justifyContent: 'center'}}>
-                <button style={{ backgroundColor: 'red', color: 'white', marginTop: '10px' }} onClick={handleDeleteClick}>
+                {/* <button style={{ backgroundColor: 'red', color: 'white', marginTop: '10px' }} onClick={handleDeleteClick}>
                     Delete
-                </button>
-                <button style={{ backgroundColor: 'blue', color: 'white', marginTop: '10px', marginLeft: '5px' }} onClick={handleEditClick}>
+                </button> */}
+                {/* <button style={{ backgroundColor: 'blue', color: 'white', marginTop: '10px', marginLeft: '5px' }} onClick={handleEditClick}>
                     View / Edit
-                </button>
+                </button> */}
                 <button style={{ backgroundColor: 'green', color: 'white', marginTop: '10px', marginLeft: '5px' }} onClick={handleScheduleClick}>
                     Schedule
                 </button>
