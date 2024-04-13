@@ -207,9 +207,13 @@ app.post('/register', async (req, res) => {
       { expiresIn: '168h' }  // expires in 24 hours
     );
 
+    const returnUserObj = {
+      username: username
+    }
+
     res.status(201).json({
       message: 'User registered successfully',
-      user: newUser,
+      user: returnUserObj,
       jwt: token
     });
   } catch (error) {
