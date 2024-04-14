@@ -50,7 +50,7 @@ app.get('/xcallback', async (req, res) => {
         console.log(tokens)
 
 
-        res.redirect('http://localhost:3000/landing');
+        res.redirect('http://localhost:3000/profile');
     } catch (error) {
       // Handle errors
       console.error('Error:', error);
@@ -83,7 +83,7 @@ app.post('/twitterloginurl', async (req, res) => {
     const getAccessTokenResponse = await getRedditAccessToken(codeFromCallback, state)
 
 
-    res.redirect('http://localhost:3000/landing');
+    res.redirect('http://localhost:3000/profile');
 })
 
 app.post('/redditloginurl', async (req, res) => {
@@ -126,7 +126,7 @@ app.post('/redditloginurl', async (req, res) => {
 
 
     
-    res.redirect('http://localhost:3000/landing');
+    res.redirect('http://localhost:3000/profile');
 })
 
 app.post('/googleloginurl', async (req, res) => {
@@ -158,7 +158,7 @@ app.get('/callback', async (req, res) => {
     const keyStrings = `accessToken: ${response.accessToken}  refreshToken: ${response.refreshToken}`
     writeTextToFile(keyStrings, 'tiktokkeys.txt')
     
-    res.redirect('https://google.com');
+    res.redirect('https://localhost:3000/profile.com');
 })
 
 app.post('/tiktokloginurl', async (req, res) => {

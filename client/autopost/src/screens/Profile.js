@@ -9,10 +9,14 @@ import UploadPictureBox from '../components/UploadPictureBox';
 import UploadedMediaContainerSmall from '../components/UploadedMediaContainerSmall';
 import SetScheduleModal from '../components/SetScheduleModal';
 import Navbar from '../components/Navbar'
+import SocialsLogin from '../components/SocialsLogin';
+import { useAuth } from '../service/authContext';
 
-function UserLandingScreen() {
+function Profile() {
     const navigate = useNavigate();
     const [showScheduleModal, setShowScheduleModal] = useState(false);
+
+    const { user } = useAuth()
 
     const handleShowScheduleModal = () => {
         setShowScheduleModal(true);
@@ -25,24 +29,17 @@ function UserLandingScreen() {
     return (
         <div className="App">
             <Navbar></Navbar>
-            <header className="App-header">
-                <img src={otherLogo} className="App-logo" alt="logo" />
-                <h1>Were in fool</h1>
-                <div>
-                   <p>poop poopy poop</p>
-                </div>
-            </header>
+
             <div>
-                <button onClick={handleShowScheduleModal}>ooooh wee</button>
+                <h1>Profile</h1>
             </div>
-            <div style={{display: 'flex', justifyContent: 'center'}}>
-                <UploadedMediaContainerSmall></UploadedMediaContainerSmall>
+            <div>
+                <p>{`Username: ${user.username}`} </p>
             </div>
-            
-            {/* Render SetScheduleModal if showScheduleModal is true */}
-             {showScheduleModal && <SetScheduleModal closeModal={handleCloseScheduleModal} />}
+            <SocialsLogin></SocialsLogin>
+
         </div>
     );
 }
 
-export default UserLandingScreen;
+export default Profile;

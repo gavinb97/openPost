@@ -16,6 +16,7 @@ const Navbar = () => {
             <li><Link to="/authorizeSocials">Authorize Socials</Link></li>
             <li><Link to="/landing">User Landing</Link></li>
             <li><Link to="/jobs">Jobs</Link></li>
+            <li><Link to="/profile">Profile</Link></li>
           </>
         ) : (
           // Links for guests

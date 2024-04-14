@@ -10,6 +10,7 @@ import LoginScreen from './screens/LoginScreen';
 import UserLandingScreen from './screens/UserLandingScreen';
 import About from './screens/About';
 import Jobs from './screens/Jobs';
+import Profile from './screens/Profile';
 import Navbar from './components/Navbar'
 import { AuthProvider } from './service/authContext';
 
@@ -46,6 +47,10 @@ function App() {
     {
       path: '/about',
       element: <About />
+    },
+    {
+      path: '/profile',
+      element: <Profile></Profile>
     }
   ]);
 
