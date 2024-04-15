@@ -2,10 +2,10 @@ import axios from 'axios';
 
 
 
-export const getYoutubeLoginUrl = async () => {
+export const getYoutubeLoginUrl = async (username) => {
     const endpoint = 'http://localhost:3455/googleloginurl';
     try {
-      const response = await axios.post(endpoint, {username: 'somedude'});
+      const response = await axios.post(endpoint, {username: username});
       return response.data;
     } catch (error) {
       console.error('Error fetching login URL:', error);

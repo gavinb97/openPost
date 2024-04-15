@@ -26,7 +26,7 @@ const {
 
 const {getTikTokLoginUrl, getAccessTokenAndOpenId} = require('./tiktokService')
 
-const {getUserByUsername, registerUser, authenticateUser, authenticateToken} = require('./authService')
+const {getUserByUsername, registerUser, authenticateUser, authenticateToken, getUserCreds} = require('./authService')
 
 const app = express();
 app.use(cookieParser());
@@ -247,6 +247,23 @@ app.post('/login', async (req, res) => {
 
     console.log(`User ${username} logged in successfully.`);
     res.status(200).json(returnUserObj);
+  } catch (error) {
+    console.log(error);
+    res.status(401).json({ message: 'Invalid credentials' });
+  }
+});
+
+
+app.post('/getUserCreds', async (req, res) => {
+  const { username } = req.body;
+
+  if (!username) {
+      return res.status(400).json({ message: 'Username is required.' });
+  }
+
+  try {
+    const creds = await getUserCreds(username)
+    res.status(200).json(creds);
   } catch (error) {
     console.log(error);
     res.status(401).json({ message: 'Invalid credentials' });

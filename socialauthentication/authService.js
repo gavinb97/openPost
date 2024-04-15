@@ -2,6 +2,7 @@ const fs = require('fs')
 const path = require('path');
 const jwt = require('jsonwebtoken');
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key'; 
+const { findUserCredentials } = require('../utils')
 
 
 const getUserByUsername = async (filename, username) => {
@@ -109,9 +110,15 @@ const authenticateToken = (req, res, next) => {
     });
   };
 
+const getUserCreds = async (username) => {
+    const userCreds = await findUserCredentials(username)
+    return userCreds
+}
+
 module.exports = {
     getUserByUsername,
     registerUser,
     authenticateUser,
-    authenticateToken
+    authenticateToken,
+    getUserCreds
 }

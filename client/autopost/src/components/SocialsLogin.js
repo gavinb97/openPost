@@ -1,15 +1,19 @@
 import logo from './../logo.svg';
 import './../App.css';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {uploadFile} from '../service/userMediaService'
 import {getTwitterLoginUrl} from '../service/twitterService'
 import {getRedditLoginUrl} from '../service/redditService'
 import {getYoutubeLoginUrl} from '../service/youtubeService'
 import { getTikTokLoginUrl } from '../service/tiktokService';
 import Navbar from '../components/Navbar'
+import { useAuth } from '../service/authContext';
 
 function SocialsLogin() {
-    const [isLoggedIn, setIsLoggedIn] = React.useState({
+  const { user } = useAuth()
+  console.log(user.username)
+
+    const [isLoggedIn, setIsLoggedIn] = useState({
       twitter: false,
       reddit: false,
       youtube: false,
@@ -23,7 +27,7 @@ function SocialsLogin() {
         youtube: getYoutubeLoginUrl,
         tiktok: getTikTokLoginUrl
       };
-      const url = await urls[media]();
+      const url = await urls[media](user.username);
       window.location.href = url;
     };
   

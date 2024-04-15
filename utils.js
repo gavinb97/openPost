@@ -461,6 +461,25 @@ const writeUserCreds = async (filename, newJsonObject) => {
     }
 };
 
+const findUserCredentials = async (username) => {
+    try {
+      // Read the creds.json file
+      const data = await fs.promises.readFile('authData\\creds.json', 'utf8');
+      // Parse the JSON data
+      const users = JSON.parse(data);
+  
+      // Find the user object by username
+      const userObject = users.find(user => user.user === username);
+      
+      // Return the found object or null if not found
+      return userObject || null;
+    } catch (error) {
+      // Handle possible errors
+      console.error('Error reading from creds.json:', error);
+      throw error;
+    }
+  };
+
 
 module.exports ={
     deleteFilesInDirectory, 
@@ -494,5 +513,6 @@ module.exports ={
     updateTwitterTokens,
     extractObjectFromFile,
     updateUserTokens,
-    writeUserCreds
+    writeUserCreds,
+    findUserCredentials
 } 
