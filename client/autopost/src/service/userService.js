@@ -25,3 +25,16 @@ export const register = async (userName, userPassword, userEmail) => {
       throw error; // Re-throw the error to propagate it further if needed
     }
   };
+
+export const getUserCreds = async (username) => {
+  const endpoint = 'http://localhost:3455/getUserCreds'
+
+  try {
+    const response = await axios.post(endpoint, {username: username});
+    return response.data;
+  } catch (error) {
+    console.error('Failed to Login', error);
+    throw error;
+  }
+}
+

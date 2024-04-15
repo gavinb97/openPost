@@ -6,19 +6,32 @@ import {getTwitterLoginUrl} from '../service/twitterService'
 import {getRedditLoginUrl} from '../service/redditService'
 import {getYoutubeLoginUrl} from '../service/youtubeService'
 import { getTikTokLoginUrl } from '../service/tiktokService';
+import { getUserCreds } from '../service/userService'
 import Navbar from '../components/Navbar'
 import { useAuth } from '../service/authContext';
 
 function SocialsLogin() {
   const { user } = useAuth()
-  console.log(user.username)
-
+  
     const [isLoggedIn, setIsLoggedIn] = useState({
       twitter: false,
       reddit: false,
       youtube: false,
       tiktok: false,
     });
+
+    useEffect(() => {
+      getUserCreds(user.username)
+        .then((creds) => {
+          setIsLoggedIn({
+            twitter: !!creds.twitterTokens,
+            reddit: !!creds.redditTokens,
+            youtube: !!creds.youtubeTokens,
+            tiktok: !!creds.tiktokTokens,
+          });
+        })
+    }, [user.username]); 
+
   
     const handleLogin = async (media) => {
       const urls = {
@@ -46,7 +59,7 @@ function SocialsLogin() {
               <div>{service.name}</div>
               <div>
                 {isLoggedIn[service.key] ? (
-                  <span style={{ color: 'green' }}>Enabled</span>
+                  <span style={{ color: 'green' }}>Authorized</span>
                 ) : (
                   <button onClick={() => handleLogin(service.key)}>Login to {service.name}</button>
                 )}
