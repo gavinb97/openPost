@@ -10,18 +10,19 @@ import { useAuth } from '../service/authContext';
 function SocialsLogin() {
   const { user } = useAuth();
   const [credentials, setCredentials] = useState({});
-  
   const [isLoggedIn, setIsLoggedIn] = useState({
     twitter: false,
     reddit: false,
     youtube: false,
     tiktok: false,
   });
+  const [isLoading, setIsLoading] = useState(true); // Added loading state
 
   useEffect(() => {
+    setIsLoading(true); // Start loading
     getUserCreds(user.username)
       .then((creds) => {
-        if (creds) {  // Check if creds is not null or undefined
+        if (creds) {
           setIsLoggedIn({
             twitter: !!creds.twitterTokens,
             reddit: !!creds.redditTokens,
@@ -30,7 +31,6 @@ function SocialsLogin() {
           });
           setCredentials(creds);
         } else {
-          // Handle the case when creds is null or undefined
           console.log("No credentials found for the user.");
           setIsLoggedIn({
             twitter: false,
@@ -40,9 +40,9 @@ function SocialsLogin() {
           });
           setCredentials({});
         }
+        setIsLoading(false); // End loading
       })
       .catch(error => {
-        // Handle any errors that occur during fetching
         console.error("Failed to fetch credentials:", error);
         setIsLoggedIn({
           twitter: false,
@@ -51,13 +51,13 @@ function SocialsLogin() {
           tiktok: false,
         });
         setCredentials({});
+        setIsLoading(false); // End loading even on error
       });
   }, [user.username]);
+
   const handleRevokeAccess = async (media) => {
     console.log('Revoke access clicked for:', media);
     const tokenDetails = credentials[`${media}Tokens`];
-
-    // Handling different parameter requirements per service
     const revokeFunctions = {
       twitter: () => revokeTwitterAccess(user.username),
       reddit: () => revokeRedditAccess(user.username, tokenDetails?.access_token),
@@ -95,6 +95,10 @@ function SocialsLogin() {
     { name: 'Youtube', key: 'youtube' },
     { name: 'TikTok', key: 'tiktok' },
   ];
+
+  if (isLoading) {
+    return <div>Loading...</div>; // Render loading indicator or null during loading
+  }
 
   return (
     <div className="App">
