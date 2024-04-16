@@ -202,7 +202,7 @@ app.get('/callback', async (req, res) => {
     const keyStrings = `accessToken: ${response.accessToken}  refreshToken: ${response.refreshToken}`
     writeTextToFile(keyStrings, 'tiktokkeys.txt')
     
-    res.redirect('https://localhost:3000/profile.com');
+    res.redirect('http://localhost:3000/profile');
 })
 
 app.post('/tiktokloginurl', async (req, res) => {
