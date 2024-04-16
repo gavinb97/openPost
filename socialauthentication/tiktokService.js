@@ -1,7 +1,7 @@
 require("dotenv").config();
 const axios = require('axios');
 const SHA256 = require('crypto-js/sha256')
-const {writeTextToFile, readTokensFromFile, getVideoChunkInfo, getFileSizeInBytes, sleep, generateRandomString, writeUserCreds, updateUserTokens} = require('../utils')
+const {writeTextToFile, readTokensFromFile, getVideoChunkInfo, getFileSizeInBytes, sleep, generateRandomString, writeUserCreds, updateUserTokens, removeTokenForUser} = require('../utils')
 const fs = require('fs');
 
 const CODE_VERIFIER = generateRandomString(69)
@@ -105,12 +105,12 @@ const getAccessTokenAndOpenId = async (code, state) => {
       };
   }
 
-  const revokeAccess = async (accessToken) => {
+  const revokeAccess = async (accessToken, username) => {
     let urlAccessToken = `https://open.tiktokapis.com/v2/oauth/token/`;
   
     const response = await axios.post(urlAccessToken, new URLSearchParams({
-      client_key: CLIENT_KEY,
-      client_secret: TIKTOK_CLIENT_SECRET,
+      client_key: process.env.TIK_TOK_CLIENT_KEY,
+      client_secret: process.env.TIK_TOK_CLIENT_SECRET,
       token: accessToken
     }),
     {
@@ -119,6 +119,7 @@ const getAccessTokenAndOpenId = async (code, state) => {
       }
     })
     console.log('revoked!!!!')
+    await removeTokenForUser(username, 'tiktok')
   }
 
   const queryCreatorInfo = async (accessToken) => {
@@ -231,5 +232,6 @@ const uploadToTikTok = async (videoPath, videoTitle) => {
 module.exports = {
   uploadToTikTok,
   getTikTokLoginUrl,
-  getAccessTokenAndOpenId
+  getAccessTokenAndOpenId,
+  revokeAccess
 }

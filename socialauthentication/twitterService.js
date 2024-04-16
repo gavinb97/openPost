@@ -1,5 +1,5 @@
 require('dotenv').config({ path: '../.env' });
-const {writeTextToFile, readTxtFile, sleep, generateRandomString, writeUserCreds, appendOrWriteToJsonFile, writeJsonToFile, updateTwitterTokens, extractObjectFromFile, updateUserTokens} = require('../utils')
+const {writeTextToFile, readTxtFile, removeTokenForUser, sleep, generateRandomString, writeUserCreds, appendOrWriteToJsonFile, writeJsonToFile, updateTwitterTokens, extractObjectFromFile, updateUserTokens} = require('../utils')
 const axios = require('axios');
 const crypto = require('crypto');
 
@@ -93,8 +93,24 @@ const refreshAccessToken = async (refreshToken) => {
     }
 };
 
+const revokeAccessToken = async (username) => {
+    try {
+        console.log(`Revoking access twitter token for user: ${username}`);
+
+        // Delete the token from storage
+        await removeTokenForUser(username, 'twitter');  
+
+        console.log(`Access token for ${username} has been successfully revoked.`);
+        return { success: true, message: "Token revoked successfully" };
+    } catch (error) {
+        console.error('Error revoking access token:', error);
+        return { success: false, message: "Failed to revoke token" };
+    }
+};
+
 module.exports = {
     generateTwitterAuthUrl,
     getAccessToken,
-    refreshAccessToken
+    refreshAccessToken,
+    revokeAccessToken
 }

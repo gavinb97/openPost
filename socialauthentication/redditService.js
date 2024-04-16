@@ -6,7 +6,7 @@ const fetch = require('node-fetch');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const SHA256 = require('crypto-js/sha256')
-const {writeTextToFile, readTokensFromFile, sleep, writeUserCreds, updateUserTokens, generateRandomString, shuffleArray, deleteFile, seeIfFileExists, writeArrayToJsonFile, appendOrWriteToJsonFile, selectRandomStrings, getRandomInterval, getRandomStringFromStringArray} = require('../utils')
+const {writeTextToFile, readTokensFromFile, removeTokenForUser, sleep, writeUserCreds, updateUserTokens, generateRandomString, shuffleArray, deleteFile, seeIfFileExists, writeArrayToJsonFile, appendOrWriteToJsonFile, selectRandomStrings, getRandomInterval, getRandomStringFromStringArray} = require('../utils')
 const fs = require('fs');
 const path = require('path')
 app.use(cookieParser());
@@ -19,7 +19,6 @@ const redditAccessTokenUrl = 'https://www.reddit.com/api/v1/access_token'
 const redirect_uri = 'https://moral-kindly-fly.ngrok-free.app/redditcallback/'
 
 const getRedditLoginUrl = async (username) => {
-//    const redirect_uri = 'https://moral-kindly-fly.ngrok-free.app/redditcallback/'
     const scopeSring = 'identity submit subscribe privatemessages edit mysubreddits read save'
     const stateString = username
 
@@ -66,8 +65,35 @@ const getRedditAccessToken = async (codeFromCallback, state) => {
         return response.data;
     } catch (e) {
         // console.log(e.response.data);
-        console.log('fucked')
+        console.log('Error getting Reddit Access Token')
         throw e; // Re-throwing the error for handling in the caller
+    }
+}
+
+
+const revokeRedditAccessToken = async (username, accessToken) => {
+    try {
+        const authHeader = `Basic ${Buffer.from(`${process.env.REDDIT_APP_ID}:${process.env.REDDIT_SECRET}`).toString('base64')}`;
+        
+        const params = new URLSearchParams();
+        params.append('token', accessToken);
+        params.append('token_type_hint', 'access_token');  // 'access_token' or 'refresh_token'
+
+        const response = await axios.post('https://www.reddit.com/api/v1/revoke_token', params.toString(), {
+            headers: {
+                'Authorization': authHeader,
+                'Content-Type': 'application/x-www-form-urlencoded'
+            }
+        });
+
+        console.log('Token revoked successfully');
+
+        // delete token from creds
+        await removeTokenForUser(username, 'reddit')
+        return response.data;
+    } catch (e) {
+        console.error('Error revoking Reddit Access Token:', e.response ? e.response.data : e.message);
+        throw e;
     }
 }
 
@@ -93,8 +119,7 @@ const getRedditRefreshToken = async (refreshToken) => {
         await sleep(5000)
         return response.data;
     } catch (e) {
-        // console.log(e.response.data);
-        console.log('fucked fucked')
+        console.log('error refreshing reddit token')
         throw e; // Re-throwing the error for handling in the caller
     }
 }
@@ -737,7 +762,8 @@ const getPostersAndWriteToFile = async (subreddit, tokens, numberOfPosts) => {
 module.exports = {
     getRedditLoginUrl,
     getRedditAccessToken,
-    getRedditRefreshToken
+    getRedditRefreshToken,
+    revokeRedditAccessToken
 }
 
 

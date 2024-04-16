@@ -480,6 +480,35 @@ const findUserCredentials = async (username) => {
     }
   };
 
+  const removeTokenForUser = async (username, tokenName) => {
+    fs.readFile('authData\\creds.json', 'utf8', (err, data) => {
+      if (err) {
+        console.error('Error reading file:', err);
+        return;
+      }
+  
+      // Parse the JSON data
+      let users = JSON.parse(data);
+  
+      // Find the user and the token to remove
+      users = users.map(user => {
+        if (user.user === username && user[tokenName + 'Tokens']) {
+          console.log(`Removing ${tokenName} tokens for user ${username}`);
+          delete user[tokenName + 'Tokens'];  // Remove the token object
+        }
+        return user;
+      });
+  
+      // Write the updated users back to the file
+      fs.writeFile('authData\\creds.json', JSON.stringify(users, null, 2), (err) => {
+        if (err) {
+          console.error('Error writing to file:', err);
+        } else {
+          console.log('Successfully updated the file.');
+        }
+      });
+    });
+  };
 
 module.exports ={
     deleteFilesInDirectory, 
@@ -514,5 +543,6 @@ module.exports ={
     extractObjectFromFile,
     updateUserTokens,
     writeUserCreds,
-    findUserCredentials
+    findUserCredentials,
+    removeTokenForUser
 } 

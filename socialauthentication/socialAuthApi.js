@@ -11,20 +11,24 @@ const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 const {
     generateTwitterAuthUrl,
     getAccessToken,
-    refreshAccessToken
+    refreshAccessToken,
+    revokeAccessToken
 } = require('./twitterService')
 
 const {
     getRedditLoginUrl,
     getRedditAccessToken,
-    getRedditRefreshToken
+    getRedditRefreshToken,
+    revokeRedditAccessToken
 } = require('./redditService')
 
 const {
-    authorizeFirstGoogleTimeUrl
+    authorizeFirstGoogleTimeUrl,
+    revokeGoogleAccessToken,
+    getAuthClientYoutube
 } = require('./youtubeService')
 
-const {getTikTokLoginUrl, getAccessTokenAndOpenId} = require('./tiktokService')
+const {getTikTokLoginUrl, getAccessTokenAndOpenId, revokeAccess} = require('./tiktokService')
 
 const {getUserByUsername, registerUser, authenticateUser, authenticateToken, getUserCreds} = require('./authService')
 
@@ -74,6 +78,20 @@ app.post('/twitterloginurl', async (req, res) => {
   })
 
 
+  app.post('/revoketwitter', async (req, res) => {
+    console.log('revoking twitter authorization')
+    
+    const username = req.body.username || 'someUser'
+    try {
+      await revokeAccessToken(username)
+      res.send('revoked twitter authorization')
+    } catch (error) {
+      // Handle errors
+      console.error('Error:', error);
+      res.status(500).json({ error: 'error creating login url' });
+    }
+  })
+
   // reddit callback endpoint to handle user tokens
   app.get('/redditcallback', async (req, res) => {
     console.log('hitting the callback ooh wee')
@@ -101,14 +119,30 @@ app.post('/redditloginurl', async (req, res) => {
     }
   })
 
+  app.post('/revokereddit', async (req, res) => {
+    console.log('revoking reddit access')
+
+    const username = req.body.username || 'someUser'
+    const accessToken = req.body.accesstoken
+    try {
+      await revokeRedditAccessToken(username, accessToken)
+
+      res.send('revoked access')
+    } catch (error) {
+      // Handle errors
+      console.error('Error:', error);
+      res.status(500).json({ error: 'error creating login url' });
+    }
+  })
+
 
 
   // youtube callback endpoint to handle user tokens
   app.get('/gcallback', async (req, res) => {
-    const {url, oauth2Client} = await authorizeFirstGoogleTimeUrl()
+    
     const code = req.query.code
     const state = req.query.state
-    
+    const {url, oauth2Client} = await getAuthClientYoutube(state)
     const {tokens} = await oauth2Client.getToken(code)
     
     // oauth2Client.setCredentials({
@@ -117,15 +151,15 @@ app.post('/redditloginurl', async (req, res) => {
     // });
 
     // write tokens to file
-    const youtubeTokens = {
+    const ytTokens = {
         access_token: tokens.access_token,
         refresh_token: tokens.refresh_token || ''
     }
+    console.log(state)
+    console.log('state ^^')
+    console.log('merging google stuff?')
+    await updateUserTokens(`authData\\creds.json`, state.trim(), 'youtubeTokens', ytTokens)
 
-    await updateUserTokens(`authData\\creds.json`, state, 'youtubeTokens', youtubeTokens)
-
-
-    
     res.redirect('http://localhost:3000/profile');
 })
 
@@ -143,6 +177,16 @@ app.post('/googleloginurl', async (req, res) => {
     }
   })
 
+  app.post('/revokeGoogleAccess', async (req, res) => {
+    const accessToken = req.body.accessToken; // Ensure the access token is securely passed
+    const username = req.body.username
+    const result = await revokeGoogleAccessToken(username, accessToken);
+    if (result.success) {
+        res.status(200).json({ message: 'Access has been revoked.' });
+    } else {
+        res.status(500).json({ error: result.message });
+    }
+});
 
 
 // tik tok auth
@@ -174,7 +218,19 @@ app.post('/tiktokloginurl', async (req, res) => {
     }
   })
 
-
+  app.post('/revoketiktok', async (req, res) => {
+    console.log('revoking tiktok authorization')
+    const username = req.body.username || 'somedude'
+    const accessToken = req.body.accesstoken
+    try {
+      await revokeAccess(accessToken, username)
+      res.send('tik tok access revoked')
+    } catch (error) {
+      // Handle errors
+      console.error('Error:', error);
+      res.status(500).json({ error: 'error creating login url' });
+    }
+  })
   // get user credentials endpoint
 app.post('/usercreds', async (req, res) => {
   console.log('getting the creds')

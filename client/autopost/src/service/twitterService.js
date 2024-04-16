@@ -11,3 +11,20 @@ export const getTwitterLoginUrl = async (username) => {
       throw error; // Re-throw the error to propagate it further if needed
     }
   };
+
+
+export const revokeTwitterAccess = async (username) => {
+  const endpoint = 'http://localhost:3455/revoketwitter';
+  try {
+      const response = await axios.post(endpoint, { username: username });
+
+      // Log the server response to console
+      if (response.status === 200) {
+          console.log('Twitter access revoked successfully:', response.data);
+      } else {
+          console.error('Failed to revoke Twitter access:', response.status);
+      }
+  } catch (error) {
+      console.error('Error in revoking Twitter access:', error.response?.data || error.message);
+  }
+};
