@@ -16,10 +16,12 @@ function UploadScreen() {
     return (
         <div className="App">
             <Navbar></Navbar>
-            <div  style={{background: '#282c34'}}>
-                <div className="upload-color">
+            
+            <div className="upload-box-container">
+                <div >
                     <h1>Media Manager</h1>
                     <h3>Upload and edit photo data</h3>
+                    
                 </div>
                 
                <UploadPictureBox onSuccessUpload={handleFileUploadSuccess} ></UploadPictureBox> 

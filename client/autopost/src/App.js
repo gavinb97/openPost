@@ -57,7 +57,7 @@ function App() {
   return (
     <AuthProvider>
         <RouterProvider router={router}>
-            <div className="App">
+            <div>
               {/* Add any global components here */}
   
        
