@@ -247,3 +247,42 @@
 .right-section {
   text-align: right;
 }
+
+.subreddit-selector {
+  position: relative; /* Needed to position the dropdown absolutely within the container */
+}
+
+.subreddit-selector .dropdown-menu {
+  position: absolute;
+  left: 50%; /* Centers the dropdown */
+  top: 100%; /* Moves the dropdown right below the button */
+  transform: translateX(-50%); /* Shifts the dropdown back by half its width */
+  background-color: white;
+  border: 1px solid #ccc;
+  box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+  width: fit-content; 
+  max-width: fit-content;
+  max-height: 15vh; /* Adjust based on your preference */
+  overflow-y: auto; /* Enables vertical scrolling */
+  z-index: 1;
+}
+
+.subreddit-selector .dropdown-menu .grid-container {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); /* Creates four columns */
+  gap: 10px; /* Space between grid items */
+}
+
+.subreddit-selector .dropdown-menu .grid-item label {
+  cursor: pointer;
+  display: flex; /* Ensures the label contents are in line */
+  align-items: center; /* Aligns the checkbox and text vertically */
+}
+
+.subreddit-selector .dropdown-menu .grid-item label span {
+  white-space: nowrap; /* Prevents the text from wrapping */
+  overflow: hidden; /* Hides overflowed text */
+  text-overflow: ellipsis; /* Adds ellipsis to overflowed text */
+  margin-left: 5px; /* Provides space between the checkbox and text */
+  max-width: calc(100% - 30px); /* Adjust width to prevent overflow */
+}
