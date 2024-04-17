@@ -260,8 +260,9 @@
   background-color: white;
   border: 1px solid #ccc;
   box-shadow: 0 8px 16px rgba(0,0,0,0.2);
-  width: fit-content; 
-  max-width: fit-content;
+  width: auto; /* Adjusts width to content */
+  min-width: 300px; /* Minimum width, adjust based on your preference */
+  max-width: 90vw; /* Prevents the dropdown from being too wide */
   max-height: 15vh; /* Adjust based on your preference */
   overflow-y: auto; /* Enables vertical scrolling */
   z-index: 1;
@@ -280,9 +281,7 @@
 }
 
 .subreddit-selector .dropdown-menu .grid-item label span {
-  white-space: nowrap; /* Prevents the text from wrapping */
-  overflow: hidden; /* Hides overflowed text */
-  text-overflow: ellipsis; /* Adds ellipsis to overflowed text */
   margin-left: 5px; /* Provides space between the checkbox and text */
-  max-width: calc(100% - 30px); /* Adjust width to prevent overflow */
+  display: block; /* Allows text to use the full available space */
+  overflow: visible; /* Shows all content */
 }
