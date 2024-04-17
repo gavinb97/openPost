@@ -57,27 +57,18 @@ const SetScheduleModal = ({ closeModal, selectedImages }) => {
 
     // Handle outside clicks to close the dropdown
     useEffect(() => {
-        function handleClickOutside(event) {
-            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-                setIsOpen(false);
-            }
-        }
+      // Initialize selectedSubreddits with all IDs from subredditList
+      setSelectedSubreddits(subredditList.map(sub => sub.id));
+    }, [subredditList]);
 
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => {
-            document.removeEventListener("mousedown", handleClickOutside);
-        };
-    }, [dropdownRef]);
-
-  const handleCheckboxChange = (event) => {
-    const { value, checked } = event.target;
-    if (checked) {
-        setSelectedSubreddits(prev => [...prev, value]);
-    } else {
-        setSelectedSubreddits(prev => prev.filter(sub => sub !== value));
-    }
-};
-
+    const handleCheckboxChange = (event) => {
+      const { value } = event.target;
+      setSelectedSubreddits(prev => 
+        prev.includes(value)
+          ? prev.filter(id => id !== value)
+          : [...prev, value]
+      );
+    };
   const handleDayClick = (day) => {
     setSelectedDays(prevState => ({
       ...prevState,
@@ -138,7 +129,8 @@ const SetScheduleModal = ({ closeModal, selectedImages }) => {
       timesOfDay,
       selectedDays,
       selectedImages,
-      durationOfJob
+      durationOfJob,
+      selectedSubreddits
     };
   
     // Log the JSON object
@@ -148,6 +140,9 @@ const SetScheduleModal = ({ closeModal, selectedImages }) => {
     closeModal();
   };
 
+    if(selectedSubreddits) {
+      console.log(selectedSubreddits)
+    }
     console.log(selectedImages)
   return (
     <div className="SetScheduleModal-modal-container">
@@ -300,35 +295,33 @@ const SetScheduleModal = ({ closeModal, selectedImages }) => {
           </div>
         )}
 
-{(selectedWebsite === 'reddit' && subredditList) && (
-  <div className="your-component">
-    {subredditList.length > 0 && (
-      <div className="subreddit-selector" ref={dropdownRef}>
-        <button onClick={toggleDropdown}>
-            Select Subreddits
-        </button>
-        {isOpen && (
-          <div className="dropdown-menu">
-            <div className="grid-container">
-              {subredditList.map(subreddit => (
-                <div key={subreddit.id} className="grid-item">
-                  <label>
-                    <input
-                      type="checkbox"
-                      value={subreddit.id}
-                      checked={selectedSubreddits.includes(subreddit.id)}
-                      onChange={handleCheckboxChange}
-                    />
-                    <span>{subreddit.name}</span>
-                  </label>
-                </div>
-              ))}
+{selectedWebsite === 'reddit' && subredditList.length > 0 && (
+      <div className="your-component">
+        <div className="subreddit-selector" ref={dropdownRef}>
+          <button onClick={toggleDropdown}>
+              Select Subreddits
+          </button>
+          {isOpen && (
+            <div className="dropdown-menu">
+              <div className="grid-container">
+                {subredditList.map(subreddit => (
+                  <div key={subreddit.id} className="grid-item">
+                    <label>
+                      <input
+                        type="checkbox"
+                        value={subreddit.id}
+                        checked={selectedSubreddits.includes(subreddit.id)}
+                        onChange={handleCheckboxChange}
+                      />
+                      <span>{subreddit.name}</span>
+                    </label>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
-    )}
-  </div>
 )}
 
         <button onClick={handleSave}>Save</button>
