@@ -763,7 +763,8 @@ module.exports = {
     getRedditLoginUrl,
     getRedditAccessToken,
     getRedditRefreshToken,
-    revokeRedditAccessToken
+    revokeRedditAccessToken,
+    getSubreddits
 }
 
 

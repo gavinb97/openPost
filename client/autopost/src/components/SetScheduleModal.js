@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import TagInputComponent from './TagInputComponent'; // Import the TagInputComponent
 import './../App.css';
+import {createScheduledJob} from '../service/jobService'
 
 const daysOfWeek = ['S', 'M', 'T', 'W', 'Th', 'F', 'Sa'];
 
@@ -10,7 +11,7 @@ const SetScheduleModal = ({ closeModal, selectedImages }) => {
   const [scheduleType, setScheduleType] = useState('random'); // State for schedule type
   const [scheduleInterval, setScheduleInterval] = useState(''); // State for schedule interval if schedule type is "scheduled"
   const [hourInterval, setHourInterval] = useState(1); // State for hour interval
-  const [timesOfDay, setTimesOfDay] = useState([{ hour: '', minute: '', ampm: 'am' }]);
+  const [timesOfDay, setTimesOfDay] = useState([]);
 
   const [durationOfJob, setDurationOfJob] = useState()
 
@@ -100,10 +101,20 @@ const SetScheduleModal = ({ closeModal, selectedImages }) => {
     setTimesOfDay([...timesOfDay, { hour: '1', minute: '00', ampm: 'am' }]);
   };
   
+  // const handleTimeChange = (index, field, value) => {
+  //   const updatedTimesOfDay = [...timesOfDay];
+  //   updatedTimesOfDay[index][field] = value;
+  //   setTimesOfDay(updatedTimesOfDay);
+  // };
+
   const handleTimeChange = (index, field, value) => {
-    const updatedTimesOfDay = [...timesOfDay];
-    updatedTimesOfDay[index][field] = value;
-    setTimesOfDay(updatedTimesOfDay);
+    const updatedTimes = timesOfDay.map((time, i) => {
+      if (i === index) {
+        return { ...time, [field]: value };
+      }
+      return time;
+    });
+    setTimesOfDay(updatedTimes);
   };
   
 
@@ -118,7 +129,7 @@ const SetScheduleModal = ({ closeModal, selectedImages }) => {
     setDurationOfJob(e.target.value);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     // Create JSON object with all the state data
     const scheduleData = {
       selectedWebsite,
@@ -135,9 +146,9 @@ const SetScheduleModal = ({ closeModal, selectedImages }) => {
   
     // Log the JSON object
     console.log('Schedule Data:', scheduleData);
-  
+    await createScheduledJob(scheduleData)
     // Close modal
-    closeModal();
+    // closeModal();
   };
 
     if(selectedSubreddits) {
@@ -239,40 +250,42 @@ const SetScheduleModal = ({ closeModal, selectedImages }) => {
         )}
 
         {scheduleType === 'scheduled' && scheduleInterval === 'set' && (
-          <div className="input-group">
-            {timesOfDay.map((time, index) => (
-              <div key={index}>
-                <select
-                  value={time.hour}
-                  onChange={(e) => handleTimeChange(index, 'hour', e.target.value)}
-                >
-                  {[...Array(12)].map((_, index) => (
-                    <option key={index} value={index + 1}>{index + 1}</option>
-                  ))}
-                </select>
-                <select
-                  value={time.minute}
-                  onChange={(e) => handleTimeChange(index, 'minute', e.target.value)}
-                >
-                  {[...Array(60)].map((_, index) => (
-                    <option key={index} value={index }>{index < 10 ? `0${index}` : index}</option>
-                  ))}
-                </select>
-                <select
-                  value={time.ampm}
-                  onChange={(e) => handleTimeChange(index, 'ampm', e.target.value)}
-                >
-                  <option value="am">AM</option>
-                  <option value="pm">PM</option>
-                </select>
-                {index > 0 && (
-                  <button onClick={() => handleRemoveTime(index)}>x</button>
-                )}
-              </div>
-            ))}
-            <button onClick={handleAddTime}>Add Time</button>
+        <div className="input-group">
+        {timesOfDay.map((time, index) => (
+          <div key={index} style={{ display: 'flex', alignItems: 'center' }}>
+            <select
+              value={time.hour}
+              onChange={(e) => handleTimeChange(index, 'hour', e.target.value)}
+            >
+              {[...Array(12)].map((_, i) => (
+                <option key={i} value={i + 1}>
+                  {i + 1}
+                </option>
+              ))}
+            </select>
+            <select
+              value={time.minute}
+              onChange={(e) => handleTimeChange(index, 'minute', e.target.value)}
+            >
+              {[...Array(60)].map((_, i) => (
+                <option key={i} value={i}>
+                  {i < 10 ? `0${i}` : i}
+                </option>
+              ))}
+            </select>
+            <select
+              value={time.ampm}
+              onChange={(e) => handleTimeChange(index, 'ampm', e.target.value)}
+            >
+              <option value="am">AM</option>
+              <option value="pm">PM</option>
+            </select>
+            <button onClick={() => handleRemoveTime(index)}>x</button> {/* "x" button appears for every input */}
           </div>
-        )}
+        ))}
+        <button onClick={handleAddTime}>Add Time</button>
+      </div>
+      )}
 
         {scheduleType === 'scheduled' && scheduleInterval === 'set' && (
           <div className="input-group">

@@ -256,18 +256,14 @@ const writePhotoDataToFile = async (data) => {
     }
 };
 
-
-// Endpoint to get the names of all files within the uploads folder
-app.get('/setSchedule', async (req, res) => {
-    
+app.post('/setSchedule', async (req, res) => {
+    const scheduleData = req.body.scheduleData
+    console.log(scheduleData)
     try {
-        if (req.schedule) {
-          const schedule = req.schedule  
-        }
+       
       
       res.status(200).send('ooh weee')
     } catch (error) {
-      // Error handling
       console.error(error);
       res.status(500).send('uuuuuuuuuuuuuuuuuuuuuuuuuf');
     }
