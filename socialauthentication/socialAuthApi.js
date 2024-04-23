@@ -20,7 +20,9 @@ const {
     getRedditAccessToken,
     getRedditRefreshToken,
     revokeRedditAccessToken,
-    getSubreddits
+    getSubreddits,
+    getSubredditsWithNSFWTag,
+    getSafeForWorkSubreddits
 } = require('./redditService')
 
 const {
@@ -327,7 +329,7 @@ app.post('/getUserCreds', async (req, res) => {
   }
 });
 
-app.post('/getsubscribedsubreddits', async (req, res) => {
+app.post('/getsubreddits', async (req, res) => {
   const { token } = req.body;
 
   if (!token) {
@@ -335,8 +337,8 @@ app.post('/getsubscribedsubreddits', async (req, res) => {
   }
 
   try {
-    await getSubreddits()
-    res.status(200).json('creds');
+    const subreddits = await getSafeForWorkSubreddits(token)
+    res.status(200).json(subreddits);
   } catch (error) {
     console.log(error);
     res.status(401).json({ message: 'Invalid credentials' });

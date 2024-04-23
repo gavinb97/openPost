@@ -7,54 +7,9 @@ import { getUserCreds } from '../service/userService';
 import Navbar from '../components/Navbar';
 import { useAuth } from '../service/authContext';
 
-function SocialsLogin() {
-  const { user } = useAuth();
-  const [credentials, setCredentials] = useState({});
-  const [isLoggedIn, setIsLoggedIn] = useState({
-    twitter: false,
-    reddit: false,
-    youtube: false,
-    tiktok: false,
-  });
-  const [isLoading, setIsLoading] = useState(true); // Added loading state
-
-  useEffect(() => {
-    setIsLoading(true); // Start loading
-    getUserCreds(user.username)
-      .then((creds) => {
-        if (creds) {
-          setIsLoggedIn({
-            twitter: !!creds.twitterTokens,
-            reddit: !!creds.redditTokens,
-            youtube: !!creds.youtubeTokens,
-            tiktok: !!creds.tiktokTokens,
-          });
-          setCredentials(creds);
-        } else {
-          console.log("No credentials found for the user.");
-          setIsLoggedIn({
-            twitter: false,
-            reddit: false,
-            youtube: false,
-            tiktok: false,
-          });
-          setCredentials({});
-        }
-        setIsLoading(false); // End loading
-      })
-      .catch(error => {
-        console.error("Failed to fetch credentials:", error);
-        setIsLoggedIn({
-          twitter: false,
-          reddit: false,
-          youtube: false,
-          tiktok: false,
-        });
-        setCredentials({});
-        setIsLoading(false); // End loading even on error
-      });
-  }, [user.username]);
-
+function SocialsLogin({ userData }) {
+  const { user, credentials, isLoggedIn, setIsLoggedIn, isLoading } = userData
+  
   const handleRevokeAccess = async (media) => {
     console.log('Revoke access clicked for:', media);
     const tokenDetails = credentials[`${media}Tokens`];
