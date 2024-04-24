@@ -2,10 +2,16 @@ import React, { useState, useRef, useEffect } from 'react';
 import TagInputComponent from './TagInputComponent'; // Import the TagInputComponent
 import './../App.css';
 import {createScheduledJob} from '../service/jobService'
+import {getSFWSubreddits} from '../service/redditService'
+
+import { useAuth } from '../service/authContext';
 
 const daysOfWeek = ['S', 'M', 'T', 'W', 'Th', 'F', 'Sa'];
 
 const SetScheduleModal = ({ closeModal, selectedImages }) => {
+
+  const { user, logoutContext, loginContext  } = useAuth()
+
   const [selectedWebsite, setSelectedWebsite] = useState('twitter'); // State for selected website
   const [picturePostOrder, setPicturePostOrder] = useState('random'); // State for picture post order
   const [scheduleType, setScheduleType] = useState('random'); // State for schedule type
@@ -25,30 +31,43 @@ const SetScheduleModal = ({ closeModal, selectedImages }) => {
     Sa: false
   });
 
-  const [selectedSubreddits, setSelectedSubreddits] = useState([]);
-  const [subredditList, setSubredditList] = useState([
-    { name: "subreddit1", id: "subreddit1" },
-    { name: "subreddit2", id: "subreddit2" },
-    { name: "subreddit3", id: "subreddit3" },
-    { name: "subreddit4000000", id: "subreddit4" },
-    { name: "subreddit5", id: "subreddit5" },
-    { name: "subreddit6", id: "subreddit6" },
-    { name: "subreddit7", id: "subreddit7" },
-    { name: "subreddit88888888888888888", id: "subreddit8" },
-    { name: "subreddit9", id: "subreddit9" },
-    { name: "subreddit10", id: "subreddit10" },
-    { name: "subreddit11", id: "subreddit11" },
-    { name: "subreddit12", id: "subreddit12" },
-    { name: "subreddit13", id: "subreddit13" },
-    { name: "subreddit14", id: "subreddit14" },
-    { name: "subreddit15", id: "subreddit15" },
-    { name: "subreddit16", id: "subreddit16" },
-    { name: "subreddit17", id: "subreddit17" },
-    { name: "subreddit18", id: "subreddit18" },
-    { name: "subreddit19", id: "subreddit19" },
-    { name: "subreddit20", id: "subreddit20" },
-]);
+  const [selectedSubreddits, setSelectedSubreddits] = useState();
 
+  const [subredditList, setSubredditList] = useState([]);
+
+  useEffect(() => {
+    if (selectedWebsite === 'reddit') {
+      const fetchSubreddits = async () => {
+        try {
+          const subreddits = await getSFWSubreddits(user);
+
+          // Create an array of objects with a unique ID for each subreddit
+          const subredditObjects = subreddits.map((subredditName, index) => ({
+            name: subredditName,
+            id: `${index + 1}`, // ID using numerical values
+          }));
+
+          setSubredditList(subredditObjects);
+
+          // Initialize selectedSubreddits with all subreddits from subredditList
+          setSelectedSubreddits(
+            subredditObjects.map((sub) => ({
+              id: sub.id,
+              name: sub.name,
+            }))
+          );
+        } catch (error) {
+          console.error('Error fetching subreddits:', error);
+        }
+      };
+
+      fetchSubreddits();
+    } else {
+      // Clear subredditList and selectedSubreddits when not 'reddit'
+      setSubredditList([]);
+      setSelectedSubreddits([]);
+    }
+  }, [selectedWebsite, user]);
 
   const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef(null);
@@ -56,20 +75,36 @@ const SetScheduleModal = ({ closeModal, selectedImages }) => {
     // Toggle the visibility of the dropdown
     const toggleDropdown = () => setIsOpen(!isOpen);
 
-    // Handle outside clicks to close the dropdown
     useEffect(() => {
-      // Initialize selectedSubreddits with all IDs from subredditList
-      setSelectedSubreddits(subredditList.map(sub => sub.id));
+      // Initialize selectedSubreddits with all subreddits from subredditList
+      console.log('subredditList:', subredditList);
+      setSelectedSubreddits(
+        subredditList.map(sub => ({
+          id: sub.id,
+          name: sub.name,
+        }))
+      );
     }, [subredditList]);
 
     const handleCheckboxChange = (event) => {
       const { value } = event.target;
-      setSelectedSubreddits(prev => 
-        prev.includes(value)
-          ? prev.filter(id => id !== value)
-          : [...prev, value]
-      );
+      const subreddit = subredditList.find(sub => sub.id === value);
+    
+      setSelectedSubreddits((prev) => {
+        // Check if the subreddit is already in the selectedSubreddits array
+        const exists = prev.some(sub => sub.id === value);
+    
+        if (exists) {
+          // If it exists, remove it
+          return prev.filter(sub => sub.id !== value);
+        } else {
+          // If it doesn't exist, add the subreddit
+          return [...prev, { id: subreddit.id, name: subreddit.name }];
+        }
+      });
     };
+
+
   const handleDayClick = (day) => {
     setSelectedDays(prevState => ({
       ...prevState,
@@ -101,11 +136,6 @@ const SetScheduleModal = ({ closeModal, selectedImages }) => {
     setTimesOfDay([...timesOfDay, { hour: '1', minute: '00', ampm: 'am' }]);
   };
   
-  // const handleTimeChange = (index, field, value) => {
-  //   const updatedTimesOfDay = [...timesOfDay];
-  //   updatedTimesOfDay[index][field] = value;
-  //   setTimesOfDay(updatedTimesOfDay);
-  // };
 
   const handleTimeChange = (index, field, value) => {
     const updatedTimes = timesOfDay.map((time, i) => {
@@ -323,7 +353,7 @@ const SetScheduleModal = ({ closeModal, selectedImages }) => {
                       <input
                         type="checkbox"
                         value={subreddit.id}
-                        checked={selectedSubreddits.includes(subreddit.id)}
+                        checked={selectedSubreddits.some(sub => sub.id === subreddit.id)}
                         onChange={handleCheckboxChange}
                       />
                       <span>{subreddit.name}</span>
