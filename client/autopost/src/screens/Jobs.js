@@ -23,9 +23,10 @@ function Jobs() {
     return (
         <div className="App">
             <Navbar></Navbar>
-            <header className="App-header">
+            {/* <header className="App-header">
                 <button onClick={handleClick}>Start Twitter Post Job</button>
-            </header>
+            </header> */}
+            <button onClick={handleClick}>Start Twitter Post Job</button>
             {showModal && <SetScheduleModal closeModal={handleClose}></SetScheduleModal>}
         </div>
     );
