@@ -2,7 +2,7 @@ const getSpeech = require('./gptSpeech')
 const getPostBodies = require('./reddit')
 const fs = require('fs');
 const { readTextFile, createSRTFile } = require('./createSubtitles')
-const {getFileName, removeSpecialCharacters, removeSpaces} = require('./utils')
+const {getFileName, removeSpecialCharacters, removeSpaces} = require('../utils')
 
 
 const redditToSpeech = async (numberOfPosts, subredditName) => {

@@ -10,7 +10,7 @@ const path = require('path');
 const readline = require('readline');
 app.use(cookieParser());
 app.use(cors());
-const {writeTextToFile, readTokensFromFile} = require('./utils')
+const {writeTextToFile, readTokensFromFile} = require('../utils')
 
 
 const authorizeFirstTimeUrl = async () => {

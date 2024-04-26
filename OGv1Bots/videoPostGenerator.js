@@ -1,7 +1,7 @@
 const createVideoForEachAudioFile = require('./videoEditor')
 const redditToSpeech = require('./redditToSpeech')
 const {uploadAndTweet} = require('./tweet')
-const {getRandomMp4PathInDirectory, getFileName, deleteFile, isFolderNotEmpty, countFilesInDirectory, removeQuotes, removeSpecialCharacters, getRandomNumberOneToFifteen} = require('./utils')
+const {getRandomMp4PathInDirectory, getFileName, deleteFile, isFolderNotEmpty, countFilesInDirectory, removeQuotes, removeSpecialCharacters, getRandomNumberOneToFifteen} = require('../utils')
 const createGPTClient = require('./gptClient')
 const {readTextFile} = require('./createSubtitles')
 const {createClientAndUpload} = require('./google')

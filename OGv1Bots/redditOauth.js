@@ -6,14 +6,14 @@ const fetch = require('node-fetch');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const SHA256 = require('crypto-js/sha256')
-const {writeTextToFile, readTokensFromFile, sleep, generateRandomString, shuffleArray, deleteFile, seeIfFileExists, writeArrayToJsonFile, appendOrWriteToJsonFile, selectRandomStrings, getRandomInterval, getRandomStringFromStringArray} = require('./utils')
+const {writeTextToFile, readTokensFromFile, sleep, generateRandomString, shuffleArray, deleteFile, seeIfFileExists, writeArrayToJsonFile, appendOrWriteToJsonFile, selectRandomStrings, getRandomInterval, getRandomStringFromStringArray} = require('../utils')
 const fs = require('fs');
 const path = require('path')
 app.use(cookieParser());
 app.use(cors());
 const btoa = require('btoa');
 const {XMLParser} = require('fast-xml-parser')
-const {redditNSFWPostTitles, redditSFWPostTitles} = require('./strings')
+const {redditNSFWPostTitles, redditSFWPostTitles} = require('../strings')
 
 const redditAccessTokenUrl = 'https://www.reddit.com/api/v1/access_token'
 const redirect_uri = 'https://moral-kindly-fly.ngrok-free.app/redditcallback/'

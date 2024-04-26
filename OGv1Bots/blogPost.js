@@ -5,7 +5,7 @@ const fs = require('fs');
 const axios = require('axios');
 const { createClient, ApiKeyStrategy } = require('@wix/sdk');
 const { files } = require('@wix/media');
-const {deleteFile} = require('./utils')
+const {deleteFile} = require('../utils')
 
 const publishDraftPost = async (draftPostId) => {
     const apiUrl = `https://www.wixapis.com/blog/v3/draft-posts/${draftPostId}/publish`;

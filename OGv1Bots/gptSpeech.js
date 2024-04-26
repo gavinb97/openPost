@@ -3,7 +3,7 @@ const fs = require('fs')
 const path = require('path')
 const createGPTClient = require('./gptClient')
 const OpenAI = require("openai");
-const {removeSpecialCharacters, removeSpaces} = require('./utils')
+const {removeSpecialCharacters, removeSpaces} = require('../utils')
 
 const speechFile = path.resolve("tempAudio/");
 const fileSuffix = ".mp3"
