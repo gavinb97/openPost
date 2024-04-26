@@ -1,13 +1,11 @@
-import React, { useState } from 'react';
-import { uploadFile, fetchAllFiles, deleteByName, getPhotoMetadata, updatePhotoMetadata } from '../service/userMediaService';
+import React, { useState, useEffect } from 'react';
+import { uploadFile, updatePhotoMetadata } from '../service/userMediaService';
 import UpdateImageDataModal from './UpdateImageDataModal';
 import './../App.css';
 
-
-const UploadPictureBox = ({ onSuccessUpload  }) => {
+const UploadPictureBox = ({ onSuccessUpload }) => {
     const [pictureFiles, setPictureFiles] = useState([]);
     const [videoFiles, setVideoFiles] = useState([]);
-  
     const [showUpdateModal, setShowUpdateModal] = useState(false);
     const [imageMetadata, setImageMetadata] = useState([]);
     const [namesOfFiles, setNamesOfFiles] = useState([]);
@@ -22,11 +20,8 @@ const UploadPictureBox = ({ onSuccessUpload  }) => {
             setPictureFiles([...pictureFiles, ...selectedFiles]);
         } else if (fileType === 'video') {
             setVideoFiles([...videoFiles, ...selectedFiles]);
-            console.log('saved it')
         }
     };
-
-    // const createMedi
 
     const handleUploadClick = async () => {
         const pictureInput = document.getElementById('pictureUpload');
@@ -36,53 +31,58 @@ const UploadPictureBox = ({ onSuccessUpload  }) => {
         const videoFiles = Array.from(videoInput.files || []);
 
         const files = [...pictureFiles, ...videoFiles];
-        const fileNames = []
-        console.log(files)
+        const uploadedFileNames = [];
+
         if (files.length > 0) {
-            for (let i = 0; i < files.length; i++) {
-                const file = files[i];
-                console.log('Uploading file:', file.name);
+            for (const file of files) {
                 try {
                     const response = await uploadFile(file, file.name);
-                    console.log(response)
-                    fileNames.push(response.file)
+                    uploadedFileNames.push(response.file);
                 } catch (error) {
                     console.error('Error uploading file:', error);
                 }
             }
-            setNamesOfFiles(fileNames)
+
             // Reset the file inputs after uploading files
             pictureInput.value = '';
             videoInput.value = '';
             
-            console.log('uploaded');
+            console.log('Files uploaded:', uploadedFileNames);
             onSuccessUpload();
-            // show modal to update description
-            setShowUpdateModal(true)
 
-           
-            
+            // Store the uploaded file names and show the update modal
+            setNamesOfFiles(uploadedFileNames);
+            setShowUpdateModal(true);
         } else {
             console.log('No files selected');
         }
     };
 
-    
-
     return (
-        <div className="upload-box-container">
-        {showUpdateModal && <UpdateImageDataModal uploadedFileNames={namesOfFiles} imageData={imageMetadata} mediaFiles={pictureFiles} closeModal={closeModal} updatePhotoMetadata={updatePhotoMetadata} />} 
-            <div className="upload-section">
-                <label className="upload-color" htmlFor="pictureUpload">Upload Pictures:</label>
-                <input className="upload-color" type="file" id="pictureUpload" name="uploadPic" accept="image/*" onChange={(event) => handleFileSelect(event, 'picture')} multiple />
+        <div>
+            <div className="upload-picture-box">
+                <div className="upload-section">
+                <label htmlFor="pictureUpload">Upload Pictures:</label>
+                <input type="file" id="pictureUpload" accept="image/*" multiple onChange={(event) => handleFileSelect(event, 'picture')} />
             </div>
             <div className="upload-section">
-                <label className="upload-color" htmlFor="videoUpload">Upload Videos:</label>
-                <input className="upload-color" type="file" id="videoUpload" name="uploadVideo" accept="video/*" onChange={(event) => handleFileSelect(event, 'video')} multiple />
+                <label htmlFor="videoUpload">Upload Videos:</label>
+                <input type="file" id="videoUpload" accept="video/*" multiple onChange={(event) => handleFileSelect(event, 'video')} />
             </div>
             <div className="upload-section">
                 <button type="button" onClick={handleUploadClick}>Upload Files</button>
             </div>
+            </div>
+            
+            {showUpdateModal && (
+                <UpdateImageDataModal
+                    uploadedFileNames={namesOfFiles}
+                    imageData={imageMetadata}
+                    mediaFiles={pictureFiles}
+                    closeModal={closeModal}
+                    updatePhotoMetadata={updatePhotoMetadata}
+                />
+            )}
         </div>
     );
 };

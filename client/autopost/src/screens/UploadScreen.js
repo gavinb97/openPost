@@ -16,17 +16,13 @@ function UploadScreen() {
     return (
         <div className="App">
             <Navbar></Navbar>
-            
-            <div className="upload-box-container">
-                <div >
+            <div>
+                <div className="upload-box-container">
                     <h1>Media Manager</h1>
                     <h3>Upload and edit photo data</h3>
-                    
                 </div>
-                
-               <UploadPictureBox onSuccessUpload={handleFileUploadSuccess} ></UploadPictureBox> 
+                <UploadPictureBox onSuccessUpload={handleFileUploadSuccess} ></UploadPictureBox> 
             </div>
-            
             <UploadedMediaContainer ref={uploadedMediaContainerRef}></UploadedMediaContainer>
         </div>
     );

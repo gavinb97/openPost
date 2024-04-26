@@ -78,7 +78,7 @@ const UpdateImageDataModal = ({ imageData, closeModal, updatePhotoMetadata, medi
 if (updatedData.length > 0 && media.length > 0) {
  
   return (
-    <div className="modal-container">
+    <div>
       <div className="modal-backdrop" onClick={closeModal}></div>
       <div className="UpdateImageDataModal">
         <h2>Update Image Data</h2>
