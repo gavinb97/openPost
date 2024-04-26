@@ -131,23 +131,26 @@ const createClientAndUpload = async (filePath, videoTitle, videoDescription) => 
 
 const revokeGoogleAccessToken = async (username, accessToken) => {
   console.log('revoiknig google')
+  console.log(username)
   try {
       const revokeUrl = `https://oauth2.googleapis.com/revoke?token=${encodeURIComponent(accessToken)}`;
       
       // Make a request to Google's revoke endpoint
       const response = await axios.post(revokeUrl);
-      
-      if (response.status === 200) {
-          console.log('Token has been successfully revoked');
+     
+      await removeTokenForUser(username, 'youtube')
+      // if (response.status === 200) {
+      //     console.log('Token has been successfully revoked');
 
-          await removeTokenForUser(username, 'youtube')
-          return { success: true, message: "Token revoked successfully" };
-      } else {
-          console.log('Failed to revoke token');
-          return { success: false, message: "Failed to revoke token" };
-      }
+      //     await removeTokenForUser(username, 'youtube')
+      //     return { success: true, message: "Token revoked successfully" };
+      // } else {
+      //     console.log('Failed to revoke token');
+      //     return { success: false, message: "Failed to revoke token" };
+      // }
   } catch (error) {
-      console.error('Error revoking Google access token:');
+      console.log('got error, gonna remove creds anyway')
+      await removeTokenForUser(username, 'youtube')
       return { success: false, message: "Failed to revoke token due to an error" };
   }
 };

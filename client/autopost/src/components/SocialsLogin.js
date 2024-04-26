@@ -9,7 +9,7 @@ import { useAuth } from '../service/authContext';
 
 function SocialsLogin({ userData }) {
   const { user, credentials, isLoggedIn, setIsLoggedIn, isLoading } = userData
-  
+
   const handleRevokeAccess = async (media) => {
     console.log('Revoke access clicked for:', media);
     const tokenDetails = credentials[`${media}Tokens`];
@@ -20,7 +20,7 @@ function SocialsLogin({ userData }) {
       tiktok: () => revokeTikTokAccess(user.username, tokenDetails?.access_token),
     };
 
-    if (tokenDetails && (media === 'twitter' || tokenDetails.access_token)) {
+    if (tokenDetails && (media === 'twitter' || media === 'reddit' || tokenDetails.access_token)) {
       try {
         await revokeFunctions[media]();
         setIsLoggedIn(prev => ({ ...prev, [media]: false }));

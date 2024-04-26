@@ -187,6 +187,7 @@ app.post('/googleloginurl', async (req, res) => {
     if (result.success) {
         res.status(200).json({ message: 'Access has been revoked.' });
     } else {
+      console.log('fuck')
         res.status(500).json({ error: result.message });
     }
 });
