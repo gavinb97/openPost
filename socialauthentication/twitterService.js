@@ -70,7 +70,7 @@ const getAccessToken = async (code, state) => {
     }
 };
 
-const refreshAccessToken = async (refreshToken) => {
+const refreshTwitterAccessToken = async (refreshToken) => {
     try {
         const clientId = process.env.CLIENT_ID;
         const clientSecret = process.env.CLIENT_SECRET;
@@ -115,6 +115,6 @@ const revokeAccessToken = async (username) => {
 module.exports = {
     generateTwitterAuthUrl,
     getAccessToken,
-    refreshAccessToken,
+    refreshTwitterAccessToken,
     revokeAccessToken
 }
