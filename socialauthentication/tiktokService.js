@@ -76,7 +76,7 @@ const getAccessTokenAndOpenId = async (code, state) => {
     
   }
 
-  const refreshAccessToken = async (refreshToken) => {
+  const refreshTikTokAccessToken = async (refreshToken) => {
     let token = ''
     if (refreshToken) {
       token = refreshToken
@@ -233,5 +233,6 @@ module.exports = {
   uploadToTikTok,
   getTikTokLoginUrl,
   getAccessTokenAndOpenId,
+  refreshTikTokAccessToken,
   revokeAccess
 }

@@ -110,14 +110,10 @@ const getRedditRefreshToken = async (refreshToken) => {
                 'Content-Type': 'application/x-www-form-urlencoded'
             }
         });
-        console.log('token refreshed')
-        console.log('deleting old file')
-        await deleteFile('redditKeys.txt')
-        console.log('deleted redditKeys.txt. About to regenerate')
-        const tokenText = `accessToken: ${response.data.access_token} refreshToken: ${response.data.refresh_token}`
-        await writeTextToFile(tokenText, 'redditKeys.json')
-        await sleep(5000)
-        return response.data;
+
+        const accessToken = response.data.access_token
+        const refreshToken = response.data.refresh_token
+        return { accessToken, refreshToken }
     } catch (e) {
         console.log('error refreshing reddit token')
         throw e; // Re-throwing the error for handling in the caller

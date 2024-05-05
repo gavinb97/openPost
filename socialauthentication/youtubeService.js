@@ -155,10 +155,44 @@ const revokeGoogleAccessToken = async (username, accessToken) => {
   }
 };
 
+
+
+const refreshYoutubeAccessToken = async (refreshToken) => {
+  try {
+    // Create an OAuth2 client with the necessary credentials
+    const oauth2Client = new google.auth.OAuth2(
+      process.env.YOUTUBE_CLIENT_ID,
+      process.env.YOUTUBE_CLIENT_SECRET,
+      process.env.YOUTUBE_REDIRECT
+    );
+
+    // Set the refresh token
+    oauth2Client.setCredentials({ refresh_token: refreshToken });
+
+    // Refresh the token
+    const { credentials } = await oauth2Client.refreshAccessToken();
+
+    const { access_token, refresh_token } = credentials;
+
+    return {
+      access_token,
+      refresh_token
+    };
+  } catch (error) {
+    console.error('Error refreshing YouTube access token:', error);
+
+    return {
+      success: false,
+      message: 'Error refreshing YouTube access token'
+    };
+  }
+};
+
 module.exports = {
     uploadToYoutube,
     createClientAndUpload,
     authorizeFirstGoogleTimeUrl,
     revokeGoogleAccessToken,
-    getAuthClientYoutube
+    getAuthClientYoutube,
+    refreshYoutubeAccessToken
   }
