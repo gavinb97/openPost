@@ -1,20 +1,55 @@
 const fs = require('fs');
 const path = require('path');
+
+const envPath = path.join(__dirname, '..', '..', '.env');
+
+require('dotenv').config({ path: envPath });
 const { getRedditRefreshToken } = require('../redditService')
-const { refreshAccessToken } = require('../twitterService')
+const { refreshTwitterAccessToken } = require('../twitterService')
 const { refreshTikTokAccessToken } = require('../tiktokService.js')
 const { refreshYoutubeAccessToken } = require('../youtubeService.js')
  
  
 
-// Dummy refreshToken function that you need to implement to return new tokens
 const refreshToken = async (refreshToken, platform) => {
-  // This should be replaced with actual token refreshing logic6333333333c 
-  // The returned object should contain the new access and refresh tokens
-  return {
-    access_token: `new_access_token_${platform}`,
-    refresh_token: `new_refresh_token_${platform}`
-  };
+  try {
+    let newTokens;
+
+    switch (platform) {
+      case 'youtubeTokens':
+        newTokens = await refreshYoutubeAccessToken(refreshToken);
+        break;
+
+      case 'redditTokens':
+        
+        newTokens = await getRedditRefreshToken(refreshToken);
+        break;
+
+      case 'twitterTokens':
+        newTokens = await refreshTwitterAccessToken(refreshToken);
+        break;
+
+      case 'tiktokTokens':
+        newTokens = await refreshTikTokAccessToken(refreshToken);
+        break;
+
+      default:
+        throw new Error(`Unknown platform: ${platform}`);
+    }
+      console.log(newTokens)
+      console.log('deez da tokens')
+    if (newTokens && newTokens.access_token) {
+      return {
+        access_token: newTokens.access_token,
+        refresh_token: newTokens.refresh_token || refreshToken, // if refresh token changes, use new one, otherwise old one
+      };
+    } else {
+      throw new Error(`Failed to refresh token for platform: ${platform}`);
+    }
+  } catch (error) {
+    console.error(`Error refreshing token for platform ${platform}:`, error);
+    return null;
+  }
 };
 
 // Arrow function to update credentials
@@ -30,17 +65,19 @@ const refreshCredentials = async (filePath) => {
     for (let platform of platforms) {
       if (user[platform]) {
         // If a platform's tokens are found, call refreshToken and update credentials
-        const { refresh_token } = user[platform];
+        const { refresh_token, access_token } = user[platform];
 
         if (refresh_token) {
           console.log(`Refreshing ${platform} tokens for user: ${user.user}`);
           
           // Get the new tokens
+          console.log(`refresh token: ${refresh_token}`)
           const newTokens = await refreshToken(refresh_token, platform);
-
+          console.log(newTokens)
+          console.log('new tokens')
           // Update the access token and refresh token in the user object
-          user[platform].access_token = newTokens.access_token;
-          user[platform].refresh_token = newTokens.refresh_token;
+          user[platform].access_token = newTokens.access_token || access_token;
+          user[platform].refresh_token = newTokens.refresh_Token || refresh_token;
         }
       }
     }

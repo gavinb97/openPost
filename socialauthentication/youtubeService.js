@@ -52,6 +52,10 @@ const authorizeFirstGoogleTimeUrl = async (username) => {
       process.env.YOUTUBE_CLIENT_SECRET,
       process.env.YOUTUBE_REDIRECT
     );
+
+    console.log("YOUTUBE_CLIENT_ID:", process.env.YOUTUBE_CLIENT_ID);
+    console.log("YOUTUBE_CLIENT_SECRET:", process.env.YOUTUBE_CLIENT_SECRET);
+    console.log("YOUTUBE_REDIRECT:", process.env.YOUTUBE_REDIRECT);
   
     const scopes = [
       'https://www.googleapis.com/auth/youtube.upload',
@@ -156,8 +160,9 @@ const revokeGoogleAccessToken = async (username, accessToken) => {
 };
 
 
-
 const refreshYoutubeAccessToken = async (refreshToken) => {
+  console.log(refreshToken)
+  console.log('in the method')
   try {
     // Create an OAuth2 client with the necessary credentials
     const oauth2Client = new google.auth.OAuth2(
@@ -165,25 +170,29 @@ const refreshYoutubeAccessToken = async (refreshToken) => {
       process.env.YOUTUBE_CLIENT_SECRET,
       process.env.YOUTUBE_REDIRECT
     );
+    console.log('about to log ids')
+    console.log("YOUTUBE_CLIENT_ID:", process.env.YOUTUBE_CLIENT_ID);
+console.log("YOUTUBE_CLIENT_SECRET:", process.env.YOUTUBE_CLIENT_SECRET);
+console.log("YOUTUBE_REDIRECT:", process.env.YOUTUBE_REDIRECT);
 
     // Set the refresh token
     oauth2Client.setCredentials({ refresh_token: refreshToken });
 
     // Refresh the token
     const { credentials } = await oauth2Client.refreshAccessToken();
-
+    console.log(credentials)
     const { access_token, refresh_token } = credentials;
 
     return {
       access_token,
-      refresh_token
+      refresh_token,
     };
   } catch (error) {
     console.error('Error refreshing YouTube access token:', error);
 
     return {
       success: false,
-      message: 'Error refreshing YouTube access token'
+      message: 'Error refreshing YouTube access token',
     };
   }
 };

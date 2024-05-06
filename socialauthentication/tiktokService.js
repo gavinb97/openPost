@@ -87,8 +87,8 @@ const getAccessTokenAndOpenId = async (code, state) => {
     let urlAccessToken = `https://open.tiktokapis.com/v2/oauth/token/`;
   
     const response = await axios.post(urlAccessToken, new URLSearchParams({
-      client_key: CLIENT_KEY,
-      client_secret: TIKTOK_CLIENT_SECRET,
+      client_key: process.env.TIK_TOK_CLIENT_KEY,
+      client_secret: process.env.TIK_TOK_CLIENT_SECRET,
       grant_type: 'refresh_token',
       refresh_token: token
     }),
@@ -99,9 +99,9 @@ const getAccessTokenAndOpenId = async (code, state) => {
     })
     // console.log(response)
     return {
-        accessToken: response.data.access_token,
+        access_token: response.data.access_token,
         openId: response.data.open_id,
-        refreshToken: response.data.refresh_token
+        refresh_token: response.data.refresh_token
       };
   }
 

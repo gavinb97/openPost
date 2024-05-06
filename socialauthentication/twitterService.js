@@ -88,10 +88,10 @@ const refreshTwitterAccessToken = async (refreshToken) => {
 
        
         
-        const accessToken = response.data.access_token
-        const refreshToken = response.data.refresh_token || ''
+        const access_token = response.data.access_token
+        const refresh_token = response.data.refresh_token || ''
         
-        return { accessToken, refreshToken }
+        return { access_token, refresh_token }
     } catch (error) {
         console.error('Error refreshing access token:', error);
     }

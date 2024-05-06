@@ -97,23 +97,23 @@ const revokeRedditAccessToken = async (username, accessToken) => {
     }
 }
 
-const getRedditRefreshToken = async (refreshToken) => {
+const getRedditRefreshToken = async (refresh_Token) => {
     try {
         const authHeader = `Basic ${btoa(`${process.env.REDDIT_APP_ID}:${process.env.REDDIT_SECRET}`)}`;
         
         const response = await axios.post(redditAccessTokenUrl, {
             grant_type: 'refresh_token',
-            refresh_token: refreshToken,
+            refresh_token: refresh_Token,
         }, {
             headers: {
                 'Authorization': authHeader,
                 'Content-Type': 'application/x-www-form-urlencoded'
             }
         });
-
-        const accessToken = response.data.access_token
-        const refreshToken = response.data.refresh_token
-        return { accessToken, refreshToken }
+        
+        const access_token = response.data.access_token
+        const refresh_token = response.data.refresh_token
+        return { access_token, refresh_token }
     } catch (e) {
         console.log('error refreshing reddit token')
         throw e; // Re-throwing the error for handling in the caller

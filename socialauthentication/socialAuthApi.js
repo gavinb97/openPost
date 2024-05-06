@@ -158,9 +158,7 @@ app.post('/redditloginurl', async (req, res) => {
         access_token: tokens.access_token,
         refresh_token: tokens.refresh_token || ''
     }
-    console.log(state)
-    console.log('state ^^')
-    console.log('merging google stuff?')
+
     await updateUserTokens(`authData\\creds.json`, state.trim(), 'youtubeTokens', ytTokens)
 
     res.redirect('http://localhost:3000/profile');
@@ -184,7 +182,7 @@ app.post('/googleloginurl', async (req, res) => {
     const accessToken = req.body.accessToken; // Ensure the access token is securely passed
     const username = req.body.username
     const result = await revokeGoogleAccessToken(username, accessToken);
-    if (result.success) {
+    if (result) {
         res.status(200).json({ message: 'Access has been revoked.' });
     } else {
       console.log('fuck')
