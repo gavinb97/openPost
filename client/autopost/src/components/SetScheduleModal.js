@@ -160,8 +160,10 @@ const SetScheduleModal = ({ closeModal, selectedImages }) => {
   };
 
   const handleSave = async () => {
+    const username = user.username
     // Create JSON object with all the state data
     const scheduleData = {
+      username,
       selectedWebsite,
       picturePostOrder,
       scheduleType,
@@ -173,7 +175,7 @@ const SetScheduleModal = ({ closeModal, selectedImages }) => {
       durationOfJob,
       selectedSubreddits
     };
-  
+ 
     // Log the JSON object
     console.log('Schedule Data:', scheduleData);
     await createScheduledJob(scheduleData)

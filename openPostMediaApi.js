@@ -12,6 +12,7 @@ const fs = require('fs');
 const path = require('path');
 const {appendOrWriteToJsonFile, deleteFromPhotoData} = require('./utils')
 const sharp = require('sharp');
+const axios = require('axios');
 
 // Multer storage configuration
 const storage = multer.diskStorage({
@@ -257,17 +258,29 @@ const writePhotoDataToFile = async (data) => {
 };
 
 app.post('/setSchedule', async (req, res) => {
-    const scheduleData = req.body.scheduleData
-    console.log(scheduleData)
+    const scheduleData = req.body.scheduleData;
+  
+    console.log('Received schedule data:', scheduleData);
+  
     try {
-       
-      
-      res.status(200).send('ooh weee')
+      // Send the schedule data to the jobs endpoint on localhost:3000
+      const response = await axios.post('http://localhost:3001/jobs', scheduleData);
+        console.log('response ')
+        console.log(response)
+      // Forward the response from the jobs endpoint to the client
+      res.status(response.status).send(response.data);
     } catch (error) {
-      console.error(error);
-      res.status(500).send('uuuuuuuuuuuuuuuuuuuuuuuuuf');
+      console.error('Error sending schedule data to jobs endpoint:', error);
+  
+      if (error.response) {
+        // If the error comes from the server response (like 400 or 500 errors), send that back to the client
+        res.status(error.response.status).send(error.response.data);
+      } else {
+        // General server error handling
+        res.status(500).send('Internal Server Error');
+      }
     }
-  })
+  });
 
 
 app.listen(3456, () => {
