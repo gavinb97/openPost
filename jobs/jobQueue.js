@@ -35,39 +35,4 @@ async function startWorker(channel) {
   });
 }
 
-// Usage
-(async () => {
-  // Setup RabbitMQ connection and channel
-  const channel = await setupQueue();
-
-  // Start the worker to process jobs from the queue
-  startWorker(channel);
-
-  // Example: Enqueue a post job with a 5-second delay
-  const job = {
-    id: 'first',
-    userId: 'user123',
-    content: 'Hello, world!',
-    scheduledTime: Date.now() + 5000, // 5 seconds from now
-  };
-
-  await enqueuePostJob(channel, job); // Enqueue the job for processing
-
-  const job2 = {
-    id: 'second',
-    userId: 'fuckity',
-    content: 'fuckity, world!',
-    scheduledTime: Date.now() + 35000, // 35 seconds from now
-  };
-
-  await enqueuePostJob(channel, job2);
-
-  const job3 = {
-    id: 'turd',
-    userId: 'fuckity',
-    content: 'howdy do buckaroo',
-    scheduledTime: Date.now() + 85000 // 35 seconds from now
-  };
-
-  await enqueuePostJob(channel, job3);
-})();
+module.exports = { setupQueue, enqueuePostJob, startWorker };
