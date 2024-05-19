@@ -224,6 +224,10 @@
   text-align: center; /* Ensures text is centered within the button */
 }
 
+.selected-day {
+  background-color: #888888; /* Darker grey for selected days */
+  color: #ffffff; /* Optional: change text color to white for better contrast */
+}
 
 
 
