@@ -264,7 +264,7 @@ app.post('/setSchedule', async (req, res) => {
   
     try {
       // Send the schedule data to the jobs endpoint on localhost:3000
-      const response = await axios.post('http://localhost:3001/jobs', scheduleData);
+      const response = await axios.post('http://localhost:4455/jobs', scheduleData);
         console.log('response ')
         console.log(response)
       // Forward the response from the jobs endpoint to the client
