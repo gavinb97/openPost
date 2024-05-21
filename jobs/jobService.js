@@ -7,18 +7,22 @@ const formatRequest = async (request) => {
         case 'reddit':
             console.log('reddit is selected')
             await handleScheduleType(request)
+            await handlePostOrder(request)
             break;
         case 'twitter': 
             console.log('twitter is selected')
             await handleScheduleType(request)
+            await handlePostOrder(request)
             break;
         case 'tiktok':
             console.log('tiktok is selected')
             await handleScheduleType(request)
+            await handlePostOrder(request)
             break;
         case 'youtube':
             console.log('youtube is selected')
             await handleScheduleType(request)
+            await handlePostOrder(request)
             break;
         default:
             console.log('No website selected, something must be wrong')
@@ -34,6 +38,7 @@ const handleScheduleType = async (request) => {
             break;
         case 'scheduled':
             console.log('scheduled chosen')
+            await handleScheduleIntervals(request)
             break
         default:
             console.log('No schedule selected, something might be wrong')
@@ -41,7 +46,7 @@ const handleScheduleType = async (request) => {
 }
 
 const handleRandomIntervalDuration = async (request) => {
-    switch (request) {
+    switch (request.durationOfJob) {
         case 'forever': 
             console.log('Job will run forever')
             break;
@@ -66,13 +71,30 @@ const handleRandomIntervalDuration = async (request) => {
 
 }
 
+const handlePostOrder = async (request) => {
+    if (request.picturePostOrder) {
+        if (request.picturePostOrder === 'random') {
+            console.log('Random post order selected');
+            const shuffledImages = [...request.selectedImages].sort(() => Math.random() - 0.5);
+            console.log('Selected images in random order:', shuffledImages);
+        } else if (request.picturePostOrder === 'order') {
+            console.log('Ordered post order selected');
+            console.log('Selected images in order:', request.selectedImages);
+        }
+    } else {
+        console.log('No post order specified');
+    }
+}
+
 const handleScheduleIntervals = async (request) => {
     switch (request.scheduleInterval) {
         case 'hour': 
             console.log('hour interval selected')
+            await handleHourInterval(request)
             break;
         case 'set':
             console.log('set interval selected')
+            await handleSetInterval(request)
             break;
         default:
             console.log('No schedule interval selected, something is wrong')
@@ -86,7 +108,28 @@ const handleHourInterval = async (request) => {
 }
 
 const handleSetInterval = async (request) => {
-    
+    if (request.timesOfDay && request.selectedDays) {
+        const daysOfWeek = {
+            S: 'Sunday',
+            M: 'Monday',
+            T: 'Tuesday',
+            W: 'Wednesday',
+            Th: 'Thursday',
+            F: 'Friday',
+            Sa: 'Saturday'
+        };
+
+        const selectedDays = Object.keys(request.selectedDays)
+            .filter(day => request.selectedDays[day])
+            .map(day => daysOfWeek[day]);
+
+        // console.log(`Job will run on the following days: ${selectedDays.join(', ')}`);
+
+        request.timesOfDay.forEach(time => {
+            const formattedTime = `${time.hour}:${time.minute} ${time.ampm.toUpperCase()}`;
+            console.log(`Job will run at ${formattedTime} on ${selectedDays.join(', ')}`);
+        });
+    }
 }
 
 module.exports = {
