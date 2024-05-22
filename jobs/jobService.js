@@ -105,6 +105,40 @@ const handleHourInterval = async (request) => {
     if (request.hourInterval) {
         console.log(`job will run every ${request.hourInterval}`)
     }
+    // create job
+    if (request.hourInterval) {
+        console.log(`Job will run every ${request.hourInterval} hour(s)`);
+
+        const jobs = [];
+        const intervalInMilliseconds = request.hourInterval * 60 * 60 * 1000; // Convert hours to milliseconds
+
+        // Create the first job to execute immediately
+        const firstJob = {
+            id: 'job1',
+            userId: request.username || 'defaultUserId',
+            content: `Post to ${request.selectedWebsite}`,
+            scheduledTime: Date.now() + 5000, // 5 seconds delay for the first job
+            selectedImages: request.selectedImages
+        };
+        jobs.push(firstJob);
+
+        // Create subsequent jobs
+        for (let i = 1; i < request.selectedImages.length; i++) {
+            const job = {
+                id: `job${i + 1}`,
+                userId: request.username || 'defaultUserId',
+                content: `Post to ${request.selectedWebsite}`,
+                scheduledTime: firstJob.scheduledTime + (i * intervalInMilliseconds),
+                selectedImages: request.selectedImages
+            };
+            jobs.push(job);
+        }
+
+        // Log the jobs array
+        console.log('Scheduled Jobs:', jobs);
+
+        // Optional: Save the jobs to the database or perform other actions
+    }
 }
 
 const handleSetInterval = async (request) => {
