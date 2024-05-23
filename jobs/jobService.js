@@ -103,14 +103,26 @@ const handleScheduleIntervals = async (request) => {
 
 const handleHourInterval = async (request) => {
     if (request.hourInterval) {
-        console.log(`job will run every ${request.hourInterval}`)
-    }
-    // create job
-    if (request.hourInterval) {
         console.log(`Job will run every ${request.hourInterval} hour(s)`);
 
         const jobs = [];
         const intervalInMilliseconds = request.hourInterval * 60 * 60 * 1000; // Convert hours to milliseconds
+        const maxDurationInMilliseconds = 48 * 60 * 60 * 1000; // 48 hours in milliseconds
+        const maxJobs = Math.floor(maxDurationInMilliseconds / intervalInMilliseconds); // Maximum number of jobs within 48 hours
+
+        // Create a copy of the selected images array to keep track of remaining images
+        let remainingImages = [...request.selectedImages];
+        const originalImages = [...request.selectedImages]; // Keep a copy of the original images for future use
+
+        // Helper function to get the next image
+        const getNextImage = () => {
+            if (request.picturePostOrder === 'random') {
+                const randomIndex = Math.floor(Math.random() * remainingImages.length);
+                return remainingImages.splice(randomIndex, 1)[0];
+            } else if (request.picturePostOrder === 'order') {
+                return remainingImages.shift();
+            }
+        };
 
         // Create the first job to execute immediately
         const firstJob = {
@@ -118,18 +130,22 @@ const handleHourInterval = async (request) => {
             userId: request.username || 'defaultUserId',
             content: `Post to ${request.selectedWebsite}`,
             scheduledTime: Date.now() + 5000, // 5 seconds delay for the first job
-            selectedImages: request.selectedImages
+            selectedImages: getNextImage()
         };
         jobs.push(firstJob);
 
         // Create subsequent jobs
-        for (let i = 1; i < request.selectedImages.length; i++) {
+        for (let i = 1; i < maxJobs; i++) {
+            if (remainingImages.length === 0) {
+                remainingImages = [...originalImages]; // Reset the remaining images if we've used them all
+            }
+
             const job = {
                 id: `job${i + 1}`,
                 userId: request.username || 'defaultUserId',
                 content: `Post to ${request.selectedWebsite}`,
                 scheduledTime: firstJob.scheduledTime + (i * intervalInMilliseconds),
-                selectedImages: request.selectedImages
+                selectedImages: getNextImage()
             };
             jobs.push(job);
         }
@@ -139,7 +155,9 @@ const handleHourInterval = async (request) => {
 
         // Optional: Save the jobs to the database or perform other actions
     }
-}
+};
+
+
 
 const handleSetInterval = async (request) => {
     if (request.timesOfDay && request.selectedDays) {
