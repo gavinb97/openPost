@@ -46,30 +46,24 @@ const handleScheduleType = async (request) => {
 }
 
 const handleRandomIntervalDuration = async (request) => {
-    switch (request.durationOfJob) {
+    const duration = request.durationOfJob;
+
+    switch (duration) {
         case 'forever': 
-            console.log('Job will run forever')
-            break;
-        case '1':
-            console.log('Job will run for 1 iteration')
-            break;
-        case '2':
-            console.log('Job will run for 2 iteration')
-            break;
-        case '3':
-            console.log('Job will run for 3 iteration')
-            break;
-        case '4': 
-            console.log('Job will run for 4 iteration')
-            break;
-        case '5':
-            console.log('Job will run for 5 iteration')
+            console.log('Job will run forever');
+            await scheduleRandomJobs(request, 48);
             break;
         default:
-            console.log('No duration selected')
+            const iterations = parseInt(duration, 10);
+            if (isNaN(iterations) || iterations <= 0) {
+                console.log('No valid duration selected');
+            } else {
+                console.log(`Job will run for ${iterations} iteration(s)`);
+                await scheduleRandomJobs(request, iterations);
+            }
     }
-
 }
+
 
 const handlePostOrder = async (request) => {
     if (request.picturePostOrder) {
@@ -100,6 +94,70 @@ const handleScheduleIntervals = async (request) => {
             console.log('No schedule interval selected, something is wrong')
     }
 }
+
+
+const scheduleRandomJobs = async (request, iterations) => {
+    if (iterations) {
+        const jobs = [];
+        const maxDurationInMilliseconds = 48 * 60 * 60 * 1000; // 48 hours in milliseconds
+        const minIntervalInMilliseconds = 10 * 60 * 1000; // 10 minutes in milliseconds
+        const maxIntervalInMilliseconds = 8 * 60 * 60 * 1000; // 8 hours in milliseconds
+        const jobSetId = uuidv4();
+        const now = Date.now();
+
+        let remainingImages = [...request.selectedImages];
+        const originalImages = [...request.selectedImages];
+
+        const getNextImage = () => {
+            if (request.picturePostOrder === 'random') {
+                const randomIndex = Math.floor(Math.random() * remainingImages.length);
+                return remainingImages.splice(randomIndex, 1)[0];
+            } else if (request.picturePostOrder === 'order') {
+                return remainingImages.shift();
+            }
+        };
+
+        const createJob = (scheduledTime, jobId) => {
+            return {
+                id: `job${jobId}`,
+                jobSetId: jobSetId,
+                userId: request.username || 'defaultUserId',
+                content: `Post to ${request.selectedWebsite}`,
+                scheduledTime: scheduledTime,
+                selectedImages: getNextImage()
+            };
+        };
+
+        let jobId = 1;
+        let currentTime = now;
+
+        for (let iteration = 0; iteration < iterations; iteration++) {
+            for (let i = 0; i < originalImages.length; i++) {
+                if (remainingImages.length === 0) {
+                    remainingImages = [...originalImages];
+                }
+
+                let intervalInMilliseconds;
+                do {
+                    intervalInMilliseconds = Math.floor(Math.random() * maxIntervalInMilliseconds);
+                } while (intervalInMilliseconds < minIntervalInMilliseconds);
+
+                currentTime += intervalInMilliseconds;
+
+                if (currentTime <= now + maxDurationInMilliseconds) {
+                    const job = createJob(currentTime, jobId++);
+                    jobs.push(job);
+                } else {
+                    break;
+                }
+            }
+        }
+
+        console.log('Scheduled Jobs:', jobs);
+
+        // Optional: Save the jobs to the database or perform other actions
+    }
+};
 
 const handleHourInterval = async (request) => {
     if (request.hourInterval) {
