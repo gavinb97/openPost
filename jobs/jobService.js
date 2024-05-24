@@ -199,16 +199,7 @@ const handleSetInterval = async (request) => {
         };
 
         // Helper function to format the time and create job
-        const createJob = (day, hour, minute, ampm, jobId) => {
-            const now = new Date();
-            const targetDate = new Date(now);
-            targetDate.setDate(targetDate.getDate() + day);
-            targetDate.setHours(hour + (ampm === 'pm' && hour < 12 ? 12 : 0), minute, 0, 0);
-
-            if (targetDate < now) {
-                targetDate.setDate(targetDate.getDate() + 7); // Move to the next week if the time has already passed for today
-            }
-
+        const createJob = (targetDate, jobId) => {
             const job = {
                 id: `job${jobId}`,
                 jobSetId: jobSetId, // Add the jobSetId to each job
@@ -232,12 +223,19 @@ const handleSetInterval = async (request) => {
                     const minute = parseInt(time.minute, 10);
                     const ampm = time.ampm.toLowerCase();
                     const targetDate = new Date(now);
-                    targetDate.setDate(now.getDate() + dayOffset);
+                    const currentDayOfWeek = now.getDay();
+                    let daysUntilTargetDay = (day - currentDayOfWeek + 7) % 7;
+
+                    if (dayOffset > 0) {
+                        daysUntilTargetDay += dayOffset * 7;
+                    }
+
+                    targetDate.setDate(now.getDate() + daysUntilTargetDay);
                     targetDate.setHours(hour + (ampm === 'pm' && hour < 12 ? 12 : 0), minute, 0, 0);
 
                     // Only push jobs that are within the next 48 hours
-                    if (targetDate.getTime() <= maxDate.getTime() && targetDate.getTime() >= now.getTime() && selectedDays.includes(targetDate.getDay())) {
-                        const job = createJob(dayOffset, hour, minute, ampm, jobId++);
+                    if (targetDate.getTime() <= maxDate.getTime() && targetDate.getTime() >= now.getTime()) {
+                        const job = createJob(targetDate, jobId++);
                         jobs.push(job);
 
                         if (remainingImages.length === 0) {
@@ -254,7 +252,6 @@ const handleSetInterval = async (request) => {
         // Optional: Save the jobs to the database or perform other actions
     }
 };
-
 
 
 // const handleSetInterval = async (request) => {
