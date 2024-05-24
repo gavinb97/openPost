@@ -1,4 +1,4 @@
-
+const { v4: uuidv4 } = require('uuid'); 
 
 const formatRequest = async (request) => {
     console.log(request)
@@ -110,6 +110,9 @@ const handleHourInterval = async (request) => {
         const maxDurationInMilliseconds = 48 * 60 * 60 * 1000; // 48 hours in milliseconds
         const maxJobs = Math.floor(maxDurationInMilliseconds / intervalInMilliseconds); // Maximum number of jobs within 48 hours
 
+        // Create a unique jobSetId for this group of jobs
+        const jobSetId = uuidv4();
+
         // Create a copy of the selected images array to keep track of remaining images
         let remainingImages = [...request.selectedImages];
         const originalImages = [...request.selectedImages]; // Keep a copy of the original images for future use
@@ -127,6 +130,7 @@ const handleHourInterval = async (request) => {
         // Create the first job to execute immediately
         const firstJob = {
             id: 'job1',
+            jobSetId: jobSetId, // Add the jobSetId to each job
             userId: request.username || 'defaultUserId',
             content: `Post to ${request.selectedWebsite}`,
             scheduledTime: Date.now() + 5000, // 5 seconds delay for the first job
@@ -142,6 +146,7 @@ const handleHourInterval = async (request) => {
 
             const job = {
                 id: `job${i + 1}`,
+                jobSetId: jobSetId, // Add the jobSetId to each job
                 userId: request.username || 'defaultUserId',
                 content: `Post to ${request.selectedWebsite}`,
                 scheduledTime: firstJob.scheduledTime + (i * intervalInMilliseconds),
@@ -157,32 +162,125 @@ const handleHourInterval = async (request) => {
     }
 };
 
-
-
 const handleSetInterval = async (request) => {
     if (request.timesOfDay && request.selectedDays) {
         const daysOfWeek = {
-            S: 'Sunday',
-            M: 'Monday',
-            T: 'Tuesday',
-            W: 'Wednesday',
-            Th: 'Thursday',
-            F: 'Friday',
-            Sa: 'Saturday'
+            S: 0, // Sunday
+            M: 1, // Monday
+            T: 2, // Tuesday
+            W: 3, // Wednesday
+            Th: 4, // Thursday
+            F: 5, // Friday
+            Sa: 6 // Saturday
         };
 
         const selectedDays = Object.keys(request.selectedDays)
             .filter(day => request.selectedDays[day])
             .map(day => daysOfWeek[day]);
 
-        // console.log(`Job will run on the following days: ${selectedDays.join(', ')}`);
+        const jobs = [];
+        const maxDays = 2; // Scheduling jobs for 2 days in advance (48 hours)
 
-        request.timesOfDay.forEach(time => {
-            const formattedTime = `${time.hour}:${time.minute} ${time.ampm.toUpperCase()}`;
-            console.log(`Job will run at ${formattedTime} on ${selectedDays.join(', ')}`);
-        });
+        // Create a unique jobSetId for this group of jobs
+        const jobSetId = uuidv4();
+
+        // Create a copy of the selected images array to keep track of remaining images
+        let remainingImages = [...request.selectedImages];
+        const originalImages = [...request.selectedImages]; // Keep a copy of the original images for future use
+
+        // Helper function to get the next image
+        const getNextImage = () => {
+            if (request.picturePostOrder === 'random') {
+                const randomIndex = Math.floor(Math.random() * remainingImages.length);
+                return remainingImages.splice(randomIndex, 1)[0];
+            } else if (request.picturePostOrder === 'order') {
+                return remainingImages.shift();
+            }
+        };
+
+        // Helper function to format the time and create job
+        const createJob = (day, hour, minute, ampm, jobId) => {
+            const now = new Date();
+            const targetDate = new Date(now);
+            targetDate.setDate(targetDate.getDate() + day);
+            targetDate.setHours(hour + (ampm === 'pm' && hour < 12 ? 12 : 0), minute, 0, 0);
+
+            if (targetDate < now) {
+                targetDate.setDate(targetDate.getDate() + 7); // Move to the next week if the time has already passed for today
+            }
+
+            const job = {
+                id: `job${jobId}`,
+                jobSetId: jobSetId, // Add the jobSetId to each job
+                userId: request.username || 'defaultUserId',
+                content: `Post to ${request.selectedWebsite}`,
+                scheduledTime: targetDate.getTime(),
+                selectedImages: getNextImage()
+            };
+
+            return job;
+        };
+
+        let jobId = 1;
+        const now = new Date();
+        const maxDate = new Date(now.getTime() + (48 * 60 * 60 * 1000)); // Current time + 48 hours
+
+        for (let dayOffset = 0; dayOffset < maxDays; dayOffset++) {
+            selectedDays.forEach(day => {
+                request.timesOfDay.forEach(time => {
+                    const hour = parseInt(time.hour, 10);
+                    const minute = parseInt(time.minute, 10);
+                    const ampm = time.ampm.toLowerCase();
+                    const targetDate = new Date(now);
+                    targetDate.setDate(now.getDate() + dayOffset);
+                    targetDate.setHours(hour + (ampm === 'pm' && hour < 12 ? 12 : 0), minute, 0, 0);
+
+                    // Only push jobs that are within the next 48 hours
+                    if (targetDate.getTime() <= maxDate.getTime() && targetDate.getTime() >= now.getTime() && selectedDays.includes(targetDate.getDay())) {
+                        const job = createJob(dayOffset, hour, minute, ampm, jobId++);
+                        jobs.push(job);
+
+                        if (remainingImages.length === 0) {
+                            remainingImages = [...originalImages]; // Reset the remaining images if we've used them all
+                        }
+                    }
+                });
+            });
+        }
+
+        // Log the jobs array
+        console.log('Scheduled Jobs:', jobs);
+
+        // Optional: Save the jobs to the database or perform other actions
     }
-}
+};
+
+
+
+// const handleSetInterval = async (request) => {
+//     if (request.timesOfDay && request.selectedDays) {
+//         const daysOfWeek = {
+//             S: 'Sunday',
+//             M: 'Monday',
+//             T: 'Tuesday',
+//             W: 'Wednesday',
+//             Th: 'Thursday',
+//             F: 'Friday',
+//             Sa: 'Saturday'
+//         };
+
+//         const selectedDays = Object.keys(request.selectedDays)
+//             .filter(day => request.selectedDays[day])
+//             .map(day => daysOfWeek[day]);
+
+//         // console.log(`Job will run on the following days: ${selectedDays.join(', ')}`);
+
+//         request.timesOfDay.forEach(time => {
+//             const formattedTime = `${time.hour}:${time.minute} ${time.ampm.toUpperCase()}`;
+//             console.log(`Job will run at ${formattedTime} on ${selectedDays.join(', ')}`);
+//         });
+//     }
+// }
 
 module.exports = {
     formatRequest
