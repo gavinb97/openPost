@@ -104,12 +104,12 @@ const scheduleRandomJobs = async (request, iterations) => {
 
         const createJob = (scheduledTime, jobId) => {
             return {
-                id: `job${jobId}`,
+                message_id: uuidv4(),
                 jobSetId: jobSetId,
                 userId: request.username || 'defaultUserId',
                 content: `Post to ${request.selectedWebsite}`,
                 scheduledTime: scheduledTime,
-                selectedImages: getNextImage()
+                image: getNextImage()
             };
         };
 
@@ -173,12 +173,12 @@ const handleHourInterval = async (request) => {
 
         // Create the first job to execute immediately
         const firstJob = {
-            id: 'job1',
+            message_id: uuidv4(),
             jobSetId: jobSetId, // Add the jobSetId to each job
             userId: request.username || 'defaultUserId',
             content: `Post to ${request.selectedWebsite}`,
             scheduledTime: Date.now() + 5000, // 5 seconds delay for the first job
-            selectedImages: getNextImage()
+            image: getNextImage()
         };
         jobs.push(firstJob);
 
@@ -189,12 +189,12 @@ const handleHourInterval = async (request) => {
             }
 
             const job = {
-                id: `job${i + 1}`,
+                message_id: uuidv4(),
                 jobSetId: jobSetId, // Add the jobSetId to each job
                 userId: request.username || 'defaultUserId',
                 content: `Post to ${request.selectedWebsite}`,
                 scheduledTime: firstJob.scheduledTime + (i * intervalInMilliseconds),
-                selectedImages: getNextImage()
+                image: getNextImage()
             };
             jobs.push(job);
         }
@@ -246,12 +246,12 @@ const handleSetInterval = async (request) => {
         // Helper function to format the time and create job
         const createJob = (targetDate, jobId) => {
             const job = {
-                id: `job${jobId}`,
+                message_id: uuidv4(),
                 jobSetId: jobSetId, // Add the jobSetId to each job
                 userId: request.username || 'defaultUserId',
                 content: `Post to ${request.selectedWebsite}`,
                 scheduledTime: targetDate.getTime(),
-                selectedImages: getNextImage()
+                image: getNextImage()
             };
 
             return job;
