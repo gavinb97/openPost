@@ -13,9 +13,11 @@ let channelPromise = setupQueue();
 channelPromise.then(startWorker);
 
 app.post('/jobs', async (req, res) => {
+
   const jobs = await formatRequest(req.body)
   console.log('deez da jobs')
   console.log(jobs)
+  console.log(req.body)
   // try {
   //   const jobData = req.body;
   //   console.log(jobData)

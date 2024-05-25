@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import TagInputComponent from './TagInputComponent'; // Import the TagInputComponent
 import './../App.css';
-import { createScheduledJob } from '../service/jobService';
+import { createScheduledJob, validateAndFormatScheduleData } from '../service/jobService';
 import { getSFWSubreddits } from '../service/redditService';
 import { useAuth } from '../service/authContext';
 
@@ -129,6 +129,7 @@ const SetScheduleModal = ({ closeModal, selectedImages }) => {
     setDurationOfJob(e.target.value);
   };
 
+
   const handleSave = async () => {
     const username = user.username;
     const scheduleData = {
@@ -144,9 +145,11 @@ const SetScheduleModal = ({ closeModal, selectedImages }) => {
       durationOfJob,
       selectedSubreddits,
     };
+    
+    const job = await validateAndFormatScheduleData(scheduleData)
 
-    console.log('Schedule Data:', scheduleData);
-    await createScheduledJob(scheduleData);
+    console.log('Schedule Data:', job);
+    await createScheduledJob(job);
   };
 
   return (
