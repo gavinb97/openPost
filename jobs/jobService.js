@@ -1,75 +1,83 @@
 const { v4: uuidv4 } = require('uuid'); 
 
 const formatRequest = async (request) => {
-    console.log(request)
-    console.log('request ^^')
+    let jobs
+
     switch (request.selectedWebsite) {
         case 'reddit':
-            console.log('reddit is selected')
-            await handleScheduleType(request)
+            jobs = await handleScheduleType(request)
             break;
         case 'twitter': 
-            console.log('twitter is selected')
-            await handleScheduleType(request)
+            jobs = await handleScheduleType(request)
             break;
         case 'tiktok':
-            console.log('tiktok is selected')
-            await handleScheduleType(request)
+            jobs = await handleScheduleType(request)
             break;
         case 'youtube':
-            console.log('youtube is selected')
-            await handleScheduleType(request)
+            jobs = await handleScheduleType(request)
             break;
         default:
             console.log('No website selected, something must be wrong')
     }
     
+    return jobs
 }
 
 const handleScheduleType = async (request) => {
+    let jobs
+
     switch (request.scheduleType) {
         case 'random':
-            await handleRandomIntervalDuration(request)
+            jobs = await handleRandomIntervalDuration(request)
             break;
         case 'scheduled':
-            await handleScheduleIntervals(request)
+            jobs = await handleScheduleIntervals(request)
             break
         default:
             console.log('No schedule selected, something might be wrong')
     }
+
+    return jobs
 }
 
 const handleRandomIntervalDuration = async (request) => {
     const duration = request.durationOfJob;
 
+    let jobs
+
     switch (duration) {
         case 'forever': 
-            console.log('Job will run forever');
-            await scheduleRandomJobs(request, 48);
+            jobs = await scheduleRandomJobs(request, 48);
             break;
         default:
             const iterations = parseInt(duration, 10);
             if (isNaN(iterations) || iterations <= 0) {
                 console.log('No valid duration selected');
             } else {
-                console.log(`Job will run for ${iterations} iteration(s)`);
-                await scheduleRandomJobs(request, iterations);
+                jobs = await scheduleRandomJobs(request, iterations);
             }
     }
+
+    return jobs
 }
 
 
 const handleScheduleIntervals = async (request) => {
+
+    let jobs
+
     switch (request.scheduleInterval) {
         case 'hour': 
-            await handleHourInterval(request)
+            jobs = await handleHourInterval(request)
             break;
         case 'set':
-            await handleSetInterval(request)
+            jobs = await handleSetInterval(request)
             break;
         default:
             console.log('No schedule interval selected, something is wrong')
     }
+
+    return jobs
 }
 
 
@@ -130,9 +138,10 @@ const scheduleRandomJobs = async (request, iterations) => {
             }
         }
 
-        console.log('Scheduled Jobs:', jobs);
+        // console.log('Scheduled Jobs:', jobs);
 
         // Optional: Save the jobs to the database or perform other actions
+        return { jobs, originalImages, remainingImages }
     }
 };
 
@@ -191,9 +200,10 @@ const handleHourInterval = async (request) => {
         }
 
         // Log the jobs array
-        console.log('Scheduled Jobs:', jobs);
+        // console.log('Scheduled Jobs:', jobs);
 
         // Optional: Save the jobs to the database or perform other actions
+        return { jobs, originalImages, remainingImages }
     }
 };
 
@@ -282,9 +292,10 @@ const handleSetInterval = async (request) => {
         }
 
         // Log the jobs array
-        console.log('Scheduled Jobs:', jobs);
+        // console.log('Scheduled Jobs:', jobs);
 
         // Optional: Save the jobs to the database or perform other actions
+        return { jobs, originalImages, remainingImages }
     }
 };
 
