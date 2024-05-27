@@ -71,25 +71,30 @@ export const createScheduledJob = async (schedule) => {
         }
         jobObject.durationOfJob = durationOfJob;
     } else if (scheduleType === 'scheduled') {
-        if (timesOfDay) {
-            jobObject.timesOfDay = timesOfDay;
-        }
-        if (selectedDays) {
-            jobObject.selectedDays = selectedDays;
-        }
         if (scheduleInterval) {
             jobObject.scheduleInterval = scheduleInterval;
         }
         if (hourInterval) {
             jobObject.hourInterval = hourInterval;
         }
+        if  (scheduleInterval === 'set') {
+            if (timesOfDay) {
+              jobObject.timesOfDay = timesOfDay;
+            }
+            if (selectedDays) {
+              jobObject.selectedDays = selectedDays;
+            }
+        }
+        
     }
 
     // Include selected subreddits if the website is Reddit
     if (selectedWebsite.toLowerCase() === 'reddit' && selectedSubreddits) {
         jobObject.selectedSubreddits = selectedSubreddits;
     }
-
+    console.log(jobObject)
     return jobObject;
+
+  
 };
 

@@ -23,6 +23,43 @@ const formatRequest = async (request) => {
     return jobs
 }
 
+const createRandomJobObject = (request, jobSetId, originalImages, remainingImages, scheduledTime) => {
+    return {
+        job_set_id: jobSetId,
+        user_id: request.username || 'defaultUserId',
+        content: `Post to ${request.selectedWebsite}`,
+        scheduled_time: new Date(scheduledTime),
+        original_images: originalImages,
+        remaining_images: remainingImages,
+        username: request.username,
+        selected_website: request.selectedWebsite,
+        picture_post_order: request.picturePostOrder,
+        schedule_type: request.scheduleType,
+        duration_of_job: request.durationOfJob === 'forever' ? -1 : parseInt(request.durationOfJob, 10),
+        selected_subreddits: request.selectedSubreddits
+    };
+};
+
+const createScheduledJobObject = (request, jobSetId, originalImages, remainingImages, scheduledTime) => {
+    return {
+        job_set_id: jobSetId,
+        user_id: request.username || 'defaultUserId',
+        content: `Post to ${request.selectedWebsite}`,
+        scheduled_time: new Date(scheduledTime),
+        original_images: originalImages,
+        remaining_images: remainingImages,
+        username: request.username,
+        selected_website: request.selectedWebsite,
+        picture_post_order: request.picturePostOrder,
+        schedule_type: request.scheduleType,
+        times_of_day: request.timesOfDay,
+        selected_days: request.selectedDays,
+        schedule_interval: request.scheduleInterval,
+        hour_interval: request.hourInterval,
+        selected_subreddits: request.selectedSubreddits
+    };
+};
+
 const handleScheduleType = async (request) => {
     let jobs
 
@@ -138,10 +175,9 @@ const scheduleRandomJobs = async (request, iterations) => {
             }
         }
 
-        // console.log('Scheduled Jobs:', jobs);
+        const dbJobObject = createRandomJobObject(request, jobSetId, originalImages, remainingImages, currentTime);
 
-        // Optional: Save the jobs to the database or perform other actions
-        return { jobs, originalImages, remainingImages }
+        return { jobs, originalImages, remainingImages, dbJobObject }
     }
 };
 
@@ -199,11 +235,9 @@ const handleHourInterval = async (request) => {
             jobs.push(job);
         }
 
-        // Log the jobs array
-        // console.log('Scheduled Jobs:', jobs);
+        const dbJobObject = createScheduledJobObject(request, jobSetId, originalImages, remainingImages, Date.now());
 
-        // Optional: Save the jobs to the database or perform other actions
-        return { jobs, originalImages, remainingImages }
+        return { jobs, originalImages, remainingImages, dbJobObject }
     }
 };
 
@@ -291,11 +325,9 @@ const handleSetInterval = async (request) => {
             });
         }
 
-        // Log the jobs array
-        // console.log('Scheduled Jobs:', jobs);
+        const dbJobObject = createScheduledJobObject(request, jobSetId, originalImages, remainingImages, Date.now());
 
-        // Optional: Save the jobs to the database or perform other actions
-        return { jobs, originalImages, remainingImages }
+        return { jobs, originalImages, remainingImages, dbJobObject }
     }
 };
 
