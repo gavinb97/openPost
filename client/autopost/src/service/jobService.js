@@ -42,6 +42,19 @@ export const createScheduledJob = async (schedule) => {
         throw new Error("Schedule type is required");
     }
 
+    // Ensure at least one day in selectedDays is true
+    if (scheduleType === 'scheduled' && scheduleInterval === 'set') {
+        const daysSelected = Object.values(selectedDays).some(day => day);
+        if (!daysSelected) {
+            throw new Error("At least one day must be selected in selectedDays");
+        }
+
+        // Ensure timesOfDay array has at least one value
+        if (!timesOfDay || timesOfDay.length === 0) {
+            throw new Error("At least one time must be specified in timesOfDay");
+        }
+    }
+
     // Format the job object
     const jobObject = {
         username,
@@ -79,3 +92,4 @@ export const createScheduledJob = async (schedule) => {
 
     return jobObject;
 };
+
