@@ -60,6 +60,33 @@ const createScheduledJobObject = (request, jobSetId, originalImages, remainingIm
     };
 };
 
+const createActiveJobObject = (request, dbJobObject, jobs) => {
+    const activeJobObject = {
+        job_set_id: dbJobObject.job_set_id,
+        message_ids: jobs.map(job => job.message_id),
+        number_of_messages: jobs.length,
+        user_id: dbJobObject.user_id,
+        content: `Post to ${request.selectedWebsite}`,
+        scheduled_time: new Date(dbJobObject.scheduled_time),
+        original_images: dbJobObject.original_images,
+        remaining_images: dbJobObject.remaining_images,
+        username: request.username || 'defaultUserId',
+        selected_website: request.selectedWebsite,
+        picture_post_order: request.picturePostOrder,
+        schedule_type: request.scheduleType,
+        times_of_day: request.timesOfDay || null,
+        selected_days: request.selectedDays || null,
+        schedule_interval: request.scheduleInterval || null,
+        hour_interval: request.hourInterval || null,
+        duration_of_job: request.durationOfJob || null,
+        selected_subreddits: request.selectedSubreddits || [],
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+    };
+
+    return activeJobObject;
+};
+
 const handleScheduleType = async (request) => {
     let jobs
 
@@ -176,8 +203,8 @@ const scheduleRandomJobs = async (request, iterations) => {
         }
 
         const dbJobObject = createRandomJobObject(request, jobSetId, originalImages, remainingImages, currentTime);
-
-        return { jobs, originalImages, remainingImages, dbJobObject }
+        const activeJobObject = createActiveJobObject(request, dbJobObject, jobs);
+        return { jobs, originalImages, remainingImages, dbJobObject, activeJobObject }
     }
 };
 
@@ -236,8 +263,8 @@ const handleHourInterval = async (request) => {
         }
 
         const dbJobObject = createScheduledJobObject(request, jobSetId, originalImages, remainingImages, Date.now());
-
-        return { jobs, originalImages, remainingImages, dbJobObject }
+        const activeJobObject = createActiveJobObject(request, dbJobObject, jobs);
+        return { jobs, originalImages, remainingImages, dbJobObject, activeJobObject }
     }
 };
 
@@ -326,8 +353,8 @@ const handleSetInterval = async (request) => {
         }
 
         const dbJobObject = createScheduledJobObject(request, jobSetId, originalImages, remainingImages, Date.now());
-
-        return { jobs, originalImages, remainingImages, dbJobObject }
+        const activeJobObject = createActiveJobObject(request, dbJobObject, jobs);
+        return { jobs, originalImages, remainingImages, dbJobObject, activeJobObject }
     }
 };
 
