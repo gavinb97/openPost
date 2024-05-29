@@ -1,4 +1,5 @@
 const { v4: uuidv4 } = require('uuid'); 
+const { insertScheduledJob, insertRandomJob, insertActiveJob } = require('./jobsData')
 
 const formatRequest = async (request) => {
     let jobs
@@ -87,6 +88,29 @@ const createActiveJobObject = (request, dbJobObject, jobs) => {
     return activeJobObject;
 };
 
+const handleJobInsertion = async (request, dbObject, activeJobObject) => {
+    try {
+        let jobResult;
+        
+        // Check the scheduleType and call the appropriate method
+        if (request.scheduleType === 'random') {
+            jobResult = await insertRandomJob(dbObject);
+        } else if (request.scheduleType === 'scheduled') {
+            jobResult = await insertScheduledJob(dbObject);
+        } else {
+            throw new Error('Invalid scheduleType provided');
+        }
+
+        // Insert the active job record
+        await insertActiveJob(activeJobObject);
+
+        return { success: true, jobResult };
+    } catch (error) {
+        console.error('Error handling job insertion', error);
+        throw error;
+    }
+};
+
 const handleScheduleType = async (request) => {
     let jobs
 
@@ -107,18 +131,22 @@ const handleScheduleType = async (request) => {
 const handleRandomIntervalDuration = async (request) => {
     const duration = request.durationOfJob;
 
-    let jobs
+    let jobs, dbJobObject, activeJobObject
 
     switch (duration) {
         case 'forever': 
-            jobs = await scheduleRandomJobs(request, 48);
+            ({jobs, dbJobObject, activeJobObject} = await scheduleRandomJobs(request, 48));
+            console.log(activeJobObject)
+            await handleJobInsertion(request, dbJobObject, activeJobObject)
             break;
         default:
             const iterations = parseInt(duration, 10);
             if (isNaN(iterations) || iterations <= 0) {
                 console.log('No valid duration selected');
             } else {
-                jobs = await scheduleRandomJobs(request, iterations);
+                ({jobs, dbJobObject, activeJobObject} = await scheduleRandomJobs(request, iterations));
+                console.log(activeJobObject)
+                await handleJobInsertion(request, dbJobObject, activeJobObject)
             }
     }
 
@@ -128,14 +156,17 @@ const handleRandomIntervalDuration = async (request) => {
 
 const handleScheduleIntervals = async (request) => {
 
-    let jobs
+    let jobs, dbJobObject, activeJobObject
 
     switch (request.scheduleInterval) {
         case 'hour': 
-            jobs = await handleHourInterval(request)
+            ({jobs, dbJobObject, activeJobObject} = await handleHourInterval(request))
+            await handleJobInsertion(request, dbJobObject, activeJobObject)
             break;
         case 'set':
-            jobs = await handleSetInterval(request)
+            ({jobs, dbJobObject, activeJobObject} = await handleSetInterval(request))
+            console.log(activeJobObject)
+            await handleJobInsertion(request, dbJobObject, activeJobObject)
             break;
         default:
             console.log('No schedule interval selected, something is wrong')
