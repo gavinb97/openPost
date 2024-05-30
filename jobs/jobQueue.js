@@ -27,6 +27,8 @@ async function startWorker(channel) {
     const job = JSON.parse(message.content.toString());
     console.log(`Executing post job: ${job.id}`);
     console.log(`${job.content}`)
+    console.log(`${job.website}`)
+    console.log(`${job.scheduledTime}`)
     // Execute the post job (e.g., post to social media platform)
     // Implement your logic here to handle the job
 

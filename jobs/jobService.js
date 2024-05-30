@@ -202,6 +202,7 @@ const scheduleRandomJobs = async (request, iterations) => {
                 message_id: uuidv4(),
                 jobSetId: jobSetId,
                 userId: request.username || 'defaultUserId',
+                website: request.selectedWebsite,
                 content: `Post to ${request.selectedWebsite}`,
                 scheduledTime: scheduledTime,
                 image: getNextImage()
@@ -270,6 +271,7 @@ const handleHourInterval = async (request) => {
             message_id: uuidv4(),
             jobSetId: jobSetId, // Add the jobSetId to each job
             userId: request.username || 'defaultUserId',
+            website: request.selectedWebsite,
             content: `Post to ${request.selectedWebsite}`,
             scheduledTime: Date.now() + 5000, // 5 seconds delay for the first job
             image: getNextImage()
@@ -286,6 +288,7 @@ const handleHourInterval = async (request) => {
                 message_id: uuidv4(),
                 jobSetId: jobSetId, // Add the jobSetId to each job
                 userId: request.username || 'defaultUserId',
+                website: request.selectedWebsite,
                 content: `Post to ${request.selectedWebsite}`,
                 scheduledTime: firstJob.scheduledTime + (i * intervalInMilliseconds),
                 image: getNextImage()
@@ -341,6 +344,7 @@ const handleSetInterval = async (request) => {
                 message_id: uuidv4(),
                 jobSetId: jobSetId, // Add the jobSetId to each job
                 userId: request.username || 'defaultUserId',
+                website: request.selectedWebsite,
                 content: `Post to ${request.selectedWebsite}`,
                 scheduledTime: targetDate.getTime(),
                 image: getNextImage()
