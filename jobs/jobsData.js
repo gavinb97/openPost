@@ -1,6 +1,5 @@
 const pool = require('./db'); // Import the pool instance from db.js
 
-
 const insertScheduledJob = async (job) => {
     const {
         job_set_id,
@@ -20,8 +19,27 @@ const insertScheduledJob = async (job) => {
         selected_subreddits
     } = job;
 
-    // Stringify and then parse the times_of_day array to ensure it's valid JSON
-    const timesOfDayJson = JSON.stringify(times_of_day);
+    // Handle times_of_day being null
+    const timesOfDayArray = times_of_day ? times_of_day.map(({ hour, minute, ampm }) => {
+        return `${hour}:${minute.padStart(2, '0')}${ampm}`;
+    }) : [];
+    const timesOfDayJson = JSON.stringify(timesOfDayArray);
+
+    // Handle selected_days being null
+    const dayNamesMap = {
+        S: 'Sunday',
+        M: 'Monday',
+        T: 'Tuesday',
+        W: 'Wednesday',
+        Th: 'Thursday',
+        F: 'Friday',
+        Sa: 'Saturday'
+    };
+
+    const selectedDaysArray = selected_days ? Object.entries(selected_days)
+        .filter(([day, isSelected]) => isSelected)
+        .map(([day]) => dayNamesMap[day]) : [];
+    const selectedDaysJson = JSON.stringify(selectedDaysArray);
 
     const query = `
         INSERT INTO scheduled_jobs (
@@ -59,18 +77,23 @@ const insertScheduledJob = async (job) => {
         picture_post_order,
         schedule_type,
         timesOfDayJson, // Use the JSON formatted data
-        selected_days,
+        selectedDaysJson, // Use the JSON formatted array of selected days
         schedule_interval,
         hour_interval,
         selected_subreddits
     ];
 
+    console.log('values');
+    console.log(values);
+
     try {
         const client = await pool.connect();
-        const res = await client.query(query, values);
-        client.release();
-
-        return res.rows[0];
+        try {
+            const res = await client.query(query, values);
+            return res.rows[0];
+        } finally {
+            client.release();
+        }
     } catch (err) {
         console.error('Error inserting scheduled job', err);
         throw err;
