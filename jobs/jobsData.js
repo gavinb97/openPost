@@ -61,7 +61,7 @@ const insertScheduledJob = async (job) => {
             created_at,
             updated_at
         ) VALUES (
-            $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, NOW(), NOW()
+            $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11::jsonb, $12::jsonb, $13, $14, $15, NOW(), NOW()
         ) RETURNING id;
     `;
 
@@ -192,6 +192,29 @@ const insertActiveJob = async (job) => {
     const messageIdsLiteral = `{${message_ids.map(id => `'${id}'`).join(',')}}`;
     if (duration_of_job === 'forever') duration_of_job = 0
 
+
+    // Handle times_of_day being null
+    const timesOfDayArray = times_of_day ? times_of_day.map(({ hour, minute, ampm }) => {
+        return `${hour}:${minute.padStart(2, '0')}${ampm}`;
+    }) : [];
+    const timesOfDayJson = JSON.stringify(timesOfDayArray);
+
+    // Handle selected_days being null
+    const dayNamesMap = {
+        S: 'Sunday',
+        M: 'Monday',
+        T: 'Tuesday',
+        W: 'Wednesday',
+        Th: 'Thursday',
+        F: 'Friday',
+        Sa: 'Saturday'
+    };
+
+    const selectedDaysArray = selected_days ? Object.entries(selected_days)
+        .filter(([day, isSelected]) => isSelected)
+        .map(([day]) => dayNamesMap[day]) : [];
+    const selectedDaysJson = JSON.stringify(selectedDaysArray);
+
     const query = `
         INSERT INTO active_jobs (
             job_set_id,
@@ -232,8 +255,8 @@ const insertActiveJob = async (job) => {
         selected_website,
         picture_post_order,
         schedule_type,
-        times_of_day,
-        selected_days,
+        timesOfDayJson, // Use the JSON formatted data
+        selectedDaysJson,
         schedule_interval,
         hour_interval,
         duration_of_job,
