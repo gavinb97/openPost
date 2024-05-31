@@ -183,7 +183,6 @@ const scheduleRandomJobs = async (request, iterations) => {
         const minIntervalInMilliseconds = 10 * 60 * 1000; // 10 minutes in milliseconds
         const maxIntervalInMilliseconds = 8 * 60 * 60 * 1000; // 8 hours in milliseconds
         const jobSetId = uuidv4();
-        const now = Date.now();
 
         let remainingImages = [...request.selectedImages];
         const originalImages = [...request.selectedImages];
@@ -197,20 +196,20 @@ const scheduleRandomJobs = async (request, iterations) => {
             }
         };
 
-        const createJob = (scheduledTime, jobId) => {
+        const createJob = (delayTime, jobId) => {
             return {
                 message_id: uuidv4(),
                 jobSetId: jobSetId,
                 userId: request.username || 'defaultUserId',
                 website: request.selectedWebsite,
                 content: `Post to ${request.selectedWebsite}`,
-                scheduledTime: scheduledTime,
+                scheduledTime: Date.now() + delayTime, // This now represents the delay time
                 image: getNextImage()
             };
         };
 
         let jobId = 1;
-        let currentTime = now;
+        let accumulatedDelay = 0; // Start with no delay
 
         for (let iteration = 0; iteration < iterations; iteration++) {
             for (let i = 0; i < originalImages.length; i++) {
@@ -223,10 +222,10 @@ const scheduleRandomJobs = async (request, iterations) => {
                     intervalInMilliseconds = Math.floor(Math.random() * maxIntervalInMilliseconds);
                 } while (intervalInMilliseconds < minIntervalInMilliseconds);
 
-                currentTime += intervalInMilliseconds;
+                accumulatedDelay += intervalInMilliseconds;
 
-                if (currentTime <= now + maxDurationInMilliseconds) {
-                    const job = createJob(currentTime, jobId++);
+                if (accumulatedDelay <= maxDurationInMilliseconds) {
+                    const job = createJob(accumulatedDelay, jobId++);
                     jobs.push(job);
                 } else {
                     break;
@@ -234,9 +233,9 @@ const scheduleRandomJobs = async (request, iterations) => {
             }
         }
 
-        const dbJobObject = createRandomJobObject(request, jobSetId, originalImages, remainingImages, currentTime);
+        const dbJobObject = createRandomJobObject(request, jobSetId, originalImages, remainingImages, accumulatedDelay);
         const activeJobObject = createActiveJobObject(request, dbJobObject, jobs);
-        return { jobs, originalImages, remainingImages, dbJobObject, activeJobObject }
+        return { jobs, originalImages, remainingImages, dbJobObject, activeJobObject };
     }
 };
 
@@ -266,7 +265,7 @@ const handleHourInterval = async (request) => {
             }
         };
 
-        // Create the first job to execute immediately
+        // Create the first job with an initial delay of 5 seconds
         const firstJob = {
             message_id: uuidv4(),
             jobSetId: jobSetId, // Add the jobSetId to each job
@@ -290,7 +289,7 @@ const handleHourInterval = async (request) => {
                 userId: request.username || 'defaultUserId',
                 website: request.selectedWebsite,
                 content: `Post to ${request.selectedWebsite}`,
-                scheduledTime: firstJob.scheduledTime + (i * intervalInMilliseconds),
+                scheduledTime: firstJob.scheduledTime + (i * intervalInMilliseconds), // Delay time for each subsequent job
                 image: getNextImage()
             };
             jobs.push(job);
@@ -298,9 +297,10 @@ const handleHourInterval = async (request) => {
 
         const dbJobObject = createScheduledJobObject(request, jobSetId, originalImages, remainingImages, Date.now());
         const activeJobObject = createActiveJobObject(request, dbJobObject, jobs);
-        return { jobs, originalImages, remainingImages, dbJobObject, activeJobObject }
+        return { jobs, originalImages, remainingImages, dbJobObject, activeJobObject };
     }
 };
+
 
 const handleSetInterval = async (request) => {
     if (request.timesOfDay && request.selectedDays) {
@@ -339,14 +339,14 @@ const handleSetInterval = async (request) => {
         };
 
         // Helper function to format the time and create job
-        const createJob = (targetDate, jobId) => {
+        const createJob = (delayInMilliseconds, jobId) => {
             const job = {
                 message_id: uuidv4(),
                 jobSetId: jobSetId, // Add the jobSetId to each job
                 userId: request.username || 'defaultUserId',
                 website: request.selectedWebsite,
                 content: `Post to ${request.selectedWebsite}`,
-                scheduledTime: targetDate.getTime(),
+                scheduledTime: Date.now() + delayInMilliseconds,
                 image: getNextImage()
             };
 
@@ -354,8 +354,8 @@ const handleSetInterval = async (request) => {
         };
 
         let jobId = 1;
-        const now = new Date();
-        const maxDate = new Date(now.getTime() + (48 * 60 * 60 * 1000)); // Current time + 48 hours
+        const now = Date.now();
+        const maxDate = now + (48 * 60 * 60 * 1000); // Current time + 48 hours
 
         for (let dayOffset = 0; dayOffset < maxDays; dayOffset++) {
             selectedDays.forEach(day => {
@@ -364,19 +364,21 @@ const handleSetInterval = async (request) => {
                     const minute = parseInt(time.minute, 10);
                     const ampm = time.ampm.toLowerCase();
                     const targetDate = new Date(now);
-                    const currentDayOfWeek = now.getDay();
+                    const currentDayOfWeek = new Date().getDay();
                     let daysUntilTargetDay = (day - currentDayOfWeek + 7) % 7;
 
                     if (dayOffset > 0) {
                         daysUntilTargetDay += dayOffset * 7;
                     }
 
-                    targetDate.setDate(now.getDate() + daysUntilTargetDay);
+                    targetDate.setDate(new Date().getDate() + daysUntilTargetDay);
                     targetDate.setHours(hour + (ampm === 'pm' && hour < 12 ? 12 : 0), minute, 0, 0);
 
+                    const delayInMilliseconds = targetDate.getTime() - now;
+
                     // Only push jobs that are within the next 48 hours
-                    if (targetDate.getTime() <= maxDate.getTime() && targetDate.getTime() >= now.getTime()) {
-                        const job = createJob(targetDate, jobId++);
+                    if (targetDate.getTime() <= maxDate && delayInMilliseconds >= 0) {
+                        const job = createJob(delayInMilliseconds, jobId++);
                         jobs.push(job);
 
                         if (remainingImages.length === 0) {
@@ -389,7 +391,7 @@ const handleSetInterval = async (request) => {
 
         const dbJobObject = createScheduledJobObject(request, jobSetId, originalImages, remainingImages, Date.now());
         const activeJobObject = createActiveJobObject(request, dbJobObject, jobs);
-        return { jobs, originalImages, remainingImages, dbJobObject, activeJobObject }
+        return { jobs, originalImages, remainingImages, dbJobObject, activeJobObject };
     }
 };
 
