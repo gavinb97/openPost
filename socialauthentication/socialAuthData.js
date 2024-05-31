@@ -41,8 +41,8 @@ const registerUserDB = async (user) => {
             if (credsRes.rows.length === 0) {
                 // Insert a new entry into the user_creds table
                 const insertCredsQuery = `
-                    INSERT INTO user_creds (userid, username, twitter_access_token, twitter_refresh_token, reddit_access_token, reddit_refresh_token, tiktok_access_token, tiktok_refresh_token, youtube_access_token, youtube_refresh_token)
-                    VALUES ($1, $2, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL)
+                    INSERT INTO user_creds (userid, username, twitter_access_token, twitter_refresh_token, twitter_code_verifier, reddit_access_token, reddit_refresh_token, tiktok_access_token, tiktok_refresh_token, youtube_access_token, youtube_refresh_token)
+                    VALUES ($1, $2, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL)
                 `;
                 await client.query(insertCredsQuery, [userId, username]);
                 console.log('User credentials initialized successfully.');
@@ -123,6 +123,41 @@ const getUserCreds = async (username, userid) => {
         throw new Error(`Failed to retrieve user credentials: ${error.message}`);
     }
 };
+
+const updateTwitterCodeVerifier = async (username, codeVerifier) => {
+    if (!username || !codeVerifier) {
+        throw new Error('Both username and codeVerifier are required.');
+    }
+
+    try {
+        // Connect to the pool
+        const client = await pool.connect();
+
+        try {
+            // Check if the username exists in the user_creds table
+            const userCheckQuery = 'SELECT * FROM user_creds WHERE username = $1';
+            const res = await client.query(userCheckQuery, [username]);
+            if (res.rows.length === 0) {
+                throw new Error('Username not found in user_creds table.');
+            }
+
+            // Update the user_creds table with the codeVerifier
+            const updateQuery = `
+                UPDATE user_creds
+                SET twitter_code_verifier = $1
+                WHERE username = $2;
+            `;
+            await client.query(updateQuery, [codeVerifier, username]);
+            console.log('Twitter code verifier updated successfully.');
+        } finally {
+            // Release the client back to the pool
+            client.release();
+        }
+    } catch (error) {
+        throw new Error(`Failed to update Twitter code verifier: ${error.message}`);
+    }
+};
+
 
 
 module.exports = { 
