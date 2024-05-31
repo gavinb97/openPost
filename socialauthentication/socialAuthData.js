@@ -158,6 +158,136 @@ const updateTwitterCodeVerifier = async (username, codeVerifier) => {
     }
 };
 
+const updateTwitterTokens = async (username, accessToken, refreshToken) => {
+    if (!username || !accessToken || !refreshToken) {
+        throw new Error('Username, access token, and refresh token are required.');
+    }
+
+    try {
+        // Connect to the pool
+        const client = await pool.connect();
+
+        try {
+            // Update query to set the new access and refresh tokens
+            const updateQuery = `
+                UPDATE user_creds
+                SET twitter_access_token = $1, twitter_refresh_token = $2
+                WHERE username = $3
+            `;
+            const res = await client.query(updateQuery, [accessToken, refreshToken, username]);
+            
+            if (res.rowCount === 0) {
+                throw new Error('Username not found in user_creds table.');
+            }
+
+            console.log('Twitter tokens updated successfully for username:', username);
+        } finally {
+            // Release the client back to the pool
+            client.release();
+        }
+    } catch (error) {
+        throw new Error(`Failed to update Twitter tokens: ${error.message}`);
+    }
+};
+
+const updateRedditTokens = async (username, accessToken, refreshToken) => {
+    if (!username || !accessToken || !refreshToken) {
+        throw new Error('Username, access token, and refresh token are required.');
+    }
+
+    try {
+        // Connect to the pool
+        const client = await pool.connect();
+
+        try {
+            // Update query to set the new access and refresh tokens
+            const updateQuery = `
+                UPDATE user_creds
+                SET reddit_access_token = $1, reddit_refresh_token = $2
+                WHERE username = $3
+            `;
+            const res = await client.query(updateQuery, [accessToken, refreshToken, username]);
+            
+            if (res.rowCount === 0) {
+                throw new Error('Username not found in user_creds table.');
+            }
+
+            console.log('Reddit tokens updated successfully for username:', username);
+        } finally {
+            // Release the client back to the pool
+            client.release();
+        }
+    } catch (error) {
+        throw new Error(`Failed to update Reddit tokens: ${error.message}`);
+    }
+};
+
+const updateTikTokTokens = async (username, accessToken, refreshToken) => {
+    if (!username || !accessToken || !refreshToken) {
+        throw new Error('Username, access token, and refresh token are required.');
+    }
+
+    try {
+        // Connect to the pool
+        const client = await pool.connect();
+
+        try {
+            // Update query to set the new access and refresh tokens
+            const updateQuery = `
+                UPDATE user_creds
+                SET tiktok_access_token = $1, tiktok_refresh_token = $2
+                WHERE username = $3
+            `;
+            const res = await client.query(updateQuery, [accessToken, refreshToken, username]);
+            
+            if (res.rowCount === 0) {
+                throw new Error('Username not found in user_creds table.');
+            }
+
+            console.log('TikTok tokens updated successfully for username:', username);
+        } finally {
+            // Release the client back to the pool
+            client.release();
+        }
+    } catch (error) {
+        throw new Error(`Failed to update TikTok tokens: ${error.message}`);
+    }
+};
+
+const updateYouTubeTokens = async (username, accessToken, refreshToken) => {
+    if (!username || !accessToken || !refreshToken) {
+        throw new Error('Username, access token, and refresh token are required.');
+    }
+
+    try {
+        // Connect to the pool
+        const client = await pool.connect();
+
+        try {
+            // Update query to set the new access and refresh tokens
+            const updateQuery = `
+                UPDATE user_creds
+                SET youtube_access_token = $1, youtube_refresh_token = $2
+                WHERE username = $3
+            `;
+            const res = await client.query(updateQuery, [accessToken, refreshToken, username]);
+            
+            if (res.rowCount === 0) {
+                throw new Error('Username not found in user_creds table.');
+            }
+
+            console.log('YouTube tokens updated successfully for username:', username);
+        } finally {
+            // Release the client back to the pool
+            client.release();
+        }
+    } catch (error) {
+        throw new Error(`Failed to update YouTube tokens: ${error.message}`);
+    }
+};
+
+
+
 
 
 module.exports = { 
