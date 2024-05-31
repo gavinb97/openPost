@@ -16,26 +16,44 @@ const registerUserDB = async (user) => {
         // Connect to the pool
         const client = await pool.connect();
 
-        // Check if the username already exists
-        const userCheckQuery = 'SELECT * FROM users WHERE username = $1';
-        const res = await client.query(userCheckQuery, [username]);
-        if (res.rows.length > 0) {
-            throw new Error('Username already exists.');
+        try {
+            // Check if the username already exists
+            const userCheckQuery = 'SELECT * FROM users WHERE username = $1';
+            const res = await client.query(userCheckQuery, [username]);
+            if (res.rows.length > 0) {
+                throw new Error('Username already exists.');
+            }
+
+            // Insert the new user into the users table
+            const insertQuery = `
+                INSERT INTO users (username, email, password)
+                VALUES ($1, $2, $3)
+                RETURNING userid;
+            `;
+            const result = await client.query(insertQuery, [username, email, hashedPassword]);
+            const userId = result.rows[0].userid;
+
+            console.log('User registered successfully:', result.rows[0]);
+
+            // Check if there's an entry in the user_creds table for the username and userid
+            const credsCheckQuery = 'SELECT * FROM user_creds WHERE username = $1 AND userid = $2';
+            const credsRes = await client.query(credsCheckQuery, [username, userId]);
+            if (credsRes.rows.length === 0) {
+                // Insert a new entry into the user_creds table
+                const insertCredsQuery = `
+                    INSERT INTO user_creds (userid, username, twitter_access_token, twitter_refresh_token, reddit_access_token, reddit_refresh_token, tiktok_access_token, tiktok_refresh_token, youtube_access_token, youtube_refresh_token)
+                    VALUES ($1, $2, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL)
+                `;
+                await client.query(insertCredsQuery, [userId, username]);
+                console.log('User credentials initialized successfully.');
+            }
+
+            // Return the user registration result
+            return result;
+        } finally {
+            // Release the client back to the pool
+            client.release();
         }
-
-        // Insert the new user into the users table
-        const insertQuery = `
-            INSERT INTO users (username, email, password)
-            VALUES ($1, $2, $3)
-            RETURNING userid;
-        `;
-        const result = await client.query(insertQuery, [username, email, hashedPassword]);
-        console.log('User registered successfully:', result.rows[0]);
-
-        // Release the client back to the pool
-        client.release();
-
-        return result;
     } catch (error) {
         throw new Error(`Failed to register user: ${error.message}`);
     }
@@ -77,7 +95,36 @@ const authenticateUserDB = async (username, password) => {
     }
 };
 
+const getUserCreds = async (username, userid) => {
+    // Check for empty or null values
+    if (!username || !userid) {
+        throw new Error('Both username and userid are required.');
+    }
+
+    try {
+        // Connect to the pool
+        const client = await pool.connect();
+
+        // Query the user credentials by username and userid
+        const query = 'SELECT * FROM user_creds WHERE username = $1 AND userid = $2';
+        const res = await client.query(query, [username, userid]);
+
+        // Release the client back to the pool
+        client.release();
+
+        // Check if the user credentials exist
+        if (res.rows.length === 0) {
+            throw new Error('User credentials not found.');
+        }
+
+        // Return the user credentials
+        return res.rows[0];
+    } catch (error) {
+        throw new Error(`Failed to retrieve user credentials: ${error.message}`);
+    }
+};
+
 
 module.exports = { 
-    registerUserDB, authenticateUserDB 
+    registerUserDB, authenticateUserDB, getUserCreds
 }
