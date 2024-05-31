@@ -1,8 +1,8 @@
 require('dotenv').config({ path: '../.env' });
-const {writeTextToFile, readTxtFile, removeTokenForUser, sleep, generateRandomString, writeUserCreds, appendOrWriteToJsonFile, writeJsonToFile, updateTwitterTokens, extractObjectFromFile, updateUserTokens} = require('../utils')
+const {writeTextToFile, readTxtFile, removeTokenForUser, sleep, generateRandomString, writeUserCreds, appendOrWriteToJsonFile, writeJsonToFile, extractObjectFromFile, updateUserTokens} = require('../utils')
 const axios = require('axios');
 const crypto = require('crypto');
-
+const { updateTwitterCodeVerifier, updateTwitterTokens, revokeTwitterTokens, getTwitterCodeVerifierByUsername } = require('./socialAuthData')
 const pool = require('../jobs/db');
 
 
@@ -25,8 +25,7 @@ const generateTwitterAuthUrl = async (username) => {
         }
     }
 
-    await writeUserCreds('authData\\creds.json', userTokens)
-    await writeTextToFile(codeVerifier, 'codeVerifier.json')
+    await updateTwitterCodeVerifier(username, codeVerifier)
    
     const clientId = process.env.CLIENT_ID
  
@@ -38,9 +37,8 @@ const generateTwitterAuthUrl = async (username) => {
 };
 
 const getAccessToken = async (code, state) => {
-
-    const codeVerifierFromFile = await readTxtFile('codeVerifier.json')
-    console.log('from file: ' + codeVerifierFromFile)
+    const codeVerifier = await getTwitterCodeVerifierByUsername(state)
+    
     try {
         const clientId = process.env.CLIENT_ID; // Your Twitter client ID
         const clientSecret = process.env.CLIENT_SECRET; // Your Twitter client secret
@@ -49,7 +47,7 @@ const getAccessToken = async (code, state) => {
 
         const response = await axios.post(
             'https://api.twitter.com/2/oauth2/token',
-            `code=${code}&grant_type=authorization_code&client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&code_verifier=${encodeURIComponent(codeVerifierFromFile)}`,
+            `code=${code}&grant_type=authorization_code&client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&code_verifier=${encodeURIComponent(codeVerifier)}`,
             {
                 headers: {
                     'Authorization': `Basic ${Buffer.from(`${clientId}:${clientSecret}`).toString('base64')}`,
@@ -57,14 +55,8 @@ const getAccessToken = async (code, state) => {
                 }
             }
         );
-        // write tokens to file
-        const tokens = {
-            access_token: response.data.access_token,
-            refresh_token: response.data.refresh_token || ''
-        }
-        await updateUserTokens(`authData\\creds.json`, state, 'twitterTokens', tokens)
-        // await updateTwitterTokens(`authData\\${state}.json`, twitterTokens)
-       
+
+        await updateTwitterTokens(state, response.data.access_token, response.data.refresh_token )
         return response.data;
     } catch (error) {
         console.error('Error exchanging code for access token:', error);
@@ -72,7 +64,8 @@ const getAccessToken = async (code, state) => {
     }
 };
 
-const refreshTwitterAccessToken = async (refreshToken) => {
+// TODO pass username to this 
+const refreshTwitterAccessToken = async (refreshToken, user) => {
     try {
         const clientId = process.env.CLIENT_ID;
         const clientSecret = process.env.CLIENT_SECRET;
@@ -91,8 +84,9 @@ const refreshTwitterAccessToken = async (refreshToken) => {
        
         
         const access_token = response.data.access_token
-        const refresh_token = response.data.refresh_token || ''
+        const refresh_token = response.data.refresh_token || refreshToken
         
+        await updateTwitterTokens(user, access_token, refresh_token)
         return { access_token, refresh_token }
     } catch (error) {
         console.error('Error refreshing access token:', error);
@@ -103,9 +97,7 @@ const revokeAccessToken = async (username) => {
     try {
         console.log(`Revoking access twitter token for user: ${username}`);
 
-        // Delete the token from storage
-        await removeTokenForUser(username, 'twitter');  
-
+        await revokeTwitterTokens(username)
         console.log(`Access token for ${username} has been successfully revoked.`);
         return { success: true, message: "Token revoked successfully" };
     } catch (error) {

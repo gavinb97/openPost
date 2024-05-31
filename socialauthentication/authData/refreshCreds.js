@@ -11,7 +11,7 @@ const { refreshYoutubeAccessToken } = require('../youtubeService.js')
  
  
 
-const refreshToken = async (refreshToken, platform) => {
+const refreshToken = async (refreshToken, platform, user) => {
   try {
     let newTokens;
 
@@ -26,7 +26,7 @@ const refreshToken = async (refreshToken, platform) => {
         break;
 
       case 'twitterTokens':
-        newTokens = await refreshTwitterAccessToken(refreshToken);
+        newTokens = await refreshTwitterAccessToken(refreshToken, user);
         break;
 
       case 'tiktokTokens':
@@ -72,7 +72,7 @@ const refreshCredentials = async (filePath) => {
           
           // Get the new tokens
           console.log(`refresh token: ${refresh_token}`)
-          const newTokens = await refreshToken(refresh_token, platform);
+          const newTokens = await refreshToken(refresh_token, platform, user);
           console.log(newTokens)
           console.log('new tokens')
           // Update the access token and refresh token in the user object

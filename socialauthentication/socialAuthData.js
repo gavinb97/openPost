@@ -124,6 +124,36 @@ const getUserCreds = async (username, userid) => {
     }
 };
 
+const getTwitterCodeVerifierByUsername = async (username) => {
+    if (!username) {
+        throw new Error('Username is required.');
+    }
+
+    try {
+        // Connect to the pool
+        const client = await pool.connect();
+
+        try {
+            // Query to get the twitter_code_verifier by username
+            const query = 'SELECT twitter_code_verifier FROM user_creds WHERE username = $1';
+            const res = await client.query(query, [username]);
+
+            if (res.rows.length === 0) {
+                throw new Error('Username not found in user_creds table.');
+            }
+
+            const twitterCodeVerifier = res.rows[0].twitter_code_verifier;
+            return twitterCodeVerifier;
+        } finally {
+            // Release the client back to the pool
+            client.release();
+        }
+    } catch (error) {
+        throw new Error(`Failed to get Twitter code verifier: ${error.message}`);
+    }
+};
+
+
 const updateTwitterCodeVerifier = async (username, codeVerifier) => {
     if (!username || !codeVerifier) {
         throw new Error('Both username and codeVerifier are required.');
@@ -417,5 +447,6 @@ const revokeTikTokTokens = async (username) => {
 
 
 module.exports = { 
-    registerUserDB, authenticateUserDB, getUserCreds
+    registerUserDB, authenticateUserDB, getUserCreds, updateTwitterCodeVerifier,
+    updateTwitterTokens, revokeTwitterTokens, getTwitterCodeVerifierByUsername
 }
