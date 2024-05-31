@@ -7,6 +7,7 @@ const pool = new Pool({
     database: 'openpost',
     password: 'jaden',
     port: 5432, // Default PostgreSQL port
+    max: 20
 });
 
 // Export the pool instance to use in your application

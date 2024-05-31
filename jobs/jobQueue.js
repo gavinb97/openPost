@@ -1,4 +1,5 @@
 const amqp = require('amqplib');
+const makePost = require('./jobQueueService')
 
 async function setupQueue() {
   const connection = await amqp.connect('amqp://localhost');
@@ -30,6 +31,7 @@ async function startWorker(channel) {
     console.log(`${job.website}`)
     console.log(`${job.scheduledTime}`)
     console.log(Date.now())
+    await makePost(job)
     // Execute the post job (e.g., post to social media platform)
     // Implement your logic here to handle the job
 

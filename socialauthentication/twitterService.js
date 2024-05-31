@@ -3,6 +3,8 @@ const {writeTextToFile, readTxtFile, removeTokenForUser, sleep, generateRandomSt
 const axios = require('axios');
 const crypto = require('crypto');
 
+const pool = require('../jobs/db');
+
 
 const generateTwitterAuthUrl = async (username) => {
     console.log(username)

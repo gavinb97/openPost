@@ -19,6 +19,7 @@
     "@wix/sdk": "^1.7.5",
     "amqplib": "^0.10.4",
     "axios": "^1.6.7",
+    "bcrypt": "^5.1.1",
     "body-parser": "^1.20.2",
     "btoa": "^1.2.1",
     "cookie-parser": "^1.4.6",
