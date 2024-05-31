@@ -287,7 +287,133 @@ const updateYouTubeTokens = async (username, accessToken, refreshToken) => {
 };
 
 
+const revokeTwitterTokens = async (username) => {
+    if (!username) {
+        throw new Error('Username is required.');
+    }
 
+    try {
+        // Connect to the pool
+        const client = await pool.connect();
+
+        try {
+            // Update query to set the twitter access and refresh tokens to null
+            const updateQuery = `
+                UPDATE user_creds
+                SET twitter_access_token = NULL, twitter_refresh_token = NULL
+                WHERE username = $1
+            `;
+            const res = await client.query(updateQuery, [username]);
+
+            if (res.rowCount === 0) {
+                throw new Error('Username not found in user_creds table.');
+            }
+
+            console.log('Twitter tokens revoked successfully for username:', username);
+        } finally {
+            // Release the client back to the pool
+            client.release();
+        }
+    } catch (error) {
+        throw new Error(`Failed to revoke Twitter tokens: ${error.message}`);
+    }
+};
+
+const revokeRedditTokens = async (username) => {
+    if (!username) {
+        throw new Error('Username is required.');
+    }
+
+    try {
+        // Connect to the pool
+        const client = await pool.connect();
+
+        try {
+            // Update query to set the Reddit access and refresh tokens to null
+            const updateQuery = `
+                UPDATE user_creds
+                SET reddit_access_token = NULL, reddit_refresh_token = NULL
+                WHERE username = $1
+            `;
+            const res = await client.query(updateQuery, [username]);
+
+            if (res.rowCount === 0) {
+                throw new Error('Username not found in user_creds table.');
+            }
+
+            console.log('Reddit tokens revoked successfully for username:', username);
+        } finally {
+            // Release the client back to the pool
+            client.release();
+        }
+    } catch (error) {
+        throw new Error(`Failed to revoke Reddit tokens: ${error.message}`);
+    }
+};
+
+const revokeYouTubeTokens = async (username) => {
+    if (!username) {
+        throw new Error('Username is required.');
+    }
+
+    try {
+        // Connect to the pool
+        const client = await pool.connect();
+
+        try {
+            // Update query to set the YouTube access and refresh tokens to null
+            const updateQuery = `
+                UPDATE user_creds
+                SET youtube_access_token = NULL, youtube_refresh_token = NULL
+                WHERE username = $1
+            `;
+            const res = await client.query(updateQuery, [username]);
+
+            if (res.rowCount === 0) {
+                throw new Error('Username not found in user_creds table.');
+            }
+
+            console.log('YouTube tokens revoked successfully for username:', username);
+        } finally {
+            // Release the client back to the pool
+            client.release();
+        }
+    } catch (error) {
+        throw new Error(`Failed to revoke YouTube tokens: ${error.message}`);
+    }
+};
+
+const revokeTikTokTokens = async (username) => {
+    if (!username) {
+        throw new Error('Username is required.');
+    }
+
+    try {
+        // Connect to the pool
+        const client = await pool.connect();
+
+        try {
+            // Update query to set the TikTok access and refresh tokens to null
+            const updateQuery = `
+                UPDATE user_creds
+                SET tiktok_access_token = NULL, tiktok_refresh_token = NULL
+                WHERE username = $1
+            `;
+            const res = await client.query(updateQuery, [username]);
+
+            if (res.rowCount === 0) {
+                throw new Error('Username not found in user_creds table.');
+            }
+
+            console.log('TikTok tokens revoked successfully for username:', username);
+        } finally {
+            // Release the client back to the pool
+            client.release();
+        }
+    } catch (error) {
+        throw new Error(`Failed to revoke TikTok tokens: ${error.message}`);
+    }
+};
 
 
 module.exports = { 
