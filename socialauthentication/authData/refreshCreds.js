@@ -17,7 +17,7 @@ const refreshToken = async (refreshToken, platform, user) => {
 
     switch (platform) {
       case 'youtubeTokens':
-        newTokens = await refreshYoutubeAccessToken(refreshToken);
+        newTokens = await refreshYoutubeAccessToken(refreshToken, user);
         break;
 
       case 'redditTokens':

@@ -11,7 +11,7 @@ const readline = require('readline');
 app.use(cookieParser());
 app.use(cors());
 const {writeTextToFile, readTokensFromFile, writeUserCreds, updateUserTokens, removeTokenForUser} = require('../utils')
-
+const { updateYouTubeTokens, revokeYouTubeTokens } = require('./socialAuthData')
 
 
 const authorizeFirstGoogleTimeUrl = async (username) => {
@@ -33,17 +33,7 @@ const authorizeFirstGoogleTimeUrl = async (username) => {
       state: username
     });
 
-    const userTokens = {
-        user: username,
-        youtubeTokens: {
-
-        }
-    }
-
-    await writeUserCreds('authData\\creds.json', userTokens)
-    
     return {url, oauth2Client}
-    
   }
 
   const getAuthClientYoutube = async (username) => {
@@ -141,17 +131,15 @@ const revokeGoogleAccessToken = async (username, accessToken) => {
       
       // Make a request to Google's revoke endpoint
       const response = await axios.post(revokeUrl);
-     
-      await removeTokenForUser(username, 'youtube')
-      // if (response.status === 200) {
-      //     console.log('Token has been successfully revoked');
+      await revokeYouTubeTokens(username)
 
-      //     await removeTokenForUser(username, 'youtube')
-      //     return { success: true, message: "Token revoked successfully" };
-      // } else {
-      //     console.log('Failed to revoke token');
-      //     return { success: false, message: "Failed to revoke token" };
-      // }
+      if (response.status === 200) {
+          await revokeYouTubeTokens(username)
+          return { success: true, message: "Token revoked successfully" };
+      } else {
+          console.log('Failed to revoke token');
+          return { success: false, message: "Failed to revoke token" };
+      }
   } catch (error) {
       console.log('got error, gonna remove creds anyway')
       await removeTokenForUser(username, 'youtube')
@@ -160,9 +148,8 @@ const revokeGoogleAccessToken = async (username, accessToken) => {
 };
 
 
-const refreshYoutubeAccessToken = async (refreshToken) => {
-  console.log(refreshToken)
-  console.log('in the method')
+const refreshYoutubeAccessToken = async (refreshToken, user) => {
+
   try {
     // Create an OAuth2 client with the necessary credentials
     const oauth2Client = new google.auth.OAuth2(
@@ -170,19 +157,15 @@ const refreshYoutubeAccessToken = async (refreshToken) => {
       process.env.YOUTUBE_CLIENT_SECRET,
       process.env.YOUTUBE_REDIRECT
     );
-    console.log('about to log ids')
-    console.log("YOUTUBE_CLIENT_ID:", process.env.YOUTUBE_CLIENT_ID);
-console.log("YOUTUBE_CLIENT_SECRET:", process.env.YOUTUBE_CLIENT_SECRET);
-console.log("YOUTUBE_REDIRECT:", process.env.YOUTUBE_REDIRECT);
-
+   
     // Set the refresh token
     oauth2Client.setCredentials({ refresh_token: refreshToken });
 
     // Refresh the token
     const { credentials } = await oauth2Client.refreshAccessToken();
-    console.log(credentials)
     const { access_token, refresh_token } = credentials;
-
+    await updateYouTubeTokens(user, access_token, refresh_token || refreshToken)
+    
     return {
       access_token,
       refresh_token,

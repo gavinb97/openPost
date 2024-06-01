@@ -4,7 +4,7 @@ const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const {writeTextToFile, updateUserTokens} = require('../utils')
 const bodyParser = require('body-parser');
-
+const { updateYouTubeTokens } = require('./socialAuthData')
 const jwt = require('jsonwebtoken');
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key'; 
 
@@ -154,12 +154,12 @@ app.post('/redditloginurl', async (req, res) => {
     // });
 
     // write tokens to file
-    const ytTokens = {
-        access_token: tokens.access_token,
-        refresh_token: tokens.refresh_token || ''
-    }
-
-    await updateUserTokens(`authData\\creds.json`, state.trim(), 'youtubeTokens', ytTokens)
+    // const ytTokens = {
+    //     access_token: tokens.access_token,
+    //     refresh_token: tokens.refresh_token || ''
+    // }
+    await updateYouTubeTokens(state.trim(), tokens.access_token, tokens.refresh_token || null)
+    // await updateUserTokens(`authData\\creds.json`, state.trim(), 'youtubeTokens', ytTokens)
 
     res.redirect('http://localhost:3000/profile');
 })
