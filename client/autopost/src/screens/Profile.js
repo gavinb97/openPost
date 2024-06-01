@@ -37,10 +37,10 @@ function Profile() {
       .then((creds) => {
         if (creds) {
           setIsLoggedIn({
-            twitter: !!creds.twitterTokens,
-            reddit: !!creds.redditTokens,
-            youtube: !!creds.youtubeTokens,
-            tiktok: !!creds.tiktokTokens,
+            twitter: typeof creds.twitterTokens?.access_token === 'string' && creds.twitterTokens.access_token !== null,
+            reddit: typeof creds.redditTokens?.access_token === 'string' && creds.redditTokens.access_token !== null,
+            youtube: typeof creds.youtubeTokens?.access_token === 'string' && creds.youtubeTokens.access_token !== null,
+            tiktok: typeof creds.tiktokTokens?.access_token === 'string' && creds.tiktokTokens.access_token !== null,
           });
           setCredentials(creds);
           console.log(creds)
