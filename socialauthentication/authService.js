@@ -3,7 +3,7 @@ const path = require('path');
 const jwt = require('jsonwebtoken');
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key'; 
 const { findUserCredentials } = require('../utils')
-const { registerUserDB, authenticateUserDB } = require('./socialAuthData')
+const { registerUserDB, authenticateUserDB, getCredsByUser } = require('./socialAuthData')
 
 const getUserByUsername = async (filename, username) => {
     try {
@@ -72,7 +72,7 @@ const authenticateToken = (req, res, next) => {
   };
 
 const getUserCreds = async (username) => {
-    const userCreds = await findUserCredentials(username)
+    const userCreds = await getCredsByUser(username)
     return userCreds
 }
 

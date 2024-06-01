@@ -95,34 +95,34 @@ const authenticateUserDB = async (username, password) => {
     }
 };
 
-const getUserCreds = async (username, userid) => {
-    // Check for empty or null values
-    if (!username || !userid) {
-        throw new Error('Both username and userid are required.');
-    }
+// const getUserCreds = async (username, userid) => {
+//     // Check for empty or null values
+//     if (!username || !userid) {
+//         throw new Error('Both username and userid are required.');
+//     }
 
-    try {
-        // Connect to the pool
-        const client = await pool.connect();
+//     try {
+//         // Connect to the pool
+//         const client = await pool.connect();
 
-        // Query the user credentials by username and userid
-        const query = 'SELECT * FROM user_creds WHERE username = $1 AND userid = $2';
-        const res = await client.query(query, [username, userid]);
+//         // Query the user credentials by username and userid
+//         const query = 'SELECT * FROM user_creds WHERE username = $1 AND userid = $2';
+//         const res = await client.query(query, [username, userid]);
 
-        // Release the client back to the pool
-        client.release();
+//         // Release the client back to the pool
+//         client.release();
 
-        // Check if the user credentials exist
-        if (res.rows.length === 0) {
-            throw new Error('User credentials not found.');
-        }
+//         // Check if the user credentials exist
+//         if (res.rows.length === 0) {
+//             throw new Error('User credentials not found.');
+//         }
 
-        // Return the user credentials
-        return res.rows[0];
-    } catch (error) {
-        throw new Error(`Failed to retrieve user credentials: ${error.message}`);
-    }
-};
+//         // Return the user credentials
+//         return res.rows[0];
+//     } catch (error) {
+//         throw new Error(`Failed to retrieve user credentials: ${error.message}`);
+//     }
+// };
 
 const getTwitterCodeVerifierByUsername = async (username) => {
     if (!username) {
@@ -445,8 +445,72 @@ const revokeTikTokTokens = async (username) => {
     }
 };
 
+const getCredsByUser = async (username) => {
+    if (!username) {
+        throw new Error('Username is required.');
+    }
+
+    try {
+        // Connect to the pool
+        const client = await pool.connect();
+
+        try {
+            // Query to get the credentials by username
+            const query = `
+                SELECT
+                    twitter_access_token,
+                    twitter_refresh_token,
+                    reddit_access_token,
+                    reddit_refresh_token,
+                    tiktok_access_token,
+                    tiktok_refresh_token,
+                    youtube_access_token,
+                    youtube_refresh_token
+                FROM user_creds
+                WHERE username = $1
+            `;
+            const res = await client.query(query, [username]);
+
+            if (res.rows.length === 0) {
+                throw new Error('Username not found in user_creds table.');
+            }
+
+            const userCreds = res.rows[0];
+
+            // Construct the user credentials object
+            const userObject = {
+                user: username,
+                twitterTokens: {
+                    access_token: userCreds.twitter_access_token,
+                    refresh_token: userCreds.twitter_refresh_token
+                },
+                redditTokens: {
+                    access_token: userCreds.reddit_access_token,
+                    refresh_token: userCreds.reddit_refresh_token
+                },
+                tiktokTokens: {
+                    access_token: userCreds.tiktok_access_token,
+                    refresh_token: userCreds.tiktok_refresh_token
+                },
+                youtubeTokens: {
+                    access_token: userCreds.youtube_access_token,
+                    refresh_token: userCreds.youtube_refresh_token
+                }
+            };
+
+            return userObject;
+        } finally {
+            // Release the client back to the pool
+            client.release();
+        }
+    } catch (error) {
+        console.error('Error getting user credentials from user_creds table:', error);
+        throw error;
+    }
+};
+
 
 module.exports = { 
-    registerUserDB, authenticateUserDB, getUserCreds, updateTwitterCodeVerifier,
+    registerUserDB, authenticateUserDB, getCredsByUser, updateTwitterCodeVerifier,
     updateTwitterTokens, revokeTwitterTokens, getTwitterCodeVerifierByUsername
 }
