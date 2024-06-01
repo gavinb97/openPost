@@ -8,6 +8,7 @@ const cors = require('cors');
 const SHA256 = require('crypto-js/sha256')
 const {writeTextToFile, readTokensFromFile, removeTokenForUser, sleep, writeUserCreds, updateUserTokens, generateRandomString, shuffleArray, deleteFile, seeIfFileExists, writeArrayToJsonFile, appendOrWriteToJsonFile, selectRandomStrings, getRandomInterval, getRandomStringFromStringArray} = require('../utils')
 const fs = require('fs');
+const { updateRedditTokens, revokeRedditTokens } = require('./socialAuthData')
 const path = require('path')
 app.use(cookieParser());
 app.use(cors());
@@ -56,11 +57,12 @@ const getRedditAccessToken = async (codeFromCallback, state) => {
         });
 
          // write tokens to file
-         const tokens = {
-            access_token: response.data.access_token,
-            refresh_token: response.data.refresh_token || ''
-        }
-        await updateUserTokens(`authData\\creds.json`, state, 'redditTokens', tokens)
+        //  const tokens = {
+        //     access_token: response.data.access_token,
+        //     refresh_token: response.data.refresh_token || ''
+        // }
+        await updateRedditTokens(state, response.data.access_token, response.data.refresh_token)
+        // await updateUserTokens(`authData\\creds.json`, state, 'redditTokens', tokens)
 
         return response.data;
     } catch (e) {
@@ -89,7 +91,8 @@ const revokeRedditAccessToken = async (username, accessToken) => {
         console.log('Token revoked successfully');
 
         // delete token from creds
-        await removeTokenForUser(username, 'reddit')
+        // await removeTokenForUser(username, 'reddit')
+        await revokeRedditTokens(username)
         return response.data;
     } catch (e) {
         console.error('Error revoking Reddit Access Token:', e.response ? e.response.data : e.message);
@@ -97,7 +100,7 @@ const revokeRedditAccessToken = async (username, accessToken) => {
     }
 }
 
-const getRedditRefreshToken = async (refresh_Token) => {
+const getRedditRefreshToken = async (refresh_Token, user) => {
     try {
         const authHeader = `Basic ${btoa(`${process.env.REDDIT_APP_ID}:${process.env.REDDIT_SECRET}`)}`;
         
@@ -112,7 +115,8 @@ const getRedditRefreshToken = async (refresh_Token) => {
         });
         
         const access_token = response.data.access_token
-        const refresh_token = response.data.refresh_token
+        const refresh_token = response.data.refresh_token || refresh_token
+        await updateRedditTokens(user, access_token, refresh_token)
         return { access_token, refresh_token }
     } catch (e) {
         console.log('error refreshing reddit token')

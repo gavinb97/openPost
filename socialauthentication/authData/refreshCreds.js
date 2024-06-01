@@ -22,7 +22,7 @@ const refreshToken = async (refreshToken, platform, user) => {
 
       case 'redditTokens':
         
-        newTokens = await getRedditRefreshToken(refreshToken);
+        newTokens = await getRedditRefreshToken(refreshToken, user);
         break;
 
       case 'twitterTokens':

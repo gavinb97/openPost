@@ -512,5 +512,5 @@ const getCredsByUser = async (username) => {
 
 module.exports = { 
     registerUserDB, authenticateUserDB, getCredsByUser, updateTwitterCodeVerifier,
-    updateTwitterTokens, revokeTwitterTokens, getTwitterCodeVerifierByUsername
+    updateTwitterTokens, revokeTwitterTokens, getTwitterCodeVerifierByUsername, updateRedditTokens, revokeRedditTokens
 }
