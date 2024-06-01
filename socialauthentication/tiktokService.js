@@ -3,7 +3,7 @@ const axios = require('axios');
 const SHA256 = require('crypto-js/sha256')
 const {writeTextToFile, readTokensFromFile, getVideoChunkInfo, getFileSizeInBytes, sleep, generateRandomString, writeUserCreds, updateUserTokens, removeTokenForUser} = require('../utils')
 const fs = require('fs');
-
+const { updateTikTokTokens, revokeTikTokTokens } = require('./socialAuthData')
 const CODE_VERIFIER = generateRandomString(69)
 
 const getTikTokLoginUrl = async (username) => {
@@ -18,8 +18,6 @@ const getTikTokLoginUrl = async (username) => {
     // const csrfState = username
     const csrfState = username;
     
-    
-
     let url = `https://www.tiktok.com/v2/auth/authorize/`;
 
     // the following params need to be in `application/x-www-form-urlencoded` format.
@@ -30,15 +28,7 @@ const getTikTokLoginUrl = async (username) => {
     url += `&state=` + csrfState;
     url += `&code_challenge=${CODE_CHALLENGE}`;
     url += `&code_challenge_method=S256`
-
-    const userTokens = {
-      user: username,
-      tiktokTokens: {
-      }
-    }
-    
-    await writeUserCreds('authData\\creds.json', userTokens)
-
+ 
     return url
 }
 
@@ -66,7 +56,8 @@ const getAccessTokenAndOpenId = async (code, state) => {
       refresh_token: response.data.refresh_token || '',
       openId: response.data.open_id
   }
-  await updateUserTokens(`authData\\creds.json`, state, 'tiktokTokens', tokens)
+
+  await updateTikTokTokens(state, tokens.access_token, tokens.refresh_token)
 
     return {
         accessToken: response.data.access_token,
@@ -97,7 +88,8 @@ const getAccessTokenAndOpenId = async (code, state) => {
         'Content-Type': 'application/x-www-form-urlencoded'
       }
     })
-    // console.log(response)
+
+    await updateTikTokTokens(user, response.data.access_token, response.data.refresh_token || refreshToken)
     return {
         access_token: response.data.access_token,
         openId: response.data.open_id,
@@ -118,8 +110,8 @@ const getAccessTokenAndOpenId = async (code, state) => {
         'Content-Type': 'application/x-www-form-urlencoded'
       }
     })
-    console.log('revoked!!!!')
-    await removeTokenForUser(username, 'tiktok')
+
+    await revokeTikTokTokens(username)
   }
 
   const queryCreatorInfo = async (accessToken) => {
