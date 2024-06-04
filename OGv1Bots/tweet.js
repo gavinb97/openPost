@@ -1,4 +1,4 @@
-require('dotenv').config()
+require('dotenv').config({ path: '../.env' })
 const { path } = require('@ffmpeg-installer/ffmpeg')
 const { TwitterApi } = require("twitter-api-v2")
 
@@ -59,8 +59,6 @@ const uploadAndTweet = async (mediaPath, tweetText) => {
 
     await sendTweetWithVideo(tweetText, mediaID)
 }
-
-// sendTweet('some tweeeet')
 
 module.exports = {
     sendTweet, 

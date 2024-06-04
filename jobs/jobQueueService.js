@@ -14,6 +14,10 @@ const makePost = async (job) => {
     }
 }
 
+const postToTwitter = async () => {
+    
+}
+
 
 
 module.exports = makePost

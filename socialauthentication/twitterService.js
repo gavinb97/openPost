@@ -3,8 +3,7 @@ const {writeTextToFile, readTxtFile, removeTokenForUser, sleep, generateRandomSt
 const axios = require('axios');
 const crypto = require('crypto');
 const { updateTwitterCodeVerifier, updateTwitterTokens, revokeTwitterTokens, getTwitterCodeVerifierByUsername } = require('./socialAuthData')
-const pool = require('../jobs/db');
-
+const { TwitterApi } = require("twitter-api-v2")
 
 const generateTwitterAuthUrl = async (username) => {
     console.log(username)
@@ -12,7 +11,7 @@ const generateTwitterAuthUrl = async (username) => {
     // Define OAuth parameters
     const oauthUrl = 'https://twitter.com/i/oauth2/authorize';
     const responseType = 'code';
-    const scope = 'tweet.read tweet.write follows.read follows.write offline.access like.write'; // Add all required scopes here
+    const scope = 'tweet.read tweet.write users.read follows.read follows.write offline.access like.write'; // Add all required scopes here
     const state = username; // Optional: state parameter for security
     
     const codeChallengeMethod = 'plain'; // PKCE method
@@ -55,7 +54,6 @@ const getAccessToken = async (code, state) => {
                 }
             }
         );
-
         await updateTwitterTokens(state, response.data.access_token, response.data.refresh_token )
         return response.data;
     } catch (error) {
@@ -105,9 +103,27 @@ const revokeAccessToken = async (username) => {
     }
 };
 
+const tweetOnBehalfOfUser = async (accessToken, tweetText) => {
+    const twitterClient = new TwitterApi(accessToken);
+    const client = twitterClient.v2
+    console.log(client)
+  
+    try {  
+        if (tweetText && tweetText.length <= 280) {
+            const data = await client.tweet(tweetText)
+            console.log(data)
+        } else {
+            console.log('tweet too long to be sent')
+        }
+    } catch (e) {
+      console.log(e)
+    }
+}
+
 module.exports = {
     generateTwitterAuthUrl,
     getAccessToken,
     refreshTwitterAccessToken,
-    revokeAccessToken
+    revokeAccessToken,
+    tweetOnBehalfOfUser
 }
