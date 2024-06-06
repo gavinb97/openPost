@@ -12,7 +12,8 @@ const {
     generateTwitterAuthUrl,
     getAccessToken,
     refreshAccessToken,
-    revokeAccessToken
+    revokeAccessToken,
+    getOAuth1AccessToken
 } = require('./twitterService')
 
 const {
@@ -50,11 +51,13 @@ app.get('/xcallback', async (req, res) => {
     console.log('ooh wee')
     try {
         const code = req.query.code
-        const state = req.query.state
+        // const state = req.query.state
+        // console.log(req)
         console.log(req.query)
-        console.log(code)
-        const tokens = await getAccessToken(code, state)
-        console.log(tokens)
+        // console.log(code)
+        // const tokens = await getAccessToken(code, state)
+        const oauth1Token = await getOAuth1AccessToken(req.query.state, req.query.oauth_token, req.query.oauth_verifier)
+        // console.log(oauth1Token)
 
 
         res.redirect('http://localhost:3000/profile');

@@ -4,8 +4,11 @@ const axios = require('axios');
 const crypto = require('crypto');
 const { updateTwitterCodeVerifier, updateTwitterTokens, revokeTwitterTokens, getTwitterCodeVerifierByUsername } = require('./socialAuthData')
 const { TwitterApi } = require("twitter-api-v2")
+const fs = require('fs');
+const FormData = require('form-data');
+const mime = require('mime-types');
 
-const generateTwitterAuthUrl = async (username) => {
+const generateTwitterAuthUrl1 = async (username) => {
     console.log(username)
     
     // Define OAuth parameters
@@ -120,10 +123,279 @@ const tweetOnBehalfOfUser = async (accessToken, tweetText) => {
     }
 }
 
+// const tweetVideoOnBehalfOfUser = async (accessToken, tweetText, mediaPath) => {
+//     const twitterClient = new TwitterApi(accessToken);
+    
+
+//     const uploadVideo = async (mediaPath) => {
+//         try {
+//             const mediaID = await twitterClient.v1.uploadMedia(mediaPath)
+//             console.log(mediaID)
+//             return mediaID
+//         } catch (error) {
+//             console.log(error)
+//             throw error
+//         }
+//     }
+
+//     const sendTweetWithVideo = async (tweetText, mediaID) => {
+//         try {  
+//             if (tweetText && tweetText.length <= 280) {
+//                 const data = await twitterClient.v2.tweet(tweetText, { media: {media_ids: [mediaID]}})
+//                 console.log(data)
+//             } else {
+//                 console.log('tweet too long to be sent')
+//             }
+//         } catch (e) {
+//           console.log(e)
+//           throw e
+//         }
+//     }
+
+//     const uploadAndTweet = async (mediaPath, tweetText) => {
+//         console.log(mediaPath)
+//         let mediaID = null
+//         try {
+//             mediaID = await uploadVideo(mediaPath)
+//         } catch (e) {
+//             console.log(e)
+//             console.log('we got fucked')
+//             throw e
+//         }
+        
+//         do {
+//             console.log('uploading...')
+//             await sleep(10000)
+//         } while (!mediaID)
+    
+//         await sendTweetWithVideo(tweetText, mediaID)
+//     }
+
+//     await uploadAndTweet(mediaPath, tweetText)
+// }
+
+// tweetVideoOnBehalfOfUser('M3o5RG5ZM3YyX1hyZDV2NE1IVEZWekxCSHJ5MXU2Z0d2clVBNGQ2bEt1V0R4OjE3MTc1NTYzNzcyOTA6MToxOmF0OjE', 'tweetytweedfasdfast', 'C:/Users/Gavin/Desktop/BuildABlog/openPost/apiresources/uploads/videos/1712522280452-Yeahiknowtheflaminhitsge.mp4')
+
+const tweetVideoOnBehalfOfUser = async (accessToken, tweetText, mediaPath) => {
+    const twitterClient = new TwitterApi(accessToken);
+  
+    const uploadMedia = async (mediaPath) => {
+        try {
+          // Get the media file size and MIME type
+          const mediaFile = fs.statSync(mediaPath);
+          const totalBytes = mediaFile.size;
+          const mediaType = mime.lookup(mediaPath);
+            console.log('dis da token')
+            console.log(accessToken)
+          // Initialize the upload
+          const initResponse = await axios.post('https://upload.twitter.com/1.1/media/upload.json', null, {
+            params: {
+              command: 'INIT',
+              total_bytes: totalBytes,
+              media_type: mediaType,
+            },
+            headers: {
+              'Authorization': `Bearer ${accessToken}`
+            }
+          });
+      
+          const mediaId = initResponse.data.media_id_string;
+          console.log('INIT successful, media_id:', mediaId);
+      
+          // Read the media file and upload in chunks
+          const mediaData = fs.createReadStream(mediaPath);
+          let chunkNumber = 0;
+          const chunkSize = 5 * 1024 * 1024; // 5MB chunks
+      
+          for await (const chunk of mediaData) {
+            const form = new FormData();
+            form.append('command', 'APPEND');
+            form.append('media_id', mediaId);
+            form.append('segment_index', chunkNumber);
+            form.append('media', chunk, { filename: path.basename(mediaPath) });
+      
+            await axios.post('https://upload.twitter.com/1.1/media/upload.json', form, {
+              headers: {
+                ...form.getHeaders(),
+                'Authorization': `Bearer ${accessToken}`
+              }
+            });
+      
+            console.log(`APPEND successful for chunk ${chunkNumber}`);
+            chunkNumber++;
+          }
+      
+          // Finalize the upload
+          const finalizeResponse = await axios.post('https://upload.twitter.com/1.1/media/upload.json', null, {
+            params: {
+              command: 'FINALIZE',
+              media_id: mediaId,
+            },
+            headers: {
+              'Authorization': `Bearer ${accessToken}`
+            }
+          });
+      
+          console.log('FINALIZE successful, media_id:', finalizeResponse.data.media_id_string);
+          return finalizeResponse.data.media_id_string;
+      
+        } catch (error) {
+          console.error('Error uploading media:', error.response ? error.response.data : error.message);
+          throw error;
+        }
+      };
+  
+    const sendTweetWithVideo = async (tweetText, mediaID) => {
+      try {
+        const { data } = await twitterClient.v2.tweet({
+          text: tweetText,
+          media: { media_ids: [mediaID] }
+        });
+        console.log('Tweet sent successfully:', data);
+      } catch (error) {
+        console.error('Error sending tweet:', error);
+        throw error;
+      }
+    };
+  
+    const uploadAndTweet = async (mediaPath, tweetText) => {
+      try {
+        const mediaID = await uploadMedia(mediaPath);
+        // await sendTweetWithVideo(tweetText, mediaID);
+      } catch (error) {
+        console.error('Failed to upload and tweet:', error);
+      }
+    };
+  
+    await uploadAndTweet(mediaPath, tweetText);
+  };
+
+// tweetVideoOnBehalfOfUser('M3o5RG5ZM3YyX1hyZDV2NE1IVEZWekxCSHJ5MXU2Z0d2clVBNGQ2bEt1V0R4OjE3MTc1NTYzNzcyOTA6MToxOmF0OjE', 'tweetText', 'C:/Users/Gavin/Desktop/BuildABlog/openPost/apiresources/uploads/videos/1712522280452-Yeahiknowtheflaminhitsge.mp4')
+
+
+const generateTwitterAuthUrl = async (username) => {
+    const requestTokenUrl = 'https://api.twitter.com/oauth/request_token';
+    const callbackUrl = encodeURIComponent(`https://moral-kindly-fly.ngrok-free.app/xcallback?state=${username}`);
+    const consumerKey = encodeURIComponent(process.env.APP_KEY);
+    const nonce = generateNonce();
+    const timestamp = Math.floor(Date.now() / 1000);
+    
+    // Parameters for OAuth signature
+    const baseParams = {
+        oauth_callback: callbackUrl,
+        oauth_consumer_key: consumerKey,
+        oauth_nonce: nonce,
+        oauth_signature_method: 'HMAC-SHA1',
+        oauth_timestamp: timestamp,
+        oauth_version: '1.0',
+        // state: 'wee'
+    };
+
+    // Generate OAuth signature
+    const signature = generateSignature(requestTokenUrl, 'POST', baseParams, null, process.env.APP_SECRET);
+
+    // Construct the authorization header
+    const oauthHeader = {
+        oauth_callback: callbackUrl,
+        oauth_consumer_key: consumerKey,
+        oauth_nonce: nonce,
+        oauth_signature: encodeURIComponent(signature),
+        oauth_signature_method: 'HMAC-SHA1',
+        oauth_timestamp: timestamp,
+        oauth_version: '1.0',
+    };
+
+    const authHeaderString = Object.keys(oauthHeader)
+        .map(key => `${key}="${oauthHeader[key]}"`)
+        .join(',');
+
+    // Make a POST request to obtain request token
+    const response = await fetch(requestTokenUrl, {
+        method: 'POST',
+        headers: {
+            'Authorization': `OAuth ${authHeaderString}`,
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+    });
+
+    if (!response.ok) {
+        throw new Error(`Error ${response.status}: ${response.statusText}`);
+    }
+
+    // Extract oauth_token from the response
+    const responseBody = await response.text();
+    const oauthToken = parseOAuthToken(responseBody);
+
+    if (!oauthToken) {
+        throw new Error('Failed to extract oauth_token from response');
+    }
+
+    // Step 2: GET oauth/authorize
+    const authUrl = `https://api.twitter.com/oauth/authorize?oauth_token=${oauthToken}`;
+
+    return authUrl;
+};
+
+const parseOAuthToken = (responseBody) => {
+    const tokenMatch = responseBody.match(/oauth_token=([^&]+)/);
+    return tokenMatch ? tokenMatch[1] : null;
+};
+
+const getOAuth1AccessToken = async (username, oauthToken, oauthVerifier) => {
+    try {
+        const oauthUrl = 'https://api.twitter.com/oauth/access_token';
+        const response = await axios.post(
+            oauthUrl,
+            `oauth_token=${oauthToken}&oauth_verifier=${oauthVerifier}`,
+            {
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                }
+            }
+        );
+        
+        const accessToken = parseOAuth1Response(response.data);
+        await updateTwitterTokens(username, accessToken.oauth_token, accessToken.oauth_token_secret);
+        return accessToken;
+    } catch (error) {
+        console.error('Error exchanging OAuth1 token for access token:', error);
+        throw error;
+    }
+};
+
+// Helper functions
+const generateNonce = () => {
+    // Generate a unique nonce
+    return Math.random().toString(36).substring(2) + (new Date()).getTime().toString(36);
+};
+
+const generateSignature = (url, method, oauthParams, tokenSecret, consumerSecret) => {
+    // Construct the base string
+    const baseString = `${method.toUpperCase()}&${encodeURIComponent(url)}&${encodeURIComponent(Object.keys(oauthParams).sort().map(key => `${key}=${oauthParams[key]}`).join('&'))}`;
+
+    // Generate the signing key
+    const signingKey = `${encodeURIComponent(consumerSecret)}&${tokenSecret ? encodeURIComponent(tokenSecret) : ''}`;
+
+    // Generate the HMAC-SHA1 signature
+    return crypto.createHmac('sha1', signingKey).update(baseString).digest('base64');
+};
+
+const parseOAuth1Response = (response) => {
+    // Parse OAuth1 response
+    const data = {};
+    response.split('&').forEach(param => {
+        const [key, value] = param.split('=');
+        data[key] = decodeURIComponent(value);
+    });
+    return data;
+};
+
+
 module.exports = {
     generateTwitterAuthUrl,
     getAccessToken,
     refreshTwitterAccessToken,
     revokeAccessToken,
-    tweetOnBehalfOfUser
+    tweetOnBehalfOfUser,
+    getOAuth1AccessToken
 }
