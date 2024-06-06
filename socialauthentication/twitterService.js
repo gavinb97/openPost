@@ -7,6 +7,7 @@ const { TwitterApi } = require("twitter-api-v2")
 const fs = require('fs');
 const FormData = require('form-data');
 const mime = require('mime-types');
+const OAuth = require('oauth-1.0a');
 
 const generateTwitterAuthUrl1 = async (username) => {
     console.log(username)
@@ -176,102 +177,68 @@ const tweetOnBehalfOfUser = async (accessToken, tweetText) => {
 
 // tweetVideoOnBehalfOfUser('M3o5RG5ZM3YyX1hyZDV2NE1IVEZWekxCSHJ5MXU2Z0d2clVBNGQ2bEt1V0R4OjE3MTc1NTYzNzcyOTA6MToxOmF0OjE', 'tweetytweedfasdfast', 'C:/Users/Gavin/Desktop/BuildABlog/openPost/apiresources/uploads/videos/1712522280452-Yeahiknowtheflaminhitsge.mp4')
 
-const tweetVideoOnBehalfOfUser = async (accessToken, tweetText, mediaPath) => {
-    const twitterClient = new TwitterApi(accessToken);
-  
-    const uploadMedia = async (mediaPath) => {
-        try {
-          // Get the media file size and MIME type
-          const mediaFile = fs.statSync(mediaPath);
-          const totalBytes = mediaFile.size;
-          const mediaType = mime.lookup(mediaPath);
-            console.log('dis da token')
-            console.log(accessToken)
-          // Initialize the upload
-          const initResponse = await axios.post('https://upload.twitter.com/1.1/media/upload.json', null, {
-            params: {
-              command: 'INIT',
-              total_bytes: totalBytes,
-              media_type: mediaType,
-            },
-            headers: {
-              'Authorization': `Bearer ${accessToken}`
-            }
-          });
-      
-          const mediaId = initResponse.data.media_id_string;
-          console.log('INIT successful, media_id:', mediaId);
-      
-          // Read the media file and upload in chunks
-          const mediaData = fs.createReadStream(mediaPath);
-          let chunkNumber = 0;
-          const chunkSize = 5 * 1024 * 1024; // 5MB chunks
-      
-          for await (const chunk of mediaData) {
-            const form = new FormData();
-            form.append('command', 'APPEND');
-            form.append('media_id', mediaId);
-            form.append('segment_index', chunkNumber);
-            form.append('media', chunk, { filename: path.basename(mediaPath) });
-      
-            await axios.post('https://upload.twitter.com/1.1/media/upload.json', form, {
-              headers: {
-                ...form.getHeaders(),
-                'Authorization': `Bearer ${accessToken}`
-              }
-            });
-      
-            console.log(`APPEND successful for chunk ${chunkNumber}`);
-            chunkNumber++;
-          }
-      
-          // Finalize the upload
-          const finalizeResponse = await axios.post('https://upload.twitter.com/1.1/media/upload.json', null, {
-            params: {
-              command: 'FINALIZE',
-              media_id: mediaId,
-            },
-            headers: {
-              'Authorization': `Bearer ${accessToken}`
-            }
-          });
-      
-          console.log('FINALIZE successful, media_id:', finalizeResponse.data.media_id_string);
-          return finalizeResponse.data.media_id_string;
-      
-        } catch (error) {
-          console.error('Error uploading media:', error.response ? error.response.data : error.message);
-          throw error;
-        }
-      };
-  
-    const sendTweetWithVideo = async (tweetText, mediaID) => {
-      try {
-        const { data } = await twitterClient.v2.tweet({
-          text: tweetText,
-          media: { media_ids: [mediaID] }
+const tweetVideoOnBehalfOfUser = async (accessToken, accessSecret, tweetText, mediaPath) => {
+    try {
+        // Initialize the Twitter client with the provided tokens
+        const twitterClient = new TwitterApi({
+            appKey: process.env.APP_KEY,
+            appSecret: process.env.APP_SECRET,
+            accessToken: accessToken,
+            accessSecret: accessSecret
         });
-        console.log('Tweet sent successfully:', data);
-      } catch (error) {
-        console.error('Error sending tweet:', error);
-        throw error;
-      }
-    };
-  
-    const uploadAndTweet = async (mediaPath, tweetText) => {
-      try {
-        const mediaID = await uploadMedia(mediaPath);
-        // await sendTweetWithVideo(tweetText, mediaID);
-      } catch (error) {
-        console.error('Failed to upload and tweet:', error);
-      }
-    };
-  
-    await uploadAndTweet(mediaPath, tweetText);
-  };
 
-// tweetVideoOnBehalfOfUser('M3o5RG5ZM3YyX1hyZDV2NE1IVEZWekxCSHJ5MXU2Z0d2clVBNGQ2bEt1V0R4OjE3MTc1NTYzNzcyOTA6MToxOmF0OjE', 'tweetText', 'C:/Users/Gavin/Desktop/BuildABlog/openPost/apiresources/uploads/videos/1712522280452-Yeahiknowtheflaminhitsge.mp4')
+        const client = twitterClient.readWrite
 
+        // Function to upload media
+        const uploadMedia = async (mediaPath) => {
+            try {
+                const mediaID = await client.v1.uploadMedia(mediaPath);
+                console.log('Media ID:', mediaID);
+                return mediaID;
+            } catch (error) {
+                // console.error('Error uploading media:', error);
+                throw error;
+            }
+        };
+
+        // Function to send tweet with video
+        const sendTweetWithVideo = async (tweetText, mediaID) => {
+            console.log('in send tweet with video... about to send')
+            console.log(mediaID)
+            try {
+                const  data  =  await client.v2.tweet({text: tweetText, media: { media_ids: [mediaID] }});
+                console.log('Tweet sent successfully:', data);
+            } catch (error) {
+                // console.error('Error sending tweet:', error);
+                throw error;
+            }
+        };
+
+        // Function to upload media and send tweet
+        const uploadAndTweet = async (mediaPath, tweetText) => {
+            try {
+                const mediaID = await uploadMedia(mediaPath);
+                await sendTweetWithVideo(tweetText, mediaID);
+            } catch (error) {
+                console.error('Failed to upload and tweet:', error);
+            }
+        };
+
+        // Call the uploadAndTweet function
+        await uploadAndTweet(mediaPath, tweetText);
+
+    } catch (error) {
+        console.error('Error during the process:', error);
+    }
+};
+
+
+tweetVideoOnBehalfOfUser(
+    '1706013619979268096-WtDmbvdlRbIPOxqZlcqCYR1pP7uPrN',
+    '0z6hxiplOcylDUSy3sZaL7JhGbMKTdZEZU2yjTSPc5T88',
+    'Your tweet text here',
+    'C:/Users/Gavin/Desktop/BuildABlog/openPost/apiresources/uploads/videos/1712522280452-Yeahiknowtheflaminhitsge.mp4'
+);
 
 const generateTwitterAuthUrl = async (username) => {
     const requestTokenUrl = 'https://api.twitter.com/oauth/request_token';
@@ -355,7 +322,7 @@ const getOAuth1AccessToken = async (username, oauthToken, oauthVerifier) => {
         );
         
         const accessToken = parseOAuth1Response(response.data);
-        await updateTwitterTokens(username, accessToken.oauth_token, accessToken.oauth_token_secret);
+        await updateTwitterTokens(username, accessToken.oauth_token, accessToken.oauth_token_secret, oauthVerifier);
         return accessToken;
     } catch (error) {
         console.error('Error exchanging OAuth1 token for access token:', error);

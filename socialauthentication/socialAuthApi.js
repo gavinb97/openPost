@@ -52,7 +52,7 @@ app.get('/xcallback', async (req, res) => {
     try {
         const code = req.query.code
         // const state = req.query.state
-        // console.log(req)
+        console.log(req)
         console.log(req.query)
         // console.log(code)
         // const tokens = await getAccessToken(code, state)

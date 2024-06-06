@@ -188,7 +188,7 @@ const updateTwitterCodeVerifier = async (username, codeVerifier) => {
     }
 };
 
-const updateTwitterTokens = async (username, accessToken, refreshToken) => {
+const updateTwitterTokens = async (username, accessToken, refreshToken, oauthVerifier) => {
     if (!username || !accessToken || !refreshToken) {
         throw new Error('Username, access token, and refresh token are required.');
     }
@@ -198,13 +198,27 @@ const updateTwitterTokens = async (username, accessToken, refreshToken) => {
         const client = await pool.connect();
 
         try {
-            // Update query to set the new access and refresh tokens
-            const updateQuery = `
-                UPDATE user_creds
-                SET twitter_access_token = $1, twitter_refresh_token = $2
-                WHERE username = $3
-            `;
-            const res = await client.query(updateQuery, [accessToken, refreshToken, username]);
+            let updateQuery;
+            let values;
+
+            // Construct the update query based on whether oauthVerifier is provided
+            if (oauthVerifier) {
+                updateQuery = `
+                    UPDATE user_creds
+                    SET twitter_access_token = $1, twitter_refresh_token = $2, twitter_code_verifier = $3
+                    WHERE username = $4
+                `;
+                values = [accessToken, refreshToken, oauthVerifier, username];
+            } else {
+                updateQuery = `
+                    UPDATE user_creds
+                    SET twitter_access_token = $1, twitter_refresh_token = $2
+                    WHERE username = $3
+                `;
+                values = [accessToken, refreshToken, username];
+            }
+
+            const res = await client.query(updateQuery, values);
             
             if (res.rowCount === 0) {
                 throw new Error('Username not found in user_creds table.');
