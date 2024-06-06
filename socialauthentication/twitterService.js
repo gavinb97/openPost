@@ -107,11 +107,16 @@ const revokeAccessToken = async (username) => {
     }
 };
 
-const tweetOnBehalfOfUser = async (accessToken, tweetText) => {
-    const twitterClient = new TwitterApi(accessToken);
+const tweetOnBehalfOfUser = async (accessToken, accessSecret, tweetText) => {
+    const twitterClient = new TwitterApi({
+        appKey: process.env.APP_KEY,
+        appSecret: process.env.APP_SECRET,
+        accessToken: accessToken,
+        accessSecret: accessSecret
+    });
+
     const client = twitterClient.v2
-    console.log(client)
-  
+
     try {  
         if (tweetText && tweetText.length <= 280) {
             const data = await client.tweet(tweetText)
@@ -123,59 +128,6 @@ const tweetOnBehalfOfUser = async (accessToken, tweetText) => {
       console.log(e)
     }
 }
-
-// const tweetVideoOnBehalfOfUser = async (accessToken, tweetText, mediaPath) => {
-//     const twitterClient = new TwitterApi(accessToken);
-    
-
-//     const uploadVideo = async (mediaPath) => {
-//         try {
-//             const mediaID = await twitterClient.v1.uploadMedia(mediaPath)
-//             console.log(mediaID)
-//             return mediaID
-//         } catch (error) {
-//             console.log(error)
-//             throw error
-//         }
-//     }
-
-//     const sendTweetWithVideo = async (tweetText, mediaID) => {
-//         try {  
-//             if (tweetText && tweetText.length <= 280) {
-//                 const data = await twitterClient.v2.tweet(tweetText, { media: {media_ids: [mediaID]}})
-//                 console.log(data)
-//             } else {
-//                 console.log('tweet too long to be sent')
-//             }
-//         } catch (e) {
-//           console.log(e)
-//           throw e
-//         }
-//     }
-
-//     const uploadAndTweet = async (mediaPath, tweetText) => {
-//         console.log(mediaPath)
-//         let mediaID = null
-//         try {
-//             mediaID = await uploadVideo(mediaPath)
-//         } catch (e) {
-//             console.log(e)
-//             console.log('we got fucked')
-//             throw e
-//         }
-        
-//         do {
-//             console.log('uploading...')
-//             await sleep(10000)
-//         } while (!mediaID)
-    
-//         await sendTweetWithVideo(tweetText, mediaID)
-//     }
-
-//     await uploadAndTweet(mediaPath, tweetText)
-// }
-
-// tweetVideoOnBehalfOfUser('M3o5RG5ZM3YyX1hyZDV2NE1IVEZWekxCSHJ5MXU2Z0d2clVBNGQ2bEt1V0R4OjE3MTc1NTYzNzcyOTA6MToxOmF0OjE', 'tweetytweedfasdfast', 'C:/Users/Gavin/Desktop/BuildABlog/openPost/apiresources/uploads/videos/1712522280452-Yeahiknowtheflaminhitsge.mp4')
 
 const tweetVideoOnBehalfOfUser = async (accessToken, accessSecret, tweetText, mediaPath) => {
     try {
@@ -233,12 +185,13 @@ const tweetVideoOnBehalfOfUser = async (accessToken, accessSecret, tweetText, me
 };
 
 
-tweetVideoOnBehalfOfUser(
-    '1706013619979268096-WtDmbvdlRbIPOxqZlcqCYR1pP7uPrN',
-    '0z6hxiplOcylDUSy3sZaL7JhGbMKTdZEZU2yjTSPc5T88',
-    'Your tweet text here',
-    'C:/Users/Gavin/Desktop/BuildABlog/openPost/apiresources/uploads/videos/1712522280452-Yeahiknowtheflaminhitsge.mp4'
-);
+// tweetVideoOnBehalfOfUser(
+//     '1706013619979268096-WtDmbvdlRbIPOxqZlcqCYR1pP7uPrN',
+//     '0z6hxiplOcylDUSy3sZaL7JhGbMKTdZEZU2yjTSPc5T88',
+//     'Your tweet text here',
+//     'C:/Users/Gavin/Desktop/BuildABlog/openPost/apiresources/uploads/videos/1712522280452-Yeahiknowtheflaminhitsge.mp4'
+// );
+
 
 const generateTwitterAuthUrl = async (username) => {
     const requestTokenUrl = 'https://api.twitter.com/oauth/request_token';
