@@ -66,7 +66,7 @@ const getAccessToken = async (code, state) => {
     }
 };
 
-// TODO pass username to this 
+
 const refreshTwitterAccessToken = async (refreshToken, user) => {
     try {
         const clientId = process.env.CLIENT_ID;
@@ -129,7 +129,7 @@ const tweetOnBehalfOfUser = async (accessToken, accessSecret, tweetText) => {
     }
 }
 
-const tweetVideoOnBehalfOfUser = async (accessToken, accessSecret, tweetText, mediaPath) => {
+const tweetMediaOnBehalfOfUser = async (accessToken, accessSecret, tweetText, mediaPath) => {
     try {
         // Initialize the Twitter client with the provided tokens
         const twitterClient = new TwitterApi({
@@ -183,15 +183,6 @@ const tweetVideoOnBehalfOfUser = async (accessToken, accessSecret, tweetText, me
         console.error('Error during the process:', error);
     }
 };
-
-
-// tweetVideoOnBehalfOfUser(
-//     '1706013619979268096-WtDmbvdlRbIPOxqZlcqCYR1pP7uPrN',
-//     '0z6hxiplOcylDUSy3sZaL7JhGbMKTdZEZU2yjTSPc5T88',
-//     'Your tweet text here',
-//     'C:/Users/Gavin/Desktop/BuildABlog/openPost/apiresources/uploads/videos/1712522280452-Yeahiknowtheflaminhitsge.mp4'
-// );
-
 
 const generateTwitterAuthUrl = async (username) => {
     const requestTokenUrl = 'https://api.twitter.com/oauth/request_token';
@@ -317,5 +308,6 @@ module.exports = {
     refreshTwitterAccessToken,
     revokeAccessToken,
     tweetOnBehalfOfUser,
-    getOAuth1AccessToken
+    getOAuth1AccessToken,
+    tweetMediaOnBehalfOfUser
 }

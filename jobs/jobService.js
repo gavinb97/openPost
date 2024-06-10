@@ -360,7 +360,7 @@ const handleSetInterval = async (request) => {
         for (let dayOffset = 0; dayOffset < maxDays; dayOffset++) {
             selectedDays.forEach(day => {
                 request.timesOfDay.forEach(time => {
-                    const hour = parseInt(time.hour, 10);
+                    let hour = parseInt(time.hour, 10);
                     const minute = parseInt(time.minute, 10);
                     const ampm = time.ampm.toLowerCase();
                     const targetDate = new Date(now);
@@ -372,7 +372,14 @@ const handleSetInterval = async (request) => {
                     }
 
                     targetDate.setDate(new Date().getDate() + daysUntilTargetDay);
-                    targetDate.setHours(hour + (ampm === 'pm' && hour < 12 ? 12 : 0), minute, 0, 0);
+
+                    if (ampm === 'am' && hour === 12) {
+                        hour = 0; // Handle midnight
+                    } else if (ampm === 'pm' && hour !== 12) {
+                        hour += 12; // Handle PM times except for noon
+                    }
+
+                    targetDate.setHours(hour, minute, 0, 0);
 
                     const delayInMilliseconds = targetDate.getTime() - now;
 

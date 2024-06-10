@@ -1,7 +1,6 @@
 import logo from './../logo.svg';
 import './../App.css';
 import React, { useState } from 'react';
-import {uploadFile} from '../service/userMediaService'
 import { useNavigate } from 'react-router-dom'
 import Navbar from '../components/Navbar'
 import { register } from '../service/userService';

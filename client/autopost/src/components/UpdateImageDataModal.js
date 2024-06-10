@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import TagInputComponent from './TagInputComponent'; 
-import { convertFilesToStringsForRendering, updateFileNamesAsync, fetchAllFiles, getPhotoMetadata } from '../service/userMediaService'
+import { convertFilesToStringsForRendering, updateFileNamesAsync, getPhotoMetadata } from '../service/userMediaService'
 
 const UpdateImageDataModal = ({ imageData, closeModal, updatePhotoMetadata, mediaFiles, uploadedFileNames }) => {
   const [updatedData, setUpdatedData] = useState(imageData);

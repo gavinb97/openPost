@@ -1,7 +1,6 @@
 import logo from './../logo.svg';
 import './../App.css';
 import React, { useState } from 'react';
-import {uploadFile} from '../service/userMediaService'
 import {getTwitterLoginUrl} from '../service/twitterService'
 import {getRedditLoginUrl} from '../service/redditService'
 import {getYoutubeLoginUrl} from '../service/youtubeService'

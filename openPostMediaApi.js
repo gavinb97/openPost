@@ -14,19 +14,28 @@ const {appendOrWriteToJsonFile, deleteFromPhotoData} = require('./utils')
 const sharp = require('sharp');
 const axios = require('axios');
 
+
 // Multer storage configuration
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-      // Get file extension
+      const username = req.body.username; // Access the username from the request body
+      console.log('in the storage func')
+      console.log(username)
       const ext = path.extname(file.originalname).toLowerCase();
+      let uploadPath;
+  
       if (ext === '.jpg' || ext === '.jpeg' || ext === '.png' || ext === '.gif') {
-        cb(null, 'apiresources/uploads/photos/');
+        uploadPath = `apiresources/uploads/${username}/photos/`;
       } else if (ext === '.mp4' || ext === '.mov' || ext === '.avi' || ext === '.mkv') {
-        cb(null, 'apiresources/uploads/videos/');
+        uploadPath = `apiresources/uploads/${username}/videos/`;
       } else {
-        // Invalid file type, handle accordingly
-        cb(new Error('Invalid file type'));
+        return cb(new Error('Invalid file type'));
       }
+  
+      // Create the directory if it doesn't exist
+      fs.mkdirSync(uploadPath, { recursive: true });
+  
+      cb(null, uploadPath);
     },
     filename: function (req, file, cb) {
       cb(null, Date.now() + '-' + file.originalname);
@@ -44,6 +53,8 @@ app.post('/upload', upload.single('file'), async (req, res) => {
 
         // Extract filename
         const fileName = req.file.filename;
+        const username = req.body.username;
+        console.log(username)
         console.log(req.body.categories)
 
         let description = '';
@@ -65,7 +76,7 @@ app.post('/upload', upload.single('file'), async (req, res) => {
         };
 
         // Append metadata to the JSON file
-        appendOrWriteToJsonFile('apiresources/uploads/photoMetadata/photoData.txt', metadata);
+        appendOrWriteToJsonFile(`apiresources/uploads/${username}/photoMetadata/photoData.txt`, metadata);
 
         // Respond with success status
         const responseObj = {
@@ -83,8 +94,9 @@ app.post('/upload', upload.single('file'), async (req, res) => {
 
 
 // Endpoint to get the names of all files within the uploads folder
-app.get('/files', async (req, res) => {
-    const uploadsFolder = path.join(__dirname, 'apiresources', 'uploads', 'photos');
+app.post('/files', async (req, res) => {
+    const username = req.body.username
+    const uploadsFolder = path.join(__dirname, 'apiresources', 'uploads', username, 'photos');
     try {
         // Read the contents of the uploads folder
         const files = await fs.promises.readdir(uploadsFolder);

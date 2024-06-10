@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { fetchAllFiles, deleteByName, getPhotoMetadata, updatePhotoMetadata } from '../service/userMediaService';
+import { fetchAllFiles, deleteByName, getPhotoMetadata, updatePhotoMetadata, fetchAllFilesByUser } from '../service/userMediaService';
 import UpdateImageDataModal from './UpdateImageDataModal';
 import SetScheduleModal from '../components/SetScheduleModal';
+import { useAuth } from '../service/authContext';
 import './../App.css';
 
 const UploadedMediaContainerSmall = () => {
+    const { user } = useAuth();
+
     const navigate = useNavigate();
     const [mediaFiles, setMediaFiles] = useState([]);
     const [selectedImages, setSelectedImages] = useState([]);
@@ -15,7 +18,7 @@ const UploadedMediaContainerSmall = () => {
 
     useEffect(() => {
         const getAllMedia = async () => {
-            const files = await fetchAllFiles();
+            const files = await fetchAllFilesByUser(user.username);
             setMediaFiles(files);
         };
         getAllMedia();

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { fetchAllFiles, deleteByName, getPhotoMetadata, updatePhotoMetadata } from '../service/userMediaService';
+import { fetchAllFiles, deleteByName, getPhotoMetadata, updatePhotoMetadata, fetchAllFilesByUser } from '../service/userMediaService';
+import { useAuth } from '../service/authContext';
 
 import UpdateImageDataModal from './UpdateImageDataModal';
 import SetScheduleModal from '../components/SetScheduleModal';
@@ -14,10 +15,12 @@ const UploadedMediaContainer = forwardRef((props, ref) => {
     const [imageMetadata, setImageMetadata] = useState([]);
     const [showScheduleModal, setShowScheduleModal] = useState(false)
 
+    const { user } = useAuth();
+
     const getAllMedia = async () => {
         try {
             // Fetch media files
-            const files = await fetchAllFiles();
+            const files = await fetchAllFilesByUser(user.username);
             setMediaFiles(files);
         } catch (error) {
             console.error('Error fetching media:', error);

@@ -61,7 +61,7 @@ export const updateFileNamesAsync = async (files, uploadedFileNames) => {
 
 
 
-export const uploadFile = (file, fileName) => {
+export const uploadFile = (file, fileName, username) => {
     return new Promise((resolve, reject) => {
         const endpoint = 'http://localhost:3456/upload';
 
@@ -75,7 +75,8 @@ export const uploadFile = (file, fileName) => {
             const bodyForm = new FormData();
             bodyForm.append('file', blob, fileName);
             bodyForm.append('categories', JSON.stringify([]));
-
+            bodyForm.append('username', username)
+            
             try {
                 const uploadResponse = await axios.post(
                     endpoint,
@@ -98,6 +99,18 @@ export const uploadFile = (file, fileName) => {
         };
     });
 };
+
+export const fetchAllFilesByUser = async (username) => {
+    const endpoint = 'http://localhost:3456/files';
+    try {
+      const response = await axios.post(endpoint, { username: username});
+      
+      return response.data
+    } catch (error) {
+      console.error('Error fetching files:', error);
+      // Handle errors, such as displaying an error message to the user
+    }
+  };
 
 
 

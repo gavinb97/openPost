@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { uploadFile, updatePhotoMetadata } from '../service/userMediaService';
 import UpdateImageDataModal from './UpdateImageDataModal';
+import { useAuth } from '../service/authContext';
 import './../App.css';
 
 const UploadPictureBox = ({ onSuccessUpload }) => {
+    const { user } = useAuth();
     const [pictureFiles, setPictureFiles] = useState([]);
     const [videoFiles, setVideoFiles] = useState([]);
     const [showUpdateModal, setShowUpdateModal] = useState(false);
@@ -36,7 +38,7 @@ const UploadPictureBox = ({ onSuccessUpload }) => {
         if (files.length > 0) {
             for (const file of files) {
                 try {
-                    const response = await uploadFile(file, file.name);
+                    const response = await uploadFile(file, file.name, user.username);
                     uploadedFileNames.push(response.file);
                 } catch (error) {
                     console.error('Error uploading file:', error);

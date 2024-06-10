@@ -34,8 +34,37 @@ const registerUser = async (user) => {
         const userid = await registerUserDB(user)
         
         console.log(`User registered successfully: ${userid}`);
+        await createMediaFolders(username, 'C:\\Users\\Gavin\\Desktop\\BuildABlog\\openPost\\apiresources\\uploads\\')
     } catch (error) {
         throw new Error(`Failed to register user: ${error.message}`);
+    }
+};
+
+const createMediaFolders = async (username, basePath) => {
+    const userFolderPath = path.join(basePath, username);
+    const photosFolderPath = path.join(userFolderPath, 'photos');
+    const videosFolderPath = path.join(userFolderPath, 'videos');
+    const metadataFolderPath = path.join(userFolderPath, 'photoMetaData');
+
+    console.log('Attempting to create folders');
+
+    try {
+        // Create the user's folder and any intermediate directories
+        await fs.promises.mkdir(userFolderPath, { recursive: true });
+        console.log(`Folder for user ${username} created or already exists.`);
+
+        // Create photos, videos, and metadata folders if they don't exist
+        await fs.promises.mkdir(photosFolderPath, { recursive: true });
+        console.log(`Photos folder for user ${username} created or already exists.`);
+
+        await fs.promises.mkdir(videosFolderPath, { recursive: true });
+        console.log(`Videos folder for user ${username} created or already exists.`);
+
+        await fs.promises.mkdir(metadataFolderPath, { recursive: true });
+        console.log(`Metadata folder for user ${username} created or already exists.`);
+
+    } catch (error) {
+        console.error('Error creating media folders:', error);
     }
 };
 
