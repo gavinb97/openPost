@@ -64,7 +64,6 @@ export const updateFileNamesAsync = async (files, uploadedFileNames) => {
 export const uploadFile = (file, fileName, username) => {
     return new Promise((resolve, reject) => {
         const endpoint = 'http://localhost:3456/upload';
-
         const reader = new FileReader();
         reader.readAsDataURL(file);
 
@@ -75,12 +74,13 @@ export const uploadFile = (file, fileName, username) => {
             const bodyForm = new FormData();
             bodyForm.append('file', blob, fileName);
             bodyForm.append('categories', JSON.stringify([]));
-            bodyForm.append('username', username)
-            
+            bodyForm.append('username', username);
+
             try {
                 const uploadResponse = await axios.post(
                     endpoint,
-                    bodyForm, {
+                    bodyForm,
+                    {
                         headers: {
                             'Content-Type': 'multipart/form-data',
                         },
