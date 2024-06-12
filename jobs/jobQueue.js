@@ -1,5 +1,5 @@
 const amqp = require('amqplib');
-const makePost = require('./jobQueueService')
+const {makePost, validateJob} = require('./jobQueueService')
 
 async function setupQueue() {
   const connection = await amqp.connect('amqp://localhost');

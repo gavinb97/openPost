@@ -275,10 +275,35 @@ const insertActiveJob = async (job) => {
     }
 };
 
+const isJobIdPresent = async (jobSetId) => {
+    const query = `
+        SELECT EXISTS (
+            SELECT 1
+            FROM active_jobs
+            WHERE job_set_id = $1
+        );
+    `;
+
+    const values = [jobSetId];
+
+    try {
+        const client = await pool.connect();
+        const res = await client.query(query, values);
+        client.release();
+
+        // Return true if the job ID exists, otherwise false
+        return res.rows[0].exists;
+    } catch (err) {
+        console.error('Error checking if job ID is present', err);
+        throw err;
+    }
+};
+
 
 
 module.exports = {
     insertScheduledJob,
     insertRandomJob,
-    insertActiveJob
+    insertActiveJob,
+    isJobIdPresent
 };

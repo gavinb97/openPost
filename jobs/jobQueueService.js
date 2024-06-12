@@ -1,25 +1,41 @@
 require('dotenv').config({ path: '../.env' });
 const { tweetMediaOnBehalfOfUser } = require('../socialauthentication/twitterService')
 const { getCredsByUser } = require('../socialauthentication/socialAuthData')
+const { isJobIdPresent } = require('./jobsData')
 const fs = require('fs');
 const path = require('path');
 
 
 const makePost = async (job) => {
-    const creds = await getCredsByUser(job.userId)
+    // validate that job is active 
+    const validJob = await validateJob(job)
+    if (validJob) {
+        const creds = await getCredsByUser(job.userId)
 
-    switch (job.website) {
-        case 'twitter':
-            console.log('twitter')
-            await postToTwitter(creds, job)
+        switch (job.website) {
+            case 'twitter':
+                console.log('twitter')
+                await postToTwitter(creds, job)
             
-            break;
-        case 'reddit':
-            console.log('reddit')
-            break;
-        default:
-            console.log('no website, cant do anything...')
+                break;
+            case 'reddit':
+                console.log('reddit')
+                break;
+            default:
+                console.log('no website, cant do anything...')
+        }
     }
+    
+}
+
+// check to see if job is in active jobs table
+const validateJob = async (job) => {
+    const jobID = job.jobSetId
+
+    const validJob = await isJobIdPresent(jobID)
+    validJob ? console.log('job is valid') : console.log('job has been cancelled')
+
+    return validJob
 }
 
 const getRandom3LetterWord = () => {
@@ -65,4 +81,7 @@ const getMediaIfExists = async (job) => {
 
 
 
-module.exports = makePost
+module.exports = {
+    makePost,
+    validateJob
+}
