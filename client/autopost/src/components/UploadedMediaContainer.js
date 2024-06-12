@@ -45,7 +45,7 @@ const UploadedMediaContainer = forwardRef((props, ref) => {
         try {
             const selectedFileNames = selectedImageIndexes.map(index => mediaFiles[index].fileName);
             // Call getPhotoMetadata method to fetch metadata based on selected file names
-            const metadata = await getPhotoMetadata(selectedFileNames);
+            const metadata = await getPhotoMetadata(selectedFileNames, user.username);
             setImageMetadata(metadata);
         } catch (error) {
             console.error('Error fetching photo metadata:', error);
@@ -60,9 +60,8 @@ const UploadedMediaContainer = forwardRef((props, ref) => {
         // Make a database call to delete selected files
         try {
             const selectedFileNames = selectedImages.map(index => mediaFiles[index].fileName);
-            console.log("Deleting files:", selectedFileNames);
             // Call the deleteByName method from userMediaService
-            await deleteByName(selectedFileNames);
+            await deleteByName(selectedFileNames, user.username);
             
             // Remove deleted files from the screen
             const updatedFiles = mediaFiles.filter((file, index) => !selectedImages.includes(index));
@@ -75,7 +74,6 @@ const UploadedMediaContainer = forwardRef((props, ref) => {
     };
 
     const handleEditClick = () => {
-        console.log("Edit clicked");
         // Implement edit logic here
         setShowModal(true); // Set showModal state to true to display the modal
     };
@@ -100,7 +98,6 @@ const UploadedMediaContainer = forwardRef((props, ref) => {
     };
 
     const handleRefreshClick = async () => {
-        console.log('in uploadedmediacontainer fuckidy fuck fuck')
         await getAllMedia();
     };
 
@@ -210,7 +207,6 @@ const UploadedMediaContainer = forwardRef((props, ref) => {
             } else {
                 newSelectedImages = selectedImages.filter((item) => item !== index);
             }
-            console.log(newSelectedImages)
             setSelectedImages(newSelectedImages);
         };
     
@@ -253,7 +249,7 @@ const UploadedMediaContainer = forwardRef((props, ref) => {
             
             {mediaFiles.length > 0 && <RenderImages fileObjects={mediaFiles} />} {/* Render images */}
             <div>
-                {showModal && <UpdateImageDataModal imageData={imageMetadata} mediaFiles={mediaFiles} closeModal={closeModal} updatePhotoMetadata={updatePhotoMetadata} />} 
+                {showModal && <UpdateImageDataModal imageData={imageMetadata} mediaFiles={mediaFiles} closeModal={closeModal} updatePhotoMetadata={updatePhotoMetadata} user={user} />} 
                 {showScheduleModal && <SetScheduleModal closeModal={closeModal}></SetScheduleModal>}
             </div>
             

@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import TagInputComponent from './TagInputComponent'; 
 import { convertFilesToStringsForRendering, updateFileNamesAsync, getPhotoMetadata } from '../service/userMediaService'
+import { useAuth } from '../service/authContext';
 
-const UpdateImageDataModal = ({ imageData, closeModal, updatePhotoMetadata, mediaFiles, uploadedFileNames }) => {
+const UpdateImageDataModal = ({ imageData, closeModal, updatePhotoMetadata, mediaFiles, uploadedFileNames, user }) => {
   const [updatedData, setUpdatedData] = useState(imageData);
   
-
   const [media, setMedia] = useState(mediaFiles)
  
-
   const handleChange = (e, index) => {
     const { name, value } = e.target;
     let actualValue = value;
@@ -36,24 +35,18 @@ const UpdateImageDataModal = ({ imageData, closeModal, updatePhotoMetadata, medi
             
             updateFileNamesAsync(mediaFiles, uploadedFileNames)
                 .then(async (fileData) => {
-                    console.log(fileData)
-                    // mediaFiles = fileData;
+                   
                     setMedia(fileData)
                     
-                    const metaData = await getPhotoMetadata(uploadedFileNames);
-                    // console.log(metaData);
-                    // do {
-                    //   console.log('waiting on the metaData')
-                
-                    // } while (metaData.length === 0)
+                    const metaData = await getPhotoMetadata(uploadedFileNames, user.username);
+                 
                     setUpdatedData(metaData)
                 })
                 .catch((error) => {
                     console.error('Error converting files to base64:', error);
                 });
             console.log('converted');
-            console.log(mediaFiles);
-                
+              
         }
     }
     
@@ -61,9 +54,8 @@ const UpdateImageDataModal = ({ imageData, closeModal, updatePhotoMetadata, medi
 
   const handleSave = () => {
     // Perform save operation with updatedData
-    console.log(updatedData);
     // Call updatePhotoMetadata function to update data
-    updatePhotoMetadata(updatedData); // Pass updatedData to the function
+    updatePhotoMetadata(updatedData, user.username); // Pass updatedData to the function
     // Close modal
     closeModal();
   };

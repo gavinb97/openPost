@@ -35,7 +35,7 @@ const UploadedMediaContainerSmall = () => {
     const fetchPhotoMetadata = async (selectedImageIndexes) => {
         try {
             const selectedFileNames = selectedImageIndexes.map(index => mediaFiles[index].fileName);
-            const metadata = await getPhotoMetadata(selectedFileNames);
+            const metadata = await getPhotoMetadata(selectedFileNames, user.username);
             setImageMetadata(metadata);
         } catch (error) {
             console.error('Error fetching photo metadata:', error);
@@ -46,7 +46,7 @@ const UploadedMediaContainerSmall = () => {
         try {
             const selectedFileNames = selectedImages.map(index => mediaFiles[index].fileName);
             console.log("Deleting files:", selectedFileNames);
-            await deleteByName(selectedFileNames);
+            await deleteByName(selectedFileNames, user.username);
             const updatedFiles = mediaFiles.filter((file, index) => !selectedImages.includes(index));
             setMediaFiles(updatedFiles);
             setSelectedImages([]);
@@ -57,7 +57,6 @@ const UploadedMediaContainerSmall = () => {
     };
 
     const handleEditClick = () => {
-        console.log("Edit clicked");
         setShowModal(true);
     };
 
@@ -132,7 +131,7 @@ const UploadedMediaContainerSmall = () => {
             </div>
             <div>
                 {/* Pass selected image names to SetScheduleModal */}
-                {showModal && <UpdateImageDataModal imageData={imageMetadata} closeModal={closeModal} updatePhotoMetadata={updatePhotoMetadata} />}
+                {showModal && <UpdateImageDataModal imageData={imageMetadata} closeModal={closeModal} updatePhotoMetadata={updatePhotoMetadata} user={user} />}
                 {showScheduleModal && <SetScheduleModal closeModal={closeModal} selectedImages={selectedImageNames}></SetScheduleModal>} 
             </div>
         </div>

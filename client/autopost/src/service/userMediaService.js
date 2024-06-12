@@ -27,17 +27,12 @@ const convertFileToBase64 = (file) => new Promise((resolve, reject) => {
 export const updateFileNamesAsync = async (files, uploadedFileNames) => {
     const renamedFiles = [];
 
-    console.log('Initial files:', files);
-    console.log('Uploaded file names:', uploadedFileNames);
-
     files.forEach(async file => {
-        console.log('Processing file:', file.name);
         // Find the filename with the identifier in the uploadedFileNames array
         const matchingFileName = uploadedFileNames.find(name => name.endsWith(file.name));
 
         // Only include the file if a matching file name is found and it's different from the original
         if (matchingFileName && matchingFileName !== file.name) {
-            console.log('Matched file name:', matchingFileName);
             // Create a new file object with the updated name
             const updatedFile = new File([file], matchingFileName, { type: file.type, lastModified: file.lastModified });
             
@@ -132,26 +127,23 @@ export const getPhotoFilesByName = async () => {
 }
 
 
-export const deleteByName = async (fileNames) => {
-    console.log(fileNames)
+export const deleteByName = async (fileNames, username) => {
     try {
-        const response = await axios.post('http://localhost:3456/deletebyname', fileNames,
+        const response = await axios.post('http://localhost:3456/deletebyname', {fileNames, username},
         {
             headers: {
                 'Content-Type': 'application/json'
             }
         });
-        console.log(response.data);
     } catch (error) {
         console.error('Error deleting files:', error.response.data);
     }
 }
 
-export const getPhotoMetadata = async (fileNames) => {
-    console.log('called metadatacall')
+export const getPhotoMetadata = async (fileNames, username) => {
     const endpoint = 'http://localhost:3456/getphotometadata'
     try {
-        const response = await axios.post(endpoint, fileNames);
+        const response = await axios.post(endpoint, {fileNames, username});
         return response.data;
     } catch (error) {
         console.error('Error fetching photo metadata:', error);
@@ -159,10 +151,9 @@ export const getPhotoMetadata = async (fileNames) => {
     }
 };
 
-export const updatePhotoMetadata = async (newData) => {
+export const updatePhotoMetadata = async (newData, username) => {
     try {
-        const response = await axios.post('http://localhost:3456/updatephotometadata', newData);
-        console.log(response.data); // Log success message
+        const response = await axios.post('http://localhost:3456/updatephotometadata', {newData, username});
     } catch (error) {
         console.error('Error updating photo metadata:', error.response.data.error);
     }

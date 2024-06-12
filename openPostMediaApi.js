@@ -17,162 +17,71 @@ const axios = require('axios');
 
 
 // Multer storage configuration
-// const storage = multer.diskStorage({
-//     destination: function (req, file, cb) {
-//       const username = req.body.username; // Access the username from the request body
-//       console.log('in the storage func')
-//       console.log(username)
-//       const ext = path.extname(file.originalname).toLowerCase();
-//       let uploadPath;
-  
-//       if (ext === '.jpg' || ext === '.jpeg' || ext === '.png' || ext === '.gif') {
-//         uploadPath = `apiresources/uploads/${username}/photos/`;
-//       } else if (ext === '.mp4' || ext === '.mov' || ext === '.avi' || ext === '.mkv') {
-//         uploadPath = `apiresources/uploads/${username}/videos/`;
-//       } else {
-//         return cb(new Error('Invalid file type'));
-//       }
-  
-//       // Create the directory if it doesn't exist
-//       fs.mkdirSync(uploadPath, { recursive: true });
-  
-//       cb(null, uploadPath);
-//     },
-//     filename: function (req, file, cb) {
-//       cb(null, Date.now() + '-' + file.originalname);
-//     }
-//   });
-
-
-// const upload = multer({ storage: storage })
-
-// // Endpoint for handling file uploads
-// app.post('/upload', upload.single('file'), async (req, res) => {
-//     try {
-//         // File uploaded successfully
-//         console.log('File uploaded:', req.file);
-
-//         // Extract filename
-//         const fileName = req.file.filename;
-//         const username = req.body.username;
-//         console.log(username)
-//         console.log(req.body.categories)
-
-//         let description = '';
-//         if (req.body.description) {
-//             description = req.body.description;
-//         }
-
-//         let categories = []
-//         if (req.body.categories) {
-//             categories = JSON.parse(req.body.categories)
-//         }
-
-//         // Construct the metadata object
-//         const metadata = {
-//             name: fileName,
-//             description: description,
-//             categories: categories,
-//             NSFW: true
-//         };
-
-//         // Append metadata to the JSON file
-//         appendOrWriteToJsonFile(`apiresources/uploads/${username}/photoMetadata/photoData.txt`, metadata);
-
-//         // Respond with success status
-//         const responseObj = {
-//             file: fileName,
-//             status: 'Success',
-//             description: description
-//         };
-//         res.status(200).send(responseObj);
-//     } catch (error) {
-//         // Error handling
-//         console.error('Error uploading file:', error);
-//         res.status(500).send('Error uploading file.');
-//     }
-// });
-
-const configureStorage = (username) => {
-    return multer.diskStorage({
-        destination: function (req, file, cb) {
-            const ext = path.extname(file.originalname).toLowerCase();
-            let uploadPath;
-
-            if (ext === '.jpg' || ext === '.jpeg' || ext === '.png' || ext === '.gif') {
-                uploadPath = `apiresources/uploads/${username}/photos/`;
-            } else if (ext === '.mp4' || ext === '.mov' || ext === '.avi' || ext === '.mkv') {
-                uploadPath = `apiresources/uploads/${username}/videos/`;
-            } else {
-                return cb(new Error('Invalid file type'));
-            }
-
-            // Create the directory if it doesn't exist
-            fs.mkdirSync(uploadPath, { recursive: true });
-
-            cb(null, uploadPath);
-        },
-        filename: function (req, file, cb) {
-            cb(null, Date.now() + '-' + file.originalname);
-        }
-    });
-};
-
-
-const upload = multer({
-    storage: multer.memoryStorage() // Temporary storage in memory
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        const uploadPath = 'apiresources/uploads/temp/';
+        cb(null, uploadPath);
+    },
+    filename: function (req, file, cb) {
+        cb(null, Date.now() + '-' + file.originalname);
+    }
 });
 
-
+const upload = multer({ storage: storage });
 
 // Endpoint for handling file uploads
 app.post('/upload', upload.single('file'), async (req, res) => {
     try {
-        // Access the username from the request body
+        // Extract filename
+        const fileName = req.file.filename;
         const username = req.body.username;
-        console.log('Username:', username);
-        console.log(req.body)
+        const categories = req.body.categories ? JSON.parse(req.body.categories) : [];
+        const description = req.body.description || '';
 
-        // Initialize multer with configured storage function
-        const upload = multer({ storage: configureStorage(username) }).single('file');
+        // Construct the metadata object
+        const metadata = {
+            name: fileName,
+            description: description,
+            categories: categories,
+            NSFW: true
+        };
 
-        // Upload file
-        upload(req, res, async (err) => {
-            if (err) {
-                console.error('Error uploading file:', err);
-                return res.status(500).send('Error uploading file.');
-            }
+        // Append metadata to the JSON file
+        appendOrWriteToJsonFile(`apiresources/uploads/${username}/photoMetadata/photoData.txt`, metadata);
 
-            // File uploaded successfully
-            console.log('File uploaded:', req.file);
-        
+        // Copy the file to the appropriate directory based on its extension
+        const ext = path.extname(fileName).toLowerCase();
+        let uploadDir;
+        if (ext === '.jpg' || ext === '.jpeg' || ext === '.png' || ext === '.gif') {
+            uploadDir = `apiresources/uploads/${username}/photos/`;
+        } else if (ext === '.mp4' || ext === '.mov' || ext === '.avi' || ext === '.mkv') {
+            uploadDir = `apiresources/uploads/${username}/videos/`;
+        } else {
+            throw new Error('Invalid file type');
+        }
 
-            let description = req.body.description || '';
-            let categories = req.body.categories ? JSON.parse(req.body.categories) : [];
+        // Create the directory if it doesn't exist
+        fs.mkdirSync(uploadDir, { recursive: true });
 
-            // Construct the metadata object
-            const metadata = {
-                name: req.file.filename,
-                description: description,
-                categories: categories,
-                NSFW: true
-            };
+        // Copy the file to the destination directory
+        const sourcePath = `apiresources/uploads/temp/${fileName}`;
+        const destinationPath = `${uploadDir}${fileName}`;
+        fs.copyFileSync(sourcePath, destinationPath);
 
-            // Append metadata to the JSON file
-            appendOrWriteToJsonFile(`apiresources/uploads/${username}/photoMetadata/photoData.txt`, metadata);
+        // Delete the file from the temporary directory
+        fs.unlinkSync(sourcePath);
 
-            // Respond with success status
-            const responseObj = {
-                file: req.file.filename,
-                status: 'Success',
-                description: description
-            };
-            res.status(200).send(responseObj);
-        });
+        // Respond with success status
+        const responseObj = {
+            file: fileName,
+            status: 'Success',
+            description: description
+        };
+        res.status(200).send(responseObj);
     } catch (error) {
         // Error handling
-        console.error('Error handling request:', error);
-        res.status(500).send('Error handling request.');
+        console.error('Error uploading file:', error);
+        res.status(500).send('Error uploading file.');
     }
 });
 
@@ -230,18 +139,17 @@ app.post('/files', async (req, res) => {
 // }
 
 app.post('/deletebyname', async (req, res) => {
-    const fileNames = req.body; // Assuming body contains either a single string or an array of strings
-    console.log(fileNames);
+    const fileNames = req.body.fileNames; // Assuming body contains either a single string or an array of strings
+
+    const username = req.body.username
     // Ensure fileNames is an array
     const filesToDelete = Array.isArray(fileNames) ? fileNames : [fileNames];
-    console.log(filesToDelete);
-    const uploadsFolder = path.join(__dirname, 'apiresources', 'uploads', 'photos');
+    const uploadsFolder = path.join(__dirname, 'apiresources', 'uploads', username, 'photos');
     // Loop through each filename and delete if found in uploads/photos folder
     for (const fileName of filesToDelete) {
-        console.log('in loop');
-        console.log(fileName);
+
         const filePath = path.join(uploadsFolder, fileName);
-        console.log(filePath);
+   
         try {
             // Check if file exists
             await fs.promises.stat(filePath);
@@ -257,7 +165,6 @@ app.post('/deletebyname', async (req, res) => {
                     }
                 });
             });
-            console.log(`File "${fileName}" deleted successfully.`);
         } catch (err) {
             // File does not exist or error occurred during deletion
             console.error(`Error deleting file "${fileName}":`, err);
@@ -295,11 +202,8 @@ app.post('/deletebyname', async (req, res) => {
   })
 
   app.post('/getphotometadata', async (req, res) => {
-    console.log('getting metadata')
-    console.log(req.body)
-    const fileNames = req.body; // Array of file names
-    const photoData = await readPhotoDataFromFile(); // Read photo data from file
-
+    const fileNames = req.body.fileNames; // Array of file names
+    const photoData = await readPhotoDataFromFile(req.body.username); // Read photo data from file
     // Filter photoData to include only objects with names in the request body
     const metadata = photoData.filter(obj => fileNames.includes(obj.name));
 
@@ -309,8 +213,10 @@ app.post('/deletebyname', async (req, res) => {
 // POST endpoint to update photo metadata
 app.post('/updatephotometadata', async (req, res) => {
     try {
-        const newData = req.body; // Array of new photo data objects
-        const existingData = await readPhotoDataFromFile(); // Read existing photo data from file
+        const newData = req.body.newData; // Array of new photo data objects
+        const username = req.body.username
+
+        const existingData = await readPhotoDataFromFile(username); // Read existing photo data from file
 
         // Update existing data with new data
         newData.forEach(newObj => {
@@ -323,7 +229,7 @@ app.post('/updatephotometadata', async (req, res) => {
         });
 
         // Write updated data to file
-        await writePhotoDataToFile(existingData);
+        await writePhotoDataToFile(existingData, username);
 
         res.status(200).json({ message: 'Photo metadata updated successfully.' });
     } catch (error) {
@@ -333,9 +239,9 @@ app.post('/updatephotometadata', async (req, res) => {
 });
 
 // Function to read photo data from file
-const readPhotoDataFromFile = async () => {
+const readPhotoDataFromFile = async (username) => {
     try {
-        const data = await fs.promises.readFile('apiresources/uploads/photoMetadata/photoData.txt', 'utf8');
+        const data = await fs.promises.readFile(`apiresources/uploads/${username}/photoMetadata/photoData.txt`, 'utf8');
         return JSON.parse(data);
     } catch (error) {
         console.error('Error reading photo data:', error);
@@ -344,9 +250,9 @@ const readPhotoDataFromFile = async () => {
 };
 
 // Function to write photo data to file
-const writePhotoDataToFile = async (data) => {
+const writePhotoDataToFile = async (data, username) => {
     try {
-        await fs.promises.writeFile('apiresources/uploads/photoMetadata/photoData.txt', JSON.stringify(data, null, 2), 'utf8');
+        await fs.promises.writeFile(`apiresources/uploads/${username}/photoMetadata/photoData.txt`, JSON.stringify(data, null, 2), 'utf8');
     } catch (error) {
         console.error('Error writing photo data:', error);
         throw error;

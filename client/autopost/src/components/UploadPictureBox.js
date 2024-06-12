@@ -83,6 +83,7 @@ const UploadPictureBox = ({ onSuccessUpload }) => {
                     mediaFiles={pictureFiles}
                     closeModal={closeModal}
                     updatePhotoMetadata={updatePhotoMetadata}
+                    user={user}
                 />
             )}
         </div>
