@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const { setupQueue, enqueuePostJob, startWorker } = require('./jobQueue'); // Import the startWorker function
 const { formatRequest } = require('./jobService')
+const { getActiveJobsByUserId } = require('./jobsData');
 
 const app = express();
 app.use(bodyParser.json());
@@ -34,28 +35,24 @@ app.post('/jobs', async (req, res) => {
   }
 });
 
-// app.post('/jobs', async (req, res) => {
-//   // await formatRequest(req.body)
-//   try {
-//     const jobData = req.body;
-//     console.log(jobData)
-//     // Create a job object and enqueue it
-//     const job = {
-//       id: jobData.id || 'defaultId',
-//       userId: jobData.userId || 'defaultUserId',   
-//       content: jobData.content || 'defaultContent',
-//       scheduledTime: Date.now() + (jobData.delayTime || 3000), // Default delay 3 seconds if not provided
-//     };
-//     const channel = await channelPromise;
-//     await enqueuePostJob(channel, job);
+app.post('/getjobs', async (req, res) => {
+  const { username } = req.body;
 
-//     console.log('Job enqueued:', job);
-//     res.status(201).json({ message: 'Job received and enqueued' });
-//   } catch (error) {
-//     console.error('Error receiving job:', error);
-//     res.status(500).json({ error: 'Internal Server Error' });
-//   }
-// });
+  if (!username) {
+      return res.status(400).json({ error: 'Username is required' });
+  }
+
+  try {
+      const activeJobs = await getActiveJobsByUserId(username);
+      console.log(activeJobs)
+      res.status(200).json({ activeJobs });
+  } catch (error) {
+      console.error('Error retrieving jobs:', error);
+      res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+
 
 // Start listening on port 4455
 app.listen(4455, async () => {

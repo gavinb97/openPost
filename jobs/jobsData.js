@@ -299,11 +299,31 @@ const isJobIdPresent = async (jobSetId) => {
     }
 };
 
+const getActiveJobsByUserId = async (userId) => {
+    const query = `
+        SELECT *
+        FROM active_jobs
+        WHERE user_id = $1;
+    `;
+
+    try {
+        const client = await pool.connect();
+        const res = await client.query(query, [userId]);
+        client.release();
+
+        return res.rows;
+    } catch (err) {
+        console.error('Error retrieving active jobs', err);
+        throw err;
+    }
+};
+
 
 
 module.exports = {
     insertScheduledJob,
     insertRandomJob,
     insertActiveJob,
-    isJobIdPresent
+    isJobIdPresent,
+    getActiveJobsByUserId
 };
