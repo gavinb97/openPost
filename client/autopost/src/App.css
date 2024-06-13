@@ -96,8 +96,6 @@
   background-color: white;
   border-radius: 8px;
   padding: 20px;
-  margin-top: auto;
-  margin-bottom: auto;
   z-index: 1000;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
   max-height: 75vh; /* Set maximum height to 75% of viewport height */
@@ -310,4 +308,36 @@
   margin-left: 5px; /* Provides space between the checkbox and text */
   display: block; /* Allows text to use the full available space */
   overflow: visible; /* Shows all content */
+}
+
+.container {
+  display: flex;
+  justify-content: center;
+  /* align-items: center; */
+  height: auto; 
+  margin-top: 5%;
+}
+
+table {
+  border-collapse: collapse;
+  width: 80%; /* Adjust the width as needed */
+}
+
+th, td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+
+th {
+  background-color: #f2f2f2;
+  font-weight: bold;
+}
+
+tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+tr:hover {
+  background-color: #ddd;
 }

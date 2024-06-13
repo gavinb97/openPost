@@ -51,7 +51,7 @@ const getRandom3LetterWord = () => {
 const postToTwitter = async (creds, job) => {
     if (creds.twitterTokens?.access_token && creds.twitterTokens?.refresh_token) {
         // see if we have media
-        const path = await getMediaIfExists(job)
+        const path = await getMediaIfExists(job, job.userId)
         if (path) {
             const randoString = getRandom3LetterWord()
             const tweetText = job.content + randoString
@@ -62,8 +62,8 @@ const postToTwitter = async (creds, job) => {
 }
 
 
-const getMediaIfExists = async (job) => {
-    const mediaFolderPath = process.env.PHOTO_PATH
+const getMediaIfExists = async (job, username) => {
+    const mediaFolderPath = `C:\\Users\\Gavin\\Desktop\\BuildABlog\\openPost\\apiresources\\uploads\\${username}\\photos`
     const mediaFileName = job.image;
     const mediaFilePath = path.join(mediaFolderPath, mediaFileName);
     console.log(mediaFilePath)
