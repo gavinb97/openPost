@@ -318,12 +318,30 @@ const getActiveJobsByUserId = async (userId) => {
     }
 };
 
+const deleteActiveJobByJobSetId = async (jobSetId) => {
+    const query = `
+        DELETE FROM active_jobs
+        WHERE job_set_id = $1
+        RETURNING *;
+    `;
 
+    try {
+        const client = await pool.connect();
+        const res = await client.query(query, [jobSetId]);
+        client.release();
+
+        return res.rows[0]; // Return the deleted job
+    } catch (err) {
+        console.error('Error deleting active job', err);
+        throw err;
+    }
+};
 
 module.exports = {
     insertScheduledJob,
     insertRandomJob,
     insertActiveJob,
     isJobIdPresent,
-    getActiveJobsByUserId
+    getActiveJobsByUserId,
+    deleteActiveJobByJobSetId
 };

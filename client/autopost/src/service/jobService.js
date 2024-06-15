@@ -13,6 +13,35 @@ export const createScheduledJob = async (schedule) => {
     }
   };
 
+  export const getJobsByUsername = async (user) => {
+    const endpoint = 'http://localhost:4455/getjobs';
+    console.log('in the thing')
+    console.log(user)
+    
+    try {
+        const response = await axios.post(endpoint, {username: user});
+        return response.data;
+    } catch (error) {
+        console.error('Error retrieving jobs:', error);
+        throw error; // Re-throw the error to propagate it further if needed
+    }
+};
+
+export const deleteJob = async (jobSetId) => {
+    const endpoint = 'http://localhost:4455/deletejob';
+
+    try {
+        const response = await axios.delete(endpoint, {
+            data: { jobSetId },
+        });
+        console.log('Job deleted:', response.data);
+        return response.data;
+    } catch (error) {
+        console.error('Error deleting job:', error);
+        throw error;
+    }
+};
+
   export const validateAndFormatScheduleData = (request) => {
     const {
         username,

@@ -1,11 +1,13 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const cors = require('cors');
 const { setupQueue, enqueuePostJob, startWorker } = require('./jobQueue'); // Import the startWorker function
 const { formatRequest } = require('./jobService')
-const { getActiveJobsByUserId } = require('./jobsData');
+const { getActiveJobsByUserId, deleteActiveJobByJobSetId } = require('./jobsData');
 
 const app = express();
 app.use(bodyParser.json());
+app.use(cors());
 
 // Setup RabbitMQ connection and channel
 let channelPromise = setupQueue();
@@ -52,7 +54,25 @@ app.post('/getjobs', async (req, res) => {
   }
 });
 
+app.delete('/deletejob', async (req, res) => {
+  const { jobSetId } = req.body;
 
+  if (!jobSetId) {
+      return res.status(400).json({ error: 'Job Set ID is required' });
+  }
+
+  try {
+      const deletedJob = await deleteActiveJobByJobSetId(jobSetId);
+      if (!deletedJob) {
+          return res.status(404).json({ error: 'Job not found' });
+      }
+
+      res.status(200).json({ message: 'Job deleted successfully', job: deletedJob });
+  } catch (error) {
+      console.error('Error deleting job:', error);
+      res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
 
 // Start listening on port 4455
 app.listen(4455, async () => {
