@@ -1,6 +1,8 @@
 const pool = require('./db'); // Import the pool instance from db.js
 
 const insertScheduledJob = async (job) => {
+    console.log('dis da job')
+    console.log(job)
     const {
         job_set_id,
         user_id,
@@ -16,7 +18,9 @@ const insertScheduledJob = async (job) => {
         selected_days,
         schedule_interval,
         hour_interval,
-        selected_subreddits
+        selected_subreddits,
+        original_subreddits,
+        remaining_subreddits
     } = job;
 
     // Handle times_of_day being null
@@ -58,10 +62,12 @@ const insertScheduledJob = async (job) => {
             schedule_interval,
             hour_interval,
             selected_subreddits,
+            original_subreddits,
+            remaining_subreddits,
             created_at,
             updated_at
         ) VALUES (
-            $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11::jsonb, $12::jsonb, $13, $14, $15, NOW(), NOW()
+            $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11::jsonb, $12::jsonb, $13, $14, $15, $16, $17, NOW(), NOW()
         ) RETURNING id;
     `;
 
@@ -80,7 +86,9 @@ const insertScheduledJob = async (job) => {
         selectedDaysJson, // Use the JSON formatted array of selected days
         schedule_interval,
         hour_interval,
-        selected_subreddits
+        selected_subreddits,
+        original_subreddits,
+        remaining_subreddits
     ];
 
     console.log('values');
@@ -115,7 +123,9 @@ const insertRandomJob = async (job) => {
         picture_post_order,
         schedule_type,
         duration_of_job,
-        selected_subreddits
+        selected_subreddits,
+        remaining_subreddits,
+        original_subreddits
     } = job;
 
     const query = `
@@ -132,10 +142,12 @@ const insertRandomJob = async (job) => {
             schedule_type,
             duration_of_job,
             selected_subreddits,
+            remaining_subreddits,
+            original_subreddits,
             created_at,
             updated_at
         ) VALUES (
-            $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, NOW(), NOW()
+            $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, NOW(), NOW()
         ) RETURNING id;
     `;
 
@@ -151,7 +163,9 @@ const insertRandomJob = async (job) => {
         picture_post_order,
         schedule_type,
         duration_of_job,
-        selected_subreddits
+        selected_subreddits,
+        remaining_subreddits,
+        original_subreddits
     ];
 
     try {
@@ -185,7 +199,9 @@ const insertActiveJob = async (job) => {
         schedule_interval,
         hour_interval,
         duration_of_job,
-        selected_subreddits
+        selected_subreddits,
+        remaining_subreddits,
+        original_subreddits
     } = job;
 
     // Convert message_ids array to a PostgreSQL array literal
@@ -235,10 +251,12 @@ const insertActiveJob = async (job) => {
             hour_interval,
             duration_of_job,
             selected_subreddits,
+            remaining_subreddits,
+            original_subreddits,
             created_at,
             updated_at
         ) VALUES (
-            $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, NOW(), NOW()
+            $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, NOW(), NOW()
         ) RETURNING id;
     `;
 
@@ -260,7 +278,9 @@ const insertActiveJob = async (job) => {
         schedule_interval,
         hour_interval,
         duration_of_job,
-        selected_subreddits
+        selected_subreddits,
+        remaining_subreddits,
+        original_subreddits
     ];
 
     try {

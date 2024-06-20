@@ -24,7 +24,7 @@ const formatRequest = async (request) => {
     return jobs
 }
 
-const createRandomJobObject = (request, jobSetId, originalImages, remainingImages, scheduledTime) => {
+const createRandomJobObject = (request, jobSetId, originalImages, remainingImages, scheduledTime, originalSubreddits, remainingSubreddits) => {
     return {
         job_set_id: jobSetId,
         user_id: request.username || 'defaultUserId',
@@ -32,6 +32,8 @@ const createRandomJobObject = (request, jobSetId, originalImages, remainingImage
         scheduled_time: new Date(scheduledTime),
         original_images: originalImages,
         remaining_images: remainingImages,
+        original_subreddits: originalSubreddits,
+        remaining_subreddits: remainingSubreddits,
         username: request.username,
         selected_website: request.selectedWebsite,
         picture_post_order: request.picturePostOrder,
@@ -41,7 +43,8 @@ const createRandomJobObject = (request, jobSetId, originalImages, remainingImage
     };
 };
 
-const createScheduledJobObject = (request, jobSetId, originalImages, remainingImages, scheduledTime) => {
+
+const createScheduledJobObject = (request, jobSetId, originalImages, remainingImages, scheduledTime, originalSubreddits, remainingSubreddits) => {
     return {
         job_set_id: jobSetId,
         user_id: request.username || 'defaultUserId',
@@ -49,6 +52,8 @@ const createScheduledJobObject = (request, jobSetId, originalImages, remainingIm
         scheduled_time: new Date(scheduledTime),
         original_images: originalImages,
         remaining_images: remainingImages,
+        original_subreddits: originalSubreddits,
+        remaining_subreddits: remainingSubreddits,
         username: request.username,
         selected_website: request.selectedWebsite,
         picture_post_order: request.picturePostOrder,
@@ -61,7 +66,8 @@ const createScheduledJobObject = (request, jobSetId, originalImages, remainingIm
     };
 };
 
-const createActiveJobObject = (request, dbJobObject, jobs) => {
+
+const createActiveJobObject = (request, dbJobObject, jobs, originalSubreddits, remainingSubreddits) => {
     const activeJobObject = {
         job_set_id: dbJobObject.job_set_id,
         message_ids: jobs.map(job => job.message_id),
@@ -71,6 +77,8 @@ const createActiveJobObject = (request, dbJobObject, jobs) => {
         scheduled_time: new Date(dbJobObject.scheduled_time),
         original_images: dbJobObject.original_images,
         remaining_images: dbJobObject.remaining_images,
+        original_subreddits: originalSubreddits,
+        remaining_subreddits: remainingSubreddits,
         username: request.username || 'defaultUserId',
         selected_website: request.selectedWebsite,
         picture_post_order: request.picturePostOrder,
@@ -87,6 +95,7 @@ const createActiveJobObject = (request, dbJobObject, jobs) => {
 
     return activeJobObject;
 };
+
 
 const handleJobInsertion = async (request, dbObject, activeJobObject) => {
     try {
@@ -186,6 +195,8 @@ const scheduleRandomJobs = async (request, iterations) => {
 
         let remainingImages = [...request.selectedImages];
         const originalImages = [...request.selectedImages];
+        let remainingSubreddits = request.selectedWebsite === 'reddit' ? [...request.selectedSubreddits] : [];
+        const originalSubreddits = request.selectedWebsite === 'reddit' ? [...request.selectedSubreddits] : [];
 
         const getNextImage = () => {
             if (request.picturePostOrder === 'random') {
@@ -196,8 +207,15 @@ const scheduleRandomJobs = async (request, iterations) => {
             }
         };
 
+        const getNextSubreddit = () => {
+            if (request.selectedWebsite === 'reddit') {
+                const randomIndex = Math.floor(Math.random() * remainingSubreddits.length);
+                return remainingSubreddits.splice(randomIndex, 1)[0];
+            }
+        };
+
         const createJob = (delayTime, jobId) => {
-            return {
+            const job = {
                 message_id: uuidv4(),
                 jobSetId: jobSetId,
                 userId: request.username || 'defaultUserId',
@@ -206,6 +224,12 @@ const scheduleRandomJobs = async (request, iterations) => {
                 scheduledTime: Date.now() + delayTime, // This now represents the delay time
                 image: getNextImage()
             };
+
+            if (request.selectedWebsite === 'reddit') {
+                job.subreddit = getNextSubreddit();
+            }
+
+            return job;
         };
 
         let jobId = 1;
@@ -215,6 +239,10 @@ const scheduleRandomJobs = async (request, iterations) => {
             for (let i = 0; i < originalImages.length; i++) {
                 if (remainingImages.length === 0) {
                     remainingImages = [...originalImages];
+                }
+
+                if (remainingSubreddits.length === 0) {
+                    remainingSubreddits = [...originalSubreddits];
                 }
 
                 let intervalInMilliseconds;
@@ -233,8 +261,8 @@ const scheduleRandomJobs = async (request, iterations) => {
             }
         }
 
-        const dbJobObject = createRandomJobObject(request, jobSetId, originalImages, remainingImages, accumulatedDelay);
-        const activeJobObject = createActiveJobObject(request, dbJobObject, jobs);
+        const dbJobObject = createRandomJobObject(request, jobSetId, originalImages, remainingImages, accumulatedDelay, originalSubreddits, remainingSubreddits);
+        const activeJobObject = createActiveJobObject(request, dbJobObject, jobs, originalSubreddits, remainingSubreddits);
         return { jobs, originalImages, remainingImages, dbJobObject, activeJobObject };
     }
 };
@@ -255,6 +283,10 @@ const handleHourInterval = async (request) => {
         let remainingImages = [...request.selectedImages];
         const originalImages = [...request.selectedImages]; // Keep a copy of the original images for future use
 
+        // Create a copy of the selected subreddits array to keep track of remaining subreddits
+        let remainingSubreddits = request.selectedWebsite === 'reddit' ? [...request.selectedSubreddits] : [];
+        const originalSubreddits = request.selectedWebsite === 'reddit' ? [...request.selectedSubreddits] : []; // Keep a copy of the original subreddits for future use
+
         // Helper function to get the next image
         const getNextImage = () => {
             if (request.picturePostOrder === 'random') {
@@ -263,6 +295,12 @@ const handleHourInterval = async (request) => {
             } else if (request.picturePostOrder === 'order') {
                 return remainingImages.shift();
             }
+        };
+
+        // Helper function to get the next subreddit
+        const getNextSubreddit = () => {
+            const randomIndex = Math.floor(Math.random() * remainingSubreddits.length);
+            return remainingSubreddits.splice(randomIndex, 1)[0];
         };
 
         // Create the first job with an initial delay of 5 seconds
@@ -275,12 +313,21 @@ const handleHourInterval = async (request) => {
             scheduledTime: Date.now() + 5000, // 5 seconds delay for the first job
             image: getNextImage()
         };
+
+        if (request.selectedWebsite === 'reddit') {
+            firstJob.subreddit = getNextSubreddit();
+        }
+
         jobs.push(firstJob);
 
         // Create subsequent jobs
         for (let i = 1; i < maxJobs; i++) {
             if (remainingImages.length === 0) {
                 remainingImages = [...originalImages]; // Reset the remaining images if we've used them all
+            }
+
+            if (remainingSubreddits.length === 0) {
+                remainingSubreddits = [...originalSubreddits]; // Reset the remaining subreddits if we've used them all
             }
 
             const job = {
@@ -292,11 +339,16 @@ const handleHourInterval = async (request) => {
                 scheduledTime: firstJob.scheduledTime + (i * intervalInMilliseconds), // Delay time for each subsequent job
                 image: getNextImage()
             };
+
+            if (request.selectedWebsite === 'reddit') {
+                job.subreddit = getNextSubreddit();
+            }
+
             jobs.push(job);
         }
 
-        const dbJobObject = createScheduledJobObject(request, jobSetId, originalImages, remainingImages, Date.now());
-        const activeJobObject = createActiveJobObject(request, dbJobObject, jobs);
+        const dbJobObject = createScheduledJobObject(request, jobSetId, originalImages, remainingImages, Date.now(), originalSubreddits, remainingSubreddits);
+        const activeJobObject = createActiveJobObject(request, dbJobObject, jobs, originalSubreddits, remainingSubreddits);
         return { jobs, originalImages, remainingImages, dbJobObject, activeJobObject };
     }
 };
@@ -328,6 +380,10 @@ const handleSetInterval = async (request) => {
         let remainingImages = [...request.selectedImages];
         const originalImages = [...request.selectedImages]; // Keep a copy of the original images for future use
 
+        // Create a copy of the selected subreddits array to keep track of remaining subreddits
+        let remainingSubreddits = request.selectedWebsite === 'reddit' ? [...request.selectedSubreddits] : [];
+        const originalSubreddits = request.selectedWebsite === 'reddit' ? [...request.selectedSubreddits] : []; // Keep a copy of the original subreddits for future use
+
         // Helper function to get the next image
         const getNextImage = () => {
             if (request.picturePostOrder === 'random') {
@@ -336,6 +392,12 @@ const handleSetInterval = async (request) => {
             } else if (request.picturePostOrder === 'order') {
                 return remainingImages.shift();
             }
+        };
+
+        // Helper function to get the next subreddit
+        const getNextSubreddit = () => {
+            const randomIndex = Math.floor(Math.random() * remainingSubreddits.length);
+            return remainingSubreddits.splice(randomIndex, 1)[0];
         };
 
         // Helper function to format the time and create job
@@ -349,6 +411,10 @@ const handleSetInterval = async (request) => {
                 scheduledTime: Date.now() + delayInMilliseconds,
                 image: getNextImage()
             };
+
+            if (request.selectedWebsite === 'reddit') {
+                job.subreddit = getNextSubreddit();
+            }
 
             return job;
         };
@@ -391,13 +457,17 @@ const handleSetInterval = async (request) => {
                         if (remainingImages.length === 0) {
                             remainingImages = [...originalImages]; // Reset the remaining images if we've used them all
                         }
+
+                        if (remainingSubreddits.length === 0) {
+                            remainingSubreddits = [...originalSubreddits]; // Reset the remaining subreddits if we've used them all
+                        }
                     }
                 });
             });
         }
 
-        const dbJobObject = createScheduledJobObject(request, jobSetId, originalImages, remainingImages, Date.now());
-        const activeJobObject = createActiveJobObject(request, dbJobObject, jobs);
+        const dbJobObject = createScheduledJobObject(request, jobSetId, originalImages, remainingImages, Date.now(), originalSubreddits, remainingSubreddits);
+        const activeJobObject = createActiveJobObject(request, dbJobObject, jobs, originalSubreddits, remainingSubreddits);
         return { jobs, originalImages, remainingImages, dbJobObject, activeJobObject };
     }
 };

@@ -3,6 +3,7 @@ import axios from 'axios';
 export const createScheduledJob = async (schedule) => {
     const endpoint = 'http://localhost:3456/setSchedule';
     console.log('wee')
+    console.log(schedule)
     try {
       const response = await axios.post(endpoint, {scheduleData: schedule});
       return response.data;
