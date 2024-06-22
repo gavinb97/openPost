@@ -618,13 +618,21 @@ const uploadImage = async (accessToken, filePath) => {
 
 const uploadAndPostImage = async (accessToken, filePath, subredditName, title, text, comment) => {
     const imageUrl = await uploadImage(accessToken, filePath)
-   // this takes an r/subreddit not just the name
-    const postToRedditResponse = await postImageToSubreddit(`r/${subredditName}`, accessToken, imageUrl, title, text)
-    if (comment) {
-        // post comment under same post
-        await commentOnPost(accessToken, postToRedditResponse.id, comment)
+    let postToRedditResponse
+
+    try {
+        postToRedditResponse = await postImageToSubreddit(subredditName, accessToken, imageUrl, title, text)
+      
+    } catch (e) {
+        console.log('didnt post to reddit')
     }
-    console.log((postToRedditResponse) ? 'reddit post created successfully' : 'shit got fucked')
+    
+    // if (comment) {
+    //     // post comment under same post
+    //     await commentOnPost(accessToken, postToRedditResponse.id, comment)
+    // }
+    
+    console.log((postToRedditResponse.success) ? 'reddit post created successfully' : 'shit got fucked')
 }
 
 const getSubredditNamesFromFile = (filename) => {
@@ -758,6 +766,26 @@ const getPostersAndWriteToFile = async (subreddit, tokens, numberOfPosts) => {
        appendOrWriteToJsonFile('redditPosters.json', postersBySubreddit)
 }
 
+const postToSubredditOnBehalfOfUser = async (accessToken, text, mediaPath, subredditName, title) => {
+    try {
+        console.log(title)
+        console.log(text)
+        console.log(mediaPath)
+        console.log(subredditName)
+        console.log(accessToken)
+        try {
+            const response = await uploadAndPostImage(accessToken, mediaPath, subredditName, title, text)
+        } catch (e) {
+            console.log('error uploading to subreddit')
+        }
+        
+
+
+    } catch (error) {
+        console.error('Error during the process:', error);
+    }
+};
+
 
 module.exports = {
     getRedditLoginUrl,
@@ -766,7 +794,8 @@ module.exports = {
     revokeRedditAccessToken,
     getSubreddits,
     getSubredditsWithNSFWTag,
-    getSafeForWorkSubreddits
+    getSafeForWorkSubreddits,
+    postToSubredditOnBehalfOfUser
 }
 
 

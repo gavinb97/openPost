@@ -4,7 +4,7 @@ const { getCredsByUser } = require('../socialauthentication/socialAuthData')
 const { isJobIdPresent } = require('./jobsData')
 const fs = require('fs');
 const path = require('path');
-
+const { postToSubredditOnBehalfOfUser } = require('../socialauthentication/redditService')
 
 const makePost = async (job) => {
     // validate that job is active 
@@ -20,6 +20,7 @@ const makePost = async (job) => {
                 break;
             case 'reddit':
                 console.log('reddit')
+                await postToReddit(creds, job)
                 break;
             default:
                 console.log('no website, cant do anything...')
@@ -57,6 +58,19 @@ const postToTwitter = async (creds, job) => {
             const tweetText = job.content + randoString
             await tweetMediaOnBehalfOfUser(creds.twitterTokens.access_token, creds.twitterTokens.refresh_token, tweetText, path)
             console.log('tweet sent sucessfully')
+        }
+    }
+}
+
+const postToReddit = async (creds, job) => {
+    if (creds.redditTokens?.access_token && creds.redditTokens?.refresh_token) {
+        const path = await getMediaIfExists(job, job.userId)
+        if (path) {
+            const randoString = getRandom3LetterWord()
+            
+            const subredditName = job.subreddit.name
+            const text = job.content
+            await postToSubredditOnBehalfOfUser(creds.redditTokens.access_token, text, path, subredditName.toString(), randoString)
         }
     }
 }
