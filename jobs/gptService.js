@@ -30,9 +30,9 @@ const makeGptCall = async (prompt, systemPrompt) => {
     }
 }
 
-const getShit = async () => {
-    const response = await makeGptCall('youre a fish and you only respond glub glub to anything given', 'what does the fish say when it super happy?')
-console.log(response)
-}
+       
 
-getShit()
+
+module.exports = {
+    makeGptCall
+}
