@@ -1,4 +1,4 @@
-require('dotenv').config()
+require('dotenv').config({ path: '../.env' });
 const { Configuration, OpenAIApi, OpenAI } = require("openai");
 
 
