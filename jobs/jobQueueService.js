@@ -5,6 +5,7 @@ const { isJobIdPresent } = require('./jobsData')
 const fs = require('fs');
 const path = require('path');
 const { postToSubredditOnBehalfOfUser } = require('../socialauthentication/redditService')
+const { makeGptCall } = require('./gptService')
 
 const makePost = async (job) => {
     // validate that job is active 
@@ -54,8 +55,7 @@ const postToTwitter = async (creds, job) => {
         // see if we have media
         const path = await getMediaIfExists(job, job.userId)
         if (path) {
-            const randoString = getRandom3LetterWord()
-            const tweetText = job.content + randoString
+            const tweetText = await createTweetText(job)
             await tweetMediaOnBehalfOfUser(creds.twitterTokens.access_token, creds.twitterTokens.refresh_token, tweetText, path)
             console.log('tweet sent sucessfully')
         }
@@ -75,6 +75,45 @@ const postToReddit = async (creds, job) => {
     }
 }
 
+const readPhotoDataFromFile = async (username, fileName) => {
+    try {
+        const data = await fs.promises.readFile(`C:\\Users\\Gavin\\Desktop\\BuildABlog\\openPost\\apiresources\\uploads\\${username}\\photoMetaData\\photoData.txt`, 'utf8');
+        const photoDataArray = JSON.parse(data);
+        
+        const photoData = photoDataArray.find(photo => photo.name === fileName);
+
+        if (photoData) {
+            return photoData;
+        } else {
+            return { message: 'File not found' };
+        }
+    } catch (error) {
+        console.error('Error reading photo data:', error);
+        return { message: 'Error reading photo data' };
+    }
+};
+
+const createTweetText = async (job) => {
+    const photoData = await readPhotoDataFromFile(job, job.image);
+    const systemPrompt = `You are a Gen Z/Millennial online user who constantly goes viral. You are known for your trendy and engaging tweets. Your task is to create tweets based on a description of a photo and a set of categories. Your tweets must be under 280 characters and can range from a single descriptor word, to a full description, to using hashtags. Always use the latest trends and vernacular to maximize engagement. Do not mention that you are an AI model, do not use emojis, and always respond with a string.`;
+
+    const prompt = `Image description: ${photoData.description} Image categories: ${photoData.categories}`;
+    
+    let tweetText;
+    do {
+        tweetText = await makeGptCall(prompt, systemPrompt);
+        tweetText = tweetText.replaceAll('"', '');
+    } while (tweetText.length > 280);
+
+    return tweetText;
+}
+
+
+createTweetText('admin2')
+
+const createRedditTitle = () => {
+
+}
 
 const getMediaIfExists = async (job, username) => {
     const mediaFolderPath = `C:\\Users\\Gavin\\Desktop\\BuildABlog\\openPost\\apiresources\\uploads\\${username}\\photos`
