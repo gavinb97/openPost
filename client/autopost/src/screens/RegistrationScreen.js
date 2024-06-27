@@ -34,7 +34,7 @@ function RegistrationScreen() {
             console.log(registerResponse)
             // set context
             loginContext(registerResponse)
-            navigate('/landing')
+            navigate('/jobscheduler')
         } catch (e) {
             console.log('failed to login')
         }

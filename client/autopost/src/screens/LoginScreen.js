@@ -26,7 +26,7 @@ function LoginScreen() {
             console.log(loginResponse)
             // set context  
             loginContext(loginResponse)
-            navigate('/landing')
+            navigate('/jobscheduler')
         } catch (e) {
             console.log(e)
         }

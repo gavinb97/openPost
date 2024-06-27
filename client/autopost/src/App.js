@@ -37,7 +37,7 @@ function App() {
       element: <SocialsLoginScreen />
     },
     {
-      path: '/landing', // Corrected path with '/'
+      path: '/jobscheduler', // Corrected path with '/'
       element: <UserLandingScreen />
     },
     {

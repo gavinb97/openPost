@@ -109,7 +109,7 @@ const UploadedMediaContainerSmall = () => {
 
     return (
         <div>
-            <div className="image-container-outer" style={{ overflowX: 'scroll', height: '17vw', width: '100vw', display: 'flex', justifyContent: 'flex-start', border: '10px solid #ccc', padding: '10px'}}>
+            <div className="image-container-outer" style={{ overflowX: 'scroll', height: '16vw', width: 'auto', display: 'flex', justifyContent: 'flex-start', border: '10px solid #ccc', padding: '.5%'}}>
                 <div className="image-container" style={{ display: 'flex', flexWrap: 'nowrap'}}>
                     {mediaFiles.map((fileObject, index) => (
                         <div key={index} className={`image-box ${selectedImages.includes(index) ? 'selected' : ''}`} style={{ margin: '0 10px', textAlign: 'center', width: '200px' }} onClick={() => handleImageClick(index)}>
@@ -125,8 +125,9 @@ const UploadedMediaContainerSmall = () => {
                         </div>
                     ))}
                 </div>
+                
             </div>
-            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '10px' }}>
+            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '1%', minHeight: '10vh', minWidth: 'auto' }}>
                 {selectedImages.length > 0 && renderPhotoActionButtons()}
             </div>
             <div>

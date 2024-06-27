@@ -12,8 +12,8 @@ const Navbar = () => {
         {user ? (
           // Links for logged-in users
           <>
-            <li><Link to="/landing">User Landing</Link></li>
-            <li><Link to="/uploadMedia">Media Manager</Link></li>
+          <li><Link to="/uploadMedia">Media Manager</Link></li>
+            <li><Link to="/jobscheduler">Job Scheduler</Link></li>
             <li><Link to="/jobs">Jobs</Link></li>
             <li><Link to="/profile">Profile</Link></li>
           </>

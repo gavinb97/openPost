@@ -74,26 +74,52 @@ function UserLandingScreen() {
     const handleCloseScheduleModal = () => {
         setShowScheduleModal(false);
     };
+
+    const renderPostJobBox = () => {
+        return (
+            <div className='photo-post-job-container'>
+                <h2>Photo Post Job</h2>
+                <p>Click an image or multiple images to start a photo post job</p>
+                <UploadedMediaContainerSmall></UploadedMediaContainerSmall>
+            </div>
+        )
+    }
+
+    const renderCommentJobBox = () => {
+        return (
+            <div>
+                <h2>Comment Job</h2>
+                <p>Start job to automatically comment on other posts to boost engagement</p>
+                <button>Start Comment Job</button>
+                <br></br>
+            </div>
+        )
+    }
+
+    const renderDMJobBox = () => {
+        return (
+            <div>
+                <h2>Direct Message Job</h2>
+                <p>Start a job to directly message users.</p>
+                <button>Start DM Job</button>
+            </div>
+        )
+    }
     
     console.log('user: ' + user)
     console.log(user)
     return (
         <div className="App">
             <Navbar></Navbar>
-            <header className="App-header">
+            <header className="schedule-job-header">
                 <img src={otherLogo} className="App-logo" alt="logo" />
-                <h1>Were in fool</h1>
-                <div>
-                   <p>poop poopy poop</p>
-                </div>
+                <h2>Job Scheduler</h2>
             </header>
-            <div>
-                <button onClick={handleShowScheduleModal}>ooooh wee</button>
-            </div>
-            <div style={{display: 'flex', justifyContent: 'center'}}>
-                <UploadedMediaContainerSmall></UploadedMediaContainerSmall>
-            </div>
+            {renderPostJobBox()}
             
+            {renderCommentJobBox()}
+
+            {renderDMJobBox()}
             {/* Render SetScheduleModal if showScheduleModal is true */}
              {showScheduleModal && <SetScheduleModal closeModal={handleCloseScheduleModal} />}
         </div>
