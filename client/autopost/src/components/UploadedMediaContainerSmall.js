@@ -109,7 +109,7 @@ const UploadedMediaContainerSmall = () => {
 
     return (
         <div>
-            <div className="image-container-outer" style={{ overflowX: 'scroll', height: '16vw', width: 'auto', display: 'flex', justifyContent: 'flex-start', border: '10px solid #ccc', padding: '.5%'}}>
+            <div className="image-container-outer" style={{ overflowX: 'scroll', height: '30vh', width: 'auto', display: 'flex', justifyContent: 'flex-start', border: '10px solid #ccc', padding: '.5%'}}>
                 <div className="image-container" style={{ display: 'flex', flexWrap: 'nowrap'}}>
                     {mediaFiles.map((fileObject, index) => (
                         <div key={index} className={`image-box ${selectedImages.includes(index) ? 'selected' : ''}`} style={{ margin: '0 10px', textAlign: 'center', width: '200px' }} onClick={() => handleImageClick(index)}>

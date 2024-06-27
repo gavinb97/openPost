@@ -121,7 +121,6 @@ const createRedditTitle = async (job) => {
         title = await makeGptCall(prompt, systemPrompt);
         title = title.replaceAll('"', '');
     } while (title.length > 100);
-
     return title;
 }
 

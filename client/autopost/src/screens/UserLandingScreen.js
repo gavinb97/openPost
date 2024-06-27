@@ -11,61 +11,15 @@ import SetScheduleModal from '../components/SetScheduleModal';
 import Navbar from '../components/Navbar'
 import { useAuth } from '../service/authContext';
 import { getUserCreds } from '../service/userService';
+import StartPostJobModal from '../components/StartPostJobModal';
 
 function UserLandingScreen() {
     const navigate = useNavigate();
     const [showScheduleModal, setShowScheduleModal] = useState(false);
+    const [showPostJobModal, setShowPostJobModal] = useState(false)
     
 
     const { user  } = useAuth()
-
-    // const [credentials, setCredentials] = useState({});
-    // const [isLoggedIn, setIsLoggedIn] = useState({
-    //   twitter: false,
-    //   reddit: false,
-    //   youtube: false,
-    //   tiktok: false,
-    // });
-    // const [isLoading, setIsLoading] = useState(true); // Added loading state
-  
-
-    // useEffect(() => {
-    //   setIsLoading(true); // Start loading
-    //   getUserCreds(user.username)
-    //     .then((creds) => {
-    //       if (creds) {
-    //         setIsLoggedIn({
-    //           twitter: !!creds.twitterTokens,
-    //           reddit: !!creds.redditTokens,
-    //           youtube: !!creds.youtubeTokens,
-    //           tiktok: !!creds.tiktokTokens,
-    //         });
-    //         setCredentials(creds);
-    //         loginContext(creds)
-    //       } else {
-    //         console.log("No credentials found for the user.");
-    //         setIsLoggedIn({
-    //           twitter: false,
-    //           reddit: false,
-    //           youtube: false,
-    //           tiktok: false,
-    //         });
-    //         setCredentials({});
-    //       }
-    //       setIsLoading(false); // End loading
-    //     })
-    //     .catch(error => {
-    //       console.error("Failed to fetch credentials:", error);
-    //       setIsLoggedIn({
-    //         twitter: false,
-    //         reddit: false,
-    //         youtube: false,
-    //         tiktok: false,
-    //       });
-    //       setCredentials({});
-    //       setIsLoading(false); // End loading even on error
-    //     });
-    // }, [user.username]);
 
     const handleShowScheduleModal = () => {
         setShowScheduleModal(true);
@@ -74,6 +28,17 @@ function UserLandingScreen() {
     const handleCloseScheduleModal = () => {
         setShowScheduleModal(false);
     };
+
+    const handleClosePostJobModal = () => {
+        setShowPostJobModal(false);
+    };
+
+    const handleShowPostJobModal = () => {
+        console.log('clidked hehe')
+        setShowPostJobModal(true);
+    };
+
+
 
     const renderPostJobBox = () => {
         return (
@@ -91,6 +56,17 @@ function UserLandingScreen() {
                 <h2>Comment Job</h2>
                 <p>Start job to automatically comment on other posts to boost engagement</p>
                 <button>Start Comment Job</button>
+                <br></br>
+            </div>
+        )
+    }
+
+    const renderTextPostJobBox = () => {
+        return (
+            <div style={{ marginBottom: '2%', textAlign: 'center' }}>
+                <h2>Post Job</h2>
+                <p>Automatically post to your social networks</p>
+                <button onClick={() => handleShowPostJobModal()}>Start Post Job</button>
                 <br></br>
             </div>
         )
@@ -116,12 +92,17 @@ function UserLandingScreen() {
                 <h2>Job Scheduler</h2>
             </header>
             {renderPostJobBox()}
+            <div style={{ textAlign: 'center' }}>
+                {renderTextPostJobBox()}
+            </div>
+            
             
             {renderCommentJobBox()}
 
             {renderDMJobBox()}
             {/* Render SetScheduleModal if showScheduleModal is true */}
              {showScheduleModal && <SetScheduleModal closeModal={handleCloseScheduleModal} />}
+             {showPostJobModal && <StartPostJobModal closeModal={handleClosePostJobModal}></StartPostJobModal>}
         </div>
     );
 }
