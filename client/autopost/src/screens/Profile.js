@@ -86,7 +86,7 @@ function Profile() {
     };
     
     return (
-        <div className="App">
+        <div className="App" style={{ marginBottom: '2%', textAlign: 'center' }}>
             <Navbar></Navbar>
 
             <div>

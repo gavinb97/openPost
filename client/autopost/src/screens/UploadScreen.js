@@ -14,7 +14,7 @@ function UploadScreen() {
     };
 
     return (
-        <div className="App">
+        <div className="App" style={{ textAlign: 'center' }}>
             <Navbar></Navbar>
             <div>
                 <div className="upload-box-container">

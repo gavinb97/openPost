@@ -46,7 +46,7 @@ function Jobs() {
       }, []);
 
     return (
-        <div className="App">
+        <div className="App" style={{ marginBottom: '2%', textAlign: 'center' }}>
             <Navbar />
            
             {showModal && <SetScheduleModal closeModal={handleClose} />}

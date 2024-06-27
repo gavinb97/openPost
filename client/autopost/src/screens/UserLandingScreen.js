@@ -77,7 +77,7 @@ function UserLandingScreen() {
 
     const renderPostJobBox = () => {
         return (
-            <div className='photo-post-job-container'>
+            <div className='photo-post-job-container' style={{ textAlign: 'center' }}>
                 <h2>Photo Post Job</h2>
                 <p>Click an image or multiple images to start a photo post job</p>
                 <UploadedMediaContainerSmall></UploadedMediaContainerSmall>
@@ -87,7 +87,7 @@ function UserLandingScreen() {
 
     const renderCommentJobBox = () => {
         return (
-            <div style={{ marginBottom: '2%' }}>
+            <div style={{ marginBottom: '2%', textAlign: 'center' }}>
                 <h2>Comment Job</h2>
                 <p>Start job to automatically comment on other posts to boost engagement</p>
                 <button>Start Comment Job</button>
@@ -98,7 +98,7 @@ function UserLandingScreen() {
 
     const renderDMJobBox = () => {
         return (
-            <div style={{ marginBottom: '2%' }}>
+            <div style={{ marginBottom: '2%', textAlign: 'center' }}>
                 <h2>Direct Message Job</h2>
                 <p>Start a job to directly message users.</p>
                 <button>Start DM Job</button>
