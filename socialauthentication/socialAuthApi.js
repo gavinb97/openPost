@@ -148,9 +148,10 @@ app.post('/redditloginurl', async (req, res) => {
     
     const code = req.query.code
     const state = req.query.state
+    console.log(state)
     const {url, oauth2Client} = await getAuthClientYoutube(state)
     const {tokens} = await oauth2Client.getToken(code)
-    
+    console.log(tokens)
     // oauth2Client.setCredentials({
     //   access_token: tokens.access_token,
     //   refresh_token: tokens.refresh_token

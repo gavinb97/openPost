@@ -299,7 +299,7 @@ const updateTikTokTokens = async (username, accessToken, refreshToken) => {
 };
 
 const updateYouTubeTokens = async (username, accessToken, refreshToken) => {
-    if (!username || !accessToken || !refreshToken) {
+    if (!username || !accessToken) {
         throw new Error('Username, access token, and refresh token are required.');
     }
 
@@ -523,9 +523,40 @@ const getCredsByUser = async (username) => {
     }
 };
 
+const getUserNames = async () => {
+    try {
+        // Connect to the pool
+        const client = await pool.connect();
+
+        try {
+            // Query to get all usernames
+            const query = `
+                SELECT username
+                FROM user_creds
+            `;
+            const res = await client.query(query);
+
+            if (res.rows.length === 0) {
+                throw new Error('No usernames found in user_creds table.');
+            }
+
+            // Extract usernames from the result
+            const usernames = res.rows.map(row => row.username);
+
+            return usernames;
+        } finally {
+            // Release the client back to the pool
+            client.release();
+        }
+    } catch (error) {
+        console.error('Error getting usernames from user_creds table:', error);
+        throw error;
+    }
+};
+
 
 module.exports = { 
     registerUserDB, authenticateUserDB, getCredsByUser, updateTwitterCodeVerifier,
     updateTwitterTokens, revokeTwitterTokens, getTwitterCodeVerifierByUsername, updateRedditTokens, revokeRedditTokens,
-    updateTikTokTokens, revokeTikTokTokens, updateYouTubeTokens, revokeYouTubeTokens
+    updateTikTokTokens, revokeTikTokTokens, updateYouTubeTokens, revokeYouTubeTokens, getUserNames
 }
