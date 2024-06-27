@@ -87,7 +87,7 @@ function UserLandingScreen() {
 
     const renderCommentJobBox = () => {
         return (
-            <div>
+            <div style={{ marginBottom: '2%' }}>
                 <h2>Comment Job</h2>
                 <p>Start job to automatically comment on other posts to boost engagement</p>
                 <button>Start Comment Job</button>
@@ -98,7 +98,7 @@ function UserLandingScreen() {
 
     const renderDMJobBox = () => {
         return (
-            <div>
+            <div style={{ marginBottom: '2%' }}>
                 <h2>Direct Message Job</h2>
                 <p>Start a job to directly message users.</p>
                 <button>Start DM Job</button>

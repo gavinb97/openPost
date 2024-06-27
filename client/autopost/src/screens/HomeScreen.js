@@ -10,13 +10,9 @@ import Navbar from '../components/Navbar'
 function HomeScreen() {
     const navigate = useNavigate()
     
-    return (
-        <div className="App">
-            <Navbar></Navbar>
-            <header className="App-header">
-                <img src={otherLogo} className="App-logo" alt="logo" />
-            <h1>Simplify Social, Amplify Results - OnlyPosts!</h1>
-                <div>
+    const renderWelcome = () => {
+        return (
+            <div className='home-page-body'>
                     <p>Tired of spending countless hours managing your social media accounts? Say goodbye to manual posting and engagement tasks with OnlyPosts, the revolutionary platform that empowers you to automate your entire social media presence effortlessly.</p>
                     <br></br>
                     <p>OnlyPosts leverages cutting-edge artificial intelligence technology to streamline your social media management tasks. From scheduling and publishing captivating posts to engaging with your audience through comments and direct messages, OnlyPosts handles it all with precision and efficiency.</p>
@@ -26,21 +22,45 @@ function HomeScreen() {
                     <p>Join the thousands of satisfied users who have unlocked the power of social media automation with OnlyPosts. Whether you're a busy entrepreneur, a social media influencer, or a marketing professional, OnlyPosts is your secret weapon for maximizing your online presence while saving time and effort.</p>
                     <br></br>
                     <p>Experience the future of social media management with OnlyPosts - where automation meets innovation, and success is just a click away.</p>
-                </div>
+            </div>
+        )
+    }
 
+    const renderWhoThisIsFor = () => {
+        return (
+            <div className='who-this-is-for-container'>
+                <h2>With OnlyPosts you will</h2>
+                <ul>
+                    <li>Build a community</li>
+                    <li>Expand your reach</li>
+                    <li>Grow your business</li>
+                    <li>Drive engagement</li>
+                    <li>Boost sales</li>
+                    <li>Increase traffic</li>
+                </ul>
+            </div>
+        )
+    }
+
+    return (
+        <div className="App">
+            <Navbar></Navbar>
+            <header className="App-header">
+                <img src={otherLogo} className="App-logo" alt="logo" />
+            <h2>Simplify Social, Amplify Results - OnlyPosts!</h2>
             </header>
-            <div>
-                <h1>whaddup bish</h1>
-                <h2>Come register eh</h2>
-                
+            {renderWelcome()}
+            {renderWhoThisIsFor()}
+            <div style={{ marginBottom: '1%', paddingLeft: '3%' }}>
+                <h1>Get started Automating your socials</h1>
                 <button onClick={() => navigate('/registration')}>Register Now</button>
             </div>
 
-            <div>
-                <h1>Oh already got an account?</h1>
-                <h2>login then</h2>
-                <button onClick={() => navigate('/login')}>login here</button>
+            <div style={{ marginBottom: '5%', paddingLeft: '3%' }}>
+                <h1>Already have an account?</h1>
+                <button onClick={() => navigate('/login')}>Login Here</button>
             </div>
+
         </div>
     );
 }
