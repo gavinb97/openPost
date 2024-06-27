@@ -67,7 +67,7 @@ const getAccessTokenAndOpenId = async (code, state) => {
     
   }
 
-  const refreshTikTokAccessToken = async (refreshToken) => {
+  const refreshTikTokAccessToken = async (refreshToken, user) => {
     let token = ''
     if (refreshToken) {
       token = refreshToken

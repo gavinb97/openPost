@@ -9,8 +9,8 @@ const { refreshTwitterAccessToken } = require('../twitterService')
 const { refreshTikTokAccessToken } = require('../tiktokService.js')
 const { refreshYoutubeAccessToken } = require('../youtubeService.js')
  
+const { getCredsByUser } = require('../socialAuthData')
  
-
 const refreshToken = async (refreshToken, platform, user) => {
   try {
     let newTokens;
@@ -19,29 +19,23 @@ const refreshToken = async (refreshToken, platform, user) => {
       case 'youtubeTokens':
         newTokens = await refreshYoutubeAccessToken(refreshToken, user);
         break;
-
       case 'redditTokens':
-        
         newTokens = await getRedditRefreshToken(refreshToken, user);
         break;
-
-      case 'twitterTokens':
-        newTokens = await refreshTwitterAccessToken(refreshToken, user);
-        break;
-
+      // case 'twitterTokens':
+      //   console.log('Twitter tokens are infinite!')
+      //   break;
       case 'tiktokTokens':
-        newTokens = await refreshTikTokAccessToken(refreshToken);
+        newTokens = await refreshTikTokAccessToken(refreshToken, user);
         break;
-
       default:
         throw new Error(`Unknown platform: ${platform}`);
     }
-      console.log(newTokens)
-      console.log('deez da tokens')
+
     if (newTokens && newTokens.access_token) {
       return {
         access_token: newTokens.access_token,
-        refresh_token: newTokens.refresh_token || refreshToken, // if refresh token changes, use new one, otherwise old one
+        refresh_token: newTokens.refresh_token || refreshToken,
       };
     } else {
       throw new Error(`Failed to refresh token for platform: ${platform}`);
@@ -52,45 +46,29 @@ const refreshToken = async (refreshToken, platform, user) => {
   }
 };
 
-// Arrow function to update credentials
-const refreshCredentials = async (filePath) => {
-  // Read the creds.json file
-  const fileData = fs.readFileSync(filePath, 'utf8');
-  const credentials = JSON.parse(fileData);
+const refreshAllTokensForUser = async (username) => {
+  try {
+    const userCreds = await getCredsByUser(username);
+    
+    const platforms = ['redditTokens', 'tiktokTokens', 'youtubeTokens'];
+    const refreshResults = {};
 
-  // Loop through each set of credentials
-  for (let user of credentials) {
-    const platforms = ['youtubeTokens', 'redditTokens', 'tiktokTokens', 'twitterTokens'];
-
-    for (let platform of platforms) {
-      if (user[platform]) {
-        // If a platform's tokens are found, call refreshToken and update credentials
-        const { refresh_token, access_token } = user[platform];
-
-        if (refresh_token) {
-          console.log(`Refreshing ${platform} tokens for user: ${user.user}`);
-          
-          // Get the new tokens
-          console.log(`refresh token: ${refresh_token}`)
-          const newTokens = await refreshToken(refresh_token, platform, user);
-          console.log(newTokens)
-          console.log('new tokens')
-          // Update the access token and refresh token in the user object
-          user[platform].access_token = newTokens.access_token || access_token;
-          user[platform].refresh_token = newTokens.refresh_Token || refresh_token;
-        }
+    for (const platform of platforms) {
+      const tokens = userCreds[platform];
+      if (tokens && tokens.refresh_token) {
+        console.log(`Refreshing ${platform} tokens for user ${username}`);
+        const newTokens = await refreshToken(tokens.refresh_token, platform, username);
+        refreshResults[platform] = newTokens;
       }
     }
+
+    return refreshResults;
+  } catch (error) {
+    console.error(`Error refreshing tokens for user ${username}:`, error);
+    return null;
   }
-
-  // Write the updated credentials back to the file
-  fs.writeFileSync(filePath, JSON.stringify(credentials, null, 2));
-
-  console.log('Credentials refreshed and saved.');
 };
 
-// Call the function with the file path
-const filePath = path.join(__dirname, 'creds.json');
-refreshCredentials(filePath)
-  .then(() => console.log('Refresh complete'))
-  .catch((err) => console.error('Error refreshing credentials:', err));
+refreshAllTokensForUser('admin2')
+  .then(results => console.log('Token refresh results:', results))
+  .catch(error => console.error('Error:', error));
