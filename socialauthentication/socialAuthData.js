@@ -486,7 +486,8 @@ const getCredsByUser = async (username) => {
             const res = await client.query(query, [username]);
 
             if (res.rows.length === 0) {
-                throw new Error('Username not found in user_creds table.');
+                console.log('Username not found in user_creds tablfe.');
+                return
             }
 
             const userCreds = res.rows[0];

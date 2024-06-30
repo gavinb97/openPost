@@ -29,6 +29,8 @@ const StartPostJobModal = ({ closeModal, selectedImages }) => {
     const [selectedSubreddits, setSelectedSubreddits] = useState([]);
     const [subredditList, setSubredditList] = useState([]);
   
+    const [postType, setPostType] = useState('ai')
+
     useEffect(() => {
       if (selectedWebsite === 'reddit') {
         const fetchSubreddits = async () => {
@@ -104,6 +106,10 @@ const StartPostJobModal = ({ closeModal, selectedImages }) => {
     const handleHourIntervalChange = (e) => {
       setHourInterval(parseInt(e.target.value));
     };
+
+    const handlePostTypeChange = (e) => {
+        setPostType(e.target.value)
+    }
   
     const handleAddTime = () => {
       setTimesOfDay([...timesOfDay, { hour: '1', minute: '00', ampm: 'am' }]);
@@ -128,6 +134,66 @@ const StartPostJobModal = ({ closeModal, selectedImages }) => {
     const handleDurationChange = (e) => {
       setDurationOfJob(e.target.value);
     };
+
+    const renderTimeInput = () => {
+        return (
+                <div className="input-group">
+                  {timesOfDay.map((time, index) => (
+                    <div key={index} style={{ display: 'flex', alignItems: 'center' }}>
+                      <select value={time.hour} onChange={(e) => handleTimeChange(index, 'hour', e.target.value)}>
+                        {[...Array(12)].map((_, i) => (
+                          <option key={i} value={i + 1}>
+                            {i + 1}
+                          </option>
+                        ))}
+                      </select>
+                      <select value={time.minute} onChange={(e) => handleTimeChange(index, 'minute', e.target.value)}>
+                        {[...Array(60)].map((_, i) => (
+                          <option key={i} value={i}>
+                            {i < 10 ? `0${i}` : i}
+                          </option>
+                        ))}
+                      </select>
+                      <select value={time.ampm} onChange={(e) => handleTimeChange(index, 'ampm', e.target.value)}>
+                        <option value="am">AM</option>
+                        <option value="pm">PM</option>
+                      </select>
+                      <button onClick={() => handleRemoveTime(index)}>x</button>
+                    </div>
+                  ))}
+                  <button onClick={handleAddTime}>Add Time</button>
+                </div>
+        )
+    }
+
+    const renderDayOfWeekSelect = () => {
+        return (
+                <div className="input-group">
+                  {daysOfWeek.map((day, index) => (
+                    <button
+                      key={index}
+                      className={selectedDays[day] ? 'selected-day' : ''}
+                      onClick={() => handleDayClick(day)}
+                    >
+                      {day}
+                    </button>
+                  ))}
+                </div>
+              
+        )
+    }
+
+    const renderPostOrder = () => {
+        return (
+            <div className="input-group">
+            <label htmlFor="postOrderSelect">Post order:</label>
+            <select id="postOrderSelect" value={picturePostOrder} onChange={handlePicturePostOrderChange}>
+              <option value="random">Random</option>
+              <option value="order">In order</option>
+            </select>
+          </div>
+        )
+    }
   
   
     const handleSave = async () => {
@@ -144,31 +210,144 @@ const StartPostJobModal = ({ closeModal, selectedImages }) => {
         selectedImages,
         durationOfJob,
         selectedSubreddits,
+        postType,
+        tweetInputs
       };
-      
-      const job = await validateAndFormatScheduleData(scheduleData)
+      console.log(scheduleData)
+    //   const job = await validateAndFormatScheduleData(scheduleData)
   
-      console.log('Schedule Data:', job);
-      await createScheduledJob(job);
+    //   console.log('Schedule Data:', job);
+    //   await createScheduledJob(job);
     };
 
     const renderPostTypeSelect = () => {
         return (
             <div className="input-group">
-            <label htmlFor="postTypeSelect">Post order:</label>
-            <select id="postTypeSelect" value={picturePostOrder} onChange={handlePicturePostOrderChange}>
+            <label htmlFor="postTypeSelect">Post Type:</label>
+            <select id="postTypeSelect" value={postType} onChange={handlePostTypeChange}>
               <option value="ai">Ai Generated</option>
               <option value="User">User Generated</option>
             </select>
           </div>
         )
     }
+
+    const [tweetInputs, setTweetInputs] = useState([
+        { text: '', time: { hour: '1', minute: '00', ampm: 'AM' }, date: new Date().toISOString().slice(0, 10) }
+    ]);
+    
+    const addInput = () => {
+        setTweetInputs([...tweetInputs, { text: '', time: { hour: '1', minute: '00', ampm: 'AM' }, date: new Date().toISOString().slice(0, 10) }]);
+    };
+    
+    const handleInputChange = (index, value) => {
+        const newInputs = [...tweetInputs];
+        newInputs[index].text = value;
+        setTweetInputs(newInputs);
+    };
+    
+    const handleTweetTimeChange = (index, field, value) => {
+        const updatedInputs = tweetInputs.map((input, i) => {
+            if (i === index) {
+                return {
+                    ...input,
+                    time: { ...input.time, [field]: value }
+                };
+            }
+            return input;
+        });
+        setTweetInputs(updatedInputs);
+    };
+    
+    const handleDateChange = (index, value) => {
+        const updatedInputs = tweetInputs.map((input, i) => {
+            if (i === index) {
+                return { ...input, date: value };
+            }
+            return input;
+        });
+        setTweetInputs(updatedInputs);
+    };
+    
+    const deleteInput = (index) => {
+        const newInputs = tweetInputs.filter((_, i) => i !== index);
+        setTweetInputs(newInputs);
+    };
+    
+    const renderUserGeneratedInput = () => {
+        if (selectedWebsite === 'twitter' && postType === 'User') {
+            return (
+                <div>
+                    {tweetInputs.map((input, index) => (
+                        <div key={index} style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
+                            <label style={{ marginRight: '10px' }}>{index + 1}:</label>
+                            <input
+                                type="text"
+                                value={input.text}
+                                onChange={(e) => handleInputChange(index, e.target.value)}
+                                style={{ marginRight: '10px' }}
+                                maxLength={280}
+                            />
+                            {scheduleInterval === 'set' && (
+                                <>
+                                    <select
+                                        style={{ marginRight: '10px' }}
+                                        value={input.time.hour}
+                                        onChange={(e) => handleTweetTimeChange(index, 'hour', e.target.value)}
+                                    >
+                                        {[...Array(12)].map((_, i) => (
+                                            <option key={i} value={i + 1}>
+                                                {i + 1}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    <select
+                                        style={{ marginRight: '10px' }}
+                                        value={input.time.minute}
+                                        onChange={(e) => handleTweetTimeChange(index, 'minute', e.target.value)}
+                                    >
+                                        {[...Array(60)].map((_, i) => (
+                                            <option key={i} value={i < 10 ? `0${i}` : i}>
+                                                {i < 10 ? `0${i}` : i}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    <select
+                                        style={{ marginRight: '10px' }}
+                                        value={input.time.ampm}
+                                        onChange={(e) => handleTweetTimeChange(index, 'ampm', e.target.value)}
+                                    >
+                                        <option value="AM">AM</option>
+                                        <option value="PM">PM</option>
+                                    </select>
+                                    <input
+                                        type="date"
+                                        value={input.date}
+                                        onChange={(e) => handleDateChange(index, e.target.value)}
+                                        style={{ marginRight: '10px' }}
+                                    />
+                                </>
+                            )}
+                            {index === tweetInputs.length - 1 ? (
+                                <button onClick={addInput}>+</button>
+                            ) : (
+                                <button onClick={() => deleteInput(index)}>-</button>
+                            )}
+                        </div>
+                    ))}
+                </div>
+            );
+        }
+    };
+
   
     return (
       <div className="SetScheduleModal-modal-container" style={{ marginBottom: '2%', textAlign: 'center' }}>
         <div className="SetScheduleModal-modal-backdrop" onClick={closeModal}></div>
         <div className="SetScheduleModal">
           <h2>Start Post Job</h2>
+
+
           <div className="input-group">
             <label htmlFor="website">Website:</label>
             <select id="website" value={selectedWebsite} onChange={handleWebsiteChange}>
@@ -176,14 +355,8 @@ const StartPostJobModal = ({ closeModal, selectedImages }) => {
               <option value="reddit">Reddit</option>
             </select>
           </div>
-  
-          <div className="input-group">
-            <label htmlFor="postOrderSelect">Post order:</label>
-            <select id="postOrderSelect" value={picturePostOrder} onChange={handlePicturePostOrderChange}>
-              <option value="random">Random</option>
-              <option value="order">In order</option>
-            </select>
-          </div>
+
+          {renderPostTypeSelect()}
   
           <div className="input-group">
             <label htmlFor="scheduleTypeSelect">Schedule Type:</label>
@@ -192,22 +365,9 @@ const StartPostJobModal = ({ closeModal, selectedImages }) => {
               <option value="scheduled">Scheduled</option>
             </select>
           </div>
+
+          {scheduleType === 'random' && renderPostOrder()}
   
-          {scheduleType === 'random' && (
-            <div className="input-group">
-              <label htmlFor="durationSelect">Job duration: </label>
-              <select id="durationSelect" value={durationOfJob} onChange={handleDurationChange}>
-                <option value="">Select duration</option>
-                <option value="forever">Forever</option>
-                <option value="1">1 iteration</option>
-                <option value="2">2 iterations</option>
-                <option value="3">3 iterations</option>
-                <option value="4">4 iterations</option>
-                <option value="5">5 iterations</option>
-              </select>
-              <p>*a single iteration is every photo selected posted a singular time</p>
-            </div>
-          )}
   
           {scheduleType === 'scheduled' && (
             <div className="input-group">
@@ -222,7 +382,7 @@ const StartPostJobModal = ({ closeModal, selectedImages }) => {
   
           {scheduleType === 'scheduled' && scheduleInterval === 'hour' && (
             <div className="input-group">
-              <label>Every:</label>
+              <label>Post every: </label>
               <select value={hourInterval} onChange={handleHourIntervalChange}>
                 {[...Array(24)].map((_, index) => (
                   <option key={index} value={index + 1}>
@@ -234,48 +394,11 @@ const StartPostJobModal = ({ closeModal, selectedImages }) => {
             </div>
           )}
   
-          {scheduleType === 'scheduled' && scheduleInterval === 'set' && (
-            <div className="input-group">
-              {timesOfDay.map((time, index) => (
-                <div key={index} style={{ display: 'flex', alignItems: 'center' }}>
-                  <select value={time.hour} onChange={(e) => handleTimeChange(index, 'hour', e.target.value)}>
-                    {[...Array(12)].map((_, i) => (
-                      <option key={i} value={i + 1}>
-                        {i + 1}
-                      </option>
-                    ))}
-                  </select>
-                  <select value={time.minute} onChange={(e) => handleTimeChange(index, 'minute', e.target.value)}>
-                    {[...Array(60)].map((_, i) => (
-                      <option key={i} value={i}>
-                        {i < 10 ? `0${i}` : i}
-                      </option>
-                    ))}
-                  </select>
-                  <select value={time.ampm} onChange={(e) => handleTimeChange(index, 'ampm', e.target.value)}>
-                    <option value="am">AM</option>
-                    <option value="pm">PM</option>
-                  </select>
-                  <button onClick={() => handleRemoveTime(index)}>x</button>
-                </div>
-              ))}
-              <button onClick={handleAddTime}>Add Time</button>
-            </div>
-          )}
+          {scheduleType === 'scheduled' && scheduleInterval === 'set' && selectedWebsite !== 'twitter' && renderTimeInput()}
   
-          {scheduleType === 'scheduled' && scheduleInterval === 'set' && (
-            <div className="input-group">
-              {daysOfWeek.map((day, index) => (
-                <button
-                  key={index}
-                  className={selectedDays[day] ? 'selected-day' : ''}
-                  onClick={() => handleDayClick(day)}
-                >
-                  {day}
-                </button>
-              ))}
-            </div>
-          )}
+          {scheduleType === 'scheduled' && scheduleInterval === 'set' && selectedWebsite !== 'twitter' && renderDayOfWeekSelect()}
+
+          {scheduleType === 'scheduled' && renderUserGeneratedInput()}
   
           {(selectedWebsite === 'twitter' || selectedWebsite === 'youtube' || selectedWebsite === 'tiktok') && (
             <div>
