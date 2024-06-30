@@ -211,7 +211,8 @@ const StartPostJobModal = ({ closeModal, selectedImages }) => {
         durationOfJob,
         selectedSubreddits,
         postType,
-        tweetInputs
+        tweetInputs,
+        aiPrompt
       };
       console.log(scheduleData)
     //   const job = await validateAndFormatScheduleData(scheduleData)
@@ -233,11 +234,24 @@ const StartPostJobModal = ({ closeModal, selectedImages }) => {
     }
 
     const [tweetInputs, setTweetInputs] = useState([
-        { text: '', time: { hour: '1', minute: '00', ampm: 'AM' }, date: new Date().toISOString().slice(0, 10) }
+        {
+            id: 1,
+            text: '',
+            time: { hour: '1', minute: '00', ampm: 'AM' },
+            date: new Date().toISOString().slice(0, 10),
+        },
     ]);
     
     const addInput = () => {
-        setTweetInputs([...tweetInputs, { text: '', time: { hour: '1', minute: '00', ampm: 'AM' }, date: new Date().toISOString().slice(0, 10) }]);
+        setTweetInputs((prev) => [
+            ...prev,
+            {
+                id: prev.length + 1,
+                text: '',
+                time: { hour: '1', minute: '00', ampm: 'AM' },
+                date: new Date().toISOString().slice(0, 10),
+            },
+        ]);
     };
     
     const handleInputChange = (index, value) => {
@@ -251,7 +265,7 @@ const StartPostJobModal = ({ closeModal, selectedImages }) => {
             if (i === index) {
                 return {
                     ...input,
-                    time: { ...input.time, [field]: value }
+                    time: { ...input.time, [field]: value },
                 };
             }
             return input;
@@ -270,7 +284,10 @@ const StartPostJobModal = ({ closeModal, selectedImages }) => {
     };
     
     const deleteInput = (index) => {
-        const newInputs = tweetInputs.filter((_, i) => i !== index);
+        const newInputs = tweetInputs.filter((_, i) => i !== index).map((input, i) => ({
+            ...input,
+            id: i + 1,
+        }));
         setTweetInputs(newInputs);
     };
     
@@ -279,8 +296,8 @@ const StartPostJobModal = ({ closeModal, selectedImages }) => {
             return (
                 <div>
                     {tweetInputs.map((input, index) => (
-                        <div key={index} style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
-                            <label style={{ marginRight: '10px' }}>{index + 1}:</label>
+                        <div key={input.id} style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
+                            <label style={{ marginRight: '10px' }}>{input.id}:</label>
                             <input
                                 type="text"
                                 value={input.text}
@@ -339,6 +356,61 @@ const StartPostJobModal = ({ closeModal, selectedImages }) => {
             );
         }
     };
+    
+    const renderUserGeneratedInputRandomSchedule = () => {
+        if (selectedWebsite === 'twitter' && postType === 'User' && scheduleType === 'random') {
+            return (
+                <div>
+                    {tweetInputs.map((input, index) => (
+                        <div key={input.id} style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
+                            <label style={{ marginRight: '10px' }}>{input.id}:</label>
+                            <input
+                                type="text"
+                                value={input.text}
+                                onChange={(e) => handleInputChange(index, e.target.value)}
+                                style={{ marginRight: '10px' }}
+                                maxLength={280}
+                            />
+                            {index === tweetInputs.length - 1 ? (
+                                <button onClick={addInput}>+</button>
+                            ) : (
+                                <button onClick={() => deleteInput(index)}>-</button>
+                            )}
+                        </div>
+                    ))}
+                </div>
+            );
+        }
+    };
+
+    const [aiPrompt, setAIPrompt] = useState({ style: '', contentType: '' });
+
+const handleAIPromptChange = (field, value) => {
+    setAIPrompt(prev => ({ ...prev, [field]: value }));
+};
+
+const renderAIPrompt = () => {
+    return (
+        <div>
+            <div style={{ marginBottom: '10px' }}>
+                <label style={{ marginRight: '10px' }}>Style:</label>
+                <input
+                    type="text"
+                    value={aiPrompt.style}
+                    onChange={(e) => handleAIPromptChange('style', e.target.value)}
+                />
+            </div>
+            <div style={{ marginBottom: '10px' }}>
+                <label style={{ marginRight: '10px' }}>Type of Content:</label>
+                <input
+                    type="text"
+                    value={aiPrompt.contentType}
+                    onChange={(e) => handleAIPromptChange('contentType', e.target.value)}
+                />
+            </div>
+        </div>
+    );
+};
 
   
     return (
@@ -366,7 +438,7 @@ const StartPostJobModal = ({ closeModal, selectedImages }) => {
             </select>
           </div>
 
-          {scheduleType === 'random' && renderPostOrder()}
+          {scheduleType === 'random' && postType !== 'ai' && renderPostOrder()}
   
   
           {scheduleType === 'scheduled' && (
@@ -393,12 +465,18 @@ const StartPostJobModal = ({ closeModal, selectedImages }) => {
               <span>hours</span>
             </div>
           )}
+
+          {postType === 'ai' && renderAIPrompt()}
   
-          {scheduleType === 'scheduled' && scheduleInterval === 'set' && selectedWebsite !== 'twitter' && renderTimeInput()}
+          {scheduleType === 'scheduled' && scheduleInterval === 'set' && postType === 'ai' && renderTimeInput()}
   
-          {scheduleType === 'scheduled' && scheduleInterval === 'set' && selectedWebsite !== 'twitter' && renderDayOfWeekSelect()}
+          {scheduleType === 'scheduled' && scheduleInterval === 'set' && postType === 'ai' && renderDayOfWeekSelect()}
 
           {scheduleType === 'scheduled' && renderUserGeneratedInput()}
+
+          {renderUserGeneratedInputRandomSchedule()}
+
+        
   
           {(selectedWebsite === 'twitter' || selectedWebsite === 'youtube' || selectedWebsite === 'tiktok') && (
             <div>
