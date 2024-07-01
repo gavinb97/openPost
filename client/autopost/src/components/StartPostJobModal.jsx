@@ -731,14 +731,14 @@ const renderAIPrompt = () => {
 
         
   
-          {(selectedWebsite === 'twitter' || selectedWebsite === 'youtube' || selectedWebsite === 'tiktok') && (
+          {/* {(selectedWebsite === 'twitter' || selectedWebsite === 'youtube' || selectedWebsite === 'tiktok') && (
             <div>
               <label>Mandatory hashtags (Optional): </label>
               <input />
             </div>
-          )}
+          )} */}
   
-          {selectedWebsite === 'reddit' && subredditList.length > 0 && (
+          {selectedWebsite === 'reddit' && postType === 'ai' && subredditList.length > 0 && (
             <div className="your-component">
               <div className="subreddit-selector" ref={dropdownRef}>
                 <button onClick={toggleDropdown}>Select Subreddits</button>

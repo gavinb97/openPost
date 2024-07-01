@@ -12,11 +12,13 @@ import Navbar from '../components/Navbar'
 import { useAuth } from '../service/authContext';
 import { getUserCreds } from '../service/userService';
 import StartPostJobModal from '../components/StartPostJobModal';
+import StartCommentJobModal from '../components/StartCommentJobModal';
 
 function UserLandingScreen() {
     const navigate = useNavigate();
     const [showScheduleModal, setShowScheduleModal] = useState(false);
     const [showPostJobModal, setShowPostJobModal] = useState(false)
+    const [showCommentJobModal, setShowCommentJobModal] = useState(false)
     
 
     const { user  } = useAuth()
@@ -34,10 +36,16 @@ function UserLandingScreen() {
     };
 
     const handleShowPostJobModal = () => {
-        console.log('clidked hehe')
         setShowPostJobModal(true);
     };
 
+    const handleShowCommentModal = () => {
+        setShowCommentJobModal(true)
+    }
+
+    const handleCloseCommentModal = () => {
+        setShowCommentJobModal(false)
+    }
 
 
     const renderPostJobBox = () => {
@@ -55,7 +63,7 @@ function UserLandingScreen() {
             <div style={{ marginBottom: '2%', textAlign: 'center' }}>
                 <h2>Comment Job</h2>
                 <p>Start job to automatically comment on other posts to boost engagement</p>
-                <button>Start Comment Job</button>
+                <button onClick={() => handleShowCommentModal()}>Start Comment Job</button>
                 <br></br>
             </div>
         )
@@ -103,6 +111,7 @@ function UserLandingScreen() {
             {/* Render SetScheduleModal if showScheduleModal is true */}
              {showScheduleModal && <SetScheduleModal closeModal={handleCloseScheduleModal} />}
              {showPostJobModal && <StartPostJobModal closeModal={handleClosePostJobModal}></StartPostJobModal>}
+             {showCommentJobModal && <StartCommentJobModal closeModal={handleCloseCommentModal} />}
         </div>
     );
 }
