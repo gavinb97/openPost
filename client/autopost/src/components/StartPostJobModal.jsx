@@ -212,7 +212,8 @@ const StartPostJobModal = ({ closeModal, selectedImages }) => {
         selectedSubreddits,
         postType,
         tweetInputs,
-        aiPrompt
+        aiPrompt,
+        redditPosts
       };
       console.log(scheduleData)
     //   const job = await validateAndFormatScheduleData(scheduleData)
@@ -382,7 +383,256 @@ const StartPostJobModal = ({ closeModal, selectedImages }) => {
             );
         }
     };
-
+    const [redditDropdownOpen, setRedditDropdownOpen] = useState(false);
+    const [dropdownIndex, setDropdownIndex] = useState(null);
+    
+    const toggleRedditDropdown = (index) => {
+        setRedditDropdownOpen((prev) => !prev);
+        setDropdownIndex(index);
+    };
+    const [redditPosts, setRedditPosts] = useState([
+        {
+            id: 1,
+            title: '',
+            body: '',
+            subreddits: [],
+            time: { hour: '1', minute: '00', ampm: 'AM' },
+            date: new Date().toISOString().slice(0, 10),
+        },
+    ]);
+    
+    const addRedditPost = () => {
+        setRedditPosts((prev) => [
+            ...prev,
+            {
+                id: prev.length + 1,
+                title: '',
+                body: '',
+                subreddits: [],
+                time: { hour: '1', minute: '00', ampm: 'AM' },
+                date: new Date().toISOString().slice(0, 10),
+            },
+        ]);
+    };
+    
+    const handleRedditChange = (index, field, value) => {
+        const newPosts = [...redditPosts];
+        newPosts[index][field] = value;
+        setRedditPosts(newPosts);
+    };
+    
+    const handleRedditTimeChange = (index, field, value) => {
+        const updatedPosts = redditPosts.map((post, i) => {
+            if (i === index) {
+                return {
+                    ...post,
+                    time: { ...post.time, [field]: value },
+                };
+            }
+            return post;
+        });
+        setRedditPosts(updatedPosts);
+    };
+    
+    const handleRedditDateChange = (index, value) => {
+        const updatedPosts = redditPosts.map((post, i) => {
+            if (i === index) {
+                return { ...post, date: value };
+            }
+            return post;
+        });
+        setRedditPosts(updatedPosts);
+    };
+    
+    const deleteRedditPost = (index) => {
+        const newPosts = redditPosts
+            .filter((_, i) => i !== index)
+            .map((post, i) => ({
+                ...post,
+                id: i + 1,
+            }));
+        setRedditPosts(newPosts);
+    };
+    
+    const handleSubredditSelectionRandom = (index, subredditId) => {
+        setRedditPosts((prevPosts) =>
+            prevPosts.map((post, i) => {
+                if (i === index) {
+                    const isSelected = post.subreddits.includes(subredditId);
+                    return {
+                        ...post,
+                        subreddits: isSelected
+                            ? post.subreddits.filter((id) => id !== subredditId)
+                            : [...post.subreddits, subredditId],
+                    };
+                }
+                return post;
+            })
+        );
+    };
+    
+    const renderUserGeneratedReddit = () => {
+        if (selectedWebsite === 'reddit' && postType === 'User' && scheduleType === 'random') {
+            return (
+                <div>
+                    {redditPosts.map((post, index) => (
+                        <div key={post.id} style={{ display: 'flex', flexDirection: 'column', marginBottom: '10px' }}>
+                            <label style={{ marginBottom: '5px' }}>{post.id}:</label>
+                            <input
+                                type="text"
+                                placeholder="Post Title"
+                                value={post.title}
+                                onChange={(e) => handleRedditChange(index, 'title', e.target.value)}
+                                style={{ marginBottom: '5px' }}
+                            />
+                            <textarea
+                                placeholder="Post Body"
+                                value={post.body}
+                                onChange={(e) => handleRedditChange(index, 'body', e.target.value)}
+                                style={{ marginBottom: '5px' }}
+                            />
+                            <div className="subreddit-selector">
+                                <button onClick={() => toggleRedditDropdown(index)}>Select Subreddits</button>
+                                {redditDropdownOpen && dropdownIndex === index && (
+                                    <div className="dropdown-menu">
+                                        <div className="grid-container">
+                                            {subredditList.map((subreddit) => (
+                                                <div key={subreddit.id} className="grid-item">
+                                                    <label>
+                                                        <input
+                                                            type="checkbox"
+                                                            value={subreddit.id}
+                                                            checked={post.subreddits.includes(subreddit.id)}
+                                                            onChange={() => handleSubredditSelectionRandom(index, subreddit.id)}
+                                                        />
+                                                        <span>{subreddit.name}</span>
+                                                    </label>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                            {index === redditPosts.length - 1 ? (
+                                <button onClick={addRedditPost}>+</button>
+                            ) : (
+                                <button onClick={() => deleteRedditPost(index)}>-</button>
+                            )}
+                        </div>
+                    ))}
+                </div>
+            );
+        }
+    };
+    
+    const handleSubredditSelection = (index, subredditId) => {
+        setRedditPosts((prevPosts) =>
+            prevPosts.map((post, i) => {
+                if (i === index) {
+                    const isSelected = post.subreddits.includes(subredditId);
+                    return {
+                        ...post,
+                        subreddits: isSelected ? [] : [subredditId],
+                    };
+                }
+                return post;
+            })
+        );
+    };
+    
+    const renderUserGeneratedRedditSetSchedule = () => {
+        if (selectedWebsite === 'reddit' && postType === 'User' && scheduleType === 'scheduled') {
+            return (
+                <div>
+                    {redditPosts.map((post, index) => (
+                        <div key={post.id} style={{ display: 'flex', flexDirection: 'column', marginBottom: '10px' }}>
+                            <label style={{ marginBottom: '5px' }}>{post.id}:</label>
+                            <input
+                                type="text"
+                                placeholder="Post Title"
+                                value={post.title}
+                                onChange={(e) => handleRedditChange(index, 'title', e.target.value)}
+                                style={{ marginBottom: '5px' }}
+                            />
+                            <textarea
+                                placeholder="Post Body"
+                                value={post.body}
+                                onChange={(e) => handleRedditChange(index, 'body', e.target.value)}
+                                style={{ marginBottom: '5px' }}
+                            />
+                            <div className="subreddit-selector" style={{ display: 'flex', flexDirection: 'column', marginBottom: '20%' }}>
+                                <button onClick={() => toggleRedditDropdown(index)}>Select Subreddit</button>
+                                {redditDropdownOpen && dropdownIndex === index && (
+                                    <div className="dropdown-menu">
+                                        <div className="grid-container">
+                                            {subredditList.map((subreddit) => (
+                                                <div key={subreddit.id} className="grid-item">
+                                                    <label>
+                                                        <input
+                                                            type="radio"
+                                                            value={subreddit.id}
+                                                            checked={post.subreddits.includes(subreddit.id)}
+                                                            onChange={() => handleSubredditSelection(index, subreddit.id)}
+                                                        />
+                                                        <span>{subreddit.name}</span>
+                                                    </label>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                            {scheduleInterval === 'set' && (
+                                <div style={{ display: 'flex', alignItems: 'center', marginBottom: '5px' }}>
+                                    <select
+                                        style={{ marginRight: '5px' }}
+                                        value={post.time.hour}
+                                        onChange={(e) => handleRedditTimeChange(index, 'hour', e.target.value)}
+                                    >
+                                        {[...Array(12)].map((_, i) => (
+                                            <option key={i} value={i + 1}>
+                                                {i + 1}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    <select
+                                        style={{ marginRight: '5px' }}
+                                        value={post.time.minute}
+                                        onChange={(e) => handleRedditTimeChange(index, 'minute', e.target.value)}
+                                    >
+                                        {[...Array(60)].map((_, i) => (
+                                            <option key={i} value={i < 10 ? `0${i}` : i}>
+                                                {i < 10 ? `0${i}` : i}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    <select
+                                        style={{ marginRight: '5px' }}
+                                        value={post.time.ampm}
+                                        onChange={(e) => handleRedditTimeChange(index, 'ampm', e.target.value)}
+                                    >
+                                        <option value="AM">AM</option>
+                                        <option value="PM">PM</option>
+                                    </select>
+                                    <input
+                                        type="date"
+                                        value={post.date}
+                                        onChange={(e) => handleRedditDateChange(index, e.target.value)}
+                                        style={{ marginRight: '5px' }}
+                                    />
+                                </div>
+                            )}
+                            {index === redditPosts.length - 1 ? (
+                                <button onClick={addRedditPost}>+</button>
+                            ) : (
+                                <button onClick={() => deleteRedditPost(index)}>-</button>
+                            )}
+                        </div>
+                    ))}
+                </div>
+            );
+        }
+    };
     const [aiPrompt, setAIPrompt] = useState({ style: '', contentType: '' });
 
 const handleAIPromptChange = (field, value) => {
@@ -438,9 +688,6 @@ const renderAIPrompt = () => {
             </select>
           </div>
 
-          {scheduleType === 'random' && postType !== 'ai' && renderPostOrder()}
-  
-  
           {scheduleType === 'scheduled' && (
             <div className="input-group">
               <label htmlFor="scheduleIntervalSelect">Schedule Interval:</label>
@@ -451,6 +698,12 @@ const renderAIPrompt = () => {
               </select>
             </div>
           )}
+
+          {scheduleType === 'random' && postType !== 'ai' && renderPostOrder()}
+
+            {renderUserGeneratedReddit()}
+            {renderUserGeneratedRedditSetSchedule()}
+          
   
           {scheduleType === 'scheduled' && scheduleInterval === 'hour' && (
             <div className="input-group">
