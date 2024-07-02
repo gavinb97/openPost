@@ -13,12 +13,14 @@ import { useAuth } from '../service/authContext';
 import { getUserCreds } from '../service/userService';
 import StartPostJobModal from '../components/StartPostJobModal';
 import StartCommentJobModal from '../components/StartCommentJobModal';
+import StartDMJobModal from '../components/StartDMJobModal';
 
 function UserLandingScreen() {
     const navigate = useNavigate();
     const [showScheduleModal, setShowScheduleModal] = useState(false);
     const [showPostJobModal, setShowPostJobModal] = useState(false)
     const [showCommentJobModal, setShowCommentJobModal] = useState(false)
+    const [showDMJobModal, setShowDMJobModal] = useState(false)
     
 
     const { user  } = useAuth()
@@ -44,6 +46,14 @@ function UserLandingScreen() {
     }
 
     const handleCloseCommentModal = () => {
+        setShowCommentJobModal(false)
+    }
+
+    const handleShowDMModal = () => {
+        setShowCommentJobModal(true)
+    }
+
+    const handleCloseDMModal = () => {
         setShowCommentJobModal(false)
     }
 
@@ -74,7 +84,7 @@ function UserLandingScreen() {
             <div style={{ marginBottom: '2%', textAlign: 'center' }}>
                 <h2>Post Job</h2>
                 <p>Automatically post to your social networks</p>
-                <button onClick={() => handleShowPostJobModal()}>Start Post Job</button>
+                <button onClick={() => handleShowDMModal()}>Start Post Job</button>
                 <br></br>
             </div>
         )
@@ -85,7 +95,7 @@ function UserLandingScreen() {
             <div style={{ marginBottom: '2%', textAlign: 'center' }}>
                 <h2>Direct Message Job</h2>
                 <p>Start a job to directly message users.</p>
-                <button>Start DM Job</button>
+                <button onClick={() => handleShowDMModal()}>Start DM Job</button>
             </div>
         )
     }
@@ -112,6 +122,7 @@ function UserLandingScreen() {
              {showScheduleModal && <SetScheduleModal closeModal={handleCloseScheduleModal} />}
              {showPostJobModal && <StartPostJobModal closeModal={handleClosePostJobModal}></StartPostJobModal>}
              {showCommentJobModal && <StartCommentJobModal closeModal={handleCloseCommentModal} />}
+             {showDMJobModal && <StartDMJobModal closeModal={handleCloseDMModal} />}
         </div>
     );
 }
