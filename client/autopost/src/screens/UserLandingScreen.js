@@ -50,11 +50,11 @@ function UserLandingScreen() {
     }
 
     const handleShowDMModal = () => {
-        setShowCommentJobModal(true)
+        setShowDMJobModal(true)
     }
 
     const handleCloseDMModal = () => {
-        setShowCommentJobModal(false)
+        setShowDMJobModal(false)
     }
 
 
@@ -84,7 +84,7 @@ function UserLandingScreen() {
             <div style={{ marginBottom: '2%', textAlign: 'center' }}>
                 <h2>Post Job</h2>
                 <p>Automatically post to your social networks</p>
-                <button onClick={() => handleShowDMModal()}>Start Post Job</button>
+                <button onClick={() => handleShowPostJobModal()}>Start Post Job</button>
                 <br></br>
             </div>
         )
@@ -110,9 +110,9 @@ function UserLandingScreen() {
                 <h2>Job Scheduler</h2>
             </header>
             {renderPostJobBox()}
-            <div style={{ textAlign: 'center' }}>
-                {renderTextPostJobBox()}
-            </div>
+           
+            {renderTextPostJobBox()}
+            
             
             
             {renderCommentJobBox()}

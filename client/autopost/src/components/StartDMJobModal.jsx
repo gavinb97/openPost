@@ -34,7 +34,7 @@ const StartDMJobModal = ({ closeModal }) => {
       <div className="SetScheduleModal-modal-container" style={{ marginBottom: '2%', textAlign: 'center' }}>
         <div className="SetScheduleModal-modal-backdrop" onClick={closeModal}></div>
         <div className="SetScheduleModal">
-          <h2>Start Comment Job</h2>
+          <h2>Start DM Job</h2>
 
 
           <div className="input-group">

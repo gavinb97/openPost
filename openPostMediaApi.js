@@ -262,13 +262,11 @@ const writePhotoDataToFile = async (data, username) => {
 app.post('/setSchedule', async (req, res) => {
     const scheduleData = req.body.scheduleData;
   
-    console.log('Received schedule data:', scheduleData);
+    
   
     try {
       // Send the schedule data to the jobs endpoint on localhost:3000
       const response = await axios.post('http://localhost:4455/jobs', scheduleData);
-        console.log('response ')
-        console.log(response)
       // Forward the response from the jobs endpoint to the client
       res.status(response.status).send(response.data);
     } catch (error) {
