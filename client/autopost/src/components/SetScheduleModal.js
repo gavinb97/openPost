@@ -129,6 +129,48 @@ const SetScheduleModal = ({ closeModal, selectedImages }) => {
     setDurationOfJob(e.target.value);
   };
 
+  const [includeCaption, setIncludeCaption] = useState(false)
+  const [captionType, setCaptionType] = useState()
+
+  const handleIncludeCaptionChange = (e) => {
+    const value = e.target.value === 'true';
+    setIncludeCaption(value)
+  }
+
+  const renderCaptionDropdown = () => {
+    return (
+      <div className="input-group">
+          <label htmlFor="website">Include caption:</label>
+          <select id="website" value={includeCaption} onChange={handleIncludeCaptionChange}>
+            <option value='true'>yes</option>
+            <option value='false'>no</option>
+           
+          </select>
+        </div>
+    )
+  }
+
+  const handleCaptionTypeChange = (e) => {
+    setCaptionType(e.target.value)
+  }
+
+  const renderCaptionTypeDropdown = () => {
+    if (includeCaption) {
+      return (
+      <div className="input-group">
+          <label htmlFor="website">Type of caption:</label>
+          <select id="website" value={captionType} onChange={handleCaptionTypeChange}>
+            <option value="ai">AI generated</option>
+            <option value="user">User Generated</option>
+          </select>
+          {captionType === 'ai' && <p>Ai generated caption will use description and categories to generate content</p>}
+          {captionType === 'user' && <p>User generated will use description to generate caption</p>}
+        </div>
+    )
+    }
+    
+  }
+
 
   const handleSave = async () => {
     const username = user.username;
@@ -198,6 +240,9 @@ const SetScheduleModal = ({ closeModal, selectedImages }) => {
             <p>*a single iteration is every photo selected posted a singular time</p>
           </div>
         )}
+
+        {renderCaptionDropdown()}
+        {renderCaptionTypeDropdown()}
 
         {scheduleType === 'scheduled' && (
           <div className="input-group">
