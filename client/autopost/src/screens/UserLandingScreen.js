@@ -24,7 +24,7 @@ function UserLandingScreen() {
     
 
     const { user  } = useAuth()
-
+    console.log(user)
     const handleShowScheduleModal = () => {
         setShowScheduleModal(true);
     };
