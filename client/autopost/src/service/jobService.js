@@ -55,7 +55,9 @@ export const deleteJob = async (jobSetId) => {
         selectedDays,
         selectedImages,
         durationOfJob,
-        selectedSubreddits
+        selectedSubreddits,
+        includeCaption,
+        captionType
     } = request;
 
     // Validate required fields
@@ -92,6 +94,8 @@ export const deleteJob = async (jobSetId) => {
         picturePostOrder,
         scheduleType,
         selectedImages,
+        includeCaption,
+        captionType
     };
 
     // Additional validation and formatting based on schedule type

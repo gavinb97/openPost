@@ -130,7 +130,7 @@ const SetScheduleModal = ({ closeModal, selectedImages }) => {
   };
 
   const [includeCaption, setIncludeCaption] = useState(false)
-  const [captionType, setCaptionType] = useState()
+  const [captionType, setCaptionType] = useState('user')
 
   const handleIncludeCaptionChange = (e) => {
     const value = e.target.value === 'true';
@@ -138,7 +138,8 @@ const SetScheduleModal = ({ closeModal, selectedImages }) => {
   }
 
   const renderCaptionDropdown = () => {
-    return (
+    if (selectedWebsite === 'twitter') {
+      return (
       <div className="input-group">
           <label htmlFor="website">Include caption:</label>
           <select id="website" value={includeCaption} onChange={handleIncludeCaptionChange}>
@@ -148,6 +149,8 @@ const SetScheduleModal = ({ closeModal, selectedImages }) => {
           </select>
         </div>
     )
+    }
+    
   }
 
   const handleCaptionTypeChange = (e) => {
@@ -155,7 +158,7 @@ const SetScheduleModal = ({ closeModal, selectedImages }) => {
   }
 
   const renderCaptionTypeDropdown = () => {
-    if (includeCaption) {
+    if (includeCaption && selectedWebsite === 'twitter') {
       return (
       <div className="input-group">
           <label htmlFor="website">Type of caption:</label>
@@ -186,6 +189,8 @@ const SetScheduleModal = ({ closeModal, selectedImages }) => {
       selectedImages,
       durationOfJob,
       selectedSubreddits,
+      includeCaption,
+      captionType
     };
     
     const job = await validateAndFormatScheduleData(scheduleData)

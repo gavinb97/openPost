@@ -20,7 +20,9 @@ const insertScheduledJob = async (job) => {
         hour_interval,
         selected_subreddits,
         original_subreddits,
-        remaining_subreddits
+        remaining_subreddits,
+        includeCaption,
+        captionType
     } = job;
 
     // Handle times_of_day being null
@@ -64,10 +66,12 @@ const insertScheduledJob = async (job) => {
             selected_subreddits,
             original_subreddits,
             remaining_subreddits,
+            include_caption,
+            type_of_caption,
             created_at,
             updated_at
         ) VALUES (
-            $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11::jsonb, $12::jsonb, $13, $14, $15, $16, $17, NOW(), NOW()
+            $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11::jsonb, $12::jsonb, $13, $14, $15, $16, $17, $18, $19, NOW(), NOW()
         ) RETURNING id;
     `;
 
@@ -88,7 +92,9 @@ const insertScheduledJob = async (job) => {
         hour_interval,
         selected_subreddits,
         original_subreddits,
-        remaining_subreddits
+        remaining_subreddits,
+        includeCaption,
+        captionType
     ];
 
     console.log('values');
@@ -125,7 +131,9 @@ const insertRandomJob = async (job) => {
         duration_of_job,
         selected_subreddits,
         remaining_subreddits,
-        original_subreddits
+        original_subreddits,
+        includeCaption,
+        captionType
     } = job;
 
     const query = `
@@ -144,10 +152,12 @@ const insertRandomJob = async (job) => {
             selected_subreddits,
             remaining_subreddits,
             original_subreddits,
+            include_caption,
+            type_of_caption,
             created_at,
             updated_at
         ) VALUES (
-            $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, NOW(), NOW()
+            $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, NOW(), NOW()
         ) RETURNING id;
     `;
 
@@ -165,7 +175,9 @@ const insertRandomJob = async (job) => {
         duration_of_job,
         selected_subreddits,
         remaining_subreddits,
-        original_subreddits
+        original_subreddits,
+        includeCaption,
+        captionType
     ];
 
     try {
@@ -201,7 +213,9 @@ const insertActiveJob = async (job) => {
         duration_of_job,
         selected_subreddits,
         remaining_subreddits,
-        original_subreddits
+        original_subreddits,
+        includeCaption,
+        captionType
     } = job;
 
     // Convert message_ids array to a PostgreSQL array literal
@@ -253,10 +267,12 @@ const insertActiveJob = async (job) => {
             selected_subreddits,
             remaining_subreddits,
             original_subreddits,
+            include_caption,
+            type_of_caption,
             created_at,
             updated_at
         ) VALUES (
-            $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, NOW(), NOW()
+            $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, NOW(), NOW()
         ) RETURNING id;
     `;
 
@@ -280,7 +296,9 @@ const insertActiveJob = async (job) => {
         duration_of_job,
         selected_subreddits,
         remaining_subreddits,
-        original_subreddits
+        original_subreddits,
+        includeCaption,
+        captionType
     ];
 
     try {

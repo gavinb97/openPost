@@ -55,9 +55,16 @@ const postToTwitter = async (creds, job) => {
         // see if we have media
         const path = await getMediaIfExists(job, job.userId)
         if (path) {
-            const tweetText = await createTweetText(job)
-            await tweetMediaOnBehalfOfUser(creds.twitterTokens.access_token, creds.twitterTokens.refresh_token, tweetText, path)
-            console.log('tweet sent sucessfully')
+            if (job.includeCaption) {
+               const tweetText = await createTweetText(job)
+                await tweetMediaOnBehalfOfUser(creds.twitterTokens.access_token, creds.twitterTokens.refresh_token, tweetText, path)
+                console.log('tweet sent sucessfully')
+            } else {
+                // send tweet with empty body
+                await tweetMediaOnBehalfOfUser(creds.twitterTokens.access_token, creds.twitterTokens.refresh_token, '', path)
+                console.log('tweet sent sucessfully')
+            }
+            
         }
     }
 }
@@ -98,14 +105,18 @@ const createTweetText = async (job) => {
     const systemPrompt = `You are a Gen Z/Millennial online user who constantly goes viral. You are known for your trendy and engaging tweets. Your task is to create tweets based on a description of a photo and a set of categories. Your tweets must be under 280 characters and can range from a single descriptor word, to a full description, to using hashtags. Always use the latest trends and vernacular to maximize engagement. Do not mention that you are an AI model, do not use emojis, never use emojis, and always respond with a string.`;
 
     const prompt = `Image description: ${photoData.description} Image categories: ${photoData.categories}`;
-    
-    let tweetText;
-    do {
-        tweetText = await makeGptCall(prompt, systemPrompt);
-        tweetText = tweetText.replaceAll('"', '');
-    } while (tweetText.length > 280);
+    if (job.captionType === 'ai') {
+        let tweetText;
+        do {
+            tweetText = await makeGptCall(prompt, systemPrompt);
+            tweetText = tweetText.replaceAll('"', '');
+        } while (tweetText.length > 280);
 
-    return tweetText;
+        return tweetText;
+    } else {
+        return photoData.description
+    }
+    
 }
 
 

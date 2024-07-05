@@ -222,7 +222,9 @@ const scheduleRandomJobs = async (request, iterations) => {
                 website: request.selectedWebsite,
                 content: `Post to ${request.selectedWebsite}`,
                 scheduledTime: Date.now() + delayTime, // This now represents the delay time
-                image: getNextImage()
+                image: getNextImage(),
+                includeCaption: request.includeCaption,
+                captionType: request.captionType
             };
 
             if (request.selectedWebsite === 'reddit') {
@@ -311,7 +313,9 @@ const handleHourInterval = async (request) => {
             website: request.selectedWebsite,
             content: `Post to ${request.selectedWebsite}`,
             scheduledTime: Date.now() + 5000, // 5 seconds delay for the first job
-            image: getNextImage()
+            image: getNextImage(),
+            includeCaption: request.includeCaption,
+            captionType: request.captionType
         };
 
         if (request.selectedWebsite === 'reddit') {
@@ -337,7 +341,9 @@ const handleHourInterval = async (request) => {
                 website: request.selectedWebsite,
                 content: `Post to ${request.selectedWebsite}`,
                 scheduledTime: firstJob.scheduledTime + (i * intervalInMilliseconds), // Delay time for each subsequent job
-                image: getNextImage()
+                image: getNextImage(),
+                includeCaption: request.includeCaption,
+                captionType: request.captionType
             };
 
             if (request.selectedWebsite === 'reddit') {
@@ -409,7 +415,9 @@ const handleSetInterval = async (request) => {
                 website: request.selectedWebsite,
                 content: `Post to ${request.selectedWebsite}`,
                 scheduledTime: Date.now() + delayInMilliseconds,
-                image: getNextImage()
+                image: getNextImage(),
+                includeCaption: request.includeCaption,
+                captionType: request.captionType
             };
 
             if (request.selectedWebsite === 'reddit') {
