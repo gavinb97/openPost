@@ -12,8 +12,6 @@ function Jobs() {
 
     const navigate = useNavigate();
     const { user } = useAuth();
-    console.log(user);
-    console.log('user ^^');
 
     const handleClick = () => {
         setShowModal(true);
@@ -26,7 +24,6 @@ function Jobs() {
     const handleCancelJob = async (jobId) => {
         try {
             await deleteJob(jobId)
-            console.log(`Job ${jobId} cancelled`);
             // Optionally, remove the job from the state to update the UI
             setJobs(jobs.filter(job => job.job_set_id !== jobId));
         } catch (error) {
@@ -36,13 +33,13 @@ function Jobs() {
 
     const getJobs = async () => {
         const jobs = await getJobsByUsername(user.username)
-        console.log(jobs.activeJobs)
+        
         setJobs(jobs.activeJobs)
         return jobs
     }
 
     useEffect(() => {
-        getJobs().then(() => console.log('weeee'))
+        getJobs()
       }, []);
 
     return (

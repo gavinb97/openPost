@@ -16,7 +16,6 @@ export const AuthProvider = ({ children }) => {
   const loginContext = (userData) => {
     setUser(userData);
     sessionStorage.setItem('user', JSON.stringify(userData));
-    console.log('logged in and set user context!!')
   };
 
   const logoutContext = () => {

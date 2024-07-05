@@ -32,7 +32,7 @@ function Profile() {
 
   useEffect(() => {
     setIsLoading(true); // Start loading
-    console.log(user)
+  
     getUserCreds(user.username || user.user)
       .then((creds) => {
         if (creds) {
@@ -43,7 +43,7 @@ function Profile() {
             tiktok: typeof creds.tiktokTokens?.access_token === 'string' && creds.tiktokTokens.access_token !== null,
           });
           setCredentials(creds);
-          console.log(creds)
+         
           const userContext = {
             username: user.username || user.user,
             jwt: user.jwt,
@@ -53,7 +53,6 @@ function Profile() {
           loginContext(userContext)
           setCredentials(creds)
         } else {
-          console.log("No credentials found for the user.");
           setIsLoggedIn({
             twitter: false,
             reddit: false,

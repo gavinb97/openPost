@@ -16,8 +16,6 @@ export const createScheduledJob = async (schedule) => {
 
   export const getJobsByUsername = async (user) => {
     const endpoint = 'http://localhost:4455/getjobs';
-    console.log('in the thing')
-    console.log(user)
     
     try {
         const response = await axios.post(endpoint, {username: user});

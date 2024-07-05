@@ -100,8 +100,6 @@ function UserLandingScreen() {
         )
     }
     
-    console.log('user: ' + user)
-    console.log(user)
     return (
         <div className="App">
             <Navbar></Navbar>
