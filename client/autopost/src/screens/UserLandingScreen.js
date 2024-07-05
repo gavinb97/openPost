@@ -14,6 +14,8 @@ import { getUserCreds } from '../service/userService';
 import StartPostJobModal from '../components/StartPostJobModal';
 import StartCommentJobModal from '../components/StartCommentJobModal';
 import StartDMJobModal from '../components/StartDMJobModal';
+import LoginPromptModal from '../components/LoginPromptModal';
+
 
 function UserLandingScreen() {
     const navigate = useNavigate();
@@ -21,14 +23,20 @@ function UserLandingScreen() {
     const [showPostJobModal, setShowPostJobModal] = useState(false)
     const [showCommentJobModal, setShowCommentJobModal] = useState(false)
     const [showDMJobModal, setShowDMJobModal] = useState(false)
+    const [showLoginPromptModal, setShowLoginPromptModal] = useState(false)
     
+
+    const handleShowLoginPromptModal = () => {
+        setShowLoginPromptModal(true)
+    }
+
+    const handleCloseLoginPromptModal = () => {
+        setShowLoginPromptModal(false)
+    }
 
     const { user  } = useAuth()
     console.log(user)
-    const handleShowScheduleModal = () => {
-        setShowScheduleModal(true);
-    };
-
+    
     const handleCloseScheduleModal = () => {
         setShowScheduleModal(false);
     };
@@ -121,6 +129,7 @@ function UserLandingScreen() {
              {showPostJobModal && <StartPostJobModal closeModal={handleClosePostJobModal}></StartPostJobModal>}
              {showCommentJobModal && <StartCommentJobModal closeModal={handleCloseCommentModal} />}
              {showDMJobModal && <StartDMJobModal closeModal={handleCloseDMModal} />}
+             {showLoginPromptModal && <LoginPromptModal closeModal={handleCloseLoginPromptModal}></LoginPromptModal>}
         </div>
     );
 }
