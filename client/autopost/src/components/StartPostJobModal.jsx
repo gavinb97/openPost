@@ -454,7 +454,7 @@ const StartPostJobModal = ({ closeModal, selectedImages }) => {
         setRedditPosts(newPosts);
     };
     
-    const handleSubredditSelectionRandom = (index, subredditId) => {
+    const handleSubredditSelection = (index, subredditId) => {
         setRedditPosts((prevPosts) =>
             prevPosts.map((post, i) => {
                 if (i === index) {
@@ -501,9 +501,9 @@ const StartPostJobModal = ({ closeModal, selectedImages }) => {
                                                     <label>
                                                         <input
                                                             type="checkbox"
-                                                            value={subreddit.id}
-                                                            checked={post.subreddits.includes(subreddit.id)}
-                                                            onChange={() => handleSubredditSelectionRandom(index, subreddit.id)}
+                                                            value={subreddit.name}
+                                                            checked={post.subreddits.includes(subreddit.name)}
+                                                            onChange={() => handleSubredditSelection(index, subreddit.name)}
                                                         />
                                                         <span>{subreddit.name}</span>
                                                     </label>
@@ -525,20 +525,6 @@ const StartPostJobModal = ({ closeModal, selectedImages }) => {
         }
     };
     
-    const handleSubredditSelection = (index, subredditId) => {
-        setRedditPosts((prevPosts) =>
-            prevPosts.map((post, i) => {
-                if (i === index) {
-                    const isSelected = post.subreddits.includes(subredditId);
-                    return {
-                        ...post,
-                        subreddits: isSelected ? [] : [subredditId],
-                    };
-                }
-                return post;
-            })
-        );
-    };
     
     const renderUserGeneratedRedditSetSchedule = () => {
         if (selectedWebsite === 'reddit' && postType === 'User' && scheduleType === 'scheduled') {
@@ -560,8 +546,8 @@ const StartPostJobModal = ({ closeModal, selectedImages }) => {
                                 onChange={(e) => handleRedditChange(index, 'body', e.target.value)}
                                 style={{ marginBottom: '5px' }}
                             />
-                            <div className="subreddit-selector" style={{ display: 'flex', flexDirection: 'column', marginBottom: '20%' }}>
-                                <button onClick={() => toggleRedditDropdown(index)}>Select Subreddit</button>
+                            <div className="subreddit-selector">
+                                <button onClick={() => toggleRedditDropdown(index)}>Select Subreddits</button>
                                 {redditDropdownOpen && dropdownIndex === index && (
                                     <div className="dropdown-menu">
                                         <div className="grid-container">
@@ -569,10 +555,10 @@ const StartPostJobModal = ({ closeModal, selectedImages }) => {
                                                 <div key={subreddit.id} className="grid-item">
                                                     <label>
                                                         <input
-                                                            type="radio"
-                                                            value={subreddit.id}
-                                                            checked={post.subreddits.includes(subreddit.id)}
-                                                            onChange={() => handleSubredditSelection(index, subreddit.id)}
+                                                            type="checkbox"
+                                                            value={subreddit.name}
+                                                            checked={post.subreddits.includes(subreddit.name)}
+                                                            onChange={() => handleSubredditSelection(index, subreddit.name)}
                                                         />
                                                         <span>{subreddit.name}</span>
                                                     </label>
@@ -661,7 +647,6 @@ const renderAIPrompt = () => {
         </div>
     );
 };
-
   
     return (
       <div className="SetScheduleModal-modal-container" style={{ marginBottom: '2%', textAlign: 'center' }}>
