@@ -41,7 +41,110 @@ export const deleteJob = async (jobSetId) => {
     }
 };
 
-  export const validateAndFormatScheduleData = (request) => {
+export const validateAndFormatPostJobData = (request) => {
+    const {
+        jobType,
+        username,
+        selectedWebsite,
+        picturePostOrder,
+        scheduleType,
+        scheduleInterval,
+        hourInterval,
+        timesOfDay,
+        selectedDays,
+        selectedImages,
+        durationOfJob,
+        selectedSubreddits,
+        postType,
+        tweetInputs,
+        aiPrompt,
+        redditPosts
+    } = request;
+
+    // Validate required fields
+    if (!jobType) {
+        throw new Error("Job type is required");
+    }
+    if (!username) {
+        throw new Error("Username is required");
+    }
+    if (!selectedWebsite) {
+        throw new Error("Selected website is required");
+    }
+    if (!scheduleType) {
+        throw new Error("Schedule type is required");
+    }
+
+    // Validate schedule type
+    if (scheduleType === 'scheduled') {
+        if (!scheduleInterval) {
+            throw new Error("Schedule interval is required for scheduled schedule type");
+        }
+        if (!hourInterval) {
+            throw new Error("Hour interval is required for scheduled schedule type");
+        }
+        if (scheduleInterval === 'hour') {
+            // If schedule interval is 'hour', do not include selectedDays
+            // No need to throw an error, just omit selectedDays from jobObject
+        } else {
+            const daysSelected = Object.values(selectedDays).some(day => day);
+            if (!daysSelected) {
+                throw new Error("At least one day must be selected in selectedDays for scheduled schedule type");
+            }
+            if ((!timesOfDay || timesOfDay.length === 0) && scheduleInterval === 'set') {
+                throw new Error("At least one time must be specified in timesOfDay for scheduled schedule type");
+            }
+        }
+    } else if (scheduleType === 'random') {
+        // No additional validation for random schedule type
+    } else {
+        throw new Error("Invalid schedule type");
+    }
+
+    // Format the job object
+    const jobObject = {
+        jobType,
+        username,
+        selectedWebsite,
+        scheduleType,
+        postType
+    };
+
+    // Additional validation and formatting based on schedule type
+    if (scheduleType === 'random') {
+        jobObject.durationOfJob = durationOfJob;
+    } else if (scheduleType === 'scheduled') {
+        jobObject.scheduleInterval = scheduleInterval;
+        jobObject.hourInterval = hourInterval;
+        if (scheduleInterval !== 'hour') {
+            jobObject.timesOfDay = timesOfDay;
+            jobObject.selectedDays = selectedDays;
+        }
+        jobObject.durationOfJob = durationOfJob;
+    }
+
+    // Include selected subreddits and reddit posts if the website is Reddit and postType is not 'ai'
+    if (selectedWebsite.toLowerCase() === 'reddit' && postType !== 'ai') {
+        jobObject.redditPosts = redditPosts;
+        if (selectedSubreddits) {
+            jobObject.selectedSubreddits = selectedSubreddits;
+        }
+    } else if (selectedWebsite.toLowerCase() === 'twitter' && postType !== 'ai') {
+        jobObject.tweetInputs = tweetInputs;
+    }
+
+    // Handle postType
+    if (postType === 'ai') {
+        jobObject.aiPrompt = aiPrompt;
+    }
+
+    console.log(jobObject);
+    return jobObject;
+};
+
+
+
+  export const validateAndFormatScheduleData = async (request) => {
     const {
         username,
         selectedWebsite,

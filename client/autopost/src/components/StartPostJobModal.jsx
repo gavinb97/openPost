@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import TagInputComponent from './TagInputComponent'; // Import the TagInputComponent
 import './../App.css';
-import { createScheduledJob, validateAndFormatScheduleData } from '../service/jobService';
+import { validateAndFormatPostJobData } from '../service/jobService';
 import { getSFWSubreddits } from '../service/redditService';
 import { useAuth } from '../service/authContext';
 
@@ -199,6 +199,7 @@ const StartPostJobModal = ({ closeModal, selectedImages }) => {
     const handleSave = async () => {
       const username = user.username;
       const scheduleData = {
+        jobType: 'postJob',
         username,
         selectedWebsite,
         picturePostOrder,
@@ -216,10 +217,10 @@ const StartPostJobModal = ({ closeModal, selectedImages }) => {
         redditPosts
       };
       console.log(scheduleData)
-    //   const job = await validateAndFormatScheduleData(scheduleData)
-  
-    //   console.log('Schedule Data:', job);
-    //   await createScheduledJob(job);
+      const job = await validateAndFormatPostJobData(scheduleData)
+
+      console.log(job)
+      console.log('da job above')
     };
 
     const renderPostTypeSelect = () => {
@@ -647,6 +648,29 @@ const renderAIPrompt = () => {
         </div>
     );
 };
+
+const renderDurationBox = () => {
+    if (scheduleType === 'random') {
+        return (
+            <div className="input-group">
+          <label htmlFor="durationSelect">Job duration: </label>
+          <select id="durationSelect" value={durationOfJob} onChange={handleDurationChange}>
+            <option value="">Select duration</option>
+            <option value="forever">Forever</option>
+            <option value="1">1 day</option>
+            <option value="2">2 day</option>
+            <option value="3">3 day</option>
+            <option value="4">4 day</option>
+            <option value="5">5 day</option>
+          </select>
+          
+        </div>
+        )
+    }
+    
+        
+  
+}
   
     return (
       <div className="SetScheduleModal-modal-container" style={{ marginBottom: '2%', textAlign: 'center' }}>
@@ -673,6 +697,7 @@ const renderAIPrompt = () => {
             </select>
           </div>
 
+            {renderDurationBox()}
           {scheduleType === 'scheduled' && (
             <div className="input-group">
               <label htmlFor="scheduleIntervalSelect">Schedule Interval:</label>
