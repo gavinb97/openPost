@@ -8,8 +8,10 @@ const pool = new Pool({
     database: process.env.POSTGRES_DBNAME,
     password: process.env.POSTGRES_PASSWORD,
     port: 5432, // Default PostgreSQL port
-    max: 20
+    max: 20,
+    ssl: {
+        rejectUnauthorized: false
+    }
 });
 
-// Export the pool instance to use in your application
 module.exports = pool;
