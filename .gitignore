@@ -12,4 +12,5 @@ creds.json
 codeVerifier.json
 someName_tokens.json
 manifest.json
-apiresources/uploads/
+apiresources/uploads/*.png
+openPost\apiresources\uploads\*.png
