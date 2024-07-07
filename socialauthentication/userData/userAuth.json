@@ -1,0 +1,62 @@
+[
+  {
+    "username": "someUser",
+    "email": "someEmail",
+    "password": "password"
+  },
+  {
+    "username": "someUser2",
+    "email": "someEmail",
+    "password": "password"
+  },
+  {
+    "username": "someUser3",
+    "email": "someEmail",
+    "password": "password"
+  },
+  {
+    "username": "username",
+    "email": "email@emailemail.com",
+    "password": "somkepassword"
+  },
+  {
+    "username": "admin",
+    "email": "email@emailemail.com",
+    "password": "password"
+  },
+  {
+    "username": "admin2",
+    "email": "admin@admin.com",
+    "password": "password"
+  },
+  {
+    "username": "goob5",
+    "email": "goob@goob.com",
+    "password": "password"
+  },
+  {
+    "username": "somedude",
+    "email": "somedude@gmail.com",
+    "password": "password"
+  },
+  {
+    "username": "login",
+    "email": "login@login.com",
+    "password": "password"
+  },
+  {
+    "username": "newaccount",
+    "email": "email@email.com",
+    "password": "password"
+  },
+  {
+    "username": "useruser",
+    "email": "user@email.com",
+    "password": "password"
+  },
+  {
+    "username": "admin3",
+    "email": "admin@admin.com",
+    "password": "password"
+  }
+]

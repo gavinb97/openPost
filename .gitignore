@@ -7,6 +7,9 @@ node_modules/
 *txt
 *.mp3
 *.png
-*.json
 *.jpg
 *.webp
+creds.json
+codeVerifier.json
+someName_tokens.json
+manifest.json
