@@ -311,10 +311,12 @@ const shuffleArray = array => {
     return array;
 }
 
-const deleteFromPhotoData = (fileNamesToDelete) => {
+const deleteFromPhotoData = async (username, fileNamesToDelete) => {
     try {
+        const filePath = path.join('apiresources', 'uploads', username, 'photoMetadata', 'photoData.txt');
+        
         // Read the contents of the file
-        const fileContents = fs.readFileSync('apiresources/uploads/photoMetadata/photoData.txt', 'utf8');
+        const fileContents = await fs.promises.readFile(filePath, 'utf8');
         
         // Parse the contents as JSON
         let photoData = JSON.parse(fileContents);
@@ -326,13 +328,14 @@ const deleteFromPhotoData = (fileNamesToDelete) => {
         const newData = JSON.stringify(photoData, null, 2);
         
         // Write the updated data back to the file
-        fs.writeFileSync('apiresources/uploads/photoMetadata/photoData.txt', newData);
+        await fs.promises.writeFile(filePath, newData);
         
         console.log('File names deleted successfully from photoData.txt');
     } catch (error) {
         console.error('Error deleting file names from photoData.txt:', error);
     }
-}
+};
+
 
 const readTxtFile = async (filePath) => {
     try {

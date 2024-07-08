@@ -170,7 +170,7 @@ app.post('/deletebyname', async (req, res) => {
             console.error(`Error deleting file "${fileName}":`, err);
         }
 
-        deleteFromPhotoData(filesToDelete)
+        deleteFromPhotoData(username, filesToDelete)
     }
 
     res.status(200).send('Files deletion request received.');
