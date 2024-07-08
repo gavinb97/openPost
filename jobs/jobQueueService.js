@@ -84,7 +84,7 @@ const postToReddit = async (creds, job) => {
 
 const readPhotoDataFromFile = async (username, fileName) => {
     try {
-        const data = await fs.promises.readFile(`C:\\Users\\Gavin\\Desktop\\BuildABlog\\openPost\\apiresources\\uploads\\${username}\\photoMetaData\\photoData.txt`, 'utf8');
+        const data = await fs.promises.readFile(`${process.env.PHOTODATA_PATH}${username}\\photoMetaData\\photoData.txt`, 'utf8');
         const photoDataArray = JSON.parse(data);
         
         const photoData = photoDataArray.find(photo => photo.name === fileName);

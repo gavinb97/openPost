@@ -47,7 +47,7 @@ app.post('/upload', upload.single('file'), async (req, res) => {
         };
 
         // Append metadata to the JSON file
-        appendOrWriteToJsonFile(`apiresources/uploads/${username}/photoMetadata/photoData.txt`, metadata);
+        appendOrWriteToJsonFile(`${process.env.PHOTODATA_PATH}${username}/photoMetadata/photoData.txt`, metadata);
 
         // Copy the file to the appropriate directory based on its extension
         const ext = path.extname(fileName).toLowerCase();
@@ -241,7 +241,7 @@ app.post('/updatephotometadata', async (req, res) => {
 // Function to read photo data from file
 const readPhotoDataFromFile = async (username) => {
     try {
-        const data = await fs.promises.readFile(`apiresources/uploads/${username}/photoMetadata/photoData.txt`, 'utf8');
+        const data = await fs.promises.readFile(`${process.env.PHOTODATA_PATH}${username}/photoMetadata/photoData.txt`, 'utf8');
         return JSON.parse(data);
     } catch (error) {
         console.error('Error reading photo data:', error);
@@ -252,7 +252,7 @@ const readPhotoDataFromFile = async (username) => {
 // Function to write photo data to file
 const writePhotoDataToFile = async (data, username) => {
     try {
-        await fs.promises.writeFile(`apiresources/uploads/${username}/photoMetadata/photoData.txt`, JSON.stringify(data, null, 2), 'utf8');
+        await fs.promises.writeFile(`${process.env.PHOTODATA_PATH}${username}/photoMetadata/photoData.txt`, JSON.stringify(data, null, 2), 'utf8');
     } catch (error) {
         console.error('Error writing photo data:', error);
         throw error;
