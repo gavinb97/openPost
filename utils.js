@@ -313,8 +313,8 @@ const shuffleArray = array => {
 
 const deleteFromPhotoData = async (username, fileNamesToDelete) => {
     try {
-        const filePath = path.join('apiresources', 'uploads', username, 'photoMetadata', 'photoData.txt');
-        
+
+        const filePath = `${process.env.PHOTODATA_PATH}${username}/photoMetaData/photoData.txt`
         // Read the contents of the file
         const fileContents = await fs.promises.readFile(filePath, 'utf8');
         

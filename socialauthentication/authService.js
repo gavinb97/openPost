@@ -34,7 +34,7 @@ const registerUser = async (user) => {
         const userid = await registerUserDB(user)
         
         console.log(`User registered successfully: ${userid}`);
-        await createMediaFolders(username, 'C:\\Users\\Gavin\\Desktop\\BuildABlog\\openPost\\apiresources\\uploads\\')
+        await createMediaFolders(username, `${process.env.PHOTODATA_PATH}`)
     } catch (error) {
         throw new Error(`Failed to register user: ${error.message}`);
     }

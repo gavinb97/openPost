@@ -151,7 +151,7 @@ const createRedditPostBody = async (job) => {
 }
 
 const getMediaIfExists = async (job, username) => {
-    const mediaFolderPath = `C:\\Users\\Gavin\\Desktop\\BuildABlog\\openPost\\apiresources\\uploads\\${username}\\photos`
+    const mediaFolderPath = `${process.env.PHOTODATA_PATH}${username}\\photos`
     const mediaFileName = job.image;
     const mediaFilePath = path.join(mediaFolderPath, mediaFileName);
     console.log(mediaFilePath)
