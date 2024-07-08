@@ -84,7 +84,7 @@ const postToReddit = async (creds, job) => {
 
 const readPhotoDataFromFile = async (username, fileName) => {
     try {
-        const data = await fs.promises.readFile(`${process.env.PHOTODATA_PATH}${username}\\photoMetaData\\photoData.txt`, 'utf8');
+        const data = await fs.promises.readFile(`${process.env.PHOTODATA_PATH}${username}${process.env.PHOTOMETADATA_FOLDER}photoData.txt`, 'utf8');
         const photoDataArray = JSON.parse(data);
         
         const photoData = photoDataArray.find(photo => photo.name === fileName);
@@ -151,7 +151,7 @@ const createRedditPostBody = async (job) => {
 }
 
 const getMediaIfExists = async (job, username) => {
-    const mediaFolderPath = `${process.env.PHOTODATA_PATH}${username}\\photos`
+    const mediaFolderPath = `${process.env.PHOTODATA_PATH}${username}${process.env.PHOTO_FOLDER}`
     const mediaFileName = job.image;
     const mediaFilePath = path.join(mediaFolderPath, mediaFileName);
     console.log(mediaFilePath)
