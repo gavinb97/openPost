@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 export const createScheduledJob = async (schedule) => {
-    const endpoint = 'http://localhost:3456/setSchedule';
+    const endpoint = 'http://localhost:3455/setSchedule';
     console.log('wee')
     console.log(schedule)
     try {
@@ -15,7 +15,7 @@ export const createScheduledJob = async (schedule) => {
   };
 
   export const getJobsByUsername = async (user) => {
-    const endpoint = 'http://localhost:4455/getjobs';
+    const endpoint = 'http://localhost:3455/getjobs';
     
     try {
         const response = await axios.post(endpoint, {username: user});
@@ -27,7 +27,7 @@ export const createScheduledJob = async (schedule) => {
 };
 
 export const deleteJob = async (jobSetId) => {
-    const endpoint = 'http://localhost:4455/deletejob';
+    const endpoint = 'http://localhost:3455/deletejob';
 
     try {
         const response = await axios.delete(endpoint, {

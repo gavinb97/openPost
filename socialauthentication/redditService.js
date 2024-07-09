@@ -29,8 +29,6 @@ const getRedditLoginUrl = async (username) => {
         }
     }
 
-    await writeUserCreds('authData\\creds.json', userTokens)
-
     const loginUrl = `https://www.reddit.com/api/v1/authorize?client_id=${process.env.REDDIT_APP_ID}&response_type=code&state=${stateString}&redirect_uri=${redirect_uri}&duration=permanent&scope=${scopeSring}`
     return loginUrl
 }
