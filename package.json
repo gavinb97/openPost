@@ -9,7 +9,8 @@
     "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint:fix": "eslint . --fix",
-    "refreshCreds": "node socialauthentication/authData/refreshCreds.js"
+    "refreshCreds": "node socialauthentication/authData/refreshCreds.js",
+    "Client": "npm start --prefix client/autopost"
   },
   "author": "",
   "license": "ISC",
