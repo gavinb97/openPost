@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { fetchAllFilesByUser } from '../service/userMediaService';
+import { fetchAllFilesByUser, fetchAllVideosByUser } from '../service/userMediaService';
 import { useAuth } from '../service/authContext';
 import './../App.css';
 
@@ -8,11 +8,14 @@ const useMethods = () => {
 
     const [mediaFiles, setMediaFiles] = useState([]);
     const [imagesLoaded, setImagesLoaded] = useState(false);
+    const [videoFiles, setVideoFiles] = useState([])
 
     useEffect(() => {
         const getAllMedia = async () => {
             const files = await fetchAllFilesByUser(user.username);
+            const videos = await fetchAllVideosByUser(user.username)
             setMediaFiles(files);
+            setVideoFiles(videos)
             setImagesLoaded(true);
         };
         getAllMedia();
@@ -22,7 +25,9 @@ const useMethods = () => {
         user,
         mediaFiles,
         imagesLoaded,
-        setMediaFiles
+        setMediaFiles,
+        videoFiles,
+        setVideoFiles
     };
 };
 
