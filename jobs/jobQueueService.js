@@ -248,20 +248,30 @@ const createRedditPostBody = async (job) => {
 }
 
 const getMediaIfExists = async (job, username) => {
-    const mediaFolderPath = `${process.env.PHOTODATA_PATH}${username}${process.env.PHOTO_FOLDER}`
+    const photoFolderPath = `${process.env.PHOTODATA_PATH}${username}${process.env.PHOTO_FOLDER}`;
+    const videoFolderPath = `${process.env.PHOTODATA_PATH}${username}${process.env.VIDEO_FOLDER}`;
     const mediaFileName = job.image;
-    const mediaFilePath = path.join(mediaFolderPath, mediaFileName);
-    console.log(mediaFilePath)
+    const mediaPhotoFilePath = path.join(photoFolderPath, mediaFileName);
+    const mediaVideoFilePath = path.join(videoFolderPath, mediaFileName);
+
     return new Promise((resolve, reject) => {
-        fs.access(mediaFilePath, fs.constants.F_OK, (err) => {
+        fs.access(mediaPhotoFilePath, fs.constants.F_OK, (err) => {
             if (err) {
-                resolve(null); // File does not exist
+                // If the file does not exist in the photo folder, check the video folder
+                fs.access(mediaVideoFilePath, fs.constants.F_OK, (err) => {
+                    if (err) {
+                        resolve(null); // File does not exist in both folders
+                    } else {
+                        resolve(mediaVideoFilePath); // Return the full path of the file in the video folder
+                    }
+                });
             } else {
-                resolve(mediaFilePath); // Return the full path of the file
+                resolve(mediaPhotoFilePath); // Return the full path of the file in the photo folder
             }
         });
     });
 };
+
 
 
 
