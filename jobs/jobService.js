@@ -570,6 +570,7 @@ const handleSetInterval = async (request) => {
 
         const jobs = [];
         const maxDays = 2; // Scheduling jobs for 2 days in advance (48 hours)
+        const bridgeJobInterval = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
 
         // Create a unique jobSetId for this group of jobs
         const jobSetId = uuidv4();
@@ -599,30 +600,31 @@ const handleSetInterval = async (request) => {
         };
 
         // Helper function to format the time and create job
-        const createJob = (delayInMilliseconds, jobId) => {
-            const job = {
+        const createJob = (delayInMilliseconds, isBridgeJob = false) => {
+            const jobDetails = {
                 message_id: uuidv4(),
                 jobSetId: jobSetId, // Add the jobSetId to each job
                 userId: request.username || 'defaultUserId',
                 website: request.selectedWebsite,
-                content: `Post to ${request.selectedWebsite}`,
+                content: isBridgeJob ? 'Bridge job to ensure continuity' : `Post to ${request.selectedWebsite}`,
                 scheduledTime: Date.now() + delayInMilliseconds,
-                image: getNextImage(),
-                includeCaption: request.includeCaption,
-                captionType: request.captionType
+                image: isBridgeJob ? null : getNextImage(),
+                includeCaption: isBridgeJob ? false : request.includeCaption,
+                captionType: isBridgeJob ? null : request.captionType
             };
 
-            if (request.selectedWebsite === 'reddit') {
-                job.subreddit = getNextSubreddit();
+            if (request.selectedWebsite === 'reddit' && !isBridgeJob) {
+                jobDetails.subreddit = getNextSubreddit();
             }
 
-            return job;
+            return jobDetails;
         };
 
         let jobId = 1;
         const now = Date.now();
         const maxDate = now + (48 * 60 * 60 * 1000); // Current time + 48 hours
 
+        let scheduledJobFound = false;
         for (let dayOffset = 0; dayOffset < maxDays; dayOffset++) {
             selectedDays.forEach(day => {
                 request.timesOfDay.forEach(time => {
@@ -651,8 +653,9 @@ const handleSetInterval = async (request) => {
 
                     // Only push jobs that are within the next 48 hours
                     if (targetDate.getTime() <= maxDate && delayInMilliseconds >= 0) {
-                        const job = createJob(delayInMilliseconds, jobId++);
+                        const job = createJob(delayInMilliseconds);
                         jobs.push(job);
+                        scheduledJobFound = true;
 
                         if (remainingImages.length === 0) {
                             remainingImages = [...originalImages]; // Reset the remaining images if we've used them all
@@ -666,8 +669,14 @@ const handleSetInterval = async (request) => {
             });
         }
 
+        if (!scheduledJobFound) {
+            const jobDetails = createJob(bridgeJobInterval, true);
+            jobs.push(jobDetails);
+        }
+
         const dbJobObject = createScheduledJobObject(request, jobSetId, originalImages, remainingImages, Date.now(), originalSubreddits, remainingSubreddits);
         const activeJobObject = createActiveJobObject(request, dbJobObject, jobs, originalSubreddits, remainingSubreddits);
+
         return { jobs, originalImages, remainingImages, dbJobObject, activeJobObject };
     }
 };
