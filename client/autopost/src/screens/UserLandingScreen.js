@@ -82,7 +82,7 @@ function UserLandingScreen() {
         return (
             <div className='photo-post-job-container' style={{ textAlign: 'center' }}>
                 <h2>Video Post Job</h2>
-                <p>Click an image or multiple images to start a photo post job</p>
+                <p>Click an video or multiple videos to start a video post job</p>
                 <UploadedVideoContainerSmall videoFiles={videoFiles} imagesLoaded={imagesLoaded} setvideoFiles={setvideoFiles}></UploadedVideoContainerSmall>
             </div>
         )
@@ -105,6 +105,17 @@ function UserLandingScreen() {
                 <h2>Post Job</h2>
                 <p>Automatically post to your social networks</p>
                 <button onClick={() => handleShowPostJobModal()}>Start Post Job</button>
+                <br></br>
+            </div>
+        )
+    }
+
+    const renderReplyJobBox = () => {
+        return (
+            <div style={{ marginBottom: '2%', textAlign: 'center' }}>
+                <h2>Reply Job</h2>
+                <p>Automatically reply to users to build engagement</p>
+                <button onClick={() => handleShowPostJobModal()}>Start Reply Job</button>
                 <br></br>
             </div>
         )
@@ -136,6 +147,8 @@ function UserLandingScreen() {
             {renderCommentJobBox()}
 
             {renderDMJobBox()}
+
+            {renderReplyJobBox()}
             {/* Render SetScheduleModal if showScheduleModal is true */}
              {showScheduleModal && <SetScheduleModal closeModal={handleCloseScheduleModal} />}
              {showPostJobModal && <StartPostJobModal closeModal={handleClosePostJobModal}></StartPostJobModal>}
