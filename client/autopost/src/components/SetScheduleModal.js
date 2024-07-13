@@ -235,7 +235,7 @@ const SetScheduleModal = ({ closeModal, selectedImages }) => {
             <label htmlFor="durationSelect">Job duration: </label>
             <select id="durationSelect" value={durationOfJob} onChange={handleDurationChange}>
               <option value="">Select duration</option>
-              <option value="forever">Forever</option>
+              <option value="999">Forever</option>
               <option value="1">1 iteration</option>
               <option value="2">2 iterations</option>
               <option value="3">3 iterations</option>

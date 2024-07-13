@@ -15,9 +15,11 @@ import StartPostJobModal from '../components/StartPostJobModal';
 import StartCommentJobModal from '../components/StartCommentJobModal';
 import StartDMJobModal from '../components/StartDMJobModal';
 import LoginPromptModal from '../components/LoginPromptModal';
-
+import useMethods from './UserLandingScreenMethods';
 
 function UserLandingScreen() {
+    const { mediaFiles, imagesLoaded, setMediaFiles} = useMethods()
+  
     const navigate = useNavigate();
     const [showScheduleModal, setShowScheduleModal] = useState(false);
     const [showPostJobModal, setShowPostJobModal] = useState(false)
@@ -35,7 +37,6 @@ function UserLandingScreen() {
     }
 
     const { user  } = useAuth()
-    console.log(user)
     
     const handleCloseScheduleModal = () => {
         setShowScheduleModal(false);
@@ -71,7 +72,7 @@ function UserLandingScreen() {
             <div className='photo-post-job-container' style={{ textAlign: 'center' }}>
                 <h2>Photo Post Job</h2>
                 <p>Click an image or multiple images to start a photo post job</p>
-                <UploadedMediaContainerSmall></UploadedMediaContainerSmall>
+                <UploadedMediaContainerSmall mediaFiles={mediaFiles} imagesLoaded={imagesLoaded} setMediaFiles={setMediaFiles}></UploadedMediaContainerSmall>
             </div>
         )
     }
@@ -107,7 +108,7 @@ function UserLandingScreen() {
             </div>
         )
     }
-    
+   
     return (
         <div className="App">
             <Navbar></Navbar>
@@ -115,7 +116,7 @@ function UserLandingScreen() {
                 <img src={otherLogo} className="App-logo" alt="logo" />
                 <h2>Job Scheduler</h2>
             </header>
-            {renderPostJobBox()}
+            {imagesLoaded && renderPostJobBox()}
            
             {renderTextPostJobBox()}
             

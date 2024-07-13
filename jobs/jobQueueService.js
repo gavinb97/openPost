@@ -1,11 +1,34 @@
 require('dotenv').config({ path: '../.env' });
+const amqp = require('amqplib');
 const { tweetMediaOnBehalfOfUser } = require('../socialauthentication/twitterService')
 const { getCredsByUser } = require('../socialauthentication/socialAuthData')
-const { isJobIdPresent } = require('./jobsData')
+const { isJobIdPresent, deleteMessageIdFromJob, getMessageIdsCountForJob, getJobSetById, updateActiveJob, getDurationOfJob, deleteActiveJobByJobSetId } = require('./jobsData')
 const fs = require('fs');
 const path = require('path');
 const { postToSubredditOnBehalfOfUser } = require('../socialauthentication/redditService')
 const { makeGptCall } = require('./gptService')
+const { rescheduleRandomJobs, rescheduleHourInterval, rescheduleSetInterval } = require('./jobService')
+// const { setupQueue, enqueuePostJob, startWorker, getExistingQueue } = require('./jobQueue');
+
+const getExistingQueue = async () => {
+    const connection = await amqp.connect('amqp://localhost');
+    const channel = await connection.createChannel();
+  
+    // Ensure the exchange and queue are declared as expected
+    await channel.assertExchange('delayed-exchange', 'x-delayed-message', { durable: true, arguments: { 'x-delayed-type': 'direct' } });
+    await channel.assertQueue('postJobs', { durable: true });
+    await channel.bindQueue('postJobs', 'delayed-exchange', '');
+  
+    return channel;
+  }
+  
+ 
+async function enqueuePostJob(channel, job) {
+    // Convert job to JSON and enqueue it
+    const message = Buffer.from(JSON.stringify(job));
+    const headers = { 'x-delay': job.scheduledTime - Date.now() };
+    await channel.publish('delayed-exchange', '', message, { headers });
+  }
 
 const makePost = async (job) => {
     // validate that job is active 
@@ -50,6 +73,65 @@ const getRandom3LetterWord = () => {
     return word;
 };
 
+const reschedulePostJob = async (job) => {
+    console.log('inside reschedulePostJob')
+
+    // get count of messages, if there are none then we need to reschedule the jobs
+    const numberOfMessagesLeft = await getMessageIdsCountForJob(job.jobSetId)
+    console.log(numberOfMessagesLeft)
+    if (numberOfMessagesLeft === 0) {
+        // get active job
+        const activeJob = await getJobSetById(job.jobSetId)
+        if (activeJob.schedule_type === 'random') {
+            // if it is random, find out how many duration is left
+            const duration = await getDurationOfJob(job.jobSetId)
+            if (duration > 0) {
+                const {jobs, dbJobObject, activeJobObject} = await rescheduleRandomJobs(activeJob)
+                    // enqueue next set of jobs
+                const channel = await getExistingQueue()
+                console.log('inside reschedule random jobs... jobs below')
+                console.log(jobs)
+                    for (const job of jobs) {
+                        await enqueuePostJob(channel, job);
+                        console.log('Job enqueued:', job);
+                    }
+                // update active job in the database
+                await updateActiveJob(activeJobObject)
+            } else {
+                // delete the job if duration is 0
+                await deleteActiveJobByJobSetId(job.jobSetId)
+            }   
+            
+        } else {
+            if (activeJob.schedule_interval === 'set') {
+                const {jobs, dbJobObject, activeJobObject} = await rescheduleSetInterval(activeJob)
+                console.log('inside reschedule set time jobs... jobs below')
+                console.log(jobs)
+                const channel = await getExistingQueue()
+                for (const job of jobs) {
+                    await enqueuePostJob(channel, job);
+                    console.log('Job enqueued:', job);
+                }
+
+                await updateActiveJob(activeJobObject)
+            } else if (activeJob.schedule_interval === 'hour'){
+                console.log('inside reschedule hourly jobs... jobs below')
+               
+                const {jobs, dbJobObject, activeJobObject} = await rescheduleHourInterval(activeJob)
+                console.log(jobs)
+                const channel = await getExistingQueue()
+                for (const job of jobs) {
+                    await enqueuePostJob(channel, job);
+                    console.log('Job enqueued:', job);
+                }
+                await updateActiveJob(activeJobObject)
+            }
+        }
+    } else {
+        console.log('didnt do anything...')
+    }
+}
+
 const postToTwitter = async (creds, job) => {
     if (creds.twitterTokens?.access_token && creds.twitterTokens?.refresh_token) {
         // see if we have media
@@ -66,6 +148,16 @@ const postToTwitter = async (creds, job) => {
             }
             
         }
+
+        // delete message id from db
+        console.log('deleting messageID from job...')
+        const numberOfMessagesLeft = await getMessageIdsCountForJob(job.jobSetId)
+        console.log(`intial messages: ${numberOfMessagesLeft}`)
+        await deleteMessageIdFromJob(job.jobSetId, job.message_id)
+        const afterDelete = await getMessageIdsCountForJob(job.jobSetId)
+        console.log(`after delete messages: ${afterDelete}`)
+
+        await reschedulePostJob(job)
     }
 }
 
@@ -79,6 +171,11 @@ const postToReddit = async (creds, job) => {
             const postBody = await createRedditPostBody(job)
             await postToSubredditOnBehalfOfUser(creds.redditTokens.access_token, postBody, path, subredditName.toString(), title)
         }
+
+        // delete message id from db
+        await deleteMessageIdFromJob(job.jobSetId, job.message_id)
+
+        await reschedulePostJob(job)
     }
 }
 

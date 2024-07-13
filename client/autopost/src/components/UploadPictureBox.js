@@ -16,6 +16,12 @@ const UploadPictureBox = ({ onSuccessUpload }) => {
         setShowUpdateModal(false);
     };
 
+    const clearMedia = () => {
+        setPictureFiles([])
+        setVideoFiles([])
+        setNamesOfFiles([])
+    }
+
     const handleFileSelect = (event, fileType) => {
         const selectedFiles = event.target.files;
         if (fileType === 'picture') {
@@ -26,6 +32,7 @@ const UploadPictureBox = ({ onSuccessUpload }) => {
     };
 
     const handleUploadClick = async () => {
+        console.log('in handle upload click')
         const pictureInput = document.getElementById('pictureUpload');
         const videoInput = document.getElementById('videoUpload');
 
@@ -48,10 +55,9 @@ const UploadPictureBox = ({ onSuccessUpload }) => {
             // Reset the file inputs after uploading files
             pictureInput.value = '';
             videoInput.value = '';
-            
+            console.log('wee')
             console.log('Files uploaded:', uploadedFileNames);
             onSuccessUpload();
-
             // Store the uploaded file names and show the update modal
             setNamesOfFiles(uploadedFileNames);
             setShowUpdateModal(true);
@@ -80,10 +86,11 @@ const UploadPictureBox = ({ onSuccessUpload }) => {
                 <UpdateImageDataModal
                     uploadedFileNames={namesOfFiles}
                     imageData={imageMetadata}
-                    mediaFiles={pictureFiles}
+                    mediaFiles={pictureFiles.concat(videoFiles)}
                     closeModal={closeModal}
                     updatePhotoMetadata={updatePhotoMetadata}
                     user={user}
+                    clearMedia={clearMedia}
                 />
             )}
         </div>

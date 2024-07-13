@@ -3,6 +3,7 @@ import './../App.css';
 import React, { useRef  } from 'react';
 import Navbar from '../components/Navbar'
 import UploadedMediaContainer from '../components/UploadedMediaContainer'
+import UploadedVideosContainer from '../components/UploadedVideosContainer';
 
 import UploadPictureBox from '../components/UploadPictureBox';
 function UploadScreen() {
@@ -24,6 +25,8 @@ function UploadScreen() {
                 <UploadPictureBox onSuccessUpload={handleFileUploadSuccess} ></UploadPictureBox> 
             </div>
             <UploadedMediaContainer ref={uploadedMediaContainerRef}></UploadedMediaContainer>
+            <br></br>
+            <UploadedVideosContainer ref={uploadedMediaContainerRef}></UploadedVideosContainer>
         </div>
     );
 }

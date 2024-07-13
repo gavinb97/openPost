@@ -1,7 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-const { setupQueue, enqueuePostJob, startWorker } = require('./jobQueue');
+const { setupQueue, enqueuePostJob, startWorker, getExistingQueue } = require('./jobQueue');
 const { formatRequest } = require('./jobService');
 const { getActiveJobsByUserId, deleteActiveJobByJobSetId } = require('./jobsData');
 
@@ -39,7 +39,6 @@ router.post('/getjobs', async (req, res) => {
 
     try {
         const activeJobs = await getActiveJobsByUserId(username);
-        console.log(activeJobs);
         res.status(200).json({ activeJobs });
     } catch (error) {
         console.error('Error retrieving jobs:', error);

@@ -102,14 +102,55 @@ router.post('/files', async (req, res) => {
     }
 });
 
+
+router.post('/videos', async (req, res) => {
+    const username = req.body.username;
+    const uploadsFolder = path.join(__dirname, 'apiresources', 'uploads', username, 'videos');
+    try {
+        const files = await fs.promises.readdir(uploadsFolder);
+        const fileObjects = [];
+
+        for (const file of files) {
+            const filePath = path.join(uploadsFolder, file);
+            const fileData = await fs.promises.readFile(filePath);
+            const base64Data = fileData.toString('base64');
+
+            const fileObject = {
+                fileName: file,
+                fileData: base64Data,
+            };
+            fileObjects.push(fileObject);
+        }
+
+        res.status(200).json(fileObjects);
+    } catch (error) {
+        console.error('Error reading files:', error);
+        res.status(500).send('Error reading files.');
+    }
+});
+
 router.post('/deletebyname', async (req, res) => {
     const fileNames = req.body.fileNames;
     const username = req.body.username;
     const filesToDelete = Array.isArray(fileNames) ? fileNames : [fileNames];
-    const uploadsFolder = path.join(__dirname, 'apiresources', 'uploads', username, 'photos');
+
+    const photoExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp'];
+    const videoExtensions = ['.mp4', '.avi', '.mov', '.wmv'];
+
+    const uploadsFolder = path.join(__dirname, 'apiresources', 'uploads', username);
 
     for (const fileName of filesToDelete) {
-        const filePath = path.join(uploadsFolder, fileName);
+        const extension = path.extname(fileName).toLowerCase();
+        let filePath;
+
+        if (photoExtensions.includes(extension)) {
+            filePath = path.join(uploadsFolder, 'photos', fileName);
+        } else if (videoExtensions.includes(extension)) {
+            filePath = path.join(uploadsFolder, 'videos', fileName);
+        } else {
+            console.error(`Unsupported file type for "${fileName}"`);
+            continue;
+        }
 
         try {
             await fs.promises.stat(filePath);
@@ -127,9 +168,9 @@ router.post('/deletebyname', async (req, res) => {
         } catch (err) {
             console.error(`Error deleting file "${fileName}":`, err);
         }
-
-        deleteFromPhotoData(username, filesToDelete);
     }
+
+    deleteFromPhotoData(username, filesToDelete);
 
     res.status(200).send('Files deletion request received.');
 });

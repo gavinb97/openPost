@@ -6,29 +6,29 @@ import SetScheduleModal from '../components/SetScheduleModal';
 import { useAuth } from '../service/authContext';
 import './../App.css';
 
-const UploadedMediaContainerSmall = ({mediaFiles, setMediaFiles, imagesLoaded}) => {
+const UploadedVideoContainerSmall = ({videoFiles, setvideoFiles, imagesLoaded}) => {
     const { user } = useAuth();
 
     const navigate = useNavigate();
 
-    const [selectedImages, setSelectedImages] = useState([]);
+    const [selectedVideos, setselectedVideos] = useState([]);
     const [showModal, setShowModal] = useState(false);
     const [showScheduleModal, setShowScheduleModal] = useState(false);
-    const [imageMetadata, setImageMetadata] = useState([]);
+    const [videoMetadata, setvideoMetadata] = useState([]);
 
     useEffect(() => {
-        if (selectedImages.length > 0) {
-            fetchPhotoMetadata(selectedImages);
+        if (selectedVideos.length > 0) {
+            fetchPhotoMetadata(selectedVideos);
         } else {
-            setImageMetadata([]);
+            setvideoMetadata([]);
         }
-    }, [selectedImages]);
+    }, [selectedVideos]);
 
     const fetchPhotoMetadata = async (selectedImageIndexes) => {
         try {
-            const selectedFileNames = selectedImageIndexes.map(index => mediaFiles[index].fileName);
+            const selectedFileNames = selectedImageIndexes.map(index => videoFiles[index].fileName);
             const metadata = await getPhotoMetadata(selectedFileNames, user.username);
-            setImageMetadata(metadata);
+            setvideoMetadata(metadata);
         } catch (error) {
             console.error('Error fetching photo metadata:', error);
         }
@@ -36,12 +36,12 @@ const UploadedMediaContainerSmall = ({mediaFiles, setMediaFiles, imagesLoaded}) 
 
     const handleDeleteClick = async () => {
         try {
-            const selectedFileNames = selectedImages.map(index => mediaFiles[index].fileName);
+            const selectedFileNames = selectedVideos.map(index => videoFiles[index].fileName);
             console.log("Deleting files:", selectedFileNames);
             await deleteByName(selectedFileNames, user.username);
-            const updatedFiles = mediaFiles.filter((file, index) => !selectedImages.includes(index));
-            setMediaFiles(updatedFiles);
-            setSelectedImages([]);
+            const updatedFiles = videoFiles.filter((file, index) => !selectedVideos.includes(index));
+            setvideoFiles(updatedFiles);
+            setselectedVideos([]);
             window.location.reload();
         } catch (error) {
             console.error("Error deleting files:", error);
@@ -63,10 +63,10 @@ const UploadedMediaContainerSmall = ({mediaFiles, setMediaFiles, imagesLoaded}) 
 
     const renderPhotoActionButtons = () => {
         const handleSelectAll = () => {
-            if (selectedImages.length === mediaFiles.length) {
-                setSelectedImages([]);
+            if (selectedVideos.length === videoFiles.length) {
+                setselectedVideos([]);
             } else {
-                setSelectedImages(mediaFiles.map((_, index) => index));
+                setselectedVideos(videoFiles.map((_, index) => index));
             }
         };
     
@@ -82,30 +82,30 @@ const UploadedMediaContainerSmall = ({mediaFiles, setMediaFiles, imagesLoaded}) 
                     Schedule
                 </button>
                 <button style={{ backgroundColor: 'purple', color: 'white', marginTop: '10px', marginLeft: '5px' }} onClick={handleSelectAll}>
-                    {selectedImages.length === mediaFiles.length ? 'Unselect All' : 'Select All'}
+                    {selectedVideos.length === videoFiles.length ? 'Unselect All' : 'Select All'}
                 </button>
             </div>
         );
     };
 
     const handleImageClick = (index) => {
-        if (selectedImages.includes(index)) {
-            setSelectedImages(selectedImages.filter(item => item !== index));
+        if (selectedVideos.includes(index)) {
+            setselectedVideos(selectedVideos.filter(item => item !== index));
         } else {
-            setSelectedImages([...selectedImages, index]);
+            setselectedVideos([...selectedVideos, index]);
         }
     };
 
     // Extract filenames of selected images
-    const selectedImageNames = selectedImages.map(index => mediaFiles[index]?.fileName);
+    const selectedImageNames = selectedVideos.map(index => videoFiles[index]?.fileName);
 
     if (imagesLoaded) {
         return (
         <div>
             <div className="image-container-outer" style={{ overflowX: 'scroll', height: '30vh', width: 'auto', display: 'flex', justifyContent: 'flex-start', border: '10px solid #ccc', padding: '.5%'}}>
                 <div className="image-container" style={{ display: 'flex', flexWrap: 'nowrap'}}>
-                    {mediaFiles.map((fileObject, index) => (
-                        <div key={index} className={`image-box ${selectedImages.includes(index) ? 'selected' : ''}`} style={{ margin: '0 10px', textAlign: 'center', width: '200px' }} onClick={() => handleImageClick(index)}>
+                    {videoFiles.map((fileObject, index) => (
+                        <div key={index} className={`image-box ${selectedVideos.includes(index) ? 'selected' : ''}`} style={{ margin: '0 10px', textAlign: 'center', width: '200px' }} onClick={() => handleImageClick(index)}>
                             <div className="image-wrapper">
                                 <img
                                     src={`data:image/png;base64,${fileObject.fileData}`} // Assuming the images are PNG format
@@ -113,7 +113,7 @@ const UploadedMediaContainerSmall = ({mediaFiles, setMediaFiles, imagesLoaded}) 
                                     className="image"
                                     style={{ width: '100%', height: 'auto', maxWidth: '100%' }}
                                 />
-                                <div className="image-number">{selectedImages.indexOf(index) !== -1 ? selectedImages.indexOf(index) + 1 : ''}</div>
+                                <div className="image-number">{selectedVideos.indexOf(index) !== -1 ? selectedVideos.indexOf(index) + 1 : ''}</div>
                             </div>
                         </div>
                     ))}
@@ -121,12 +121,12 @@ const UploadedMediaContainerSmall = ({mediaFiles, setMediaFiles, imagesLoaded}) 
                 
             </div>
             <div style={{ display: 'flex', justifyContent: 'center', marginTop: '1%', minHeight: '10vh', minWidth: 'auto' }}>
-                {selectedImages.length > 0 && renderPhotoActionButtons()}
+                {selectedVideos.length > 0 && renderPhotoActionButtons()}
             </div>
             <div>
                 {/* Pass selected image names to SetScheduleModal */}
-                {showModal && <UpdateImageDataModal imageData={imageMetadata} closeModal={closeModal} updatePhotoMetadata={updatePhotoMetadata} user={user} />}
-                {showScheduleModal && <SetScheduleModal closeModal={closeModal} selectedImages={selectedImageNames}></SetScheduleModal>} 
+                {showModal && <UpdateImageDataModal imageData={videoMetadata} closeModal={closeModal} updatePhotoMetadata={updatePhotoMetadata} user={user} />}
+                {showScheduleModal && <SetScheduleModal closeModal={closeModal} selectedVideos={selectedImageNames}></SetScheduleModal>} 
             </div>
         </div>
     );
@@ -134,4 +134,4 @@ const UploadedMediaContainerSmall = ({mediaFiles, setMediaFiles, imagesLoaded}) 
     
 }
 
-export default UploadedMediaContainerSmall;
+export default UploadedVideoContainerSmall;

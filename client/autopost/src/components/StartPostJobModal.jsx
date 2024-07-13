@@ -656,7 +656,7 @@ const renderDurationBox = () => {
           <label htmlFor="durationSelect">Job duration: </label>
           <select id="durationSelect" value={durationOfJob} onChange={handleDurationChange}>
             <option value="">Select duration</option>
-            <option value="forever">Forever</option>
+            <option value="999">Forever</option>
             <option value="1">1 day</option>
             <option value="2">2 day</option>
             <option value="3">3 day</option>

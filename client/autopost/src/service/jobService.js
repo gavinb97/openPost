@@ -2,8 +2,6 @@ import axios from 'axios';
 
 export const createScheduledJob = async (schedule) => {
     const endpoint = 'http://localhost:3455/setSchedule';
-    console.log('wee')
-    console.log(schedule)
     try {
       const response = await axios.post(endpoint, {scheduleData: schedule});
       return response.data;
@@ -33,7 +31,6 @@ export const deleteJob = async (jobSetId) => {
         const response = await axios.delete(endpoint, {
             data: { jobSetId },
         });
-        console.log('Job deleted:', response.data);
         return response.data;
     } catch (error) {
         console.error('Error deleting job:', error);
@@ -138,7 +135,6 @@ export const validateAndFormatPostJobData = (request) => {
         jobObject.aiPrompt = aiPrompt;
     }
 
-    console.log(jobObject);
     return jobObject;
 };
 
@@ -227,7 +223,6 @@ export const validateAndFormatPostJobData = (request) => {
     if (selectedWebsite.toLowerCase() === 'reddit' && selectedSubreddits) {
         jobObject.selectedSubreddits = selectedSubreddits;
     }
-    console.log(jobObject)
     return jobObject;
 
   

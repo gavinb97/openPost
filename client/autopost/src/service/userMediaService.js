@@ -2,15 +2,33 @@ import axios from 'axios';
 import { Buffer } from 'buffer';
 
 
-const base64ToBlob = (base64String) => {
+const getMimeTypeFromExtension = (extension) => {
+    const mimeTypes = {
+        'png': 'image/png',
+        'jpg': 'image/jpeg',
+        'jpeg': 'image/jpeg',
+        'gif': 'image/gif',
+        'bmp': 'image/bmp',
+        'webp': 'image/webp',
+        'mp4': 'video/mp4',
+        'avi': 'video/x-msvideo',
+        'mov': 'video/quicktime',
+        'wmv': 'video/x-ms-wmv',
+        // Add other MIME types as needed
+    };
+
+    return mimeTypes[extension.toLowerCase()] || 'application/octet-stream';
+};
+
+const base64ToBlob = (base64String, mimeType) => {
     // Decode base64 string into a Buffer
     const buffer = Buffer.from(base64String, 'base64');
-    
+
     // Create a Blob from the Buffer
-    const blob = new Blob([buffer], { type: 'image/png' }); // Adjust the MIME type according to your file type
+    const blob = new Blob([buffer], { type: mimeType });
 
     return blob;
-}
+};
 
 const convertFileToBase64 = (file) => new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -27,33 +45,38 @@ const convertFileToBase64 = (file) => new Promise((resolve, reject) => {
 export const updateFileNamesAsync = async (files, uploadedFileNames) => {
     const renamedFiles = [];
 
-    files.forEach(async file => {
+    for (const file of files) {
         // Find the filename with the identifier in the uploadedFileNames array
+        console.log(uploadedFileNames)
         const matchingFileName = uploadedFileNames.find(name => name.endsWith(file.name));
 
         // Only include the file if a matching file name is found and it's different from the original
         if (matchingFileName && matchingFileName !== file.name) {
+            // Extract the file extension from the matching file name
+            const fileExtension = matchingFileName.split('.').pop();
+
+            // Get the MIME type based on the file extension
+            const mimeType = getMimeTypeFromExtension(fileExtension);
+
             // Create a new file object with the updated name
-            const updatedFile = new File([file], matchingFileName, { type: file.type, lastModified: file.lastModified });
-            
-            const base64file = await convertFileToBase64(updatedFile)
-            
+            const updatedFile = new File([file], matchingFileName, { type: mimeType, lastModified: file.lastModified });
+
+            const base64file = await convertFileToBase64(updatedFile);
+
             const fileObject = {
                 fileName: matchingFileName,
-                fileData: base64file
-            }
+                fileData: base64file,
+            };
 
             renamedFiles.push(fileObject);
         } else {
             console.log('No matching file name found for:', file.name);
         }
-    });
+    }
 
     console.log('Renamed files:', renamedFiles);
     return renamedFiles;
 };
-
-
 
 
 export const uploadFile = (file, fileName, username) => {
@@ -106,6 +129,19 @@ export const fetchAllFilesByUser = async (username) => {
       // Handle errors, such as displaying an error message to the user
     }
   };
+
+  export const fetchAllVideosByUser = async (username) => {
+    const endpoint = 'http://localhost:3455/videos';
+    try {
+      const response = await axios.post(endpoint, { username: username});
+      
+      return response.data
+    } catch (error) {
+      console.error('Error fetching files:', error);
+      // Handle errors, such as displaying an error message to the user
+    }
+  };
+
 
 
 

@@ -97,8 +97,7 @@ const insertScheduledJob = async (job) => {
         captionType
     ];
 
-    console.log('values');
-    console.log(values);
+ 
 
     try {
         const client = await pool.connect();
@@ -220,7 +219,7 @@ const insertActiveJob = async (job) => {
 
     // Convert message_ids array to a PostgreSQL array literal
     const messageIdsLiteral = `{${message_ids.map(id => `'${id}'`).join(',')}}`;
-    if (duration_of_job === 'forever') duration_of_job = 0
+    // if (duration_of_job === 'forever') duration_of_job = 999
 
 
     // Handle times_of_day being null
@@ -337,6 +336,109 @@ const isJobIdPresent = async (jobSetId) => {
     }
 };
 
+const updateActiveJob = async (job) => {
+    let {
+        job_set_id,
+        message_ids,
+        number_of_messages,
+        user_id,
+        content,
+        scheduled_time,
+        original_images,
+        remaining_images,
+        username,
+        selected_website,
+        picture_post_order,
+        schedule_type,
+        times_of_day,
+        selected_days,
+        schedule_interval,
+        hour_interval,
+        duration_of_job,
+        selected_subreddits,
+        remaining_subreddits,
+        original_subreddits,
+        include_caption,
+        type_of_caption
+    } = job;
+
+    // Convert message_ids array to a PostgreSQL array literal
+    const messageIdsLiteral = `{${message_ids.map(id => `'${id}'`).join(',')}}`;
+
+    // Handle times_of_day being an array of strings
+    const timesOfDayArray = times_of_day ? times_of_day.map(time => time) : [];
+    const timesOfDayJson = JSON.stringify(timesOfDayArray);
+
+    // Handle selected_days being an array of day names
+    const selectedDaysArray = selected_days ? selected_days : [];
+    const selectedDaysJson = JSON.stringify(selectedDaysArray);
+
+    const query = `
+        UPDATE active_jobs SET
+            message_ids = $1,
+            number_of_messages = $2,
+            user_id = $3,
+            content = $4,
+            scheduled_time = $5,
+            original_images = $6,
+            remaining_images = $7,
+            username = $8,
+            selected_website = $9,
+            picture_post_order = $10,
+            schedule_type = $11,
+            times_of_day = $12,
+            selected_days = $13,
+            schedule_interval = $14,
+            hour_interval = $15,
+            duration_of_job = $16,
+            selected_subreddits = $17,
+            remaining_subreddits = $18,
+            original_subreddits = $19,
+            include_caption = $20,
+            type_of_caption = $21,
+            updated_at = NOW()
+        WHERE job_set_id = $22
+        RETURNING id;
+    `;
+
+    const values = [
+        messageIdsLiteral, // Use the PostgreSQL array literal
+        number_of_messages,
+        user_id,
+        content,
+        scheduled_time,
+        original_images,
+        remaining_images,
+        username,
+        selected_website,
+        picture_post_order,
+        schedule_type,
+        timesOfDayJson, // Use the JSON formatted data
+        selectedDaysJson,
+        schedule_interval,
+        hour_interval,
+        duration_of_job,
+        selected_subreddits,
+        remaining_subreddits,
+        original_subreddits,
+        include_caption,
+        type_of_caption,
+        job_set_id
+    ];
+
+
+    try {
+        const client = await pool.connect();
+        const res = await client.query(query, values);
+        client.release();
+
+        return res.rows[0];
+    } catch (err) {
+        console.error('Error updating active job', err);
+        throw err;
+    }
+};
+
 const getActiveJobsByUserId = async (userId) => {
     const query = `
         SELECT *
@@ -375,11 +477,164 @@ const deleteActiveJobByJobSetId = async (jobSetId) => {
     }
 };
 
+const deleteMessageIdFromJob = async (job_set_id, message_id) => {
+    console.log('attempting to delete message id...');
+
+    const selectQuery = `
+        SELECT message_ids
+        FROM active_jobs
+        WHERE job_set_id = $1;
+    `;
+
+    const updateQuery = `
+        UPDATE active_jobs
+        SET message_ids = $1, updated_at = NOW()
+        WHERE job_set_id = $2;
+    `;
+
+    try {
+        const client = await pool.connect();
+        
+        // Retrieve the current message_ids for the job
+        const res = await client.query(selectQuery, [job_set_id]);
+        if (res.rows.length === 0) {
+            client.release();
+            throw new Error(`Job with job_set_id ${job_set_id} not found.`);
+        }
+        
+        let { message_ids } = res.rows[0];
+        console.log(message_ids);
+        console.log('message ids from rows ^^^');
+        
+        // Ensure message_id is formatted correctly for comparison
+        const formattedMessageId = `'${message_id}'`;
+
+        // Remove the message_id from the array
+        const updatedMessageIds = message_ids.filter(id => id !== formattedMessageId);
+        console.log(updatedMessageIds);
+        console.log('updated message ids from rows ^^^');
+
+        // Update the job with the new message_ids array
+        await client.query(updateQuery, [updatedMessageIds, job_set_id]);
+        client.release();
+        
+        console.log('Message ID deleted successfully.');
+    } catch (err) {
+        console.error('Error deleting message_id from job', err);
+        throw err;
+    }
+};
+
+
+const getMessageIdsCountForJob = async (job_set_id) => {
+    const query = `
+        SELECT message_ids
+        FROM active_jobs
+        WHERE job_set_id = $1;
+    `;
+
+    try {
+        const client = await pool.connect();
+        const res = await client.query(query, [job_set_id]);
+        client.release();
+
+        if (res.rows.length === 0) {
+            throw new Error(`Job with job_set_id ${job_set_id} not found.`);
+        }
+
+        const { message_ids } = res.rows[0];
+        return message_ids.length;
+    } catch (err) {
+        console.error('Error getting message_ids count for job', err);
+        throw err;
+    }
+};
+
+const getDurationOfJob = async (job_set_id) => {
+    const query = `
+        SELECT duration_of_job
+        FROM active_jobs
+        WHERE job_set_id = $1;
+    `;
+
+    try {
+        const client = await pool.connect();
+        const res = await client.query(query, [job_set_id]);
+        client.release();
+
+        if (res.rows.length === 0) {
+            throw new Error(`Job with job_set_id ${job_set_id} not found.`);
+        }
+
+        const { duration_of_job } = res.rows[0];
+        return duration_of_job;
+    } catch (err) {
+        console.error('Error getting duration of job', err);
+        throw err;
+    }
+};
+
+
+const getJobSetById = async (jobSetId) => {
+    const query = `
+        SELECT 
+            job_set_id,
+            message_ids,
+            number_of_messages,
+            user_id,
+            content,
+            scheduled_time,
+            original_images,
+            remaining_images,
+            username,
+            selected_website,
+            picture_post_order,
+            schedule_type,
+            times_of_day,
+            selected_days,
+            schedule_interval,
+            hour_interval,
+            duration_of_job,
+            selected_subreddits,
+            remaining_subreddits,
+            original_subreddits,
+            include_caption,
+            type_of_caption,
+            created_at,
+            updated_at
+        FROM active_jobs
+        WHERE job_set_id = $1;
+    `;
+
+    const values = [jobSetId];
+
+    try {
+        const client = await pool.connect();
+        const res = await client.query(query, values);
+        client.release();
+
+        if (res.rows.length === 0) {
+            throw new Error(`No job found with job_set_id: ${jobSetId}`);
+        }
+
+        return res.rows[0];
+    } catch (err) {
+        console.error('Error retrieving job set by ID', err);
+        throw err;
+    }
+};
+
+
 module.exports = {
     insertScheduledJob,
     insertRandomJob,
     insertActiveJob,
     isJobIdPresent,
     getActiveJobsByUserId,
-    deleteActiveJobByJobSetId
+    deleteActiveJobByJobSetId,
+    deleteMessageIdFromJob,
+    getMessageIdsCountForJob,
+    getJobSetById,
+    updateActiveJob,
+    getDurationOfJob
 };
