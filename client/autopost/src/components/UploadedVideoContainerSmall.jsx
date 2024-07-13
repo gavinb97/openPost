@@ -89,7 +89,7 @@ const UploadedVideoContainerSmall = ({ videoFiles, setvideoFiles, imagesLoaded }
         }
     };
 
-    const selectedImageNames = selectedVideos.map(index => videoFiles[index]?.fileName);
+    const selectedVideoNames = selectedVideos.map(index => videoFiles[index]?.fileName);
 
     if (imagesLoaded) {
         return (
@@ -114,7 +114,7 @@ const UploadedVideoContainerSmall = ({ videoFiles, setvideoFiles, imagesLoaded }
                 </div>
                 <div>
                     {showModal && <UpdateImageDataModal imageData={videoMetadata} closeModal={closeModal} updatePhotoMetadata={updatePhotoMetadata} user={user} />}
-                    {showScheduleModal && <SetScheduleModal closeModal={closeModal} selectedVideos={selectedImageNames}></SetScheduleModal>} 
+                    {showScheduleModal && <SetScheduleModal closeModal={closeModal} selectedImages={selectedVideoNames}></SetScheduleModal>} 
                 </div>
             </div>
         );
