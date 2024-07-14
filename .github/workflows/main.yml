@@ -15,9 +15,10 @@ jobs:
           echo "made directory"
           echo "${{ secrets.ARTIFACT_SSH_KEY }}" > ~/.ssh/id_rsa
           echo "above chmod stuff"
-         
+          chmod 600 ~/.ssh/id_rsa
+          echo "did che chmod"
           ssh-keyscan -p 22 ${{ secrets.ARTIFACT_HOST }} >> ~/.ssh/known_hosts
-
+          echo "did the keyscan"
           sudo apt-get install sshpass
           echo "are we in?"
       - name: Deploy to server
