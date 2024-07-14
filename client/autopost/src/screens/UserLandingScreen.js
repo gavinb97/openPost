@@ -157,6 +157,7 @@ function UserLandingScreen() {
              {showLoginPromptModal && <LoginPromptModal closeModal={handleCloseLoginPromptModal}></LoginPromptModal>}
         </div>
     );
+    
 }
 
 export default UserLandingScreen;
