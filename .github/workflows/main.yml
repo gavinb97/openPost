@@ -13,7 +13,6 @@ jobs:
         username: ${{ secrets.USER }}
         key: ${{ secrets.ARTIFACT_SSH_KEY }}
         port: ${{ secrets.PORT }}
-        passphrase: ${{ secrets.PSW }}
         script: |
           whoami
           ls
