@@ -96,7 +96,7 @@ const UploadedVideoContainerSmall = ({ videoFiles, setvideoFiles, imagesLoaded }
             <div>
                 <div className="image-container-outer" style={{ overflowX: 'scroll', height: 'auto', width: 'auto', display: 'flex', justifyContent: 'flex-start', border: '10px solid #ccc', padding: '.5%'}}>
                     <div className="image-container" style={{ display: 'flex', flexWrap: 'nowrap'}}>
-                        {videoFiles.map((fileObject, index) => (
+                        {videoFiles && videoFiles.map((fileObject, index) => (
                             <div key={index} className={`image-box ${selectedVideos.includes(index) ? 'selected' : ''}`} style={{ margin: '0 10px', textAlign: 'center', width: '200px' }} onClick={() => handleImageClick(index)}>
                                 <div className="image-wrapper">
                                     <video width="100%" height="60%">
