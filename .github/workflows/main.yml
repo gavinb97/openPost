@@ -1,31 +1,16 @@
-name: Deploy to server
+name: Deploy to linux
 on: push
 jobs:
-  deploy:
+
+  build:
+    name: Build
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Set up SSH key
-        run: |
-          echo "${{ secrets.ARTIFACT_SSH_KEY }}"
-          echo "ssh key above, gonna make directory"
-          mkdir -p ~/.ssh
-          echo "made directory"
-          echo "${{ secrets.ARTIFACT_SSH_KEY }}" > ~/.ssh/id_rsa
-          echo "above chmod stuff"
-          chmod 600 ~/.ssh/id_rsa
-          echo "did che chmod"
-          ${{ secrets.ARTIFACT_HOST }} >> ~/.ssh/known_hosts
-          echo "did the keyscan"
-          sudo apt-get install sshpass
-          echo "are we in?"
-      - name: Deploy to server
-        run: |
-          echo "hi"
-          sshpass -p '${{ secrets.PSW }}' ssh -v -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ secrets.HOST }} <<'ENDSSH'
-          cd ${{ secrets.APP_PATH }}
-          git pull
-          ENDSSH
-        
+    - name: executing remote ssh commands using ssh key
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USER }}
+        key: ${{ secrets.ARTIFACT_SSH_KEY }}
+        port: ${{ secrets.PORT }}
+        script: whoami
