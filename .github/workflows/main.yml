@@ -10,8 +10,11 @@ jobs:
       - name: Set up SSH key
         run: |
           echo "${{ secrets.ARTIFACT_SSH_KEY }}"
+          echo "ssh key above, gonna make directory"
           mkdir -p ~/.ssh
+          echo "made directory"
           echo "${{ secrets.ARTIFACT_SSH_KEY }}" > ~/.ssh/id_rsa
+          echo "above chmod stuff"
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -p 22 ${{ secrets.ARTIFACT_HOST }} >> ~/.ssh/known_hosts
 
