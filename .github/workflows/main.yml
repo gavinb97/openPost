@@ -9,7 +9,6 @@ jobs:
 
       - name: Set up SSH key
         run: |
-          env
           echo "${{ secrets.ARTIFACT_SSH_KEY }}"
           mkdir -p ~/.ssh
           echo "${{ secrets.ARTIFACT_SSH_KEY }}" > ~/.ssh/id_rsa
