@@ -24,7 +24,7 @@ jobs:
 
       - name: Deploy to server
         run: |
-        echo "hi"
+          echo "hi"
           # sshpass -p '${{ secrets.PSWD }}' ssh -v -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ secrets.HOST }} <<'ENDSSH'
           # cd ${{ secrets.APP_PATH }}
           # git pull
