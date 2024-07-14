@@ -29,6 +29,13 @@ jobs:
           npm install
         EOF
 
+    - name: Start ngrok
+      run: |
+        ssh -o StrictHostKeyChecking=no gavin@192.168.1.121 << 'EOF'
+          cd ./Desktop/open/openPost/
+          ngrok http 3455 -- domain moral-kindly-fly.ngrok-free.app
+        EOF
+
     - name: Start refreshCreds job in background
       run: |
         ssh -o StrictHostKeyChecking=no gavin@192.168.1.121 << 'EOF'
