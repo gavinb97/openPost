@@ -5,7 +5,7 @@ on: push
 jobs:
   build:
     name: Build
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
@@ -17,7 +17,7 @@ jobs:
         EOF
       env:
         SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-        
+    
     - name: Add SSH key
       run: |
         echo "$SSH_PRIVATE_KEY" > key
