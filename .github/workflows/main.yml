@@ -14,8 +14,14 @@ jobs:
       run: |
         ssh -o StrictHostKeyChecking=no gavin@192.168.1.121 << 'EOF'
           cd ./Desktop/open/openPost/
-          echo "in open, about to ls"
-          ls
+          echo "in directory, killing any running processes..."
+          pkill -f node || echo "No Running Processes"
+          echo "Pulling newest code..."
+          git pull
+          echo "installing..."
+          npm install
+          echo "starting refresh creds job"
+          npm run refreshCreds
         EOF
       env:
         SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
