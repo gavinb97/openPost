@@ -9,6 +9,13 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
+
+    - name: Add SSH key
+      run: |
+        echo "${{ secrets.SSH_PRIVATE_KEY }}" > key
+        chmod 600 key
+        eval $(ssh-agent)
+        ssh-add key
     
     - name: Executing remote SSH commands using SSH key
       run: |
@@ -20,15 +27,14 @@ jobs:
           git pull
           echo "installing..."
           npm install
-          echo "starting refresh creds job"
-          npm run refreshCreds
+        EOF
+
+    - name: Start refreshCreds job in background
+      run: |
+        ssh -o StrictHostKeyChecking=no gavin@192.168.1.121 << 'EOF'
+          cd ./Desktop/open/openPost/
+          echo "starting refresh creds job in background"
+          nohup npm run refreshCreds > refreshCreds.log 2>&1 &
         EOF
       env:
         SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-    
-    - name: Add SSH key
-      run: |
-        echo "${{ secrets.SSH_PRIVATE_KEY }}" > key
-        chmod 600 key
-        eval $(ssh-agent)
-        ssh-add key
