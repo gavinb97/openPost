@@ -1,12 +1,26 @@
 name: Deploy to linux
-on: push
-jobs:
 
+on: push
+
+jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
     steps:
-    - name: executing remote ssh commands using ssh key
-      script: |
-        ssh gavin@192.168.1.121
-        ls
+    - name: Checkout repository
+      uses: actions/checkout@v2
+    
+    - name: Executing remote SSH commands using SSH key
+      run: |
+        ssh -o StrictHostKeyChecking=no gavin@192.168.1.121 << 'EOF'
+          ls
+        EOF
+      env:
+        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        
+    - name: Add SSH key
+      run: |
+        echo "$SSH_PRIVATE_KEY" > key
+        chmod 600 key
+        eval $(ssh-agent)
+        ssh-add key
