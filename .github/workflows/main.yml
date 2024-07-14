@@ -11,22 +11,18 @@ jobs:
         run: |
           env
           echo "${{ secrets.ARTIFACT_SSH_KEY }}"
-          echo "${{ secrets.PSWD }}"
-          echo "${{ secrets.USER }}"
-          ssh gavin@192.168.1.121
+          mkdir -p ~/.ssh
+          echo "${{ secrets.ARTIFACT_SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -p 22 ${{ secrets.ARTIFACT_HOST }} >> ~/.ssh/known_hosts
+
+          sudo apt-get install sshpass
           echo "are we in?"
-          # mkdir -p ~/.ssh
-          # echo "${{ secrets.ARTIFACT_SSH_KEY }}" > ~/.ssh/id_rsa
-          # chmod 600 ~/.ssh/id_rsa
-          # ssh-keyscan -p 22 ${{ secrets.ARTIFACT_HOST }} >> ~/.ssh/known_hosts
-
-          # sudo apt-get install sshpass
-
       - name: Deploy to server
         run: |
           echo "hi"
-          # sshpass -p '${{ secrets.PSWD }}' ssh -v -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ secrets.HOST }} <<'ENDSSH'
-          # cd ${{ secrets.APP_PATH }}
-          # git pull
-          # ENDSSH
+          sshpass -p '${{ secrets.PSW }}' ssh -v -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ secrets.HOST }} <<'ENDSSH'
+          cd ${{ secrets.APP_PATH }}
+          git pull
+          ENDSSH
         
