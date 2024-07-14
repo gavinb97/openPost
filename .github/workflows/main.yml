@@ -13,12 +13,8 @@ jobs:
     - name: Executing remote SSH commands using SSH key
       run: |
         ssh -o StrictHostKeyChecking=no gavin@192.168.1.121 << 'EOF'
-          ls
-          cd ./Desktop
-          cd ./open
+          cd ./Desktop/open/openPost/
           echo "in open, about to ls"
-          ls
-          cd ./openPost
           ls
         EOF
       env:
