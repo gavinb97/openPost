@@ -19,7 +19,7 @@ jobs:
     
     - name: Executing remote SSH commands using SSH key
       run: |
-        ssh -o StrictHostKeyChecking=no gavin@192.168.1.121 << 'EOF'
+        ssh -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ secrets.HOST }} << 'EOF'
           cd ./Desktop/open/openPost/
           echo "in directory, killing any running processes..."
           pkill -f node || echo "No Running Processes"
@@ -31,14 +31,14 @@ jobs:
 
     - name: Kill existing ngrok session
       run: |
-        ssh -o StrictHostKeyChecking=no gavin@192.168.1.121 << 'EOF'
+        ssh -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ secrets.HOST }} << 'EOF'
           echo "Killing any running ngrok sessions..."
           pkill -f ngrok || echo "No Running ngrok Processes"
         EOF
 
     - name: Start ngrok
       run: |
-        ssh -o StrictHostKeyChecking=no gavin@192.168.1.121 << 'EOF'
+        ssh -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ secrets.HOST }} << 'EOF'
           cd ./Desktop/open/openPost/
           echo "starting ngrok in background"
           nohup ngrok http 3455 --domain moral-kindly-fly.ngrok-free.app > ngrok.log 2>&1 &
@@ -46,7 +46,7 @@ jobs:
 
     - name: Start refreshCreds job in background
       run: |
-        ssh -o StrictHostKeyChecking=no gavin@192.168.1.121 << 'EOF'
+        ssh -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ secrets.HOST }} << 'EOF'
           cd ./Desktop/open/openPost/
           echo "starting refresh creds job in background"
           nohup npm run refreshCreds > refreshCreds.log 2>&1 &
@@ -54,7 +54,7 @@ jobs:
 
     - name: Start api
       run: |
-        ssh -o StrictHostKeyChecking=no gavin@192.168.1.121 << 'EOF'
+        ssh -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ secrets.HOST }} << 'EOF'
           cd ./Desktop/open/openPost/
           echo "starting api in background"
           nohup npm start > openPostApi.log 2>&1 &
@@ -62,7 +62,7 @@ jobs:
 
     - name: Start client
       run: |
-        ssh -o StrictHostKeyChecking=no gavin@192.168.1.121 << 'EOF'
+        ssh -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ secrets.HOST }} << 'EOF'
           cd ./Desktop/open/openPost/
           echo "starting client in background"
           nohup npm run client > openPostClient.log 2>&1 &
