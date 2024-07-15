@@ -51,6 +51,7 @@
   justify-content: center;
   font-size: 26px;
   color: white;
+  padding-top: 2%;
 }
 
 .home-page-body {
@@ -260,6 +261,7 @@
 .navbar {
   background-color: #00aff0; /* Background color of the navbar */
   overflow: hidden; /* Ensure contents don't overflow */
+  border-bottom: 2px solid lightblue;
 }
 
 .navbar ul {
