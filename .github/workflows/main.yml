@@ -16,7 +16,14 @@ jobs:
         chmod 600 key
         eval $(ssh-agent)
         ssh-add key
-    
+
+    - name: Configure Git to use SSH
+      run: |
+        ssh -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ secrets.HOST }} << 'EOF'
+          cd ./Desktop/open/openPost/
+          git remote set-url origin git@github.com:gavinb97/openPost.git
+        EOF
+
     - name: Executing remote SSH commands using SSH key
       run: |
         ssh -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ secrets.HOST }} << 'EOF'
