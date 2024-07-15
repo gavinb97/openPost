@@ -6,7 +6,7 @@ import { getTikTokLoginUrl, revokeTikTokAccess } from '../service/tiktokService'
 import { getUserCreds } from '../service/userService';
 import Navbar from '../components/Navbar';
 import { useAuth } from '../service/authContext';
-
+ 
 function SocialsLogin({ userData }) {
   const { user, credentials, isLoggedIn, setIsLoggedIn, isLoading } = userData
 
