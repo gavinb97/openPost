@@ -20,7 +20,7 @@ jobs:
     - name: Executing remote SSH commands using SSH key
       run: |
         ssh -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ secrets.HOST }} << 'EOF'
-          cd ./Desktop/openPost/openPost/
+          cd ./Desktop/open/openPost/
           echo "in directory, killing any running processes..."
           pkill -f node || echo "No Running Processes"
           echo "Pulling newest code..."
@@ -39,7 +39,7 @@ jobs:
     - name: Start ngrok
       run: |
         ssh -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ secrets.HOST }} << 'EOF'
-          cd ./Desktop/openPost/openPost/
+          cd ./Desktop/open/openPost/
           echo "starting ngrok in background"
           nohup ngrok http 3455 --domain moral-kindly-fly.ngrok-free.app > ngrok.log 2>&1 &
         EOF
@@ -47,7 +47,7 @@ jobs:
     - name: Start refreshCreds job in background
       run: |
         ssh -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ secrets.HOST }} << 'EOF'
-          cd ./Desktop/openPost/openPost/
+          cd ./Desktop/open/openPost/
           echo "starting refresh creds job in background"
           nohup npm run refreshCreds > refreshCreds.log 2>&1 &
         EOF
@@ -55,7 +55,7 @@ jobs:
     - name: Start api
       run: |
         ssh -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ secrets.HOST }} << 'EOF'
-          cd ./Desktop/openPost/openPost/
+          cd ./Desktop/open/openPost/
           echo "starting api in background"
           nohup npm start > openPostApi.log 2>&1 &
         EOF
@@ -63,7 +63,7 @@ jobs:
     - name: Start client
       run: |
         ssh -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ secrets.HOST }} << 'EOF'
-          cd ./Desktop/openPost/openPost/
+          cd ./Desktop/open/openPost/
           echo "starting client in background"
           nohup npm run client > openPostClient.log 2>&1 &
         EOF
