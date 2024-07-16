@@ -1,7 +1,6 @@
-import logo from './logo.svg';
 import './App.css';
 import React from 'react';
-import { createBrowserRouter, RouterProvider, Link  } from 'react-router-dom';
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import UploadScreen from './screens/UploadScreen';
 import SocialsLoginScreen from './screens/SocialsLoginScreen';
 import RegistrationScreen from './screens/RegistrationScreen';
@@ -11,7 +10,7 @@ import UserLandingScreen from './screens/UserLandingScreen';
 import About from './screens/About';
 import Jobs from './screens/Jobs';
 import Profile from './screens/Profile';
-import Navbar from './components/Navbar'
+import Navbar from './components/Navbar';
 import { AuthProvider } from './service/authContext';
 
 function App() {
@@ -29,19 +28,19 @@ function App() {
       element: <LoginScreen />
     },
     {
-      path: '/uploadMedia', // Corrected path with '/'
+      path: '/uploadMedia',
       element: <UploadScreen />
     },
     {
-      path: '/authorizeSocials', // Corrected path with '/'
+      path: '/authorizeSocials',
       element: <SocialsLoginScreen />
     },
     {
-      path: '/jobscheduler', // Corrected path with '/'
+      path: '/jobscheduler',
       element: <UserLandingScreen />
     },
     {
-      path: '/jobs', // Corrected path with '/'
+      path: '/jobs',
       element: <Jobs />
     },
     {
@@ -50,21 +49,15 @@ function App() {
     },
     {
       path: '/profile',
-      element: <Profile></Profile>
+      element: <Profile />
     }
   ]);
 
   return (
-    <AuthProvider>
-        <RouterProvider router={router}>
-            <div>
-              {/* Add any global components here */}
-  
-       
-            </div>
-        </RouterProvider>
+       <AuthProvider>
+      <RouterProvider router={router}>
+      </RouterProvider>
     </AuthProvider>
-    
   );
 }
 

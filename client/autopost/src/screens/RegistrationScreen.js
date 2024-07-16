@@ -42,49 +42,55 @@ function RegistrationScreen() {
     };
 
     return (
-        <div className="App">
+        <div className="registration-page">
             <Navbar></Navbar>
-            <header className="App-header">
-                <p>Registration</p>
+            <div className='registration-box'>
+                 <header>
+                <h1>Create Your Account</h1>
 
-                <form onSubmit={handleSubmit}>
-                    <div>
-                        <label>Username: </label>
+                <form onSubmit={handleSubmit} className='registration-input-container'>
+                    <div >
+                        {/* <label>Username: </label> */}
                         <input
                             type="text"
                             value={username}
                             onChange={handleUsernameChange}
                             minLength={5}
                             required
+                            placeholder='Username'
                         />
                     </div>
 
                     <div>
-                        <label>Email: </label>
+                        {/* <label>Email: </label> */}
                         <input
                             type="email"
                             value={email}
                             onChange={handleEmailChange}
                             required
+                            placeholder='Email'
                         />
                     </div>
 
                     <div>
-                        <label>Password: </label>
+                        {/* <label>Password: </label> */}
                         <input
                             type="password"
                             value={password}
                             onChange={handlePasswordChange}
                             minLength={6}
                             required
+                            placeholder='Password'
                         />
                     </div>
 
                     <div>
-                        <button type="submit">Register</button>
+                        <button type="submit">Sign Up</button>
                     </div>
                 </form>
             </header>
+            </div>
+           
         </div>
     );
 }

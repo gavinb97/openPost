@@ -11,11 +11,11 @@ function About() {
     const navigate = useNavigate()
     
     return (
-        <div className="App">
+        <div className="App home-page">
             <Navbar></Navbar>
             <header className="App-header">
                 <img src={otherLogo} className="App-logo" alt="logo" />
-            <h1>Simplify Social, Amplify Results - OnlyPosts!</h1>
+            <h2>Simplify Social, Amplify Results</h2>
             </header>
         </div>
     );

@@ -4,7 +4,6 @@ import { useAuth } from '../service/authContext';  // Ensure this path matches t
 
 const Navbar = () => {
   const { user, logoutContext } = useAuth();  // Destructuring to get user and logoutContext
-
   return (
     <nav className="navbar">
       {/* Left section */}

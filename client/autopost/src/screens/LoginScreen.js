@@ -34,29 +34,29 @@ function LoginScreen() {
     };
 
     return (
-        <div className="App">
+        <div className="login-page">
             <Navbar></Navbar>
-            <header className="App-header">
-                <p>Login</p>
+            <header className="login-box">
+                <h1>Login</h1>
 
-                <form onSubmit={handleSubmit}>
+                <form onSubmit={handleSubmit} className='login-input-container'>
                     <div>
-                        <label>Username: </label>
                         <input
                             type="text"
                             value={username}
                             onChange={handleUsernameChange}
                             required
+                            placeholder='Username'
                         />
                     </div>
 
                     <div>
-                        <label>Password: </label>
                         <input
                             type="password"
                             value={password}
                             onChange={handlePasswordChange}
                             required
+                            placeholder='Password'
                         />
                     </div>
 

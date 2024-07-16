@@ -43,11 +43,11 @@ function HomeScreen() {
     }
 
     return (
-        <div className="App">
-            <Navbar></Navbar>
+        <div className="App home-page">
+             <Navbar></Navbar>
             <header className="App-header">
                 <img src={otherLogo} className="App-logo" alt="logo" />
-            <h2>Simplify Social, Amplify Results - OnlyPosts!</h2>
+            <h2>Simplify Social, Amplify Results</h2>
             </header>
             {renderWelcome()}
             {renderWhoThisIsFor()}

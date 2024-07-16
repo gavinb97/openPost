@@ -1,5 +1,104 @@
 .App {
   /* text-align: center; */
+  
+}
+
+.home-page {
+  margin-top: 3%;
+}
+
+.registration-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background-color: white;
+}
+
+.registration-box {
+  width: 90%;
+  max-width: 400px;
+  padding: 3rem;
+  background-color: #00aff0;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  color: white;
+
+  h1 {
+    text-shadow: 1px 1px 2px black;
+  }
+
+  button {
+    margin-top: 10%;
+    color: white;
+    background-color: #0091ea;
+    padding: 2%;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-shadow: 1px 1px 2px black;
+  }
+}
+
+.registration-input-container {
+  input {
+    border-radius: 10px;
+    padding: 4%;
+    margin: 2%;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border: 1px solid #0091ea;
+  }
+
+  input:focus {
+    outline: none !important;
+  }
+}
+
+.login-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background-color: white;
+}
+
+.login-box {
+  width: 90%;
+  max-width: 400px;
+  padding: 3rem;
+  background-color: #00aff0;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  color: white;
+
+  h1 {
+    text-shadow: 1px 1px 2px black;
+  }
+
+  button {
+    margin-top: 10%;
+    color: white;
+    background-color: #0091ea;
+    padding: 2%;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-shadow: 1px 1px 2px black;
+  }
+}
+
+.login-input-container {
+  input {
+    border-radius: 10px;
+    padding: 4%;
+    margin: 2%;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border: 1px solid #0091ea;
+  }
+
+  input:focus {
+    outline: none !important;
+  }
 }
 
 .App-logo {
@@ -52,6 +151,10 @@
   font-size: 26px;
   color: white;
   padding-top: 2%;
+
+  h2 {
+    text-shadow: 1px 1px 2px black;
+  }
 }
 
 .home-page-body {
@@ -261,7 +364,12 @@
 .navbar {
   background-color: #00aff0; /* Background color of the navbar */
   overflow: hidden; /* Ensure contents don't overflow */
-  border-bottom: 2px solid lightblue;
+  border-bottom: 2px solid #0091ea;
+  position: fixed;
+  top: 0;
+  width: 100%;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  text-shadow: 1px 1px 2px black;
 }
 
 .navbar ul {
