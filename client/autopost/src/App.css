@@ -7,6 +7,83 @@
   padding-top: 3rem;
 }
 
+.about-page {
+  padding-top: 3rem;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.about-page-header {
+  flex: 2;
+}
+
+.about-page-whoweare-box {
+  text-align: center;
+  /* position: relative; */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 auto; 
+  width: 80%;
+}
+
+.whoweare-image-container {
+  position: relative;
+  width: 100%;
+}
+
+.whoweare-image {
+  width: 100%;
+  height: auto;
+
+}
+
+.whoweare-text {
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  color: #00aff0;
+  padding: 1rem;
+
+  h1 {
+    color: grey;
+    text-align: left;
+    text-decoration: underline;
+    text-underline-offset: 1rem;
+    text-decoration-color: #00aff0;
+  }
+
+  p {
+    color: black;
+    font-size: 36px;
+  }
+}
+
+.about-page-second-box {
+  display: flex;
+  flex-direction: column;
+}
+
+.about-page-second-box-box {
+  padding-top: 6rem;
+  padding-bottom: 6rem;
+  padding-left: 30vw;
+  background-color: #00aff0;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.about-page-second-second-box {
+  padding-top: 6rem;
+  padding-bottom: 6rem;
+  padding-right: 30vw;
+  background-color: white;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  text-align: right;
+}
+
 .registration-page {
   display: flex;
   align-items: center;
@@ -153,8 +230,9 @@
   font-size: 26px;
   color: white;
   padding-top: 2%;
-
-  h2 {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  
+  h2 {  
     text-shadow: 1px 1px 2px black;
   }
 }
@@ -373,6 +451,7 @@
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   text-shadow: 1px 1px 2px black;
   height: 3rem;
+  z-index: 1000; 
 }
 
 .navbar ul {
