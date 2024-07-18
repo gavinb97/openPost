@@ -20,7 +20,7 @@
 
 .about-page-whoweare-box {
   text-align: center;
-  /* position: relative; */
+  position: relative;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -35,8 +35,7 @@
 
 .whoweare-image {
   width: 100%;
-  height: auto;
-
+  
 }
 
 .whoweare-text {
@@ -47,24 +46,27 @@
   text-align: center;
   color: #00aff0;
   padding: 1rem;
-
+  
   h1 {
     color: grey;
     text-align: left;
     text-decoration: underline;
     text-underline-offset: 1rem;
     text-decoration-color: #00aff0;
+    font-size: 2vw;
   }
 
   p {
     color: black;
-    font-size: 36px;
+    font-size: 2vw;
   }
 }
 
 .about-page-second-box {
   display: flex;
   flex-direction: column;
+
+  
 }
 
 .about-page-second-box-box {
@@ -73,6 +75,31 @@
   padding-left: 30vw;
   background-color: #00aff0;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+
+  h1 {
+    color: white;
+    text-align: left;
+    text-decoration: underline;
+    text-underline-offset: 1rem;
+    text-decoration-color: white;
+    font-size: 2vw;
+  }
+
+  p {
+    color: white;
+    font-size: 1vw;
+  }
+
+  button {
+    padding: 1vw;
+    border: none;
+    border-radius: 1vw;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  button:hover {
+    color: #00aff0;
+  }
 }
 
 .about-page-second-second-box {
@@ -82,6 +109,125 @@
   background-color: white;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   text-align: right;
+
+  h1 {
+    color: grey;
+    text-align: right;
+    text-decoration: underline;
+    text-underline-offset: 1rem;
+    text-decoration-color: #00aff0;
+    font-size: 2vw;
+  }
+
+  p {
+    color: black;
+    font-size: 1vw;
+  }
+
+  button {
+    padding: 1vw;
+    border: none;
+    border-radius: 1vw;
+    background-color: #00aff0;
+    color: white;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  button:hover {
+    background-color: #0091ea;
+  }
+}
+
+.about-page-twotonebox-container {
+  display: flex;
+  flex-direction: row;
+}
+
+.about-page-users-box-light-blue {
+  width: 20vw;
+  height: 40vh;
+  background-color: #a7e7ff;
+
+}
+
+.about-page-users-box-dark-blue {
+  width: 80vw;
+  height: 40vh;
+  background-color: #00aff0;
+
+  h1 {
+    color: white;
+    text-align: left;
+    text-decoration: underline;
+    text-underline-offset: 1rem;
+    text-decoration-color: white;
+    font-size: 2vw;
+    padding-left: 5rem;
+  }
+
+  p {
+    color: white;
+    font-size: 1vw;
+    padding-left: 5rem;
+  }
+}
+
+.about-page-white-box {
+  height: 33vh;
+}
+
+.userbox {
+  position: relative;
+  width: 100%;
+}
+
+.about-page-support-twotonebox-container {
+  display: flex;
+  flex-direction: row;
+}
+
+.about-page-users-support-box-light-blue {
+  width: 85vw;
+  height: 40vh;
+  background-color: #a7e7ff;
+  
+  h1 {
+    color: grey;
+    text-align: left;
+    text-decoration: underline;
+    text-underline-offset: 1rem;
+    text-decoration-color: #00aff0;
+    font-size: 2vw;
+    padding-left: 5rem;
+  }
+
+  p {
+    color: grey;
+    font-size: 1vw;
+    padding-left: 5rem;
+  }
+}
+
+.about-page-users-support-box-dark-blue {
+  width: 15vw;
+  height: 40vh;
+  background-color: #00aff0;
+}
+
+.about-page-post-boxes {
+  display: flex;
+  justify-content: center;
+  gap: 3vw;
+
+  position: absolute;
+  top: 16vh; 
+  left: 30vh;  
+  padding: 0 auto;
+  transform: translate(0%, 1%);
+  color: #00aff0;
+}
+
+.about-page-post-box {
+  width: 20vw;
 }
 
 .registration-page {

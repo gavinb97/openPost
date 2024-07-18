@@ -3,6 +3,7 @@ import otherLogo from './../onlypostsNoBackground.png';
 import './../App.css';
 import React from 'react';
 import Navbar from '../components/Navbar';
+import { TwitterTweetEmbed } from 'react-twitter-embed';
 
 function About() {
   return (
@@ -13,7 +14,7 @@ function About() {
         <img src={otherLogo} className="App-logo" alt="logo" />
         <h2>Simplify Social, Amplify Results</h2>
       </header>
-    <p></p>
+
       <div className='about-page-whoweare-box'>
         <div className='whoweare-image-container'>
           <img src={whoWeAreBackground} alt="Who We Are Background" className='whoweare-image' />
@@ -26,18 +27,69 @@ function About() {
 
         <div className='about-page-second-box'>
             <div className='about-page-second-box-box'>
-                <hi>Mission, Vision and Values</hi>
+                <h1>Mission, Vision and Values</h1>
                 <p>As a creator first platform - our creator community is at the heart of everything we do.</p>
                 <button>Our mission, vision, and values</button>
             </div>
             <div className='about-page-second-second-box'>
-            <hi>Our Approach to Safety</hi>
+            <h1>Our Approach to Safety</h1>
                 <p>We are committed to building the safest social media platform in the world.</p>
                 <button>Transparency center</button>
             </div>
         </div>
     </div>
 
+    <div className='about-page-support-container'>
+        <div className='about-page-support-twotonebox-container'>
+            <div className='about-page-users-support-box-light-blue'>
+            <h1>Support</h1>
+            <p>Please contact media@onlyfans.com with questions and a member of our team will review your inquiry.</p>
+            </div>
+            <div className='about-page-users-support-box-dark-blue'>
+            
+            </div>
+        </div>
+        <div className='about-page-white-box'>
+
+        </div>
+        
+    </div>
+
+    <div className='about-page-users-container'>
+        <div className='userbox'>
+        <div className='about-page-twotonebox-container'>
+            <div className='about-page-users-box-light-blue'>
+               
+            </div>
+            <div className='about-page-users-box-dark-blue'>
+                <h1>Our Creators</h1>
+                <p>We are an inclusive platform, home to a diverse range of content creators. To see the wide range of talent on our platform visit</p>
+            </div>
+        </div>
+        <div className='about-page-white-box'>
+
+        </div>
+        <div className='about-page-post-boxes'>
+            <div className='about-page-post-box'>
+                    <TwitterTweetEmbed
+                        tweetId={'1813855976803770440'}
+                    />
+            </div>
+            <div className='about-page-post-box'>
+            <TwitterTweetEmbed
+                        tweetId={'1813855976803770440'}
+                    />
+            </div>
+            <div className='about-page-post-box'>
+            <TwitterTweetEmbed
+                        tweetId={'1813855976803770440'}
+                    />
+            </div>
+        </div>
+    </div>
+    </div>
+
+   
     </div>
     
   );
