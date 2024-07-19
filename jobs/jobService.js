@@ -563,7 +563,7 @@ const handleSetInterval = async (request) => {
             F: 5, // Friday
             Sa: 6 // Saturday
         };
- 
+  
         const selectedDays = Object.keys(request.selectedDays)
             .filter(day => request.selectedDays[day])
             .map(day => daysOfWeek[day]);
