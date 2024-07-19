@@ -76,6 +76,9 @@ function About() {
         <div className='about-page-white-box-users'>
 
         </div>
+        <div className='about-page-pb-parent'>
+
+        </div>
         <div className='about-page-post-boxes'>
             <div className='about-page-post-box'>
                     <TwitterTweetEmbed

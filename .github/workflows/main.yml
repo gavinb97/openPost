@@ -36,6 +36,15 @@ jobs:
           npm install
         EOF
 
+
+    - name: installing client
+      run: |
+        ssh -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ secrets.HOST }} << 'EOF'
+          cd ./Desktop/open/openPost/client/autopost
+          echo "installing..."
+          npm install
+        EOF
+
     - name: Kill existing ngrok session
       run: |
         ssh -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ secrets.HOST }} << 'EOF'

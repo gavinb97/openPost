@@ -234,11 +234,19 @@
   background-color: #00aff0;
 }
 
+.about-page-pb-parent{
+  display: flex;
+  /* justify-content: space-between; */
+  height: 15vh;
+  width: 100%;
+}
+
 .about-page-post-boxes {
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
+  flex-direction: row;
   gap: 3vw;
-
+  
   position: absolute;
   top: 16vh; 
   left: 30vh;  
@@ -248,7 +256,9 @@
 }
 
 .about-page-post-box {
+  flex: 3;
   width: 20vw;
+  height: 10vh;
 }
 
 .registration-page {
