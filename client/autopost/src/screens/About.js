@@ -6,6 +6,12 @@ import Navbar from '../components/Navbar';
 import { TwitterTweetEmbed } from 'react-twitter-embed';
 
 function About() {
+
+
+    const handleContactSupportClick = () => {
+        // navigate to support page where users can ask for help or request feature
+    }
+
   return (
     <div>
         <Navbar />
@@ -28,13 +34,13 @@ function About() {
         <div className='about-page-second-box'>
             <div className='about-page-second-box-box'>
                 <h1>Mission, Vision and Values</h1>
-                <p>As a creator first platform - our creator community is at the heart of everything we do.</p>
+                <p>As a creator first platform - our users are at the heart of everything we do.</p>
                 <button>Our mission, vision, and values</button>
             </div>
             <div className='about-page-second-second-box'>
             <h1>Our Approach to Safety</h1>
-                <p>We are committed to building the safest social media platform in the world.</p>
-                <button>Transparency center</button>
+                <p>We are committed to building an automation platform prioritizing safety.</p>
+                <button>ToS and Privacy Policy</button>
             </div>
         </div>
     </div>
@@ -43,7 +49,8 @@ function About() {
         <div className='about-page-support-twotonebox-container'>
             <div className='about-page-users-support-box-light-blue'>
             <h1>Support</h1>
-            <p>Please contact media@onlyfans.com with questions and a member of our team will review your inquiry.</p>
+            <p>Please contact eastmckinley@gmail.com with questions and a member of our team will review your inquiry.</p>
+            <button onClick={handleContactSupportClick()}>Contact Support</button>
             </div>
             <div className='about-page-users-support-box-dark-blue'>
             
@@ -63,10 +70,10 @@ function About() {
             </div>
             <div className='about-page-users-box-dark-blue'>
                 <h1>Our Creators</h1>
-                <p>We are an inclusive platform, home to a diverse range of content creators. To see the wide range of talent on our platform visit</p>
+                <p>See how they use automation</p>
             </div>
         </div>
-        <div className='about-page-white-box'>
+        <div className='about-page-white-box-users'>
 
         </div>
         <div className='about-page-post-boxes'>
