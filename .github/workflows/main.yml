@@ -24,7 +24,7 @@ jobs:
           git remote set-url origin git@github.com:gavinb97/openPost.git
         EOF
 
-    - name: Executing remote SSH commands using SSH key
+    - name: pull and install api
       run: |
         ssh -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ secrets.HOST }} << 'EOF'
           cd ./Desktop/open/openPost/
@@ -39,7 +39,7 @@ jobs:
         EOF
 
 
-    - name: installing client
+    - name: build client
       run: |
         ssh -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ secrets.HOST }} << 'EOF'
           cd ./Desktop/open/openPost/client/autopost
@@ -81,10 +81,10 @@ jobs:
           nohup npm start > openPostApi.log 2>&1 &
         EOF
 
-    # - name: Start client
-    #   run: |
-    #     ssh -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ secrets.HOST }} << 'EOF'
-    #       cd ./Desktop/open/openPost/
-    #       echo "starting client in background"
-    #       nohup npm run client > openPostClient.log 2>&1 &
-    #     EOF
+    - name: Start client
+      run: |
+        ssh -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ secrets.HOST }} << 'EOF'
+          cd ./Desktop/open/openPost/
+          echo "starting client in background"
+          nohup npm run client > openPostClient.log 2>&1 &
+        EOF
