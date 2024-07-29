@@ -30,7 +30,7 @@ jobs:
           cd ./Desktop/open/openPost/
           echo "in directory, killing any running processes..."
           pkill -f node || echo "No Running Processes"
-          rmdir node_modules
+          rmdir -rf node_modules
           rm package-lock.json
           echo "Pulling newest code..."
           git pull
@@ -43,7 +43,7 @@ jobs:
       run: |
         ssh -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ secrets.HOST }} << 'EOF'
           cd ./Desktop/open/openPost/client/autopost
-          rmdir node_modules
+          rmdir -rf node_modules
           rm package-lock.json
           echo "installing..."
           npm install
