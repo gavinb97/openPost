@@ -31,8 +31,8 @@
 
 .whoweare-image-container {
   position: relative;
-  width: 70%;
-  height: 50%;
+  width: 80%;
+  height: 40%;
 }
 
 .whoweare-image {
@@ -53,7 +53,7 @@
     color: grey;
     text-align: left;
     text-decoration: underline;
-    text-underline-offset: 1rem;
+    /* text-underline-offset: 1rem; */
     text-decoration-color: #00aff0;
     font-size: 2vw;
   }
@@ -82,7 +82,7 @@
     color: white;
     text-align: left;
     text-decoration: underline;
-    text-underline-offset: 1rem;
+    text-underline-offset: 3%;
     text-decoration-color: white;
     font-size: 2vw;
   }
@@ -116,7 +116,7 @@
     color: grey;
     text-align: right;
     text-decoration: underline;
-    text-underline-offset: 1rem;
+    text-underline-offset: 3%;
     text-decoration-color: #00aff0;
     font-size: 2vw;
   }
@@ -160,7 +160,7 @@
     color: white;
     text-align: left;
     text-decoration: underline;
-    text-underline-offset: 1rem;
+    text-underline-offset: 3%;
     text-decoration-color: white;
     font-size: 2vw;
     padding-left: 5rem;
@@ -186,6 +186,10 @@
   width: 100%;
 }
 
+.about-page-support-container {
+
+}
+
 .about-page-support-twotonebox-container {
   display: flex;
   flex-direction: row;
@@ -201,7 +205,7 @@
     color: grey;
     text-align: left;
     text-decoration: underline;
-    text-underline-offset: 1rem;
+    text-underline-offset: 3%;
     text-decoration-color: #00aff0;
     font-size: 2vw;
     padding-left: 5rem;
@@ -252,7 +256,7 @@
   left: 30vh;  
   padding: 0 auto;
   transform: translate(0%, 1%);
-  color: #00aff0;
+  color: #00aff0; 
 }
 
 .about-page-post-box {
@@ -268,6 +272,65 @@
   height: 100vh;
   background-color: white;
 }
+
+.footer-container {
+  padding-top: 3vh;
+  display: flex;
+  flex-direction: row;
+  gap: 2%;
+  background-color: #00aff0;
+  overflow: hidden;
+  width: 100%;
+  box-shadow: 0 4px 8px black;
+  border-top: 1vh solid white;
+  height: 3rem;
+  z-index: 1000;
+  padding-left: 4vw;
+}
+
+.pp-title-container {
+  padding-top: 4%;
+  background-color: white;
+  height: 10%;
+
+  h1 {
+    padding-top: 1vh;
+    padding-left: 30vw;
+    text-align: left;
+  }
+}
+
+.pp-tos-container {
+  /* padding-top: 1vh; */
+  background-color: white;
+  height: 10%;
+
+  h1 {
+    /* padding-bottom: 1vh; */
+    padding-left: 30vw;
+    text-align: left;
+  }
+}
+
+.pp-policy-container {
+  display: flex;
+  flex-direction: row;
+}
+
+.pp-policy-container-left {
+  background-color: #00aff0;
+  width: 15vw;
+  height: 100vh;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.pp-policy-container-right {
+  background-color: #0091ea;
+  width: 85vw;
+  height: 100vh;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
 
 .registration-box {
   width: 90%;

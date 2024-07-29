@@ -4,12 +4,18 @@ import './../App.css';
 import React from 'react';
 import Navbar from '../components/Navbar';
 import { TwitterTweetEmbed } from 'react-twitter-embed';
+import Footer from '../components/Footer';
+import { useNavigate } from 'react-router-dom';
 
 function About() {
+    const navigate = useNavigate();
 
+    const handlePrivacyTosClick = () => {
+        navigate('/privacyTos')
+    }
 
     const handleContactSupportClick = () => {
-        // navigate to support page where users can ask for help or request feature
+        navigate('/contact')
     }
 
   return (
@@ -40,7 +46,7 @@ function About() {
             <div className='about-page-second-second-box'>
             <h1>Our Approach to Safety</h1>
                 <p>We are committed to building an automation platform prioritizing safety.</p>
-                <button>ToS and Privacy Policy</button>
+                <button onClick={handlePrivacyTosClick}>ToS and Privacy Policy</button>
             </div>
         </div>
     </div>
@@ -49,8 +55,8 @@ function About() {
         <div className='about-page-support-twotonebox-container'>
             <div className='about-page-users-support-box-light-blue'>
             <h1>Support</h1>
-            <p>Please contact eastmckinley@gmail.com with questions and a member of our team will review your inquiry.</p>
-            <button onClick={handleContactSupportClick()}>Contact Support</button>
+            <p>Please contact us with questions and a member of our team will review your inquiry.</p>
+            <button onClick={handleContactSupportClick}>Contact Support</button>
             </div>
             <div className='about-page-users-support-box-dark-blue'>
             
@@ -62,7 +68,7 @@ function About() {
         
     </div>
 
-    <div className='about-page-users-container'>
+    {/* <div className='about-page-users-container'>
         <div className='userbox'>
         <div className='about-page-twotonebox-container'>
             <div className='about-page-users-box-light-blue'>
@@ -97,9 +103,9 @@ function About() {
             </div>
         </div>
     </div>
-    </div>
+    </div> */}
 
-   
+    <Footer></Footer>
     </div>
     
   );

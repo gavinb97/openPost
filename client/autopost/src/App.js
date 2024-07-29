@@ -12,12 +12,22 @@ import Jobs from './screens/Jobs';
 import Profile from './screens/Profile';
 import Navbar from './components/Navbar';
 import { AuthProvider } from './service/authContext';
+import PrivacyToS from './screens/PrivacyToS'
+import ContactSupport from './screens/ContactSupport';
 
 function App() {
   const router = createBrowserRouter([
     {
       path: '/',
       element: <HomeScreen />
+    },
+    {
+      path: '/privacyTos',
+      element: <PrivacyToS />
+    },
+    {
+      path: '/contact',
+      element: <ContactSupport />
     },
     {
       path: '/registration',
