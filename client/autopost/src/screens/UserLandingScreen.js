@@ -29,6 +29,8 @@ function UserLandingScreen() {
     const [showLoginPromptModal, setShowLoginPromptModal] = useState(false)
     
 
+
+
     const handleShowLoginPromptModal = () => {
         setShowLoginPromptModal(true)
     }
@@ -157,7 +159,7 @@ function UserLandingScreen() {
              {showLoginPromptModal && <LoginPromptModal closeModal={handleCloseLoginPromptModal}></LoginPromptModal>}
         </div>
     );
-    
+
 }
 
 export default UserLandingScreen;

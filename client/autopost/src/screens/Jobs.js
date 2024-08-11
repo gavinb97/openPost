@@ -13,6 +13,14 @@ function Jobs() {
     const navigate = useNavigate();
     const { user } = useAuth();
 
+    useEffect(() => {
+        if (user === null) {
+            navigate('/login')
+        } else {
+            getJobs()
+        }
+    }, [])
+    
     const handleClick = () => {
         setShowModal(true);
     }
@@ -38,9 +46,7 @@ function Jobs() {
         return jobs
     }
 
-    useEffect(() => {
-        getJobs()
-      }, []);
+   
 
     return (
         <div className="App" style={{ marginBottom: '2%', textAlign: 'center' }}>

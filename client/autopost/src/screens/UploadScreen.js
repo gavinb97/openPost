@@ -1,13 +1,23 @@
 
 import './../App.css';
-import React, { useRef  } from 'react';
+import React, { useRef, useEffect  } from 'react';
 import Navbar from '../components/Navbar'
 import UploadedMediaContainer from '../components/UploadedMediaContainer'
 import UploadedVideosContainer from '../components/UploadedVideosContainer';
+import { useAuth } from '../service/authContext';
+import { useNavigate } from 'react-router-dom';
 
 import UploadPictureBox from '../components/UploadPictureBox';
 function UploadScreen() {
     const uploadedMediaContainerRef = useRef(null);
+    const navigate = useNavigate();
+    const { user } = useAuth();
+
+    useEffect(() => {
+        if (user === null) {
+            navigate('/login')
+        }
+    }, [])
 
     const handleFileUploadSuccess = async () => {
         // Call handleRefreshClick from UploadedMediaContainer

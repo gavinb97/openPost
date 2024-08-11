@@ -30,8 +30,11 @@ function Profile() {
 
   const userData = {credentials, isLoggedIn, setIsLoggedIn, user, isLoading}
 
+ 
+
   useEffect(() => {
-    setIsLoading(true); // Start loading
+    if (user !== null) {
+      setIsLoading(true); // Start loading
   
     getUserCreds(user.username || user.user)
       .then((creds) => {
@@ -74,7 +77,13 @@ function Profile() {
         setCredentials({});
         setIsLoading(false); // End loading even on error
       });
-  }, [user.username]);
+    } else {
+      navigate('/login')
+    }
+
+    
+  }, []);
+  
 
     const handleShowScheduleModal = () => {
         setShowScheduleModal(true);
@@ -83,6 +92,8 @@ function Profile() {
     const handleCloseScheduleModal = () => {
         setShowScheduleModal(false);
     };
+    
+    if (user === null) return null
     
     return (
         <div className="App" style={{ marginBottom: '2%', textAlign: 'center' }}>
