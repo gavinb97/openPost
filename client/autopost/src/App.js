@@ -14,6 +14,7 @@ import Navbar from './components/Navbar';
 import { AuthProvider } from './service/authContext';
 import PrivacyToS from './screens/PrivacyToS'
 import ContactSupport from './screens/ContactSupport';
+import MissionStatement from './screens/MissionStatement';
 
 function App() {
   const router = createBrowserRouter([
@@ -60,6 +61,10 @@ function App() {
     {
       path: '/profile',
       element: <Profile />
+    },
+    {
+      path: '/missionstatement',
+      element: <MissionStatement />
     }
   ]);
 

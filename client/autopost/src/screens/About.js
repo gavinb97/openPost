@@ -18,6 +18,10 @@ function About() {
         navigate('/contact')
     }
 
+    const handleMissionStatementClick = () => {
+        navigate('/missionstatement')
+    }
+
   return (
     <div>
         <Navbar />
@@ -41,7 +45,7 @@ function About() {
             <div className='about-page-second-box-box'>
                 <h1>Mission, Vision and Values</h1>
                 <p>As a creator first platform - our users are at the heart of everything we do.</p>
-                <button>Our mission, vision, and values</button>
+                <button onClick={handleMissionStatementClick}>Our mission, vision, and values</button>
             </div>
             <div className='about-page-second-second-box'>
             <h1>Our Approach to Safety</h1>

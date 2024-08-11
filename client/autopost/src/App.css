@@ -365,6 +365,12 @@
   text-align: left;
 }
 
+.missionHeader {
+  padding-top: 5vh;
+  padding-bottom: 1vh;
+  text-decoration: underline;
+}
+
 .pp-policy-container {
   padding-top: 3vh;
   display: flex;
