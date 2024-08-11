@@ -33,6 +33,10 @@ function LoginScreen() {
         
     };
 
+    const handleRegisterClick = () => {
+        navigate('/registration')
+    }
+
     return (
         <div className="login-page">
             <Navbar></Navbar>
@@ -63,8 +67,12 @@ function LoginScreen() {
                     <div>
                         <button type="submit">Login</button>
                     </div>
+
+                    <p className='login-register-anchor'>Don't have an account? <a href='' onClick={handleRegisterClick}>Register</a></p>
+                    
                 </form>
             </header>
+            
         </div>
     );
 }

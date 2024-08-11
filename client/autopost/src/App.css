@@ -319,6 +319,16 @@
   height: 10vh;
 }
 
+.login-register-anchor {
+  a {
+    color: white;
+  }
+
+  a:hover {
+    color:#0091ea
+  }
+}
+
 .registration-page {
   display: flex;
   align-items: center;
