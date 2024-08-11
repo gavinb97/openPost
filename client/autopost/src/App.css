@@ -7,6 +7,60 @@
   padding-top: 3rem;
 }
 
+.contact-container {
+  display: flex;
+  padding-top: 3vh;
+  justify-content: center;
+}
+
+.contact-form {
+  background-color: white;
+  padding: 2vw;
+  width: 30vw;
+  margin-top: 10vh;
+  text-align: center;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+
+  button {
+    color: white;
+    background-color: #0091ea;
+    padding: 2%;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-shadow: 1px 1px 2px black;
+    border: 1px solid #0091ea;
+  }
+
+  input {
+    border-radius: 10px;
+    padding: 1%;
+    margin: 2%;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border: 1px solid #0091ea;
+  }
+
+  input:focus {
+    outline: none !important;
+  }
+
+  textarea {
+    border-radius: 10px;
+    padding: 1%;
+    margin: 2%;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border: 1px solid #0091ea;
+  }
+
+  textarea:focus {
+    outline: none !important;
+  }
+
+  
+}
+
 .about-page {
   padding-top: 3rem;
   display: flex;
@@ -289,15 +343,15 @@
 }
 
 .pp-title-container {
-  padding-top: 4%;
+  /* padding-top: 4%; */
   background-color: white;
   height: 10%;
 
-  h1 {
+  /* h1 {
     padding-top: 1vh;
     padding-left: 30vw;
-    text-align: left;
-  }
+    text-align: center;
+  } */
 }
 
 .pp-tos-container {
