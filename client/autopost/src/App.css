@@ -374,6 +374,15 @@
   height: auto; /* Adjust height to auto so it expands based on content */
 }
 
+.pp-policy-container2 {
+  border-top: 1px solid white;
+  display: flex;
+  flex-direction: row;
+  font-family: Arial, sans-serif;
+  color: #333;
+  height: auto; /* Adjust height to auto so it expands based on content */
+}
+
 .pp-policy-container-left {
   background-color: #00aff0;
   width: 15vw;

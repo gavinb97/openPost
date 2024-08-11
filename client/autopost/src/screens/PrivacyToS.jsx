@@ -35,7 +35,7 @@ const PrivacyToS = () => {
                 </div>
             </div>
             
-            <div className='pp-policy-container'>
+            <div className='pp-policy-container2'>
                 <div className='pp-policy-container-left'></div>
                 <div className='pp-policy-container-right'>
                     <div className='privacy-policy-text-container'>
