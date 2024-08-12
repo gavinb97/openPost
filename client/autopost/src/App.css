@@ -5,6 +5,27 @@
 
 .home-page {
   padding-top: 3rem;
+  text-align: center;
+
+  button {
+    margin-top: 1vh;
+    color: white;
+    background-color: #0091ea;
+    padding: 2%;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-shadow: 1px 1px 2px black;
+    border: 1px solid #0091ea;
+  }
+  
+  button:hover {
+    background-color: #00aff0;
+  }
+}
+
+.get-started-automating {
+  padding-top: 2vh;
+  padding-bottom: 5vh;
 }
 
 .contact-container {
@@ -594,7 +615,11 @@
   padding-left: 3%;
   padding-right: 3%;
   padding-top: 3%;
-  text-align: left;
+  text-align: center;
+  padding-bottom: 2vh;
+  p {
+    font-size: 1vw;
+  }
 }
 
 .schedule-job-header {
@@ -611,6 +636,89 @@
 .who-this-is-for-container {
   text-align: left;
   margin: 3%;
+}
+
+.two-tone-feature-container {
+  display: flex;
+}
+
+.small-feature-darkblue {
+  background-color: #0091ea;
+  height: 25vh;
+  width: 15vw;
+}
+
+.big-feature-blue {
+  background-color: #00aff0;
+  height: 25vh;
+  width: 85vw;
+  display: flex;
+  flex-direction: column;
+  justify-content: left;
+  /* align-items: center; */
+  text-align: left;
+
+  h1 {
+    margin-left: 1vw;
+    color: white;
+    font-size: 2vw;
+  }
+  
+  p {
+    margin-left: 1vw;
+    color: white;
+    font-size: 1vw;
+  }
+}
+
+.big-feature-darkblue {
+  background-color: #0091ea;
+  height: 25vh;
+  width: 85vw;
+  display: flex;
+  
+  display: flex;
+  flex-direction: column;
+  text-align: right;
+  h1 {
+    margin-right: 1vw;
+    color: white;
+    font-size: 2vw;
+    margin-left: 1vw;
+  }
+
+  p {
+    color: white;
+    margin-right: 1vw;
+    font-size: 1vw;
+    margin-left: 1vw;
+  }
+}
+
+.small-feature-blue {
+  background-color: #00aff0;
+  height: 25vh;
+  width: 15vw;
+}
+
+.features-white-box {
+  height: 25vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #0091ea;
+  display: flex;
+  flex-direction: column;
+
+  h1 {
+    font-size: 2vw;
+  }
+
+  p {
+    font-size: 1vw;
+    padding-left: 1vw;
+    padding-right: 1vw;
+  }
 }
 
 .App-link {

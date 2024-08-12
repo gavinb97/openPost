@@ -3,7 +3,6 @@ import otherLogo from './../onlypostsNoBackground.png';
 import './../App.css';
 import React from 'react';
 import Navbar from '../components/Navbar';
-import { TwitterTweetEmbed } from 'react-twitter-embed';
 import Footer from '../components/Footer';
 import { useNavigate } from 'react-router-dom';
 
@@ -71,43 +70,6 @@ function About() {
         </div>
         
     </div>
-
-    {/* <div className='about-page-users-container'>
-        <div className='userbox'>
-        <div className='about-page-twotonebox-container'>
-            <div className='about-page-users-box-light-blue'>
-               
-            </div>
-            <div className='about-page-users-box-dark-blue'>
-                <h1>Our Creators</h1>
-                <p>See how they use automation</p>
-            </div>
-        </div>
-        <div className='about-page-white-box-users'>
-
-        </div>
-        <div className='about-page-pb-parent'>
-
-        </div>
-        <div className='about-page-post-boxes'>
-            <div className='about-page-post-box'>
-                    <TwitterTweetEmbed
-                        tweetId={'1813855976803770440'}
-                    />
-            </div>
-            <div className='about-page-post-box'>
-            <TwitterTweetEmbed
-                        tweetId={'1813855976803770440'}
-                    />
-            </div>
-            <div className='about-page-post-box'>
-            <TwitterTweetEmbed
-                        tweetId={'1813855976803770440'}
-                    />
-            </div>
-        </div>
-    </div>
-    </div> */}
 
     <Footer></Footer>
     </div>
