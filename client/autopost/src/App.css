@@ -631,6 +631,7 @@
   justify-content: center;
   font-size: calc(10px + 2vmin);
   color: white;
+  padding-top: 10vh;
 }
 
 .who-this-is-for-container {
@@ -806,6 +807,7 @@
   align-items: center;
   background-color: #282c34;
   color: white;
+  padding-top: 5vh;
 }
 
 .upload-picture-box {

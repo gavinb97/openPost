@@ -96,7 +96,7 @@ function Profile() {
     if (user === null) return null
     
     return (
-        <div className="App" style={{ marginBottom: '2%', textAlign: 'center' }}>
+        <div className="App" style={{ marginTop: '10vh', marginBottom: '2%', textAlign: 'center' }}>
             <Navbar></Navbar>
 
             <div>
