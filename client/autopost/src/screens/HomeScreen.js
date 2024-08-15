@@ -21,7 +21,7 @@ function HomeScreen() {
 
     const renderFeatures = () => {
         return (
-            <div className='features-container'>
+            <div>
                 <div className='two-tone-feature-container'>
                     <div className='small-feature-darkblue'></div>
                     <div className='big-feature-blue'>
