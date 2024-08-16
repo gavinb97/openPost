@@ -14,7 +14,6 @@ function HomeScreen() {
         return (
             <div className='home-page-body'>
                 <p>Welcome to OnlyPosts, the ultimate social media automation platform. Effortlessly schedule and post engaging content with AI-driven precision, boosting your following, engagement, and sales without lifting a finger.</p>
-                <p>Whether you're an entrepreneur, influencer, or marketer, OnlyPosts is your go-to tool for maximizing your online presence. Let our cutting-edge technology streamline your social media strategy and watch your success soar.</p>
             </div>
         );
     }
