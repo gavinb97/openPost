@@ -62,7 +62,7 @@ function HomeScreen() {
 
 
     return (
-        <div className="App home-page">
+        <div className="home-page">
              <Navbar></Navbar>
             <header className="App-header">
                 <img src={otherLogo} className="App-logo" alt="logo" />

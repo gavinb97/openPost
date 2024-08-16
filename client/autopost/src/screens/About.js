@@ -22,23 +22,22 @@ function About() {
     }
 
   return (
-    <div>
-        <Navbar />
-        <div className="about-page">
+    <div className='about-page'>
+        <Navbar></Navbar>
+        <div >
       <header className="App-header about-page-header">
         <img src={otherLogo} className="App-logo" alt="logo" />
         <h2>Simplify Social, Amplify Results</h2>
       </header>
 
-      <div className='about-page-whoweare-box'>
+  
         <div className='whoweare-image-container'>
-          <img src={whoWeAreBackground} alt="Who We Are Background" className='whoweare-image' />
           <div className='whoweare-text'>
             <h1>Who we are</h1>
             <p>OnlyPosts is an automated platform empowering creators to own their full potential, spread their content, and develop organic connections with their followers.</p>
           </div>
         </div>
-      </div>
+      
 
         <div className='about-page-second-box'>
             <div className='about-page-second-box-box'>
@@ -57,17 +56,13 @@ function About() {
     <div className='about-page-support-container'>
         <div className='about-page-support-twotonebox-container'>
             <div className='about-page-users-support-box-light-blue'>
-            <h1>Support</h1>
-            <p>Please contact us with questions and a member of our team will review your inquiry.</p>
-            <button onClick={handleContactSupportClick}>Contact Support</button>
+              <h1>Support</h1>
+              <p>Please contact us with questions and a member of our team will review your inquiry.</p>
+              <button onClick={handleContactSupportClick}>Contact Support</button>
             </div>
-            <div className='about-page-users-support-box-dark-blue'>
-            
-            </div>
+            <div className='about-page-users-support-box-dark-blue'></div>
         </div>
-        <div className='about-page-white-box'>
-
-        </div>
+        <div className='about-page-white-box'></div>
         
     </div>
 
