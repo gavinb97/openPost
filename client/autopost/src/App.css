@@ -36,7 +36,7 @@
 .contact-form {
   background-color: white;
   padding: 2vw;
-  width: 30vw;
+  width:100%;
   margin-top: 10vh;
   text-align: center;
   align-items: center;
@@ -44,6 +44,13 @@
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 
+  h1 {
+    font-size: 2rem;
+  }
+
+  label {
+    font-size: 1rem;
+  }
   button {
     color: white;
     background-color: #0091ea;
@@ -60,6 +67,7 @@
     margin: 2%;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     border: 1px solid #0091ea;
+    width: 70%;
   }
 
   input:focus {
@@ -72,6 +80,7 @@
     margin: 2%;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     border: 1px solid #0091ea;
+    width: 70%;
   }
 
   textarea:focus {
@@ -397,6 +406,16 @@
   text-decoration: underline;
 }
 
+.constact-support-container {
+  padding-top: 3vh;
+  display: flex;
+  flex-direction: row;
+  font-family: Arial, sans-serif;
+  color: #333;
+  height: 100%;
+}
+
+
 .pp-policy-container {
   padding-top: 3vh;
   display: flex;
@@ -413,6 +432,22 @@
   font-family: Arial, sans-serif;
   color: #333;
   height: auto; /* Adjust height to auto so it expands based on content */
+}
+
+.contact-support-left {
+  background-color: #00aff0;
+  width: 15vw;
+  height: 100vh; /* Ensures the left panel is at least as tall as the viewport */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.contact-support-right {
+  background-color: #0091ea;
+  width: 85vw;
+  padding-left: 10vw;
+  padding-right: 10vw;
+  height: 100vh; /* Ensures the right panel is at least as tall as the viewport */
+  box-sizing: border-box;
 }
 
 .pp-policy-container-left {

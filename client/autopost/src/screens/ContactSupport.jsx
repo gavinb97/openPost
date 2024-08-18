@@ -53,13 +53,11 @@ const ContactSupport = () => {
     }
 
     return (
-        <div className='privacy-policy-container'>
+        <div>
             <Navbar></Navbar>
-            <div className='pp-policy-container'>
-                <div className='pp-policy-container-left'>
-
-                </div>
-                <div className='pp-policy-container-right'>
+            <div className='constact-support-container'>
+                <div className='contact-support-left'></div>
+                <div className='contact-support-right'>
                     {renderForm()}
                 </div>
             </div>
