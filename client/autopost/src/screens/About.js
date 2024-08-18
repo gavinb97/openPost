@@ -22,9 +22,9 @@ function About() {
     }
 
   return (
-    <div className='about-page'>
-        <Navbar></Navbar>
-        <div >
+    <div >
+        <Navbar />
+        <div className='about-page'>
       <header className="App-header about-page-header">
         <img src={otherLogo} className="App-logo" alt="logo" />
         <h2>Simplify Social, Amplify Results</h2>
@@ -66,7 +66,7 @@ function About() {
         
     </div>
 
-    <Footer></Footer>
+    {/* <Footer></Footer> */}
     </div>
     
   );

@@ -1,6 +1,5 @@
 .App {
-  /* text-align: center; */
-  
+
 }
 
 .home-page {
@@ -88,7 +87,7 @@
   flex-direction: column;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   height: auto;
-}
+} 
 
 .about-page-header {
   flex: 2;
@@ -471,7 +470,7 @@
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   text-align: center;
   color: white;
-
+  margin: 1rem;
   h1 {
     text-shadow: 1px 1px 2px black;
   }
@@ -519,7 +518,7 @@
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   text-align: center;
   color: white;
-
+  margin: 1rem;
   h1 {
     text-shadow: 1px 1px 2px black;
   }
@@ -608,11 +607,8 @@
 }
 
 .home-page-body {
-  /* padding-left: 3%; */
   padding-left: 1rem;
-  /* padding-right: 3%; */
   padding-right: 1rem;
-  /* padding-top: 3%; */
   padding-top: 1rem;
   text-align: center;
   padding-bottom: 2vh;
