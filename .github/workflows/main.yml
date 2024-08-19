@@ -10,11 +10,6 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v2
      
-    - name: Set up Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: 18
-
     - name: Add SSH key
       run: |
         echo "${{ secrets.SSH_PRIVATE_KEY }}" > key
@@ -30,6 +25,9 @@ jobs:
         EOF
 
     - name: pull and install api
+      uses: actions/setup-node@v4
+      with:
+        node-version: 18
       run: |
         ssh -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ secrets.HOST }} << 'EOF'
           cd ./Desktop/open/openPost/
@@ -47,6 +45,9 @@ jobs:
 
 
     - name: build client
+      uses: actions/setup-node@v4
+      with:
+        node-version: 18
       run: |
         ssh -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ secrets.HOST }} << 'EOF'
           cd ./Desktop/open/openPost/client/autopost
