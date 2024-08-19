@@ -28,6 +28,8 @@ jobs:
       run: |
         ssh -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ secrets.HOST }} << 'EOF'
           cd ./Desktop/open/openPost/
+          echo "checking node version"
+          node -v
           echo "in directory, killing any running processes..."
           pkill -f node || echo "No Running Processes"
           rm -rf node_modules
