@@ -44,9 +44,7 @@ jobs:
           echo "installing..."
           npm install
         EOF
-      with:
-        node-version: 1
-
+    
     - name: build client
       run: |
         ssh -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ secrets.HOST }} << 'EOF'
