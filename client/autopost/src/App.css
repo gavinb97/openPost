@@ -953,45 +953,66 @@
   text-shadow: 1px 1px 2px black;
   height: 3rem;
   z-index: 1000;
+  display: flex;
+  justify-content: space-between;
 }
 
 .navbar ul {
   list-style-type: none; /* Remove bullet points from the list */
   padding: 0; /* Remove default padding */
   margin: 0; /* Remove default margin */
+  display: flex; /* Use flexbox for layout */
+  align-items: center; /* Center items vertically */
 }
 
 .navbar li {
-  float: left; /* Float the list items to the left */
+  flex: 1; /* Make list items flexible */
+  text-align: center; /* Center-align text */
 }
 
 .navbar li a {
   display: block; /* Display the links as block elements */
   color: white; /* Text color */
   text-align: center; /* Center-align text */
-  padding: 14px 16px; /* Padding around the text */
+  padding: 0.5rem 1rem; /* Padding around the text */
   text-decoration: none; /* Remove underline from links */
+  font-size: 1.2vw; /* Responsive font size */
+  white-space: nowrap; /* Prevent text wrapping */
 }
 
 .navbar li a:hover {
   background-color: #ddd; /* Background color on hover */
   color: black; /* Text color on hover */
 }
-.navbar {
-  display: flex;
-  justify-content: space-between;
-}
 
-.left-section,
-.right-section {
-  list-style-type: none;
-  margin: 0;
-  padding: 0;
+.left-section, .right-section {
+  display: flex; /* Use flexbox for layout */
+  align-items: center; /* Center items vertically */
 }
 
 .right-section {
-  text-align: right;
+  justify-content: flex-end; /* Align right-section items to the right */
 }
+
+/* Media queries to adjust font-size for smaller screens */
+@media (max-width: 1024px) {
+  .navbar li a {
+    font-size: 1.4vw; /* Slightly increase the font size for medium screens */
+  }
+}
+
+@media (max-width: 768px) {
+  .navbar li a {
+    font-size: 1.6vw; /* Increase the font size for smaller screens */
+  }
+}
+
+@media (max-width: 480px) {
+  .navbar li a {
+    font-size: 2.5vw; /* Further increase the font size for very small screens */
+  }
+}
+
 
 .subreddit-selector {
   position: relative; /* Needed to position the dropdown absolutely within the container */
@@ -1031,35 +1052,47 @@
   overflow: visible; /* Shows all content */
 }
 
-.container {
+.jobs-table {
   display: flex;
   justify-content: center;
-  /* align-items: center; */
   height: auto; 
   margin-top: 5%;
   margin-bottom: 5%;
+
+  table {
+    /* padding-left: 2rem;
+    padding-right: 2rem; */
+    border-collapse: collapse;
+    width: 50%; /* Adjust the width as needed */
+  }
+  
+  th, td {
+    border: 1px solid #ddd;
+    padding: 1rem;
+    text-align: left;
+  }
+  
+  th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+  }
+  
+  tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+  
+  tr:hover {
+    background-color: #ddd;
+  }
 }
 
-table {
-  border-collapse: collapse;
-  width: 80%; /* Adjust the width as needed */
+.jobs-container {
+  display: flex;
+  flex-direction: column;
 }
 
-th, td {
-  border: 1px solid #ddd;
-  padding: 8px;
-  text-align: left;
-}
+.jobs-header-container {
+  padding-top: 10vh;
+  text-align: center;
 
-th {
-  background-color: #f2f2f2;
-  font-weight: bold;
-}
-
-tr:nth-child(even) {
-  background-color: #f9f9f9;
-}
-
-tr:hover {
-  background-color: #ddd;
 }

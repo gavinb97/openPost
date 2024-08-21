@@ -3,7 +3,7 @@ import '../App.css';
 
 const JobsTable = ({ jobs, onCancelJob }) => {
     return (
-        <div className="container">
+        <div className="jobs-table">
             <table>
                 <thead>
                     <tr>
@@ -29,14 +29,14 @@ const JobsTable = ({ jobs, onCancelJob }) => {
                             <td>{job.times_of_day.join(', ')}</td>
                             <td>
                                 <button
-                                    style={{
-                                        backgroundColor: 'red',
-                                        color: 'white',
-                                        border: 'none',
-                                        padding: '5px 10px',
-                                        cursor: 'pointer',
-                                        borderRadius: '5px'
-                                    }}
+                                    // style={{
+                                    //     backgroundColor: 'red',
+                                    //     color: 'white',
+                                    //     border: 'none',
+                                    //     padding: '5px 10px',
+                                    //     cursor: 'pointer',
+                                    //     borderRadius: '5px'
+                                    // }}
                                     onClick={() => onCancelJob(job.job_set_id)}
                                 >
                                     Cancel Job

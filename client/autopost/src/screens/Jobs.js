@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import { useAuth } from '../service/authContext';
-import SetScheduleModal from '../components/SetScheduleModal';
 import JobsTable from '../components/JobsTable';
 import {getJobsByUsername, deleteJob} from '../service/jobService'
 
@@ -49,16 +48,16 @@ function Jobs() {
    
 
     return (
-        <div className="App" style={{ marginBottom: '2%', textAlign: 'center' }}>
+        <div>
             <Navbar />
-           
-            {showModal && <SetScheduleModal closeModal={handleClose} />}
-            <div>
-                <div>
-                    <p>Active Jobs</p>
-                    {jobs && <JobsTable jobs={jobs} onCancelJob={handleCancelJob} />}
+           <div className='jobs-container'>
+                <div className="jobs-header-container">
+                    <h1>Active Jobs</h1> 
                 </div>
-            </div>
+                {/* <div className='jobs-table-container'>
+                    {jobs && <JobsTable jobs={jobs} onCancelJob={handleCancelJob} />}
+                </div> */}
+           </div>
         </div>
     );
 }
