@@ -1124,6 +1124,7 @@
   line-height: 1.2;
   word-wrap: break-word;
   flex: 1; /* Allow text to take available space */
+  color: white;
 }
 
 .job-details button {
