@@ -4,6 +4,7 @@ import Navbar from '../components/Navbar';
 import { useAuth } from '../service/authContext';
 import JobsTable from '../components/JobsTable';
 import {getJobsByUsername, deleteJob} from '../service/jobService'
+import JobsBoxes from '../components/JobsBoxes';
 
 function Jobs() {
     const [showModal, setShowModal] = useState(false);
@@ -57,6 +58,7 @@ function Jobs() {
                 {/* <div className='jobs-table-container'>
                     {jobs && <JobsTable jobs={jobs} onCancelJob={handleCancelJob} />}
                 </div> */}
+                <JobsBoxes jobs={jobs} onCancelJob={handleCancelJob}/>
            </div>
         </div>
     );

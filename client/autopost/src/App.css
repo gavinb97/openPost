@@ -1096,3 +1096,86 @@
   text-align: center;
 
 }
+
+.active-job-box {
+  background-color: #00aff0;
+  margin: 0 2rem 1rem;
+  padding: 0.5rem;
+  min-height: 4rem;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.1);
+  
+}
+
+.job-details {
+  display: flex;
+  justify-content: space-between; /* Spread items across the line */
+  align-items: center; 
+  height: 100%;
+  gap: 1rem; /* Space between items */
+  flex-wrap: wrap; /* Allow wrapping to new lines on smaller screens */
+  padding: 1rem;
+}
+
+.job-details p {
+  font-size: 1rem;
+  margin: 0;
+  line-height: 1.2;
+  word-wrap: break-word;
+  flex: 1; /* Allow text to take available space */
+}
+
+.job-details button {
+  font-size: 1rem;
+  padding: 0.4rem 0.8rem;
+  border: none;
+  background-color: #ff3b30;
+  color: white;
+  cursor: pointer;
+  border-radius: 0.3rem;
+  flex-shrink: 0; /* Prevent the button from shrinking */
+}
+
+/* Adjust for smaller screens */
+@media (max-width: 768px) {
+  .active-job-box {
+    margin: 0 1rem 1rem;
+    padding: 0.8rem;
+  }
+
+  .job-details {
+    flex-direction: column; /* Stack items vertically */
+    align-items: flex-start; /* Align items to the left */
+  }
+
+  .job-details p,
+  .job-details button {
+    font-size: 0.9rem;
+  }
+
+  .job-details button {
+    margin-top: 0.5rem; /* Add some space above the button */
+    align-self: center; /* Center the button on smaller screens */
+  }
+}
+
+@media (max-width: 480px) {
+  .active-job-box {
+    margin: 0 0.5rem 1rem;
+    padding: 1rem;
+  }
+
+  .job-details p,
+  .job-details button {
+    font-size: 0.85rem;
+  }
+
+  .job-details button {
+    padding: 0.3rem 0.7rem;
+  }
+}
+
+.active-jobs-container {
+  padding: 1rem 0;
+}
