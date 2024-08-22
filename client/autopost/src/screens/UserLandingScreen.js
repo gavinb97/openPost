@@ -92,7 +92,7 @@ function UserLandingScreen() {
 
     const renderCommentJobBox = () => {
         return (
-            <div style={{ marginBottom: '2%', textAlign: 'center' }}>
+            <div className='jobbox'>
                 <h2>Comment Job</h2>
                 <p>Start job to automatically comment on other posts to boost engagement</p>
                 <button onClick={() => handleShowCommentModal()}>Start Comment Job</button>
@@ -103,7 +103,7 @@ function UserLandingScreen() {
 
     const renderTextPostJobBox = () => {
         return (
-            <div style={{ marginBottom: '2%', textAlign: 'center' }}>
+            <div className='jobbox'>
                 <h2>Post Job</h2>
                 <p>Automatically post to your social networks</p>
                 <button onClick={() => handleShowPostJobModal()}>Start Post Job</button>
@@ -114,7 +114,7 @@ function UserLandingScreen() {
 
     const renderReplyJobBox = () => {
         return (
-            <div style={{ marginBottom: '2%', textAlign: 'center' }}>
+            <div className='jobbox'>
                 <h2>Reply Job</h2>
                 <p>Automatically reply to users to build engagement</p>
                 <button onClick={() => handleShowPostJobModal()}>Start Reply Job</button>
@@ -125,7 +125,7 @@ function UserLandingScreen() {
 
     const renderDMJobBox = () => {
         return (
-            <div style={{ marginBottom: '2%', textAlign: 'center' }}>
+            <div className='jobbox'>
                 <h2>Direct Message Job</h2>
                 <p>Start a job to directly message users.</p>
                 <button onClick={() => handleShowDMModal()}>Start DM Job</button>
