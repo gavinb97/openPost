@@ -107,23 +107,23 @@ const UpdateImageDataModal = ({ imageData, closeModal, updatePhotoMetadata, medi
           <p>Adding a description and categories to your photos will help our AI optimize your posts.</p>
           {updatedData.map((item, index) => (
             <div key={index}>
-              <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px', margin: '5px', marginTop: '6%' }}>
-                {renderMedia(media.find(file => file.fileName === item.name))}
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '1rem', marginTop: '1rem' }}>
                 <label style={{ marginRight: '10px' }}>Name:</label>
                 <p>{item.name}</p>
+                {renderMedia(media.find(file => file.fileName === item.name))}
               </div>
               
-              <div style={{ display: 'flex', alignItems: 'center', height: 'auto', marginBottom: '10px', border: '1px solid grey', margin: '5px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', height: 'auto', marginBottom: '1rem'}}>
                 <label style={{ marginRight: 5 }}>Description:</label>
                 <textarea
                   name="description"
                   value={item.description}
                   onChange={(e) => handleChange(e, index)}
-                  style={{ minHeight: '50px', height: 'auto', resize: 'vertical' }} // Set flexible height
+                  style={{ minHeight: '50px', height: 'auto', resize: 'vertical', width: '100%', borderRadius: '1rem', padding: '1rem'}} 
                 />
               </div>
               
-              <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px', border: '1px solid grey', margin: '5px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', marginBottom: '1rem' }}>
                 <label style={{ marginRight: 10 }}>Categories:</label>
                 <div style={{ display: 'flex', alignContent: 'flex-start' }}>
                   <TagInputComponent 
@@ -134,7 +134,7 @@ const UpdateImageDataModal = ({ imageData, closeModal, updatePhotoMetadata, medi
                 </div>
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px', border: '1px solid grey', margin: '5px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', marginBottom: '1rem'}}>
                 <label style={{ marginRight: 10 }}>NSFW:</label>
                 <input
                   type="radio"
@@ -157,8 +157,11 @@ const UpdateImageDataModal = ({ imageData, closeModal, updatePhotoMetadata, medi
               </div>
             </div>
           ))}
-          <button onClick={handleSave}>Save</button>
-          <button onClick={closeModal}>Close</button>
+          <div className='updateImageModalButtons' >
+            <button onClick={handleSave}>Save</button>
+            <button onClick={closeModal}>Close</button>
+          </div>
+          
         </div>
       </div>
     );

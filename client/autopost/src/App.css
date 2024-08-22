@@ -809,7 +809,7 @@
   border-radius: 8px;
   padding: 20px;
   z-index: 1000;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 0 10px #00aff0;
   max-height: 75vh; /* Set maximum height to 75% of viewport height */
   overflow-y: auto; /* Enable vertical scrolling when content exceeds max-height */
   width: 75%; /* Set width to 75% of viewport width */
@@ -900,7 +900,7 @@
   background-color: white;
   padding: 1rem;
   border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 0 10px #00aff0;
   z-index: 1000; /* Ensure modal appears above backdrop */
   align-items: center;
   margin: 1rem;
@@ -1205,3 +1205,47 @@
 
 }
 
+.updateImageModalButtons {
+  button {
+    margin-top: 1vh;
+    color: white;
+    background-color: #0091ea;
+    padding: 2%;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-shadow: 1px 1px 2px black;
+    border: 1px solid #0091ea;
+    margin: 1rem;
+  }
+  
+  button:hover {
+    background-color: #00aff0;
+  }
+}
+
+.ReactTags__tags.react-tags-wrapper {
+  
+}
+
+.ReactTags__tagInputField {
+  width: 100%;
+  border-radius: 1rem;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+  padding-left: .15rem;
+  border: 1px solid black;
+  margin-bottom: 1rem;
+}
+
+.ReactTags__remove {
+  background-color: #00aff0;
+  border: 0;
+  border-radius: 1rem;
+  text-align: center;
+  margin: .25rem;
+
+  svg {
+    display: block;
+    margin: auto;
+  }
+}
