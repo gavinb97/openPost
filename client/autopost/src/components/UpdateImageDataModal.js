@@ -105,6 +105,7 @@ const UpdateImageDataModal = ({ imageData, closeModal, updatePhotoMetadata, medi
         <div className="UpdateImageDataModal">
           <h2>Update Image Data</h2>
           <p>Adding a description and categories to your photos will help our AI optimize your posts.</p>
+          <div style={{borderBottom: '.25rem solid #00aff0'}}></div>
           {updatedData.map((item, index) => (
             <div key={index}>
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '1rem', marginTop: '1rem' }}>
@@ -134,7 +135,7 @@ const UpdateImageDataModal = ({ imageData, closeModal, updatePhotoMetadata, medi
                 </div>
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', marginBottom: '1rem'}}>
+              <div style={{ display: 'flex', alignItems: 'center', marginBottom: '2rem'}}>
                 <label style={{ marginRight: 10 }}>NSFW:</label>
                 <input
                   type="radio"
@@ -155,8 +156,11 @@ const UpdateImageDataModal = ({ imageData, closeModal, updatePhotoMetadata, medi
                 />
                 <label>No</label>
               </div>
+            <div style={{borderBottom: '.25rem solid #00aff0'}}></div>
+
             </div>
           ))}
+          
           <div className='updateImageModalButtons' >
             <button onClick={handleSave}>Save</button>
             <button onClick={closeModal}>Close</button>
