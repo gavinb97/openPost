@@ -459,6 +459,71 @@ const revokeTikTokTokens = async (username) => {
     }
 };
 
+// const getCredsByUser = async (username) => {
+//     if (!username) {
+//         throw new Error('Username is required.');
+//     }
+
+//     try {
+//         // Connect to the pool
+//         const client = await pool.connect();
+
+//         try {
+//             // Query to get the credentials by username
+//             const query = `
+//                 SELECT
+//                     twitter_access_token,
+//                     twitter_refresh_token,
+//                     reddit_access_token,
+//                     reddit_refresh_token,
+//                     tiktok_access_token,
+//                     tiktok_refresh_token,
+//                     youtube_access_token,
+//                     youtube_refresh_token
+//                 FROM user_creds
+//                 WHERE username = $1
+//             `;
+//             const res = await client.query(query, [username]);
+
+//             if (res.rows.length === 0) {
+//                 console.log('Username not found in user_creds tablfe.');
+//                 return
+//             }
+
+//             const userCreds = res.rows[0];
+
+//             // Construct the user credentials object
+//             const userObject = {
+//                 user: username,
+//                 twitterTokens: {
+//                     access_token: userCreds.twitter_access_token,
+//                     refresh_token: userCreds.twitter_refresh_token
+//                 },
+//                 redditTokens: {
+//                     access_token: userCreds.reddit_access_token,
+//                     refresh_token: userCreds.reddit_refresh_token
+//                 },
+//                 tiktokTokens: {
+//                     access_token: userCreds.tiktok_access_token,
+//                     refresh_token: userCreds.tiktok_refresh_token
+//                 },
+//                 youtubeTokens: {
+//                     access_token: userCreds.youtube_access_token,
+//                     refresh_token: userCreds.youtube_refresh_token
+//                 }
+//             };
+
+//             return userObject;
+//         } finally {
+//             // Release the client back to the pool
+//             client.release();
+//         }
+//     } catch (error) {
+//         console.error('Error getting user credentials from user_creds table:', error);
+//         throw error;
+//     }
+// };
+
 const getCredsByUser = async (username) => {
     if (!username) {
         throw new Error('Username is required.');
@@ -486,14 +551,12 @@ const getCredsByUser = async (username) => {
             const res = await client.query(query, [username]);
 
             if (res.rows.length === 0) {
-                console.log('Username not found in user_creds tablfe.');
-                return
+                console.log('Username not found in user_creds table.');
+                return [];
             }
 
-            const userCreds = res.rows[0];
-
-            // Construct the user credentials object
-            const userObject = {
+            // Create an array of user objects from the result rows
+            const userObjects = res.rows.map(userCreds => ({
                 user: username,
                 twitterTokens: {
                     access_token: userCreds.twitter_access_token,
@@ -511,9 +574,9 @@ const getCredsByUser = async (username) => {
                     access_token: userCreds.youtube_access_token,
                     refresh_token: userCreds.youtube_refresh_token
                 }
-            };
+            }));
 
-            return userObject;
+            return userObjects;
         } finally {
             // Release the client back to the pool
             client.release();
