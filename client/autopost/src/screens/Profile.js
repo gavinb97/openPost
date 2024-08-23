@@ -12,6 +12,7 @@ import Navbar from '../components/Navbar'
 import SocialsLogin from '../components/SocialsLogin';
 import { useAuth } from '../service/authContext';
 import { getUserCreds } from '../service/userService';
+import AuthorizeAccounts from '../components/AuthorizeAccounts';
 
 function Profile() {
     const navigate = useNavigate();
@@ -106,7 +107,7 @@ function Profile() {
                 <p>{`Username: ${user.username}`} </p>
             </div>
             <SocialsLogin userData={userData}></SocialsLogin>
-
+            <AuthorizeAccounts></AuthorizeAccounts>
         </div>
     );
 }

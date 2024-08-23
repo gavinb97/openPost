@@ -1262,3 +1262,44 @@
     margin: auto;
   }
 }
+
+.authorize-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  button {
+    margin-left: 1rem;
+    background-color: #0091ea;
+    border-radius: .25rem;
+    border: 0;
+    color: white;
+  }
+
+  button:hover {
+    background-color: #00aff0;
+  }
+}
+
+.authorized-accounts-box {
+  border: .25rem solid #0091ea;
+  height: 8.5rem;
+  margin: 1rem;
+  display: flex;
+  flex-direction: row;
+  overflow: auto;
+}
+
+.authorize-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.accountbox {
+  border: 1px solid black;
+  height: 4rem;
+  width: 4rem;
+  padding: 1rem;
+  margin: 1rem;
+}
