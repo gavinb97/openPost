@@ -1199,6 +1199,19 @@
     padding-right: 1.5rem;
   }
 
+  button {
+    color: white;
+    background-color: #0091ea;
+    border: 0;
+    border-radius: 1rem;
+    padding: 1rem;
+    margin-top: .25rem;
+  }
+
+  button:hover {
+    background-color: #00aff0;
+  }
+
 }
 
 .image-container-outer {

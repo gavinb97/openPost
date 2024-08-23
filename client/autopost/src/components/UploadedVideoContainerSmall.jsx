@@ -71,10 +71,10 @@ const UploadedVideoContainerSmall = ({ videoFiles, setvideoFiles, imagesLoaded }
 
         return (
             <div style={{ display: 'flex', justifyContent: 'center'}}>
-                <button style={{ backgroundColor: 'green', color: 'white', marginTop: '10px', marginLeft: '5px' }} onClick={handleScheduleClick}>
+                <button style={{ backgroundColor: '#0091ea', color: 'white', marginTop: '.5rem', marginLeft: '1rem', borderRadius: '1rem', border: 0 }} onClick={handleScheduleClick}>
                     Schedule
                 </button>
-                <button style={{ backgroundColor: 'purple', color: 'white', marginTop: '10px', marginLeft: '5px' }} onClick={handleSelectAll}>
+                <button style={{ backgroundColor: '#0091ea', color: 'white', marginTop: '.5rem', marginLeft: '1rem', borderRadius: '1rem', border: 0 }} onClick={handleSelectAll}>
                     {selectedVideos.length === videoFiles.length ? 'Unselect All' : 'Select All'}
                 </button>
             </div>

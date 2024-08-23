@@ -148,21 +148,21 @@ const UploadedVideosContainer = forwardRef((props, ref) => {
     
 
     return (
-        <div style={{ textAlign: 'center' }}>
-            <div style={{ display: 'inline-flex', alignItems: 'center' }}>
-                <button onClick={handleRefreshClick}>Refresh</button>
+        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', borderBottom: '.25rem solid #00aff0' }}>
+                <button onClick={handleRefreshClick} style={{backgroundColor: '#0091ea', color: 'white', marginTop: '.5rem', marginLeft: '1rem', borderRadius: '1rem', border: 0 }}>Refresh</button>
                 <h2 style={{ marginLeft: '1rem', marginRight: '1rem' }}>Uploaded Videos</h2>
             </div>
             
             {selectedVideos.length > 0 && (
                 <div style={{ display: 'flex', justifyContent: 'center' }}>
-                    <button style={{ backgroundColor: 'red', color: 'white', marginTop: '10px' }} onClick={handleDeleteClick}>
+                    <button style={{ backgroundColor: 'red', color: 'white', marginTop: '.5rem', padding: '1rem', borderRadius: '1rem', border: 0}} onClick={handleDeleteClick}>
                         Delete
                     </button>
-                    <button style={{ backgroundColor: 'blue', color: 'white', marginTop: '10px', marginLeft: '5px' }} onClick={handleEditClick}>
+                    <button style={{ backgroundColor: '#0091ea', color: 'white', marginTop: '.5rem', marginLeft: '1rem', borderRadius: '1rem', border: 0  }} onClick={handleEditClick}>
                         View / Edit
                     </button>
-                    <button style={{ backgroundColor: 'purple', color: 'white', marginTop: '10px', marginLeft: '5px' }} onClick={handleSelectAll}>
+                    <button style={{ backgroundColor: '#0091ea', color: 'white', marginTop: '.5rem', marginLeft: '1rem', borderRadius: '1rem', border: 0 }} onClick={handleSelectAll}>
                         {selectedVideos.length === videos.length ? 'Unselect All' : 'Select All'}
                     </button>
                 </div>
