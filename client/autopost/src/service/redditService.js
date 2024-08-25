@@ -15,12 +15,13 @@ export const getRedditLoginUrl = async (username) => {
   };
 
 
-export const revokeRedditAccess = async (username, accessToken) => {
+export const revokeRedditAccess = async (username, accessToken, handle) => {
   const endpoint = 'http://localhost:3455/revokereddit';
   try {
       const requestBody = {
           username: username,
-          accesstoken: accessToken
+          accesstoken: accessToken,
+          handle: handle
       };
 
       const response = await axios.post(endpoint, requestBody);

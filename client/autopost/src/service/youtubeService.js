@@ -15,11 +15,11 @@ export const getYoutubeLoginUrl = async (username) => {
   };
 
 
-export const revokeGoogleAccess = async (username, accessToken) => {
+export const revokeGoogleAccess = async (username, accessToken, handle) => {
   const endpoint = 'http://localhost:3455/revokeGoogleAccess';
     try {
         // Make a POST request to the revokeGoogleAccess endpoint
-        const response = await axios.post(endpoint, { accessToken: accessToken, username: username });
+        const response = await axios.post(endpoint, { accessToken: accessToken, username: username, handle });
         if (response.status === 200) {
             console.log('Success:', response.data);
             return { success: true, message: response.data.message };

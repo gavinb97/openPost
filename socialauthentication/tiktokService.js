@@ -100,7 +100,7 @@ const getAccessTokenAndOpenId = async (code, state) => {
       };
   }
 
-  const revokeAccess = async (accessToken, username) => {
+  const revokeAccess = async (accessToken, username, handle) => {
     let urlAccessToken = `https://open.tiktokapis.com/v2/oauth/token/`;
   
     const response = await axios.post(urlAccessToken, new URLSearchParams({
@@ -114,7 +114,7 @@ const getAccessTokenAndOpenId = async (code, state) => {
       }
     })
 
-    await revokeTikTokTokens(username)
+    await revokeTikTokTokens(username, handle)
   }
 
   const queryCreatorInfo = async (accessToken) => {

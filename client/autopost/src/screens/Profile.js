@@ -13,11 +13,12 @@ import SocialsLogin from '../components/SocialsLogin';
 import { useAuth } from '../service/authContext';
 import { getUserCreds } from '../service/userService';
 import AuthorizeAccounts from '../components/AuthorizeAccounts';
+import AccountDetailsModal from '../components/AccountDetailsModal';
 
 function Profile() {
     const navigate = useNavigate();
-    const [showScheduleModal, setShowScheduleModal] = useState(false);
-
+    const [showAccountDetailsModal, setShowAccountDetailsModal] = useState(false);
+    const [accountDetails, setAccountDetails] = useState()
     const { user, logoutContext, loginContext  } = useAuth()
 
   const [credentials, setCredentials] = useState({});
@@ -40,9 +41,6 @@ function Profile() {
       getUserCreds(user.username || user.user)
         .then((creds) => {
           if (creds && creds.length > 0) {
-            console.log('in the useeffect');
-            console.log(creds);
-  
             const isLoggedIn = {
               twitter: false,
               reddit: false,
@@ -104,12 +102,12 @@ function Profile() {
   }, []);
   
 
-    const handleShowScheduleModal = () => {
-        setShowScheduleModal(true);
+    const handleOpenAccountDetails = () => {
+      setShowAccountDetailsModal(true);
     };
 
-    const handleCloseScheduleModal = () => {
-        setShowScheduleModal(false);
+    const handleCloseAccountDetails = () => {
+      setShowAccountDetailsModal(false);
     };
     
     if (user === null) return null
@@ -125,7 +123,8 @@ function Profile() {
                 <p>{`Username: ${user.username}`} </p>
             </div>
             <SocialsLogin userData={userData}></SocialsLogin>
-            <AuthorizeAccounts userData={userData}></AuthorizeAccounts>
+            <AuthorizeAccounts userData={userData} handleOpenAccountDetails={handleOpenAccountDetails} setAccountDetails={setAccountDetails}></AuthorizeAccounts>
+            {showAccountDetailsModal && <AccountDetailsModal closeModal={handleCloseAccountDetails} accountDetails={accountDetails}/>}
         </div>
     );
 }

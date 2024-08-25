@@ -123,7 +123,7 @@ const createClientAndUpload = async (filePath, videoTitle, videoDescription) => 
 }
 
 
-const revokeGoogleAccessToken = async (username, accessToken) => {
+const revokeGoogleAccessToken = async (username, accessToken, handle) => {
   console.log('revoiknig google')
   console.log(username)
   try {
@@ -131,19 +131,22 @@ const revokeGoogleAccessToken = async (username, accessToken) => {
       
       // Make a request to Google's revoke endpoint
       const response = await axios.post(revokeUrl);
-      await revokeYouTubeTokens(username)
+      // await revokeYouTubeTokens(username, handle)
+    console.log(response)
 
       if (response.status === 200) {
-          await revokeYouTubeTokens(username)
+          await revokeYouTubeTokens(username, handle)
           return { success: true, message: "Token revoked successfully" };
-      } else {
-          console.log('Failed to revoke token');
-          return { success: false, message: "Failed to revoke token" };
+      } else if (response.data.error_description === 'Token expired or revoked') {
+          console.log('Token expired or revoked... removing from db');
+          await revokeYouTubeTokens(username, handle)
+          return { success: true, message: "Deleted stale token" };
+          
       }
   } catch (error) {
-      console.log('got error, gonna remove creds anyway')
-      await removeTokenForUser(username, 'youtube')
-      return { success: false, message: "Failed to revoke token due to an error" };
+    console.log('Token expired or revoked... removing from db');
+    await revokeYouTubeTokens(username, handle)
+    return { success: true, message: "Deleted stale token" };
   }
 };
 

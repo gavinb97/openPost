@@ -13,10 +13,10 @@ export const getTwitterLoginUrl = async (username) => {
   };
 
 
-export const revokeTwitterAccess = async (username) => {
+export const revokeTwitterAccess = async (username, handle) => {
   const endpoint = 'http://localhost:3455/revoketwitter';
   try {
-      const response = await axios.post(endpoint, { username: username });
+      const response = await axios.post(endpoint, { username: username, handle: handle });
 
       // Log the server response to console
       if (response.status === 200) {

@@ -116,10 +116,10 @@ const refreshTwitterAccessToken = async (refreshToken, user) => {
     }
 };
 
-const revokeAccessToken = async (username) => {
+const revokeAccessToken = async (username, handle) => {
     try {
         console.log(`Revoking access twitter token for user: ${username}`);
-        await revokeTwitterTokens(username)
+        await revokeTwitterTokens(username, handle)
         console.log(`Access token for ${username} has been successfully revoked.`);
         return { success: true, message: "Token revoked successfully" };
     } catch (error) {

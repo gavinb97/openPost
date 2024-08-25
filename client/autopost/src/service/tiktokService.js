@@ -13,13 +13,14 @@ export const getTikTokLoginUrl = async (username) => {
   };
 
 
-export const revokeTikTokAccess = async (username, accessToken) => {
+export const revokeTikTokAccess = async (username, accessToken, handle) => {
   const endpoint = 'http://localhost:3455/revoketiktok';
     try {
         // Prepare the request payload
         const requestBody = {
             username: username,
-            accesstoken: accessToken
+            accesstoken: accessToken,
+            handle: handle
         };
 
         // Send a POST request to the server

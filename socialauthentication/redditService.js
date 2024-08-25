@@ -68,7 +68,7 @@ const getRedditAccessToken = async (codeFromCallback, state) => {
 }
 
 
-const revokeRedditAccessToken = async (username, accessToken) => {
+const revokeRedditAccessToken = async (username, accessToken, handle) => {
     try {
         const authHeader = `Basic ${Buffer.from(`${process.env.REDDIT_APP_ID}:${process.env.REDDIT_SECRET}`).toString('base64')}`;
         
@@ -87,7 +87,7 @@ const revokeRedditAccessToken = async (username, accessToken) => {
 
         // delete token from creds
         // await removeTokenForUser(username, 'reddit')
-        await revokeRedditTokens(username)
+        await revokeRedditTokens(username, accessToken, handle)
         return response.data;
     } catch (e) {
         console.error('Error revoking Reddit Access Token:', e.response ? e.response.data : e.message);

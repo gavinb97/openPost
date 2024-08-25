@@ -1,0 +1,47 @@
+import React, { useState, useEffect } from 'react';
+import TagInputComponent from './TagInputComponent'; 
+import { convertFilesToStringsForRendering, updateFileNamesAsync, getPhotoMetadata } from '../service/userMediaService';
+import { useAuth } from '../service/authContext';
+import { revokeTwitterAccess } from '../service/twitterService';
+import {  revokeRedditAccess } from '../service/redditService';
+import {  revokeGoogleAccess } from '../service/youtubeService';
+import {  revokeTikTokAccess } from '../service/tiktokService';
+
+const AccountDetailsModal = ({ closeModal, accountDetails, setAccountDetails}) => {
+ 
+
+  const revoke = (accountDetails) => {
+    console.log('clicked save')
+    console.log(accountDetails)
+    if (accountDetails.twitterTokens.access_token !== null) revokeTwitterAccess(accountDetails.user, accountDetails.handle)
+    if (accountDetails.redditTokens.access_token !== null) revokeRedditAccess(accountDetails.user, accountDetails.redditTokens.access_token, accountDetails.handle)
+    if (accountDetails.youtubeTokens.access_token !== null) revokeGoogleAccess(accountDetails.user, accountDetails.youtubeTokens.access_token, accountDetails.handle)
+    if (accountDetails.tiktokTokens.access_token !== null) revokeTikTokAccess(accountDetails.user, accountDetails.tiktokTokens.access_token, accountDetails.handle)
+    closeModal();
+  };
+
+
+  if (accountDetails) {
+    return (
+      <div>
+        <div className="modal-backdrop" onClick={closeModal}></div>
+        <div className="UpdateImageDataModal">
+          <h2>Account Details</h2>
+         
+          <div style={{borderBottom: '.25rem solid #00aff0'}}></div>
+            <p>Account: {accountDetails.handle}</p>
+          
+          <div className='updateImageModalButtons' >
+            <button onClick={() => revoke(accountDetails)}>Revoke Access</button>
+            <button onClick={closeModal}>Close</button>
+          </div>
+          
+        </div>
+      </div>
+    );
+  }
+
+  return null;
+};
+
+export default AccountDetailsModal;

@@ -447,7 +447,7 @@ const updateYouTubeTokens = async (username, accessToken, refreshToken, handle) 
 };
 
 
-const revokeTwitterTokens = async (username) => {
+const revokeTwitterTokens = async (username, handle) => {
     if (!username) {
         throw new Error('Username is required.');
     }
@@ -459,11 +459,9 @@ const revokeTwitterTokens = async (username) => {
         try {
             // Update query to set the twitter access and refresh tokens to null
             const updateQuery = `
-                UPDATE user_creds
-                SET twitter_access_token = NULL, twitter_refresh_token = NULL
-                WHERE username = $1
+                delete from user_creds where username = $1 and handle = $2
             `;
-            const res = await client.query(updateQuery, [username]);
+            const res = await client.query(updateQuery, [username, handle]);
 
             if (res.rowCount === 0) {
                 throw new Error('Username not found in user_creds table.');
@@ -479,7 +477,7 @@ const revokeTwitterTokens = async (username) => {
     }
 };
 
-const revokeRedditTokens = async (username) => {
+const revokeRedditTokens = async (username, access_token, handle) => {
     if (!username) {
         throw new Error('Username is required.');
     }
@@ -487,15 +485,13 @@ const revokeRedditTokens = async (username) => {
     try {
         // Connect to the pool
         const client = await pool.connect();
-
+        
         try {
             // Update query to set the Reddit access and refresh tokens to null
             const updateQuery = `
-                UPDATE user_creds
-                SET reddit_access_token = NULL, reddit_refresh_token = NULL
-                WHERE username = $1
+                delete from user_creds where username = $1 and handle = $2
             `;
-            const res = await client.query(updateQuery, [username]);
+            const res = await client.query(updateQuery, [username, handle]);
 
             if (res.rowCount === 0) {
                 throw new Error('Username not found in user_creds table.');
@@ -511,7 +507,7 @@ const revokeRedditTokens = async (username) => {
     }
 };
 
-const revokeYouTubeTokens = async (username) => {
+const revokeYouTubeTokens = async (username, handle) => {
     if (!username) {
         throw new Error('Username is required.');
     }
@@ -523,11 +519,9 @@ const revokeYouTubeTokens = async (username) => {
         try {
             // Update query to set the YouTube access and refresh tokens to null
             const updateQuery = `
-                UPDATE user_creds
-                SET youtube_access_token = NULL, youtube_refresh_token = NULL
-                WHERE username = $1
+                delete from user_creds where username = $1 and handle = $2
             `;
-            const res = await client.query(updateQuery, [username]);
+            const res = await client.query(updateQuery, [username, handle]);
 
             if (res.rowCount === 0) {
                 throw new Error('Username not found in user_creds table.');
@@ -543,7 +537,7 @@ const revokeYouTubeTokens = async (username) => {
     }
 };
 
-const revokeTikTokTokens = async (username) => {
+const revokeTikTokTokens = async (username, handle) => {
     if (!username) {
         throw new Error('Username is required.');
     }
@@ -551,15 +545,14 @@ const revokeTikTokTokens = async (username) => {
     try {
         // Connect to the pool
         const client = await pool.connect();
-
+            console.log(username)
+            console.log(handle)
         try {
             // Update query to set the TikTok access and refresh tokens to null
             const updateQuery = `
-                UPDATE user_creds
-                SET tiktok_access_token = NULL, tiktok_refresh_token = NULL
-                WHERE username = $1
+                delete from user_creds where username = $1 and handle = $2
             `;
-            const res = await client.query(updateQuery, [username]);
+            const res = await client.query(updateQuery, [username, handle]);
 
             if (res.rowCount === 0) {
                 throw new Error('Username not found in user_creds table.');

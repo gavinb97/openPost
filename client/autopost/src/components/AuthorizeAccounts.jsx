@@ -5,7 +5,7 @@ import { getYoutubeLoginUrl, revokeGoogleAccess } from '../service/youtubeServic
 import { getTikTokLoginUrl, revokeTikTokAccess } from '../service/tiktokService';
 import '../App.css' 
 
-const AuthorizeAccounts = ({ userData }) => {
+const AuthorizeAccounts = ({ userData, handleOpenAccountDetails, setAccountDetails }) => {
     const { user, credentials, isLoggedIn, setIsLoggedIn, isLoading } = userData
 
     const [twitterAccounts, setTwitterAccounts] = useState([]) 
@@ -20,7 +20,6 @@ const AuthorizeAccounts = ({ userData }) => {
         const tiktok = [] 
         if (userData) {
             if (userData.credentials && userData.credentials.length > 0) {
-                console.log(userData.credentials)
                 const creds = userData.credentials
                 creds.forEach((credential) => {
             if (credential.twitterTokens && credential.twitterTokens.access_token) {
@@ -95,7 +94,7 @@ const AuthorizeAccounts = ({ userData }) => {
 
                 <div className='authorized-accounts-box'>
                     {accounts.map((account, index) => (
-                        <div key={index} className='accountbox'>
+                        <div key={index} className='accountbox' onClick={() => handleAccountClick(account)}>
                             {account.handle}
                         </div>
                     ))}
@@ -103,6 +102,12 @@ const AuthorizeAccounts = ({ userData }) => {
             </div>
         ) 
     } 
+
+    const handleAccountClick = (data) => {
+        console.log(data)
+        setAccountDetails(data)
+        handleOpenAccountDetails(true)
+    }
 
     return (
         <div>

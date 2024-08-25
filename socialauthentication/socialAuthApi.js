@@ -70,8 +70,9 @@ router.post('/twitterloginurl', async (req, res) => {
 router.post('/revoketwitter', async (req, res) => {
     console.log('revoking twitter authorization');
     const username = req.body.username || 'someUser';
+    const handle = req.body.handle
     try {
-        await revokeAccessToken(username);
+        await revokeAccessToken(username, handle);
         res.send('revoked twitter authorization');
     } catch (error) {
         console.error('Error:', error);
@@ -112,8 +113,9 @@ router.post('/revokereddit', async (req, res) => {
     console.log('revoking reddit access');
     const username = req.body.username || 'someUser';
     const accessToken = req.body.accesstoken;
+    const handle = req.body.handle
     try {
-        await revokeRedditAccessToken(username, accessToken);
+        await revokeRedditAccessToken(username, accessToken, handle);
         res.send('revoked access');
     } catch (error) {
         console.error('Error:', error);
@@ -162,7 +164,8 @@ router.get('/gcallback', async (req, res) => {
 router.post('/revokeGoogleAccess', async (req, res) => {
     const accessToken = req.body.accessToken;
     const username = req.body.username;
-    const result = await revokeGoogleAccessToken(username, accessToken);
+    const handle = req.body.handle
+    const result = await revokeGoogleAccessToken(username, accessToken, handle);
     if (result) {
         res.status(200).json({ message: 'Access has been revoked.' });
     } else {
@@ -197,8 +200,9 @@ router.post('/revoketiktok', async (req, res) => {
     console.log('revoking tiktok authorization');
     const username = req.body.username || 'somedude';
     const accessToken = req.body.accesstoken;
+    const handle = req.body.handle
     try {
-        await revokeAccess(accessToken, username);
+        await revokeAccess(accessToken, username, handle);
         res.send('tik tok access revoked');
     } catch (error) {
         console.error('Error:', error);
