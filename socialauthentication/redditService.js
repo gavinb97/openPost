@@ -54,13 +54,10 @@ const getRedditAccessToken = async (codeFromCallback, state) => {
             }
         });
 
-         // write tokens to file
-        //  const tokens = {
-        //     access_token: response.data.access_token,
-        //     refresh_token: response.data.refresh_token || ''
-        // }
-        await updateRedditTokens(state, response.data.access_token, response.data.refresh_token)
-        // await updateUserTokens(`authData\\creds.json`, state, 'redditTokens', tokens)
+        const username = await getRedditUsername(response.data.access_token)
+        console.log(username)
+        await updateRedditTokens(state, response.data.access_token, response.data.refresh_token, username)
+
 
         return response.data;
     } catch (e) {
@@ -121,6 +118,29 @@ const getRedditRefreshToken = async (refresh_Token, user) => {
         throw e; // Re-throwing the error for handling in the caller
     }
 }
+
+const getRedditUsername = async (accessToken) => {
+    try {
+        // Define the API URL to fetch the logged-in user's information
+        const userInfoUrl = 'https://oauth.reddit.com/api/v1/me';
+
+        // Make the API request
+        const response = await axios.get(userInfoUrl, {
+            headers: {
+                'Authorization': `Bearer ${accessToken}`,
+                'User-Agent': 'web:yourAppName:v1.0 (by /u/yourRedditUsername)'
+            }
+        });
+
+        // Extract the username from the response
+        const username = response.data.name;
+
+        return username;
+    } catch (error) {
+        console.error('Error fetching Reddit username:', error);
+        throw error;
+    }
+};
 
 const getSubreddits = async (accessToken) => {
     let after = ''; // Initialize the 'after' parameter for pagination

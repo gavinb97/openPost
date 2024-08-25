@@ -1299,7 +1299,10 @@
 .accountbox {
   border: 1px solid black;
   height: 4rem;
-  width: 4rem;
+  width: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   padding: 1rem;
   margin: 1rem;
 }

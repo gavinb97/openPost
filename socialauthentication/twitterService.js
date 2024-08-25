@@ -39,6 +39,26 @@ const generateTwitterAuthUrl1 = async (username) => {
     return authUrl;
 };
 
+const getTwitterHandle = async (accessToken, accessSecret) => {
+    try {
+        const twitterClient = new TwitterApi({
+            appKey: process.env.APP_KEY,
+            appSecret: process.env.APP_SECRET,
+            accessToken: accessToken,
+            accessSecret: accessSecret
+        });
+
+        const client = twitterClient.readWrite
+        const currentUser = client.currentUser()
+        const username = (await currentUser).screen_name
+        return username
+  
+    } catch (error) {
+      console.error('Error fetching Twitter username:', error.message);
+      console.log(error)
+    }
+  }
+
 const getAccessToken = async (code, state) => {
     const codeVerifier = await getTwitterCodeVerifierByUsername(state)
     
@@ -58,7 +78,8 @@ const getAccessToken = async (code, state) => {
                 }
             }
         );
-        await updateTwitterTokens(state, response.data.access_token, response.data.refresh_token )
+        const handle = await getTwitterHandle(response.data.access_token, response.data.refresh_token)
+        await updateTwitterTokens(state, response.data.access_token, response.data.refresh_token, handle )
         return response.data;
     } catch (error) {
         console.error('Error exchanging code for access token:', error);
@@ -264,9 +285,11 @@ const getOAuth1AccessToken = async (username, oauthToken, oauthVerifier) => {
                 }
             }
         );
-        
+
         const accessToken = parseOAuth1Response(response.data);
-        await updateTwitterTokens(username, accessToken.oauth_token, accessToken.oauth_token_secret, oauthVerifier);
+        const handle = await getTwitterHandle(accessToken.oauth_token, accessToken.oauth_token_secret)
+        
+        await updateTwitterTokens(username, accessToken.oauth_token, accessToken.oauth_token_secret, oauthVerifier, handle);
         return accessToken;
     } catch (error) {
         console.error('Error exchanging OAuth1 token for access token:', error);

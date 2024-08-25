@@ -37,26 +37,58 @@ function Profile() {
     if (user !== null) {
       setIsLoading(true); // Start loading
   
-    getUserCreds(user.username || user.user)
-      .then((creds) => {
-        if (creds) {
-          setIsLoggedIn({
-            twitter: typeof creds.twitterTokens?.access_token === 'string' && creds.twitterTokens.access_token !== null,
-            reddit: typeof creds.redditTokens?.access_token === 'string' && creds.redditTokens.access_token !== null,
-            youtube: typeof creds.youtubeTokens?.access_token === 'string' && creds.youtubeTokens.access_token !== null,
-            tiktok: typeof creds.tiktokTokens?.access_token === 'string' && creds.tiktokTokens.access_token !== null,
-          });
-          setCredentials(creds);
-         
-          const userContext = {
-            username: user.username || user.user,
-            jwt: user.jwt,
-            creds
+      getUserCreds(user.username || user.user)
+        .then((creds) => {
+          if (creds && creds.length > 0) {
+            console.log('in the useeffect');
+            console.log(creds);
+  
+            const isLoggedIn = {
+              twitter: false,
+              reddit: false,
+              youtube: false,
+              tiktok: false,
+            };
+  
+            // Loop over creds and check for each token
+            creds.forEach((cred) => {
+              if (typeof cred.twitterTokens?.access_token === 'string' && cred.twitterTokens?.access_token !== null) {
+                isLoggedIn.twitter = true;
+              }
+              if (typeof cred.redditTokens?.access_token === 'string' && cred.redditTokens?.access_token !== null) {
+                isLoggedIn.reddit = true;
+              }
+              if (typeof cred.youtubeTokens?.access_token === 'string' && cred.youtubeTokens?.access_token !== null) {
+                isLoggedIn.youtube = true;
+              }
+              if (typeof cred.tiktokTokens?.access_token === 'string' && cred.tiktokTokens?.access_token !== null) {
+                isLoggedIn.tiktok = true;
+              }
+            });
+  
+            setIsLoggedIn(isLoggedIn);
+            setCredentials(creds);
+  
+            const userContext = {
+              username: user.username || user.user,
+              jwt: user.jwt,
+              creds,
+            };
+  
+            loginContext(userContext);
+          } else {
+            setIsLoggedIn({
+              twitter: false,
+              reddit: false,
+              youtube: false,
+              tiktok: false,
+            });
+            setCredentials({});
           }
-         
-          loginContext(userContext)
-          setCredentials(creds)
-        } else {
+          setIsLoading(false); // End loading
+        })
+        .catch((error) => {
+          console.error("Failed to fetch credentials:", error);
           setIsLoggedIn({
             twitter: false,
             reddit: false,
@@ -64,25 +96,11 @@ function Profile() {
             tiktok: false,
           });
           setCredentials({});
-        }
-        setIsLoading(false); // End loading
-      })
-      .catch(error => {
-        console.error("Failed to fetch credentials:", error);
-        setIsLoggedIn({
-          twitter: false,
-          reddit: false,
-          youtube: false,
-          tiktok: false,
+          setIsLoading(false); // End loading even on error
         });
-        setCredentials({});
-        setIsLoading(false); // End loading even on error
-      });
     } else {
-      navigate('/login')
+      navigate('/login');
     }
-
-    
   }, []);
   
 
@@ -107,7 +125,7 @@ function Profile() {
                 <p>{`Username: ${user.username}`} </p>
             </div>
             <SocialsLogin userData={userData}></SocialsLogin>
-            <AuthorizeAccounts></AuthorizeAccounts>
+            <AuthorizeAccounts userData={userData}></AuthorizeAccounts>
         </div>
     );
 }

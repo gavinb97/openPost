@@ -56,8 +56,9 @@ const getAccessTokenAndOpenId = async (code, state) => {
       refresh_token: response.data.refresh_token || '',
       openId: response.data.open_id
   }
-
-  await updateTikTokTokens(state, tokens.access_token, tokens.refresh_token)
+  const creatorInfo = await queryCreatorInfo(tokens.access_token)
+  
+  await updateTikTokTokens(state, tokens.access_token, tokens.refresh_token, creatorInfo.creator_username)
 
     return {
         accessToken: response.data.access_token,
@@ -89,7 +90,9 @@ const getAccessTokenAndOpenId = async (code, state) => {
       }
     })
 
-    await updateTikTokTokens(user, response.data.access_token, response.data.refresh_token || refreshToken)
+    const creatorInfo = await queryCreatorInfo(tokens.access_token)
+
+    await updateTikTokTokens(user, response.data.access_token, response.data.refresh_token || refreshToken, creatorInfo)
     return {
         access_token: response.data.access_token,
         openId: response.data.open_id,
@@ -125,7 +128,8 @@ const getAccessTokenAndOpenId = async (code, state) => {
         'Content-Type': 'application/json; charset=utf-8'
       }
     })
-    console.log(response.data.data)
+    
+    return response.data.data
   }
 
   const initializePostRequest = async (accessToken, filePath, videoTitle) => {
@@ -226,5 +230,6 @@ module.exports = {
   getTikTokLoginUrl,
   getAccessTokenAndOpenId,
   refreshTikTokAccessToken,
-  revokeAccess
+  revokeAccess,
+  queryCreatorInfo
 }

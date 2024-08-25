@@ -8,6 +8,7 @@ const bodyParser = require('body-parser');
 const { updateYouTubeTokens } = require('./socialAuthData');
 const jwt = require('jsonwebtoken');
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+const {google} = require('googleapis');
 
 const {
     generateTwitterAuthUrl,
@@ -99,6 +100,14 @@ router.post('/redditloginurl', async (req, res) => {
     }
 });
 
+router.post('/googleloginurl', async (req, res) => {
+    console.log(req.body.username)
+    const username = req.body.username
+    const { url, oauth2Client } = await authorizeFirstGoogleTimeUrl(username);
+    console.log(url) 
+    res.send(url)
+}) 
+
 router.post('/revokereddit', async (req, res) => {
     console.log('revoking reddit access');
     const username = req.body.username || 'someUser';
@@ -116,21 +125,37 @@ router.post('/revokereddit', async (req, res) => {
 router.get('/gcallback', async (req, res) => {
     const code = req.query.code;
     const state = req.query.state;
-    const { url, oauth2Client } = await getAuthClientYoutube(state);
+    const { url, oauth2Client } = await authorizeFirstGoogleTimeUrl(state);
+    
+    // Get tokens from the code
     const { tokens } = await oauth2Client.getToken(code);
-    await updateYouTubeTokens(state.trim(), tokens.access_token, tokens.refresh_token || null);
-    res.redirect('http://localhost:3000/profile');
-});
+    oauth2Client.setCredentials(tokens);
 
-router.post('/googleloginurl', async (req, res) => {
-    console.log('sending login url');
-    const username = req.body.username || 'somedude';
     try {
-        const loginUrl = await authorizeFirstGoogleTimeUrl(username);
-        res.send(loginUrl.url);
+        // Get the user's YouTube channel information
+        const youtube = google.youtube({version: 'v3', auth: oauth2Client });
+        const response = await youtube.channels.list({
+            auth: oauth2Client,
+            part: 'snippet',
+            mine: true
+        });
+
+        if (response.data.items.length === 0) {
+            throw new Error('No YouTube channel found for the authenticated user.');
+        }
+        console.log(response.data)
+        const username = response.data.items[0].snippet.title; // Get the channel name
+        console.log(username)
+        console.log(tokens.access_token)
+        console.log(tokens.refresh_token)
+        console.log('gonna update from api')
+        // Update the tokens along with the YouTube username
+        await updateYouTubeTokens(state.trim(), tokens.access_token, tokens.refresh_token, username.trim());
+
+        res.redirect('http://localhost:3000/profile');
     } catch (error) {
-        console.error('Error:', error);
-        res.status(500).json({ error: 'error creating login url' });
+        console.error('Error retrieving YouTube channel information:', error);
+        res.redirect('http://localhost:3000/profile');
     }
 });
 

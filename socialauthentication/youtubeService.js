@@ -164,7 +164,25 @@ const refreshYoutubeAccessToken = async (refreshToken, user) => {
     // Refresh the token
     const { credentials } = await oauth2Client.refreshAccessToken();
     const { access_token, refresh_token } = credentials;
-    await updateYouTubeTokens(user, access_token, refresh_token || refreshToken)
+
+
+     // Get the user's YouTube channel information
+     const youtube = google.youtube({version: 'v3', auth: oauth2Client });
+     const response = await youtube.channels.list({
+         auth: oauth2Client,
+         part: 'snippet',
+         mine: true
+     });
+
+     if (response.data.items.length === 0) {
+         throw new Error('No YouTube channel found for the authenticated user.');
+     }
+     console.log(response.data)
+     const username = response.data.items[0].snippet.title; // Get the channel name
+     console.log(username)
+     console.log('in youtubeservice making update call')
+
+    await updateYouTubeTokens(user, access_token, refresh_token || refreshToken, username.trim())
     
     return {
       access_token,
