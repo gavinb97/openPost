@@ -11,8 +11,6 @@ const AccountDetailsModal = ({ closeModal, accountDetails, setAccountDetails}) =
  
 
   const revoke = (accountDetails) => {
-    console.log('clicked save')
-    console.log(accountDetails)
     if (accountDetails.twitterTokens.access_token !== null) revokeTwitterAccess(accountDetails.user, accountDetails.handle)
     if (accountDetails.redditTokens.access_token !== null) revokeRedditAccess(accountDetails.user, accountDetails.redditTokens.access_token, accountDetails.handle)
     if (accountDetails.youtubeTokens.access_token !== null) revokeGoogleAccess(accountDetails.user, accountDetails.youtubeTokens.access_token, accountDetails.handle)

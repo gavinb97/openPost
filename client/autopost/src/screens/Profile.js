@@ -119,10 +119,11 @@ function Profile() {
             <div>
                 <h1>Profile</h1>
             </div>
-            <div>
+            <div style={{ marginLeft: '1rem', marginRight: '1rem'}}>
                 <p>{`Username: ${user.username}`} </p>
+                <p>Login with Twitter, Reddit, Youtube or TikTok to get started</p>
             </div>
-            <SocialsLogin userData={userData}></SocialsLogin>
+            {/* <SocialsLogin userData={userData}></SocialsLogin> */}
             <AuthorizeAccounts userData={userData} handleOpenAccountDetails={handleOpenAccountDetails} setAccountDetails={setAccountDetails}></AuthorizeAccounts>
             {showAccountDetailsModal && <AccountDetailsModal closeModal={handleCloseAccountDetails} accountDetails={accountDetails}/>}
         </div>

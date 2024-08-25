@@ -1282,12 +1282,13 @@
 }
  
 .authorized-accounts-box {
-  border: .25rem solid #0091ea;
+  border: .25rem solid #00aff0;
   height: 8.5rem;
   margin: 1rem;
   display: flex;
   flex-direction: row;
   overflow: auto;
+  border-radius: 1rem;
 }
 
 .authorize-container {
@@ -1305,4 +1306,12 @@
   justify-content: center;
   padding: 1rem;
   margin: 1rem;
+  border-radius: 1rem;
+  background-color: #0091ea;
+  border: 0;
+  color: white;
+}
+
+.accountbox:hover {
+  background-color: #00aff0;
 }

@@ -104,7 +104,6 @@ const AuthorizeAccounts = ({ userData, handleOpenAccountDetails, setAccountDetai
     } 
 
     const handleAccountClick = (data) => {
-        console.log(data)
         setAccountDetails(data)
         handleOpenAccountDetails(true)
     }
