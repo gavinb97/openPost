@@ -1434,6 +1434,10 @@
   color: red;
 }
 
+.login-error-message {
+  color: red;
+}
+
 .username-validations p {
   margin: 0;
   padding: 5px 0;

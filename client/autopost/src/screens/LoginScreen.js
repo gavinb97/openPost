@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom'
-import Navbar from '../components/Navbar'
+import { useNavigate } from 'react-router-dom';
+import Navbar from '../components/Navbar';
 import { login } from '../service/userService';
-import { useAuth } from '../service/authContext'
+import { useAuth } from '../service/authContext';
 
 function LoginScreen() {
-    const navigate = useNavigate()
+    const navigate = useNavigate();
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const [errorMessage, setErrorMessage] = useState(''); // State to track error messages
 
-    const { user, logoutContext, loginContext } = useAuth()
+    const { loginContext } = useAuth();
 
     const handleUsernameChange = (event) => {
         setUsername(event.target.value);
@@ -21,21 +22,23 @@ function LoginScreen() {
 
     const handleSubmit = async (event) => {
         event.preventDefault();
+        setErrorMessage(''); // Reset error message
+
         try {
-            const loginResponse = await login(username, password)
-            console.log(loginResponse)
-            // set context  
-            loginContext(loginResponse)
-            navigate('/jobscheduler')
+            const loginResponse = await login(username, password);
+            console.log(loginResponse);
+            // Set context  
+            loginContext(loginResponse);
+            navigate('/jobscheduler');
         } catch (e) {
-            console.log(e)
+            console.log(e);
+            setErrorMessage('Incorrect username or password'); // Set error message
         }
-        
     };
 
     const handleRegisterClick = () => {
-        navigate('/registration')
-    }
+        navigate('/registration');
+    };
 
     return (
         <div className="login-page">
@@ -64,15 +67,21 @@ function LoginScreen() {
                         />
                     </div>
 
+                    {errorMessage && (
+                        <div className="login-error-message">
+                            <p>{errorMessage}</p>
+                        </div>
+                    )}
+
                     <div>
                         <button type="submit">Login</button>
                     </div>
 
-                    <p className='login-register-anchor'>Don't have an account? <a href='' onClick={handleRegisterClick}>Register</a></p>
-                    
+                    <p className='login-register-anchor'>
+                        Don't have an account? <a href='' onClick={handleRegisterClick}>Register</a>
+                    </p>
                 </form>
             </header>
-            
         </div>
     );
 }
