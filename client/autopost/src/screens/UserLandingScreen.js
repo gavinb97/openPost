@@ -72,8 +72,6 @@ function UserLandingScreen() {
     })
     }, []) 
      
-    console.log(twitterAccounts)
-    console.log('twitter accounts')
     const handleShowLoginPromptModal = () => {
         setShowLoginPromptModal(true)
     }

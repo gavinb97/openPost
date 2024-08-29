@@ -1018,6 +1018,18 @@
   border: 0;
 }
 
+.subredditSelect button {
+  margin: 1rem;
+  padding: 1rem;
+  border: none;
+  border-radius: 1rem;
+  cursor: pointer;
+  background-color: #00aff0; 
+  text-align: center; 
+  color: white;
+  border: 0;
+}
+
 .input-group button:hover {
   margin: 1rem;
   padding: 1rem;

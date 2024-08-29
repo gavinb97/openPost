@@ -433,7 +433,7 @@ const SetScheduleModal = ({ closeModal, selectedImages, twitterAccounts, redditA
     return (
       <>
          {selectedWebsite === 'reddit' && subredditList.length > 0 && (
-          <div className="your-component">
+          <div className="subredditSelect">
             <div className="subreddit-selector" ref={dropdownRef}>
               <button onClick={toggleDropdown}>Select Subreddits</button>
               {isOpen && (
@@ -479,6 +479,10 @@ const SetScheduleModal = ({ closeModal, selectedImages, twitterAccounts, redditA
 
     if ((scheduleType === 'scheduled' && scheduleInterval === 'set') && (timesOfDay.length === 0 || (!selectedDays.M && !selectedDays.T && !selectedDays.W
       && !selectedDays.T && !selectedDays.Th && !selectedDays.F && !selectedDays.Sa && !selectedDays.S))) {
+      className += ' disabledButton';
+    }
+
+    if (selectedWebsite === 'reddit' && selectedSubreddits.length === 0) {
       className += ' disabledButton';
     }
   
