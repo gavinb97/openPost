@@ -39,10 +39,8 @@ export const revokeRedditAccess = async (username, accessToken, handle) => {
 
 export const getSFWSubreddits = async (user) => {
   const endpoint = 'http://localhost:3455/getsfwsubreddits'
-  console.log(user.creds.redditTokens)
-  console.log('user')
   try {
-    const response = await axios.post(endpoint, {token: user.creds.redditTokens.access_token});
+    const response = await axios.post(endpoint, {token: user.redditTokens.access_token});
     return response.data;
   } catch (error) {
     console.error('Failed to get subreddits', error);

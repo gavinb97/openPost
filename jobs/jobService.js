@@ -2,6 +2,8 @@ const { v4: uuidv4 } = require('uuid');
 const { insertScheduledJob, insertRandomJob, insertActiveJob } = require('./jobsData')
 
 const formatRequest = async (request) => {
+    console.log(request)
+    console.log('in format request ^^')
     let jobs
 
     switch (request.selectedWebsite) {
@@ -87,6 +89,7 @@ const createActiveJobObject = (obj, dbJobObject, jobs, originalSubreddits, remai
         hour_interval: obj.hourInterval || obj.hour_interval || null,
         duration_of_job: obj.durationOfJob || obj.duration_of_job || null,
         selected_subreddits: obj.selectedSubreddits || obj.selected_subreddits || [],
+        handle: obj.handle,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
     };
@@ -324,7 +327,8 @@ const rescheduleRandomJobs = async (job) => {
             scheduledTime: Date.now() + delayTime, // This now represents the delay time
             image: getNextImage(),
             includeCaption: job.include_caption,
-            captionType: job.type_of_caption
+            captionType: job.type_of_caption,
+            handle: job.handle || ''
         };
 
         if (job.selected_website === 'reddit') {
@@ -425,7 +429,8 @@ const handleHourInterval = async (request) => {
             scheduledTime: Date.now() + 5000, // 5 seconds delay for the first job
             image: getNextImage(),
             includeCaption: request.includeCaption,
-            captionType: request.captionType
+            captionType: request.captionType,
+            handle: request.handle
         };
 
         if (request.selectedWebsite === 'reddit') {
@@ -507,7 +512,8 @@ const rescheduleHourInterval = async (job) => {
         scheduledTime: Date.now() + 5000, // 5 seconds delay for the first job
         image: getNextImage(),
         includeCaption: job.include_caption,
-        captionType: job.type_of_caption
+        captionType: job.type_of_caption,
+        handle: job.handle
     };
 
     if (job.selected_website === 'reddit') {
@@ -610,7 +616,8 @@ const handleSetInterval = async (request) => {
                 scheduledTime: Date.now() + delayInMilliseconds,
                 image: isBridgeJob ? null : getNextImage(),
                 includeCaption: isBridgeJob ? false : request.includeCaption,
-                captionType: isBridgeJob ? null : request.captionType
+                captionType: isBridgeJob ? null : request.captionType,
+                handle: request.handle
             };
 
             if (request.selectedWebsite === 'reddit' && !isBridgeJob) {
@@ -732,7 +739,8 @@ const rescheduleSetInterval = async (job) => {
                 scheduledTime: Date.now() + delayInMilliseconds,
                 image: isBridgeJob ? null : getNextImage(),
                 includeCaption: isBridgeJob ? false : job.include_caption,
-                captionType: isBridgeJob ? null : job.type_of_caption
+                captionType: isBridgeJob ? null : job.type_of_caption,
+                handle: job.handle
             };
 
             if (job.selected_website === 'reddit' && !isBridgeJob) {

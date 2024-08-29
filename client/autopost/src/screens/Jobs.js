@@ -5,6 +5,7 @@ import { useAuth } from '../service/authContext';
 import JobsTable from '../components/JobsTable';
 import {getJobsByUsername, deleteJob} from '../service/jobService'
 import JobsBoxes from '../components/JobsBoxes';
+import JobPromptModal from '../components/JobPromptModal'
 
 function Jobs() {
     const [showModal, setShowModal] = useState(false);
@@ -59,6 +60,7 @@ function Jobs() {
                     {jobs && <JobsTable jobs={jobs} onCancelJob={handleCancelJob} />}
                 </div> */}
                 <JobsBoxes jobs={jobs} onCancelJob={handleCancelJob}/>
+                {jobs && jobs.length === 0 && <JobPromptModal />}
            </div>
         </div>
     );

@@ -154,9 +154,11 @@ export const validateAndFormatPostJobData = (request) => {
         durationOfJob,
         selectedSubreddits,
         includeCaption,
-        captionType
+        captionType,
+        handle
     } = request;
-
+    console.log('re quest')
+    console.log(request)
     // Validate required fields
     if (!username) {
         throw new Error("Username is required");
@@ -192,7 +194,8 @@ export const validateAndFormatPostJobData = (request) => {
         scheduleType,
         selectedImages,
         includeCaption,
-        captionType
+        captionType,
+        handle
     };
 
     // Additional validation and formatting based on schedule type
@@ -218,6 +221,7 @@ export const validateAndFormatPostJobData = (request) => {
         }
         
     }
+    console.log(jobObject)
 
     // Include selected subreddits if the website is Reddit
     if (selectedWebsite.toLowerCase() === 'reddit' && selectedSubreddits) {

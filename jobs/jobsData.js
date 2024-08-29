@@ -214,7 +214,8 @@ const insertActiveJob = async (job) => {
         remaining_subreddits,
         original_subreddits,
         includeCaption,
-        captionType
+        captionType,
+        handle
     } = job;
 
     // Convert message_ids array to a PostgreSQL array literal
@@ -268,10 +269,11 @@ const insertActiveJob = async (job) => {
             original_subreddits,
             include_caption,
             type_of_caption,
+            handle,
             created_at,
             updated_at
         ) VALUES (
-            $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, NOW(), NOW()
+            $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, NOW(), NOW()
         ) RETURNING id;
     `;
 
@@ -297,7 +299,8 @@ const insertActiveJob = async (job) => {
         remaining_subreddits,
         original_subreddits,
         includeCaption,
-        captionType
+        captionType,
+        handle
     ];
 
     try {
@@ -359,7 +362,8 @@ const updateActiveJob = async (job) => {
         remaining_subreddits,
         original_subreddits,
         include_caption,
-        type_of_caption
+        type_of_caption,
+        handle
     } = job;
 
     // Convert message_ids array to a PostgreSQL array literal
@@ -396,6 +400,7 @@ const updateActiveJob = async (job) => {
             original_subreddits = $19,
             include_caption = $20,
             type_of_caption = $21,
+            handle = $23,
             updated_at = NOW()
         WHERE job_set_id = $22
         RETURNING id;
@@ -423,7 +428,8 @@ const updateActiveJob = async (job) => {
         original_subreddits,
         include_caption,
         type_of_caption,
-        job_set_id
+        job_set_id,
+        handle
     ];
 
 
@@ -600,6 +606,7 @@ const getJobSetById = async (jobSetId) => {
             original_subreddits,
             include_caption,
             type_of_caption,
+            handle,
             created_at,
             updated_at
         FROM active_jobs

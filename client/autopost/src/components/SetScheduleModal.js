@@ -32,11 +32,14 @@ const SetScheduleModal = ({ closeModal, selectedImages, twitterAccounts, redditA
   const [warningMessage, setWarningMessage] = useState('');
 
   useEffect(() => {
-    if (selectedWebsite === 'reddit') {
+    if (selectedWebsite === 'reddit' && selectedAccount) {
       const fetchSubreddits = async () => {
         try {
-          const subreddits = await getSFWSubreddits(user);
-
+          const credsArray = user.creds
+        
+          const accountCreds = credsArray.find((creds) => creds.handle === selectedAccount);
+          const subreddits = await getSFWSubreddits(accountCreds);
+          
           const subredditObjects = subreddits.map((subredditName, index) => ({
             name: subredditName,
             id: `${index + 1}`, // ID using numerical values
@@ -54,7 +57,7 @@ const SetScheduleModal = ({ closeModal, selectedImages, twitterAccounts, redditA
       setSubredditList([]);
       setSelectedSubreddits([]);
     }
-  }, [selectedWebsite, user]);
+  }, [selectedWebsite, user, selectedAccount]);
 
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
@@ -196,7 +199,8 @@ const SetScheduleModal = ({ closeModal, selectedImages, twitterAccounts, redditA
       durationOfJob,
       selectedSubreddits,
       includeCaption,
-      captionType
+      captionType,
+      handle: selectedAccount
     };
 
     

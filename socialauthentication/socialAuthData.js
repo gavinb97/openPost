@@ -698,6 +698,70 @@ const getCredsByUser = async (username) => {
     }
 };
 
+const getCredsByUsernameAndHandle = async (username, handle) => {
+    if (!username || !handle) {
+        throw new Error('Username and handle are required.');
+    }
+
+    try {
+        // Connect to the pool
+        const client = await pool.connect();
+
+        try {
+            // Query to get the credentials by username and handle
+            const query = `
+                SELECT
+                    twitter_access_token,
+                    twitter_refresh_token,
+                    reddit_access_token,
+                    reddit_refresh_token,
+                    tiktok_access_token,
+                    tiktok_refresh_token,
+                    youtube_access_token,
+                    youtube_refresh_token,
+                    handle
+                FROM user_creds
+                WHERE username = $1 AND handle = $2
+            `;
+            const res = await client.query(query, [username, handle]);
+
+            if (res.rows.length === 0) {
+                console.log('No credentials found for the given username and handle.');
+                return null;
+            }
+
+            // Return the first (and only) row
+            const userCreds = res.rows[0];
+            return {
+                user: username,
+                handle: userCreds.handle,
+                twitterTokens: {
+                    access_token: userCreds.twitter_access_token,
+                    refresh_token: userCreds.twitter_refresh_token
+                },
+                redditTokens: {
+                    access_token: userCreds.reddit_access_token,
+                    refresh_token: userCreds.reddit_refresh_token
+                },
+                tiktokTokens: {
+                    access_token: userCreds.tiktok_access_token,
+                    refresh_token: userCreds.tiktok_refresh_token
+                },
+                youtubeTokens: {
+                    access_token: userCreds.youtube_access_token,
+                    refresh_token: userCreds.youtube_refresh_token
+                }
+            };
+        } finally {
+            // Release the client back to the pool
+            client.release();
+        }
+    } catch (error) {
+        console.error('Error getting user credentials from user_creds table:', error);
+        throw error;
+    }
+};
+
 const getUserNames = async () => {
     try {
         // Connect to the pool
@@ -733,5 +797,5 @@ const getUserNames = async () => {
 module.exports = { 
     registerUserDB, authenticateUserDB, getCredsByUser, updateTwitterCodeVerifier,
     updateTwitterTokens, revokeTwitterTokens, getTwitterCodeVerifierByUsername, updateRedditTokens, revokeRedditTokens,
-    updateTikTokTokens, revokeTikTokTokens, updateYouTubeTokens, revokeYouTubeTokens, getUserNames
+    updateTikTokTokens, revokeTikTokTokens, updateYouTubeTokens, revokeYouTubeTokens, getUserNames, getCredsByUsernameAndHandle
 }

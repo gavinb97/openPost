@@ -14,7 +14,7 @@ channelPromise.then(startWorker);
 
 router.post('/jobs', async (req, res) => {
     const jobs = await formatRequest(req.body);
-
+    console.log(jobs)
     try {
         const channel = await channelPromise;
 

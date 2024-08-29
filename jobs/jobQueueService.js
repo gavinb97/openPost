@@ -1,7 +1,7 @@
 require('dotenv').config({ path: '../.env' });
 const amqp = require('amqplib');
 const { tweetMediaOnBehalfOfUser } = require('../socialauthentication/twitterService')
-const { getCredsByUser } = require('../socialauthentication/socialAuthData')
+const { getCredsByUser, getCredsByUsernameAndHandle } = require('../socialauthentication/socialAuthData')
 const { isJobIdPresent, deleteMessageIdFromJob, getMessageIdsCountForJob, getJobSetById, updateActiveJob, getDurationOfJob, deleteActiveJobByJobSetId } = require('./jobsData')
 const fs = require('fs');
 const path = require('path');
@@ -34,7 +34,7 @@ const makePost = async (job) => {
     // validate that job is active 
     const validJob = await validateJob(job)
     if (validJob) {
-        const creds = await getCredsByUser(job.userId)
+        const creds = await getCredsByUsernameAndHandle(job.userId, job.handle)
 
         switch (job.website) {
             case 'twitter':
@@ -133,6 +133,7 @@ const reschedulePostJob = async (job) => {
 }
 
 const postToTwitter = async (creds, job) => {
+    console.log(creds)
     if (creds.twitterTokens?.access_token && creds.twitterTokens?.refresh_token) {
         // see if we have media
         const path = await getMediaIfExists(job, job.userId)
@@ -158,6 +159,8 @@ const postToTwitter = async (creds, job) => {
         console.log(`after delete messages: ${afterDelete}`)
 
         await reschedulePostJob(job)
+    } else {
+        console.log('didnt send anything')
     }
 }
 
