@@ -20,17 +20,60 @@ import UploadedVideoContainerSmall from '../components/UploadedVideoContainerSma
 
 function UserLandingScreen() {
     const { mediaFiles, imagesLoaded, setMediaFiles, videoFiles, setvideoFiles} = useMethods()
-  
+    
     const navigate = useNavigate();
     const [showScheduleModal, setShowScheduleModal] = useState(false);
     const [showPostJobModal, setShowPostJobModal] = useState(false)
     const [showCommentJobModal, setShowCommentJobModal] = useState(false)
     const [showDMJobModal, setShowDMJobModal] = useState(false)
     const [showLoginPromptModal, setShowLoginPromptModal] = useState(false)
-    
 
+    const [twitterAccounts, setTwitterAccounts] = useState([]) 
+    const [redditAccounts, setRedditAccounts] = useState([]) 
+    const [youtubeAccounts, setYoutubeAccounts] = useState([]) 
+    const [tiktokAccounts, setTiktokAccounts] = useState([]) 
 
+    const { user  } = useAuth()
 
+    useEffect(() => {
+        getUserCreds(user.username)
+            .then((creds) => {
+                if (creds && creds.length > 0) {
+                    const twitter = [] 
+                    const reddit = [] 
+                    const youtube = [] 
+                    const tiktok = [] 
+                   
+                    if (creds && creds.length > 0) {
+                        creds.forEach((credential) => {
+                    if (credential.twitterTokens && credential.twitterTokens.access_token) {
+                        twitter.push(credential) 
+                    }
+                    if (credential.redditTokens && credential.redditTokens.access_token) {
+                        reddit.push(credential) 
+                    }
+                    if (credential.youtubeTokens && credential.youtubeTokens.access_token) {
+                        youtube.push(credential) 
+                    }
+                    if (credential.tiktokTokens && credential.tiktokTokens.access_token) {
+                        tiktok.push(credential) 
+                    }
+                }) 
+
+                setTwitterAccounts(twitter) 
+                setRedditAccounts(reddit) 
+                setYoutubeAccounts(youtube) 
+                setTiktokAccounts(tiktok) 
+                }
+            
+            } else {
+                setShowLoginPromptModal(true)
+            }
+    })
+    }, []) 
+     
+    console.log(twitterAccounts)
+    console.log('twitter accounts')
     const handleShowLoginPromptModal = () => {
         setShowLoginPromptModal(true)
     }
@@ -39,7 +82,6 @@ function UserLandingScreen() {
         setShowLoginPromptModal(false)
     }
 
-    const { user  } = useAuth()
     
     const handleCloseScheduleModal = () => {
         setShowScheduleModal(false);
@@ -75,7 +117,7 @@ function UserLandingScreen() {
             <div className='photo-post-job-container' style={{ textAlign: 'center' }}>
                 <h2>Photo Post Job</h2>
                 <p>Click an image or multiple images to start a photo post job</p>
-                <UploadedMediaContainerSmall mediaFiles={mediaFiles} imagesLoaded={imagesLoaded} setMediaFiles={setMediaFiles}></UploadedMediaContainerSmall>
+                <UploadedMediaContainerSmall mediaFiles={mediaFiles} imagesLoaded={imagesLoaded} setMediaFiles={setMediaFiles} twitterAccounts={twitterAccounts} redditAccounts={redditAccounts} youtubeAccounts={youtubeAccounts} tiktokAccounts={tiktokAccounts}></UploadedMediaContainerSmall>
             </div>
         )
     }
@@ -85,7 +127,7 @@ function UserLandingScreen() {
             <div className='photo-post-job-container' style={{ textAlign: 'center' }}>
                 <h2>Video Post Job</h2>
                 <p>Click an video or multiple videos to start a video post job</p>
-                <UploadedVideoContainerSmall videoFiles={videoFiles} imagesLoaded={imagesLoaded} setvideoFiles={setvideoFiles}></UploadedVideoContainerSmall>
+                <UploadedVideoContainerSmall videoFiles={videoFiles} imagesLoaded={imagesLoaded} setvideoFiles={setvideoFiles} twitterAccounts={twitterAccounts} redditAccounts={redditAccounts} youtubeAccounts={youtubeAccounts} tiktokAccounts={tiktokAccounts}></UploadedVideoContainerSmall>
             </div>
         )
     }
@@ -132,6 +174,8 @@ function UserLandingScreen() {
             </div>
         )
     }
+
+  
    
     return (
         <div className="App">
@@ -152,10 +196,11 @@ function UserLandingScreen() {
 
             {renderReplyJobBox()}
             {/* Render SetScheduleModal if showScheduleModal is true */}
-             {showScheduleModal && <SetScheduleModal closeModal={handleCloseScheduleModal} />}
-             {showPostJobModal && <StartPostJobModal closeModal={handleClosePostJobModal}></StartPostJobModal>}
-             {showCommentJobModal && <StartCommentJobModal closeModal={handleCloseCommentModal} />}
-             {showDMJobModal && <StartDMJobModal closeModal={handleCloseDMModal} />}
+            
+             {/* {showScheduleModal && <SetScheduleModal closeModal={handleCloseScheduleModal}  twitterAccounts={twitterAccounts} redditAccounts={redditAccounts} youtubeAccounts={youtubeAccounts} tiktokAccounts={tiktokAccounts}/>} */}
+             {showPostJobModal && <StartPostJobModal closeModal={handleClosePostJobModal} twitterAccounts={twitterAccounts} redditAccounts={redditAccounts} youtubeAccounts={youtubeAccounts} tiktokAccounts={tiktokAccounts}></StartPostJobModal>}
+             {showCommentJobModal && <StartCommentJobModal closeModal={handleCloseCommentModal} twitterAccounts={twitterAccounts} redditAccounts={redditAccounts} youtubeAccounts={youtubeAccounts} tiktokAccounts={tiktokAccounts}/>}
+             {showDMJobModal && <StartDMJobModal closeModal={handleCloseDMModal} twitterAccounts={twitterAccounts} redditAccounts={redditAccounts} youtubeAccounts={youtubeAccounts} tiktokAccounts={tiktokAccounts}/>}
              {showLoginPromptModal && <LoginPromptModal closeModal={handleCloseLoginPromptModal}></LoginPromptModal>}
         </div>
     );

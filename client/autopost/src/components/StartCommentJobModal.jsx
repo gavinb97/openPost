@@ -6,7 +6,7 @@ import { getSFWSubreddits } from '../service/redditService';
 import { useAuth } from '../service/authContext';
 
 
-const StartCommentJobModal = ({ closeModal }) => {
+const StartCommentJobModal = ({ closeModal, twitterAccounts, redditAccounts, youtubeAccounts, tiktokAccounts }) => {
     const { user } = useAuth();
 
     const [selectedWebsite, setSelectedWebsite] = useState('twitter'); 

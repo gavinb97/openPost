@@ -7,7 +7,7 @@ import { useAuth } from '../service/authContext';
 
 const daysOfWeek = ['S', 'M', 'T', 'W', 'Th', 'F', 'Sa'];
 
-const StartPostJobModal = ({ closeModal, selectedImages }) => {
+const StartPostJobModal = ({ closeModal, selectedImages, twitterAccounts, redditAccounts, youtubeAccounts, tiktokAccounts }) => {
     const { user } = useAuth();
 
     const [selectedWebsite, setSelectedWebsite] = useState('twitter'); // State for selected website

@@ -6,7 +6,7 @@ import SetScheduleModal from '../components/SetScheduleModal';
 import { useAuth } from '../service/authContext';
 import './../App.css';
 
-const UploadedMediaContainerSmall = ({mediaFiles, setMediaFiles, imagesLoaded}) => {
+const UploadedMediaContainerSmall = ({mediaFiles, setMediaFiles, imagesLoaded, twitterAccounts, redditAccounts, youtubeAccounts, tiktokAccounts}) => {
     const { user } = useAuth();
 
     const navigate = useNavigate();
@@ -126,7 +126,7 @@ const UploadedMediaContainerSmall = ({mediaFiles, setMediaFiles, imagesLoaded}) 
             <div>
                 {/* Pass selected image names to SetScheduleModal */}
                 {showModal && <UpdateImageDataModal imageData={imageMetadata} closeModal={closeModal} updatePhotoMetadata={updatePhotoMetadata} user={user} />}
-                {showScheduleModal && <SetScheduleModal closeModal={closeModal} selectedImages={selectedImageNames}></SetScheduleModal>} 
+                {showScheduleModal && <SetScheduleModal closeModal={closeModal} selectedImages={selectedImageNames} twitterAccounts={twitterAccounts} redditAccounts={redditAccounts} youtubeAccounts={youtubeAccounts} tiktokAccounts={tiktokAccounts}></SetScheduleModal>} 
             </div>
         </div>
     );

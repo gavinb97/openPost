@@ -5,7 +5,7 @@ import { createScheduledJob, validateAndFormatScheduleData } from '../service/jo
 import { useAuth } from '../service/authContext';
 
 
-const StartDMJobModal = ({ closeModal }) => {
+const StartDMJobModal = ({ closeModal, twitterAccounts, redditAccounts, youtubeAccounts, tiktokAccounts }) => {
     const { user } = useAuth();
 
     const [selectedWebsite, setSelectedWebsite] = useState('twitter'); 
