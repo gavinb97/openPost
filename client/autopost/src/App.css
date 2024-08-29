@@ -1419,3 +1419,36 @@
 .accountbox:hover {
   background-color: #00aff0;
 }
+
+.password-validations p {
+  margin: 0;
+  padding: 5px 0;
+  font-size: 14px;
+}
+
+.password-validations .valid {
+  color: green;
+}
+
+.password-validations .invalid {
+  color: red;
+}
+
+.username-validations p {
+  margin: 0;
+  padding: 5px 0;
+  font-size: 14px;
+}
+
+.username-validations .valid {
+  color: green;
+}
+
+.username-validations .invalid {
+  color: red;
+}
+
+.registerbutton button:disabled {
+  background-color: grey;
+  cursor: not-allowed;
+}
