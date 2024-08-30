@@ -46,7 +46,7 @@ const SetScheduleModal = ({ closeModal, selectedImages, twitterAccounts, redditA
           }));
 
           setSubredditList(subredditObjects);
-          setSelectedSubreddits(subredditObjects);
+          // setSelectedSubreddits(subredditObjects);
         } catch (error) {
           console.error('Error fetching subreddits:', error);
         }
@@ -64,17 +64,17 @@ const SetScheduleModal = ({ closeModal, selectedImages, twitterAccounts, redditA
 
   const toggleDropdown = () => setIsOpen(!isOpen);
 
-  useEffect(() => {
-    setSelectedSubreddits(subredditList);
-  }, [subredditList]);
+  // useEffect(() => {
+  //   setSelectedSubreddits(subredditList);
+  // }, [subredditList]);
 
   const handleCheckboxChange = (event) => {
     const { value } = event.target;
     const subreddit = subredditList.find((sub) => sub.id === value);
-
+  
     setSelectedSubreddits((prev) => {
       const exists = prev.some((sub) => sub.id === value);
-
+  
       if (exists) {
         return prev.filter((sub) => sub.id !== value);
       } else {
