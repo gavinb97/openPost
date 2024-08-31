@@ -64,10 +64,6 @@ const SetScheduleModal = ({ closeModal, selectedImages, twitterAccounts, redditA
 
   const toggleDropdown = () => setIsOpen(!isOpen);
 
-  // useEffect(() => {
-  //   setSelectedSubreddits(subredditList);
-  // }, [subredditList]);
-
   const handleCheckboxChange = (event) => {
     const { value } = event.target;
     const subreddit = subredditList.find((sub) => sub.id === value);
