@@ -1468,3 +1468,18 @@
   background-color: grey;
   cursor: not-allowed;
 }
+
+.payment-page-container {
+  display: flex;
+  justify-content: center; 
+  align-items: center;   
+  height: 100vh;         
+}
+
+.payment-box {
+  display: flex;
+  justify-content: center; 
+  align-items: center;   
+  width: 100%;            
+  height: 100%;           
+}

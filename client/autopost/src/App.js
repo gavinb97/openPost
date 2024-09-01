@@ -15,6 +15,7 @@ import { AuthProvider } from './service/authContext';
 import PrivacyToS from './screens/PrivacyToS'
 import ContactSupport from './screens/ContactSupport';
 import MissionStatement from './screens/MissionStatement';
+import Payment from './screens/Payment';
 
 function App() {
   const router = createBrowserRouter([
@@ -65,6 +66,10 @@ function App() {
     {
       path: '/missionstatement',
       element: <MissionStatement />
+    },
+    {
+      path: '/pro',
+      element: <Payment />
     }
   ]);
 
