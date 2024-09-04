@@ -38,5 +38,19 @@ export const getUserCreds = async (username) => {
   }
 }
 
+export const fetchUserEmail = async (username) => {
+  const endpoint = 'http://localhost:3455/getemail'; 
+
+  try {
+   
+    const response = await axios.post(endpoint, { username: username });
+ 
+    return response.data.email;
+  } catch (error) {
+    console.error('Failed to fetch email', error);
+    throw error;
+  }
+}
+
 
 

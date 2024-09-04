@@ -9,6 +9,8 @@ const { updateYouTubeTokens } = require('./socialAuthData');
 const jwt = require('jsonwebtoken');
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 const {google} = require('googleapis');
+const { fulfillCheckout } = require('./authService')
+
 
 const {
     generateTwitterAuthUrl,
@@ -35,7 +37,7 @@ const {
 } = require('./youtubeService');
 
 const { getTikTokLoginUrl, getAccessTokenAndOpenId, revokeAccess } = require('./tiktokService');
-const { getUserByUsername, registerUser, authenticateUser, authenticateToken, getUserCreds } = require('./authService');
+const { getUserByUsername, registerUser, authenticateUser, authenticateToken, getUserCreds, fetchUserEmail } = require('./authService');
 
 router.use(cookieParser());
 router.use(cors());
@@ -271,6 +273,27 @@ router.post('/getsfwsubreddits', async (req, res) => {
     } catch (error) {
         console.log(error);
         res.status(401).json({ message: 'Invalid credentials' });
+    }
+});
+
+router.post('/getemail', async (req, res) => {
+    const { username } = req.body;
+
+    // Validate that the username is provided in the request body
+    if (!username) {
+        return res.status(400).json({ message: 'Username is required.' });
+    }
+
+    try {
+        // Call the fetchUserEmail function from the service layer
+        const email = await fetchUserEmail(username);
+
+        // If an email is found, return it in the response
+        res.status(200).json({ email });
+    } catch (error) {
+        // Log the error and return a 404 status if the email is not found or any error occurs
+        console.log(error);
+        res.status(404).json({ message: 'Email not found for the given username.' });
     }
 });
 

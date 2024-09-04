@@ -1,16 +1,17 @@
 const express = require('express');
 const app = express();
-const bodyParser = require('body-parser');
 const cors = require('cors');
 
-
+const stripeRoute = require('./socialauthentication/stripeRoute')
 const openPostMediaApi = require('./openPostMediaApi');
 const jobsApi = require('./../openPost/jobs/jobsApi');
 const socialAuthApi = require('./socialauthentication/socialAuthApi')
 
-app.use(bodyParser.json())
+
+
 app.use(cors())
 
+app.use(stripeRoute)
 app.use(openPostMediaApi);
 app.use(jobsApi);
 app.use(socialAuthApi)

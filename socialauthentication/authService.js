@@ -1,9 +1,11 @@
+require("dotenv").config();
 const fs = require('fs')
 const path = require('path');
 const jwt = require('jsonwebtoken');
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key'; 
 const { findUserCredentials } = require('../utils')
-const { registerUserDB, authenticateUserDB, getCredsByUser } = require('./socialAuthData')
+const { registerUserDB, authenticateUserDB, getCredsByUser, getUserEmailByUsername, updateProStatus, deactivateProStatus } = require('./socialAuthData')
+const stripe = require('stripe')(process.env.STRIPE_KEY);
 
 const getUserByUsername = async (filename, username) => {
     try {
@@ -17,6 +19,24 @@ const getUserByUsername = async (filename, username) => {
         return userObject;
     } catch (error) {
         console.error('Error reading file or parsing JSON:', error);
+        throw error;
+    }
+};
+
+const fetchUserEmail = async (username) => {
+    try {
+        // Call the getUserEmailByUsername function and await the result
+        const email = await getUserEmailByUsername(username);
+
+        // If an email was found, return it
+        if (email) {
+            console.log(`Email for user ${username}: ${email}`);
+            return email;
+        } else {
+            throw new Error(`No email found for username: ${username}`);
+        }
+    } catch (error) {
+        console.error('Error fetching user email:', error.message);
         throw error;
     }
 };
@@ -105,10 +125,55 @@ const getUserCreds = async (username) => {
     return userCreds
 }
 
+const fulfillCheckout = async (sessionId) => {
+    console.log(sessionId)
+    console.log('in fulfil checkout')
+    console.log(process.env.STRIPE_KEY)
+ 
+    console.log('Fulfilling Checkout Session ' + sessionId);
+  
+    // TODO: Make this function safe to run multiple times,
+    // even concurrently, with the same session ID
+  
+    // TODO: Make sure fulfillment hasn't already been
+    // peformed for this Checkout Session
+  
+    // Retrieve the Checkout Session from the API with line_items expanded
+    const checkoutSession = await stripe.checkout.sessions.retrieve(sessionId, {
+      expand: ['line_items'],
+    });
+
+  
+    // Check the Checkout Session's payment_status property
+    // to determine if fulfillment should be peformed
+    if (checkoutSession.payment_status !== 'unpaid') {
+      // TODO: Perform fulfillment of the line items
+        console.log(checkoutSession)
+      // TODO: Record/save fulfillment status for this
+      // Checkout Session
+        console.log('updating pro status...')
+        console.log(checkoutSession.customer_email)
+        await updateProStatus(checkoutSession.customer_email)
+    }
+}
+
+const cancelMembership = async (sessionId) => {
+    const session = await stripe.subscriptions.retrieve(sessionId, {
+        expand: ['customer'],
+      });
+      
+      const email = session.customer.email;
+      console.log('Subscription schedule aborted for email:', email);
+      await deactivateProStatus(email)
+}
+
 module.exports = {
     getUserByUsername,
     registerUser,
     authenticateUser,
     authenticateToken,
-    getUserCreds
+    getUserCreds,
+    fulfillCheckout,
+    fetchUserEmail,
+    cancelMembership
 }

@@ -27,8 +27,8 @@ const registerUserDB = async (user) => {
 
             // Insert the new user into the users table
             const insertQuery = `
-                INSERT INTO users (username, email, password)
-                VALUES ($1, $2, $3)
+                INSERT INTO users (username, email, password, pro)
+                VALUES ($1, $2, $3, false)
                 RETURNING userid;
             `;
             const result = await client.query(insertQuery, [username, email, hashedPassword]);
@@ -793,9 +793,124 @@ const getUserNames = async () => {
     }
 };
 
+const getUserEmailByUsername = async (username) => {
+    if (!username) {
+        throw new Error('Username must not be empty or null.');
+    }
+
+    try {
+        // Connect to the pool
+        const client = await pool.connect();
+
+        try {
+            // Query to get the email for the given username
+            const emailQuery = 'SELECT email FROM users WHERE username = $1';
+            const res = await client.query(emailQuery, [username]);
+
+            if (res.rows.length === 0) {
+                throw new Error('User not found.');
+            }
+
+            // Return the email
+            const email = res.rows[0].email;
+            console.log(`Email for user ${username}: ${email}`);
+            return email;
+
+        } finally {
+            // Release the client back to the pool
+            client.release();
+        }
+    } catch (error) {
+        throw new Error(`Failed to retrieve email: ${error.message}`);
+    }
+};
+
+const updateProStatus = async (email) => {
+    // Check for empty or null username
+    if (!email) {
+        throw new Error('Username must not be empty or null.');
+    }
+
+    try {
+        // Connect to the pool
+        const client = await pool.connect();
+
+        try {
+            // Check if the username exists
+            const userCheckQuery = 'SELECT * FROM users WHERE email = $1';
+            const res = await client.query(userCheckQuery, [email]);
+
+            if (res.rows.length === 0) {
+                throw new Error('Username does not exist.');
+            }
+
+            // Update the pro status to true for the given username
+            const updateQuery = `
+                UPDATE users
+                SET pro = true
+                WHERE email = $1
+                RETURNING userid, username, pro;
+            `;
+            const result = await client.query(updateQuery, [email]);
+
+            console.log('Pro status updated successfully:', result.rows[0]);
+
+            // Return the updated user details
+            return result.rows[0];
+        } finally {
+            // Release the client back to the pool
+            client.release();
+        }
+    } catch (error) {
+        throw new Error(`Failed to update pro status: ${error.message}`);
+    }
+};
+
+const deactivateProStatus = async (email) => {
+    // Check for empty or null email
+    if (!email) {
+        throw new Error('Email must not be empty or null.');
+    }
+
+    try {
+        // Connect to the pool
+        const client = await pool.connect();
+
+        try {
+            // Check if the user exists
+            const userCheckQuery = 'SELECT * FROM users WHERE email = $1';
+            const res = await client.query(userCheckQuery, [email]);
+
+            if (res.rows.length === 0) {
+                throw new Error('User does not exist.');
+            }
+
+            // Update the pro status to false for the given email
+            const updateQuery = `
+                UPDATE users
+                SET pro = false
+                WHERE email = $1
+                RETURNING userid, username, pro;
+            `;
+            const result = await client.query(updateQuery, [email]);
+
+            console.log('Pro status deactivated successfully:', result.rows[0]);
+
+            // Return the updated user details
+            return result.rows[0];
+        } finally {
+            // Release the client back to the pool
+            client.release();
+        }
+    } catch (error) {
+        throw new Error(`Failed to deactivate pro status: ${error.message}`);
+    }
+};
+
 
 module.exports = { 
     registerUserDB, authenticateUserDB, getCredsByUser, updateTwitterCodeVerifier,
     updateTwitterTokens, revokeTwitterTokens, getTwitterCodeVerifierByUsername, updateRedditTokens, revokeRedditTokens,
-    updateTikTokTokens, revokeTikTokTokens, updateYouTubeTokens, revokeYouTubeTokens, getUserNames, getCredsByUsernameAndHandle
+    updateTikTokTokens, revokeTikTokTokens, updateYouTubeTokens, revokeYouTubeTokens, getUserNames, getCredsByUsernameAndHandle,
+    getUserEmailByUsername, updateProStatus, deactivateProStatus
 }
