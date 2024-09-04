@@ -825,7 +825,7 @@ const getUserEmailByUsername = async (username) => {
     }
 };
 
-const updateProStatus = async (email) => {
+const updateProStatus = async (email, customerId) => {
     // Check for empty or null username
     if (!email) {
         throw new Error('Username must not be empty or null.');
@@ -847,11 +847,11 @@ const updateProStatus = async (email) => {
             // Update the pro status to true for the given username
             const updateQuery = `
                 UPDATE users
-                SET pro = true
+                SET pro = true, stripe_customer_id = $2
                 WHERE email = $1
                 RETURNING userid, username, pro;
             `;
-            const result = await client.query(updateQuery, [email]);
+            const result = await client.query(updateQuery, [email, customerId]);
 
             console.log('Pro status updated successfully:', result.rows[0]);
 

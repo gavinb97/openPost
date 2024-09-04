@@ -152,8 +152,10 @@ const fulfillCheckout = async (sessionId) => {
       // TODO: Record/save fulfillment status for this
       // Checkout Session
         console.log('updating pro status...')
+        const customerId = checkoutSession.customer
+
         console.log(checkoutSession.customer_email)
-        await updateProStatus(checkoutSession.customer_email)
+        await updateProStatus(checkoutSession.customer_email, customerId)
     }
 }
 
@@ -163,7 +165,12 @@ const cancelMembership = async (sessionId) => {
       });
       
       const email = session.customer.email;
+      const customerId = session.customer.id
       console.log('Subscription schedule aborted for email:', email);
+    //   console.log(session)
+      const customer = await stripe.customers.retrieve(customerId);
+      console.log(customer)
+      console.log('customer ^^')
       await deactivateProStatus(email)
 }
 
