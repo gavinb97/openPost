@@ -64,5 +64,20 @@ export const fetchUserEmail = async (username) => {
   }
 }
 
+export const getBillingPortal = async (customerId) => {
+  const endpoint = 'http://localhost:3455/billing_session_url'; 
+
+  try {
+   
+    const response = await axios.post(endpoint, { customerId: customerId });
+ 
+    return response.data;
+  } catch (error) {
+    console.error('Failed to fetch email', error);
+    throw error;
+  }
+  
+}
+
 
 

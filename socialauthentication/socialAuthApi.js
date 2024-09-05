@@ -317,4 +317,25 @@ router.post('/getemail', async (req, res) => {
     }
 });
 
+router.post("/billing_session_url", async (req, res) => {
+    const stripe = require('stripe')(process.env.STRIPE_KEY);
+
+    const customerId = req.body.customerId
+    try {
+        const session = await stripe.billingPortal.sessions.create({
+          customer: customerId,
+          return_url: 'http://localhost:3000/pro',
+        });
+        if (session) {
+          res.status(200).json({
+            status: 200,
+            message: 'stripe billing portal session created successfully.',
+            data: session,
+          });
+        }
+      } catch (error) {
+        console.log(error)
+      }
+  });
+
 module.exports = router;

@@ -1500,3 +1500,19 @@
     color: #0091ea;
   }
 }
+
+.youHavePremium {
+  text-align: center;
+
+  button {
+    padding: 1rem;
+    background-color: #0091ea;
+    border-radius: 1rem;
+    border: 0;
+    color: white;
+  }
+
+  button:hover {
+    background-color: #00aff0;
+  }
+}

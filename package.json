@@ -8,7 +8,7 @@
     "startVideo": "node videoPostGenerator.js",
     "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "lint:fix": "eslint . --fix",
+    "lint:fix": "eslint . --ext .js,.jsx,.css --fix",
     "refreshCreds": "node socialauthentication/authData/refreshCreds.js",
     "client": "npm start --prefix client/autopost"
   },
