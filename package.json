@@ -8,7 +8,7 @@
     "startVideo": "node videoPostGenerator.js",
     "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "lint:fix": "eslint . --ext .js,.jsx,.css --fix",
+    "lint:fix": "eslint . --fix",
     "refreshCreds": "node socialauthentication/authData/refreshCreds.js",
     "client": "npm start --prefix client/autopost"
   },
@@ -57,9 +57,13 @@
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
+    "@babel/core": "^7.25.2",
+    "@babel/eslint-parser": "^7.25.1",
+    "@babel/preset-env": "^7.25.4",
+    "@babel/preset-react": "^7.24.7",
     "@eslint/js": "^9.0.0",
     "eslint": "^8.57.0",
-    "eslint-plugin-react": "^7.34.1",
+    "eslint-plugin-react": "^7.35.2",
     "globals": "^15.0.0"
   }
 }
