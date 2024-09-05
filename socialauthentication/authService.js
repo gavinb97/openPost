@@ -4,7 +4,7 @@ const path = require('path');
 const jwt = require('jsonwebtoken');
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key'; 
 const { findUserCredentials } = require('../utils')
-const { registerUserDB, authenticateUserDB, getCredsByUser, getUserEmailByUsername, updateProStatus, deactivateProStatus } = require('./socialAuthData')
+const { getUpdatedDetails, registerUserDB, authenticateUserDB, getCredsByUser, getUserEmailByUsername, updateProStatus, deactivateProStatus } = require('./socialAuthData')
 const stripe = require('stripe')(process.env.STRIPE_KEY);
 
 const getUserByUsername = async (filename, username) => {
@@ -98,9 +98,7 @@ const authenticateUser = async (username, password) => {
     
     try {
        const user = await authenticateUserDB(username, password)
-       console.log(user.username)
-       console.log('username above')
-       return { username: user.username };  // return an object containing the username
+       return { username: user.username, pro: user.pro, customerId: user.stripe_customer_id || null }; 
     } catch (error) {
         throw new Error(`Authentication failed: ${error.message}`);
     }
@@ -123,6 +121,11 @@ const authenticateToken = (req, res, next) => {
 const getUserCreds = async (username) => {
     const userCreds = await getCredsByUser(username)
     return userCreds
+}
+
+const getUpdatedUserDetails = async (username) => {
+    const details = await getUpdatedDetails(username)
+    return details
 }
 
 const fulfillCheckout = async (sessionId) => {
@@ -182,5 +185,6 @@ module.exports = {
     getUserCreds,
     fulfillCheckout,
     fetchUserEmail,
-    cancelMembership
+    cancelMembership,
+    getUpdatedUserDetails
 }

@@ -34,7 +34,8 @@ function UserLandingScreen() {
     const [tiktokAccounts, setTiktokAccounts] = useState([]) 
 
     const { user  } = useAuth()
-
+    console.log(user)
+    console.log('user ^^')
     useEffect(() => {
         getUserCreds(user.username)
             .then((creds) => {

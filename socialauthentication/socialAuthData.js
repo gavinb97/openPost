@@ -96,34 +96,33 @@ const authenticateUserDB = async (username, password) => {
     }
 };
 
-// const getUserCreds = async (username, userid) => {
-//     // Check for empty or null values
-//     if (!username || !userid) {
-//         throw new Error('Both username and userid are required.');
-//     }
+const getUpdatedDetails = async (username) => {
+    if (!username) {
+        throw new Error('Both username and password are required.');
+    }
+    console.log('innit');
+    try {
+        // Connect to the pool
+        const client = await pool.connect();
 
-//     try {
-//         // Connect to the pool
-//         const client = await pool.connect();
+        // Query the user by username
+        const query = 'SELECT * FROM users WHERE username = $1';
+        const res = await client.query(query, [username]);
 
-//         // Query the user credentials by username and userid
-//         const query = 'SELECT * FROM user_creds WHERE username = $1 AND userid = $2';
-//         const res = await client.query(query, [username, userid]);
+        // Release the client back to the pool
+        client.release();
+        
+        if (res.rows.length === 0) {
+            throw new Error('Username not found.');
+        }
 
-//         // Release the client back to the pool
-//         client.release();
+        const user = res.rows[0];
 
-//         // Check if the user credentials exist
-//         if (res.rows.length === 0) {
-//             throw new Error('User credentials not found.');
-//         }
-
-//         // Return the user credentials
-//         return res.rows[0];
-//     } catch (error) {
-//         throw new Error(`Failed to retrieve user credentials: ${error.message}`);
-//     }
-// };
+        return user; 
+    } catch (error) {
+        throw new Error(`Authentication failed: ${error.message}`);
+    }
+};
 
 const getTwitterCodeVerifierByUsername = async (username) => {
     if (!username) {
@@ -912,5 +911,5 @@ module.exports = {
     registerUserDB, authenticateUserDB, getCredsByUser, updateTwitterCodeVerifier,
     updateTwitterTokens, revokeTwitterTokens, getTwitterCodeVerifierByUsername, updateRedditTokens, revokeRedditTokens,
     updateTikTokTokens, revokeTikTokTokens, updateYouTubeTokens, revokeYouTubeTokens, getUserNames, getCredsByUsernameAndHandle,
-    getUserEmailByUsername, updateProStatus, deactivateProStatus
+    getUserEmailByUsername, updateProStatus, deactivateProStatus, getUpdatedDetails
 }

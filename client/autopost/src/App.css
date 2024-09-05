@@ -1483,3 +1483,20 @@
   width: 100%;            
   height: 100%;           
 }
+
+.proSuccessContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  text-align: center;
+}
+
+.proSuccessScreen {
+  padding: 2rem;
+  color: #00aff0;
+  
+  a {
+    color: #0091ea;
+  }
+}

@@ -16,6 +16,7 @@ import PrivacyToS from './screens/PrivacyToS'
 import ContactSupport from './screens/ContactSupport';
 import MissionStatement from './screens/MissionStatement';
 import Payment from './screens/Payment';
+import ProSuccessScreen from './screens/ProSuccessScreen'
 
 function App() {
   const router = createBrowserRouter([
@@ -70,6 +71,10 @@ function App() {
     {
       path: '/pro',
       element: <Payment />
+    },
+    {
+      path: '/prosuccess',
+      element: <ProSuccessScreen />
     }
   ]);
 

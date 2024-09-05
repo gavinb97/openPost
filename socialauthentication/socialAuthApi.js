@@ -37,7 +37,7 @@ const {
 } = require('./youtubeService');
 
 const { getTikTokLoginUrl, getAccessTokenAndOpenId, revokeAccess } = require('./tiktokService');
-const { getUserByUsername, registerUser, authenticateUser, authenticateToken, getUserCreds, fetchUserEmail } = require('./authService');
+const { getUserByUsername, registerUser, authenticateUser, authenticateToken, getUserCreds, fetchUserEmail, getUpdatedUserDetails } = require('./authService');
 
 router.use(cookieParser());
 router.use(cors());
@@ -222,7 +222,7 @@ router.post('/register', async (req, res) => {
     try {
         await registerUser(newUser);
         const token = jwt.sign({ username: newUser.username }, JWT_SECRET, { expiresIn: '168h' });
-        const returnUserObj = { username, jwt: token };
+        const returnUserObj = { username, jwt: token, pro: false, customerId: null };
         console.log(`${username} registered successfully`);
         res.status(201).json(returnUserObj);
     } catch (error) {
@@ -239,7 +239,8 @@ router.post('/login', async (req, res) => {
     try {
         const user = await authenticateUser(username, password);
         const token = jwt.sign({ username: user.username }, JWT_SECRET, { expiresIn: '168h' });
-        const returnUserObj = { username, jwt: token };
+        
+        const returnUserObj = { username, jwt: token, pro: user.pro, customerId: user.customerId};
         console.log(`User ${username} logged in successfully.`);
         res.status(200).json(returnUserObj);
     } catch (error) {
@@ -247,6 +248,25 @@ router.post('/login', async (req, res) => {
         res.status(401).json({ message: 'Invalid credentials' });
     }
 });
+
+router.post('/updateddetails', async (req, res) => {
+    const { username } = req.body;
+    if (!username) {
+        return res.status(400).json({ message: 'Username and password are required.' });
+    }
+    try {
+        const user = await getUpdatedUserDetails(username)
+        const token = jwt.sign({ username: user.username }, JWT_SECRET, { expiresIn: '168h' });
+        
+        const returnUserObj = { username, jwt: token, pro: user.pro, customerId: user.customerId};
+        console.log(`sending updated user data`);
+        res.status(200).json(returnUserObj);
+    } catch (error) {
+        console.log(error);
+        res.status(401).json({ message: 'Invalid credentials' });
+    }
+});
+
 
 router.post('/getUserCreds', async (req, res) => {
     const { username } = req.body;

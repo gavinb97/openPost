@@ -26,6 +26,18 @@ export const register = async (userName, userPassword, userEmail) => {
     }
   };
 
+  export const getUpdatedDetails = async (userName) => {
+    const endpoint = 'http://localhost:3455/updateddetails';
+    try {
+      const response = await axios.post(endpoint, {username: userName });
+      return response.data;
+    } catch (error) {
+      console.error('Failed to Login', error);
+      
+      throw error; // Re-throw the error to propagate it further if needed
+    }
+  }
+
 export const getUserCreds = async (username) => {
   const endpoint = 'http://localhost:3455/getUserCreds'
 
