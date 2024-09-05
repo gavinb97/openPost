@@ -1,6 +1,6 @@
 import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { fetchAllFilesByUser, deleteByName, getPhotoMetadata } from '../service/userMediaService';
+import { fetchAllFilesByUser, deleteByName, getPhotoMetadata, updatePhotoMetadata } from '../service/userMediaService';
 import { useAuth } from '../service/authContext';
 import UpdateImageDataModal from './UpdateImageDataModal';
 import SetScheduleModal from '../components/SetScheduleModal';
