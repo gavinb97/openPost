@@ -9,16 +9,16 @@ const {authenticate} = require('@google-cloud/local-auth');
 
 
 const uploadToYoutube = async (oauthClient, fileName)  => {
-    const youtube = oauthClient.youtube('v3');
+  const youtube = oauthClient.youtube('v3');
   // Obtain user credentials to use for the request
-//   const auth = await authenticate({
-//     // need to put oauth stuff here
-//     scopes: [
-//       'https://www.googleapis.com/auth/youtube.upload',
-//       'https://www.googleapis.com/auth/youtube',
-//     ],
-//   });
-//   google.options({auth});
+  //   const auth = await authenticate({
+  //     // need to put oauth stuff here
+  //     scopes: [
+  //       'https://www.googleapis.com/auth/youtube.upload',
+  //       'https://www.googleapis.com/auth/youtube',
+  //     ],
+  //   });
+  //   google.options({auth});
 
   const fileSize = fs.statSync(fileName).size;
   const res = await youtube.videos.insert(
@@ -52,8 +52,8 @@ const uploadToYoutube = async (oauthClient, fileName)  => {
   console.log('\n\n');
   console.log(res.data);
   return res.data;
-}
+};
 
 // uploadToYoutube('someFile')
 
-module.exports = uploadToYoutube
+module.exports = uploadToYoutube;

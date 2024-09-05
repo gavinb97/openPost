@@ -1,7 +1,7 @@
 const amqp = require('amqplib');
-const {makePost, validateJob} = require('./jobQueueService')
+const {makePost, validateJob} = require('./jobQueueService');
 
-async function setupQueue() {
+async function setupQueue () {
   const connection = await amqp.connect('amqp://localhost');
   const channel = await connection.createChannel();
 
@@ -15,7 +15,7 @@ async function setupQueue() {
   return channel;
 }
 
-async function enqueuePostJob(channel, job) {
+async function enqueuePostJob (channel, job) {
   // Convert job to JSON and enqueue it
   const message = Buffer.from(JSON.stringify(job));
   const headers = { 'x-delay': job.scheduledTime - Date.now() };
@@ -32,19 +32,19 @@ const getExistingQueue = async () => {
   await channel.bindQueue('postJobs', 'delayed-exchange', '');
 
   return channel;
-}
+};
 
-async function startWorker(channel) {
+async function startWorker (channel) {
   // Consume post jobs from the queue
   await channel.consume('postJobs', async (message) => {
     const job = JSON.parse(message.content.toString());
     console.log(`Executing post job: ${job.message_id}`);
-    console.log(`${job.content}`)
-    console.log(`${job.website}`)
-    console.log(`${job.scheduledTime}`)
-    console.log(Date.now())
+    console.log(`${job.content}`);
+    console.log(`${job.website}`);
+    console.log(`${job.scheduledTime}`);
+    console.log(Date.now());
     if (job.content !== 'Bridge job to ensure continuity') {
-      await makePost(job)
+      await makePost(job);
     }
     
     // Acknowledge the message to remove it from the queue

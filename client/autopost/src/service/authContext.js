@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 
 const AuthContext = createContext(null);
 
-export function useAuth() {
+export function useAuth () {
   return useContext(AuthContext);
 }
 
@@ -21,7 +21,7 @@ export const AuthProvider = ({ children }) => {
   const logoutContext = () => {
     setUser(null);
     sessionStorage.removeItem('user');
-    console.log('Logged Out')
+    console.log('Logged Out');
   };
 
   // Ensure that the context provides not just the user but also the login and logout functions

@@ -7,8 +7,8 @@ import { getUserCreds } from '../service/userService';
 import Navbar from '../components/Navbar';
 import { useAuth } from '../service/authContext';
  
-function SocialsLogin({ userData }) {
-  const { user, credentials, isLoggedIn, setIsLoggedIn, isLoading } = userData
+function SocialsLogin ({ userData }) {
+  const { user, credentials, isLoggedIn, setIsLoggedIn, isLoading } = userData;
 
   const handleRevokeAccess = async (media) => {
     console.log('Revoke access clicked for:', media);

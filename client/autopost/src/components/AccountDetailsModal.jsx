@@ -11,10 +11,10 @@ const AccountDetailsModal = ({ closeModal, accountDetails, setAccountDetails}) =
  
 
   const revoke = (accountDetails) => {
-    if (accountDetails.twitterTokens.access_token !== null) revokeTwitterAccess(accountDetails.user, accountDetails.handle)
-    if (accountDetails.redditTokens.access_token !== null) revokeRedditAccess(accountDetails.user, accountDetails.redditTokens.access_token, accountDetails.handle)
-    if (accountDetails.youtubeTokens.access_token !== null) revokeGoogleAccess(accountDetails.user, accountDetails.youtubeTokens.access_token, accountDetails.handle)
-    if (accountDetails.tiktokTokens.access_token !== null) revokeTikTokAccess(accountDetails.user, accountDetails.tiktokTokens.access_token, accountDetails.handle)
+    if (accountDetails.twitterTokens.access_token !== null) revokeTwitterAccess(accountDetails.user, accountDetails.handle);
+    if (accountDetails.redditTokens.access_token !== null) revokeRedditAccess(accountDetails.user, accountDetails.redditTokens.access_token, accountDetails.handle);
+    if (accountDetails.youtubeTokens.access_token !== null) revokeGoogleAccess(accountDetails.user, accountDetails.youtubeTokens.access_token, accountDetails.handle);
+    if (accountDetails.tiktokTokens.access_token !== null) revokeTikTokAccess(accountDetails.user, accountDetails.tiktokTokens.access_token, accountDetails.handle);
     closeModal();
   };
 
@@ -27,7 +27,7 @@ const AccountDetailsModal = ({ closeModal, accountDetails, setAccountDetails}) =
           <h2>Account Details</h2>
          
           <div style={{borderBottom: '.25rem solid #00aff0'}}></div>
-            <p>Account: {accountDetails.handle}</p>
+          <p>Account: {accountDetails.handle}</p>
           
           <div className='updateImageModalButtons' >
             <button onClick={() => revoke(accountDetails)}>Revoke Access</button>

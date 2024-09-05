@@ -12,13 +12,13 @@ import Jobs from './screens/Jobs';
 import Profile from './screens/Profile';
 import Navbar from './components/Navbar';
 import { AuthProvider } from './service/authContext';
-import PrivacyToS from './screens/PrivacyToS'
+import PrivacyToS from './screens/PrivacyToS';
 import ContactSupport from './screens/ContactSupport';
 import MissionStatement from './screens/MissionStatement';
 import Payment from './screens/Payment';
-import ProSuccessScreen from './screens/ProSuccessScreen'
+import ProSuccessScreen from './screens/ProSuccessScreen';
 
-function App() {
+function App () {
   const router = createBrowserRouter([
     {
       path: '/',
@@ -79,7 +79,7 @@ function App() {
   ]);
 
   return (
-       <AuthProvider>
+    <AuthProvider>
       <RouterProvider router={router}>
 
       </RouterProvider>

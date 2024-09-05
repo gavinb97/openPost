@@ -11,7 +11,7 @@ const Navbar = () => {
         {user ? (
           // Links for logged-in users
           <>
-          <li><Link to="/uploadMedia">Media Manager</Link></li>
+            <li><Link to="/uploadMedia">Media Manager</Link></li>
             <li><Link to="/jobscheduler">Job Scheduler</Link></li>
             <li><Link to="/jobs">Jobs</Link></li>
             <li><Link to="/pro">Pro</Link></li>
@@ -29,8 +29,8 @@ const Navbar = () => {
       <ul className="right-section">
         {user ? (
           <>
-          <li><Link to="/profile">Profile</Link></li>
-          <li><Link to="/" onClick={logoutContext}>Logout</Link></li> 
+            <li><Link to="/profile">Profile</Link></li>
+            <li><Link to="/" onClick={logoutContext}>Logout</Link></li> 
           </>
         ) : (
           <>

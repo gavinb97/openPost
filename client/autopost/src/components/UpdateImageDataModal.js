@@ -156,7 +156,7 @@ const UpdateImageDataModal = ({ imageData, closeModal, updatePhotoMetadata, medi
                 />
                 <label>No</label>
               </div>
-            <div style={{borderBottom: '.25rem solid #00aff0'}}></div>
+              <div style={{borderBottom: '.25rem solid #00aff0'}}></div>
 
             </div>
           ))}

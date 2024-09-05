@@ -1,25 +1,25 @@
 import logo from './../logo.svg';
 
-import otherLogo from './../onlypostsNoBackground.png'
+import otherLogo from './../onlypostsNoBackground.png';
 import './../App.css';
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom'
-import UploadedMediaContainer from '../components/UploadedMediaContainer'
+import { useNavigate } from 'react-router-dom';
+import UploadedMediaContainer from '../components/UploadedMediaContainer';
 import UploadPictureBox from '../components/UploadPictureBox';
 import UploadedMediaContainerSmall from '../components/UploadedMediaContainerSmall';
 import SetScheduleModal from '../components/SetScheduleModal';
-import Navbar from '../components/Navbar'
+import Navbar from '../components/Navbar';
 import SocialsLogin from '../components/SocialsLogin';
 import { useAuth } from '../service/authContext';
 import { getUserCreds } from '../service/userService';
 import AuthorizeAccounts from '../components/AuthorizeAccounts';
 import AccountDetailsModal from '../components/AccountDetailsModal';
 
-function Profile() {
-    const navigate = useNavigate();
-    const [showAccountDetailsModal, setShowAccountDetailsModal] = useState(false);
-    const [accountDetails, setAccountDetails] = useState()
-    const { user, logoutContext, loginContext  } = useAuth()
+function Profile () {
+  const navigate = useNavigate();
+  const [showAccountDetailsModal, setShowAccountDetailsModal] = useState(false);
+  const [accountDetails, setAccountDetails] = useState();
+  const { user, logoutContext, loginContext  } = useAuth();
 
   const [credentials, setCredentials] = useState({});
   const [isLoggedIn, setIsLoggedIn] = useState({
@@ -30,7 +30,7 @@ function Profile() {
   });
   const [isLoading, setIsLoading] = useState(true); // Added loading state
 
-  const userData = {credentials, isLoggedIn, setIsLoggedIn, user, isLoading}
+  const userData = {credentials, isLoggedIn, setIsLoggedIn, user, isLoading};
 
  
 
@@ -86,7 +86,7 @@ function Profile() {
           setIsLoading(false); // End loading
         })
         .catch((error) => {
-          console.error("Failed to fetch credentials:", error);
+          console.error('Failed to fetch credentials:', error);
           setIsLoggedIn({
             twitter: false,
             reddit: false,
@@ -102,32 +102,32 @@ function Profile() {
   }, []);
   
 
-    const handleOpenAccountDetails = () => {
-      setShowAccountDetailsModal(true);
-    };
+  const handleOpenAccountDetails = () => {
+    setShowAccountDetailsModal(true);
+  };
 
-    const handleCloseAccountDetails = () => {
-      setShowAccountDetailsModal(false);
-    };
+  const handleCloseAccountDetails = () => {
+    setShowAccountDetailsModal(false);
+  };
     
-    if (user === null) return null
+  if (user === null) return null;
     
-    return (
-        <div className="App" style={{ marginTop: '10vh', marginBottom: '2%', textAlign: 'center' }}>
-            <Navbar></Navbar>
+  return (
+    <div className="App" style={{ marginTop: '10vh', marginBottom: '2%', textAlign: 'center' }}>
+      <Navbar></Navbar>
 
-            <div>
-                <h1>Profile</h1>
-            </div>
-            <div style={{ marginLeft: '1rem', marginRight: '1rem'}}>
-                <p>{`Username: ${user.username}`} </p>
-                <p>Login with Twitter, Reddit, Youtube or TikTok to get started</p>
-            </div>
-            {/* <SocialsLogin userData={userData}></SocialsLogin> */}
-            <AuthorizeAccounts userData={userData} handleOpenAccountDetails={handleOpenAccountDetails} setAccountDetails={setAccountDetails}></AuthorizeAccounts>
-            {showAccountDetailsModal && <AccountDetailsModal closeModal={handleCloseAccountDetails} accountDetails={accountDetails}/>}
-        </div>
-    );
+      <div>
+        <h1>Profile</h1>
+      </div>
+      <div style={{ marginLeft: '1rem', marginRight: '1rem'}}>
+        <p>{`Username: ${user.username}`} </p>
+        <p>Login with Twitter, Reddit, Youtube or TikTok to get started</p>
+      </div>
+      {/* <SocialsLogin userData={userData}></SocialsLogin> */}
+      <AuthorizeAccounts userData={userData} handleOpenAccountDetails={handleOpenAccountDetails} setAccountDetails={setAccountDetails}></AuthorizeAccounts>
+      {showAccountDetailsModal && <AccountDetailsModal closeModal={handleCloseAccountDetails} accountDetails={accountDetails}/>}
+    </div>
+  );
 }
 
 export default Profile;

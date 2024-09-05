@@ -1,32 +1,32 @@
-require("dotenv").config();
-const createGPTClient = require('./gptClient')
+require('dotenv').config();
+const createGPTClient = require('./gptClient');
 
-const OpenAI = require("openai");
+const OpenAI = require('openai');
 
 
 const openai = new OpenAI({
-	apiKey: process.env.GPT_KEY,
+  apiKey: process.env.GPT_KEY,
 });
 
 
 const generateImage = async (textPrompt) => {
-    try {
-        const response = await openai.images.generate({
-            model: "dall-e-3",
-            prompt: textPrompt,
-            n: 1,
-            size: "1024x1024"
-        })
+  try {
+    const response = await openai.images.generate({
+      model: 'dall-e-3',
+      prompt: textPrompt,
+      n: 1,
+      size: '1024x1024'
+    });
    
-        image_url = response.data[0].url
+    image_url = response.data[0].url;
         
-        return image_url
-    } catch (e) {
-        console.log(e)
-    }
-}
+    return image_url;
+  } catch (e) {
+    console.log(e);
+  }
+};
 
-module.exports = generateImage
+module.exports = generateImage;
 
 
 

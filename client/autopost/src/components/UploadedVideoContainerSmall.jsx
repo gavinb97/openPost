@@ -7,118 +7,118 @@ import { useAuth } from '../service/authContext';
 import './../App.css';
 
 const UploadedVideoContainerSmall = ({ videoFiles, setvideoFiles, imagesLoaded, twitterAccounts, redditAccounts, youtubeAccounts, tiktokAccounts }) => {
-    const { user } = useAuth();
-    const navigate = useNavigate();
+  const { user } = useAuth();
+  const navigate = useNavigate();
 
-    const [selectedVideos, setselectedVideos] = useState([]);
-    const [showModal, setShowModal] = useState(false);
-    const [showScheduleModal, setShowScheduleModal] = useState(false);
-    const [videoMetadata, setvideoMetadata] = useState([]);
+  const [selectedVideos, setselectedVideos] = useState([]);
+  const [showModal, setShowModal] = useState(false);
+  const [showScheduleModal, setShowScheduleModal] = useState(false);
+  const [videoMetadata, setvideoMetadata] = useState([]);
 
-    useEffect(() => {
-        if (selectedVideos.length > 0) {
-            fetchPhotoMetadata(selectedVideos);
-        } else {
-            setvideoMetadata([]);
-        }
-    }, [selectedVideos]);
-
-    const fetchPhotoMetadata = async (selectedImageIndexes) => {
-        try {
-            const selectedFileNames = selectedImageIndexes.map(index => videoFiles[index].fileName);
-            const metadata = await getPhotoMetadata(selectedFileNames, user.username);
-            setvideoMetadata(metadata);
-        } catch (error) {
-            console.error('Error fetching photo metadata:', error);
-        }
-    };
-
-    const handleDeleteClick = async () => {
-        try {
-            const selectedFileNames = selectedVideos.map(index => videoFiles[index].fileName);
-            console.log("Deleting files:", selectedFileNames);
-            await deleteByName(selectedFileNames, user.username);
-            const updatedFiles = videoFiles.filter((file, index) => !selectedVideos.includes(index));
-            setvideoFiles(updatedFiles);
-            setselectedVideos([]);
-            window.location.reload();
-        } catch (error) {
-            console.error("Error deleting files:", error);
-        }
-    };
-
-    const handleEditClick = () => {
-        setShowModal(true);
-    };
-
-    const closeModal = () => {
-        setShowModal(false);
-        setShowScheduleModal(false);
-    };
-
-    const handleScheduleClick = () => {
-        setShowScheduleModal(true);
-    };
-
-    const renderPhotoActionButtons = () => {
-        const handleSelectAll = () => {
-            if (selectedVideos.length === videoFiles.length) {
-                setselectedVideos([]);
-            } else {
-                setselectedVideos(videoFiles.map((_, index) => index));
-            }
-        };
-
-        return (
-            <div style={{ display: 'flex', justifyContent: 'center'}}>
-                <button style={{ backgroundColor: '#0091ea', color: 'white', marginTop: '.5rem', marginLeft: '1rem', borderRadius: '1rem', border: 0 }} onClick={handleScheduleClick}>
-                    Schedule
-                </button>
-                <button style={{ backgroundColor: '#0091ea', color: 'white', marginTop: '.5rem', marginLeft: '1rem', borderRadius: '1rem', border: 0 }} onClick={handleSelectAll}>
-                    {selectedVideos.length === videoFiles.length ? 'Unselect All' : 'Select All'}
-                </button>
-            </div>
-        );
-    };
-
-    const handleImageClick = (index) => {
-        if (selectedVideos.includes(index)) {
-            setselectedVideos(selectedVideos.filter(item => item !== index));
-        } else {
-            setselectedVideos([...selectedVideos, index]);
-        }
-    };
-
-    const selectedVideoNames = selectedVideos.map(index => videoFiles[index]?.fileName);
-
-    if (imagesLoaded) {
-        return (
-            <div>
-                <div className="image-container-outer" style={{ overflowX: 'scroll', height: 'auto', width: 'auto', display: 'flex', justifyContent: 'flex-start', border: '.25rem solid #00aff0', paddingBottom: '2rem', paddingTop: '.25rem', borderRadius: '1rem', margin: '1rem'}}>
-                    <div className="image-container" style={{ display: 'flex', flexWrap: 'nowrap'}}>
-                        {videoFiles && videoFiles.map((fileObject, index) => (
-                            <div key={index} className={`image-box ${selectedVideos.includes(index) ? 'selected' : ''}`} style={{ margin: '0 10px', textAlign: 'center', width: '200px' }} onClick={() => handleImageClick(index)}>
-                                <div className="image-wrapper">
-                                    <video width="100%" height="60%">
-                                        <source src={`data:video/mp4;base64,${fileObject.fileData}`} type="video/mp4" />
-                                        Your browser does not support the video tag.
-                                    </video>
-                                    <div className="image-number">{selectedVideos.indexOf(index) !== -1 ? selectedVideos.indexOf(index) + 1 : ''}</div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'center', marginTop: '1%', minHeight: '10vh', minWidth: 'auto' }}>
-                    {selectedVideos.length > 0 && renderPhotoActionButtons()}
-                </div>
-                <div>
-                    {showModal && <UpdateImageDataModal imageData={videoMetadata} closeModal={closeModal} updatePhotoMetadata={updatePhotoMetadata} user={user} />}
-                    {showScheduleModal && <SetScheduleModal closeModal={closeModal} selectedImages={selectedVideoNames} twitterAccounts={twitterAccounts} redditAccounts={redditAccounts} youtubeAccounts={youtubeAccounts} tiktokAccounts={tiktokAccounts}></SetScheduleModal>} 
-                </div>
-            </div>
-        );
+  useEffect(() => {
+    if (selectedVideos.length > 0) {
+      fetchPhotoMetadata(selectedVideos);
+    } else {
+      setvideoMetadata([]);
     }
+  }, [selectedVideos]);
+
+  const fetchPhotoMetadata = async (selectedImageIndexes) => {
+    try {
+      const selectedFileNames = selectedImageIndexes.map(index => videoFiles[index].fileName);
+      const metadata = await getPhotoMetadata(selectedFileNames, user.username);
+      setvideoMetadata(metadata);
+    } catch (error) {
+      console.error('Error fetching photo metadata:', error);
+    }
+  };
+
+  const handleDeleteClick = async () => {
+    try {
+      const selectedFileNames = selectedVideos.map(index => videoFiles[index].fileName);
+      console.log('Deleting files:', selectedFileNames);
+      await deleteByName(selectedFileNames, user.username);
+      const updatedFiles = videoFiles.filter((file, index) => !selectedVideos.includes(index));
+      setvideoFiles(updatedFiles);
+      setselectedVideos([]);
+      window.location.reload();
+    } catch (error) {
+      console.error('Error deleting files:', error);
+    }
+  };
+
+  const handleEditClick = () => {
+    setShowModal(true);
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
+    setShowScheduleModal(false);
+  };
+
+  const handleScheduleClick = () => {
+    setShowScheduleModal(true);
+  };
+
+  const renderPhotoActionButtons = () => {
+    const handleSelectAll = () => {
+      if (selectedVideos.length === videoFiles.length) {
+        setselectedVideos([]);
+      } else {
+        setselectedVideos(videoFiles.map((_, index) => index));
+      }
+    };
+
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center'}}>
+        <button style={{ backgroundColor: '#0091ea', color: 'white', marginTop: '.5rem', marginLeft: '1rem', borderRadius: '1rem', border: 0 }} onClick={handleScheduleClick}>
+                    Schedule
+        </button>
+        <button style={{ backgroundColor: '#0091ea', color: 'white', marginTop: '.5rem', marginLeft: '1rem', borderRadius: '1rem', border: 0 }} onClick={handleSelectAll}>
+          {selectedVideos.length === videoFiles.length ? 'Unselect All' : 'Select All'}
+        </button>
+      </div>
+    );
+  };
+
+  const handleImageClick = (index) => {
+    if (selectedVideos.includes(index)) {
+      setselectedVideos(selectedVideos.filter(item => item !== index));
+    } else {
+      setselectedVideos([...selectedVideos, index]);
+    }
+  };
+
+  const selectedVideoNames = selectedVideos.map(index => videoFiles[index]?.fileName);
+
+  if (imagesLoaded) {
+    return (
+      <div>
+        <div className="image-container-outer" style={{ overflowX: 'scroll', height: 'auto', width: 'auto', display: 'flex', justifyContent: 'flex-start', border: '.25rem solid #00aff0', paddingBottom: '2rem', paddingTop: '.25rem', borderRadius: '1rem', margin: '1rem'}}>
+          <div className="image-container" style={{ display: 'flex', flexWrap: 'nowrap'}}>
+            {videoFiles && videoFiles.map((fileObject, index) => (
+              <div key={index} className={`image-box ${selectedVideos.includes(index) ? 'selected' : ''}`} style={{ margin: '0 10px', textAlign: 'center', width: '200px' }} onClick={() => handleImageClick(index)}>
+                <div className="image-wrapper">
+                  <video width="100%" height="60%">
+                    <source src={`data:video/mp4;base64,${fileObject.fileData}`} type="video/mp4" />
+                                        Your browser does not support the video tag.
+                  </video>
+                  <div className="image-number">{selectedVideos.indexOf(index) !== -1 ? selectedVideos.indexOf(index) + 1 : ''}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '1%', minHeight: '10vh', minWidth: 'auto' }}>
+          {selectedVideos.length > 0 && renderPhotoActionButtons()}
+        </div>
+        <div>
+          {showModal && <UpdateImageDataModal imageData={videoMetadata} closeModal={closeModal} updatePhotoMetadata={updatePhotoMetadata} user={user} />}
+          {showScheduleModal && <SetScheduleModal closeModal={closeModal} selectedImages={selectedVideoNames} twitterAccounts={twitterAccounts} redditAccounts={redditAccounts} youtubeAccounts={youtubeAccounts} tiktokAccounts={tiktokAccounts}></SetScheduleModal>} 
+        </div>
+      </div>
+    );
+  }
 };
 
 export default UploadedVideoContainerSmall;

@@ -1,15 +1,15 @@
 require('dotenv').config({ path: '../.env' });
-const { Configuration, OpenAIApi, OpenAI } = require("openai");
+const { Configuration, OpenAIApi, OpenAI } = require('openai');
 
 
 
 // returns openAI client
 const createGPTClient = async () => {
-    const openai = new OpenAI({
-      apiKey: process.env.GPT_KEY,
-    })
-   return openai
-  }
+  const openai = new OpenAI({
+    apiKey: process.env.GPT_KEY,
+  });
+  return openai;
+};
 
 
-module.exports = createGPTClient
+module.exports = createGPTClient;

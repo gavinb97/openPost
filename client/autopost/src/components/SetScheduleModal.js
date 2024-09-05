@@ -28,14 +28,14 @@ const SetScheduleModal = ({ closeModal, selectedImages, twitterAccounts, redditA
   });
   const [selectedSubreddits, setSelectedSubreddits] = useState([]);
   const [subredditList, setSubredditList] = useState([]);
-  const [selectedAccount, setSelectedAccount] = useState()
+  const [selectedAccount, setSelectedAccount] = useState();
   const [warningMessage, setWarningMessage] = useState('');
 
   useEffect(() => {
     if (selectedWebsite === 'reddit' && selectedAccount) {
       const fetchSubreddits = async () => {
         try {
-          const credsArray = user.creds
+          const credsArray = user.creds;
         
           const accountCreds = credsArray.find((creds) => creds.handle === selectedAccount);
           const subreddits = await getSFWSubreddits(accountCreds);
@@ -130,18 +130,18 @@ const SetScheduleModal = ({ closeModal, selectedImages, twitterAccounts, redditA
     setDurationOfJob(e.target.value);
   };
 
-  const [includeCaption, setIncludeCaption] = useState(false)
-  const [captionType, setCaptionType] = useState('user')
+  const [includeCaption, setIncludeCaption] = useState(false);
+  const [captionType, setCaptionType] = useState('user');
 
   const handleIncludeCaptionChange = (e) => {
     const value = e.target.value === 'true';
-    setIncludeCaption(value)
-  }
+    setIncludeCaption(value);
+  };
 
   const renderCaptionDropdown = () => {
     if (selectedWebsite === 'twitter') {
       return (
-      <div className="input-group">
+        <div className="input-group">
           <label htmlFor="website">Include caption:</label>
           <select className='modalSelect' id="website" value={includeCaption} onChange={handleIncludeCaptionChange}>
             <option value='true'>yes</option>
@@ -149,19 +149,19 @@ const SetScheduleModal = ({ closeModal, selectedImages, twitterAccounts, redditA
            
           </select>
         </div>
-    )
+      );
     }
     
-  }
+  };
 
   const handleCaptionTypeChange = (e) => {
-    setCaptionType(e.target.value)
-  }
+    setCaptionType(e.target.value);
+  };
 
   const renderCaptionTypeDropdown = () => {
     if (includeCaption && selectedWebsite === 'twitter') {
       return (
-      <div className="input-group">
+        <div className="input-group">
           <label htmlFor="website">Type of caption:</label>
           <select className='modalSelect' id="website" value={captionType} onChange={handleCaptionTypeChange}>
             <option value="ai">AI generated</option>
@@ -170,14 +170,14 @@ const SetScheduleModal = ({ closeModal, selectedImages, twitterAccounts, redditA
           {captionType === 'ai' && <p>Ai generated caption will use description and categories to generate content</p>}
           {captionType === 'user' && <p>User generated will use description to generate caption</p>}
         </div>
-    )
+      );
     }
     
-  }
+  };
 
   const validateSubmit = () => {
 
-  }
+  };
 
 
   const handleSave = async () => {
@@ -200,7 +200,7 @@ const SetScheduleModal = ({ closeModal, selectedImages, twitterAccounts, redditA
     };
 
     
-    const job = await validateAndFormatScheduleData(scheduleData)
+    const job = await validateAndFormatScheduleData(scheduleData);
 
     console.log('Schedule Data:', job);
     await createScheduledJob(job);
@@ -210,17 +210,17 @@ const SetScheduleModal = ({ closeModal, selectedImages, twitterAccounts, redditA
 
     return (
       <div className="input-group">
-      <label htmlFor="website">Website:</label>
-      <select className='modalSelect' id="website" value={selectedWebsite} onChange={handleWebsiteChange}>
-        <option>Select Website</option>
-        {twitterAccounts.length > 0 && <option value="twitter">Twitter</option>}
-        {redditAccounts.length > 0 && <option value="reddit">Reddit</option>}
-        {tiktokAccounts.length > 0 && <option value="tiktok">TikTok</option>}
-        {youtubeAccounts.length > 0 && <option value="youtube">Youtube Shorts</option>}
-      </select>
-    </div>
-    )
-  }
+        <label htmlFor="website">Website:</label>
+        <select className='modalSelect' id="website" value={selectedWebsite} onChange={handleWebsiteChange}>
+          <option>Select Website</option>
+          {twitterAccounts.length > 0 && <option value="twitter">Twitter</option>}
+          {redditAccounts.length > 0 && <option value="reddit">Reddit</option>}
+          {tiktokAccounts.length > 0 && <option value="tiktok">TikTok</option>}
+          {youtubeAccounts.length > 0 && <option value="youtube">Youtube Shorts</option>}
+        </select>
+      </div>
+    );
+  };
 
   const handleAccountChange = (event) => {
     setSelectedAccount(event.target.value);
@@ -229,10 +229,10 @@ const SetScheduleModal = ({ closeModal, selectedImages, twitterAccounts, redditA
 
   const selectAccountDropDown = () => {
     
-  const renderAccountOptions = () => {
-    let accounts = [];
+    const renderAccountOptions = () => {
+      let accounts = [];
 
-    switch (selectedWebsite) {
+      switch (selectedWebsite) {
       case 'twitter':
         accounts = twitterAccounts;
         break;
@@ -247,29 +247,29 @@ const SetScheduleModal = ({ closeModal, selectedImages, twitterAccounts, redditA
         break;
       default:
         break;
-    }
+      }
 
-    return accounts.map((account) => (
-      <option key={account.handle} value={account.handle}>
-        {account.handle}
-      </option>
-    ));
+      return accounts.map((account) => (
+        <option key={account.handle} value={account.handle}>
+          {account.handle}
+        </option>
+      ));
+    };
+
+    return (
+      <>
+        {selectedWebsite && (
+          <div className="input-group">
+            <label htmlFor="account">Account:</label>
+            <select className='modalSelect' id="account" value={selectedAccount} onChange={handleAccountChange}>
+              <option>Select Account</option>
+              {renderAccountOptions()}
+            </select>
+          </div>
+        )}
+      </>
+    );
   };
-
-  return (
-    <>
-      {selectedWebsite && (
-        <div className="input-group">
-          <label htmlFor="account">Account:</label>
-          <select className='modalSelect' id="account" value={selectedAccount} onChange={handleAccountChange}>
-          <option>Select Account</option>
-            {renderAccountOptions()}
-          </select>
-        </div>
-      )}
-    </>
-  );
-};
 
   const renderPicturePostOrder = () => {
     return (
@@ -283,25 +283,25 @@ const SetScheduleModal = ({ closeModal, selectedImages, twitterAccounts, redditA
         </div>}
       </>
       
-    )
-  }
+    );
+  };
 
   const renderScheduleType = () => {
     return (
       <div className="input-group">
-      <label htmlFor="scheduleTypeSelect">Schedule Type:</label>
-      <select className='modalSelect' id="scheduleTypeSelect" value={scheduleType} onChange={handleScheduleTypeChange}>
-        <option value="random">Random</option>
-        <option value="scheduled">Scheduled</option>
-      </select>
-    </div>
-    )
-  }
+        <label htmlFor="scheduleTypeSelect">Schedule Type:</label>
+        <select className='modalSelect' id="scheduleTypeSelect" value={scheduleType} onChange={handleScheduleTypeChange}>
+          <option value="random">Random</option>
+          <option value="scheduled">Scheduled</option>
+        </select>
+      </div>
+    );
+  };
 
   const renderJobDurationForRandomJobs = () => {
     return(
       <>
-       {scheduleType === 'random' && (
+        {scheduleType === 'random' && (
           <div className="input-group">
             <label htmlFor="durationSelect">Job duration: </label>
             <select className='modalSelect' id="durationSelect" value={durationOfJob} onChange={handleDurationChange}>
@@ -317,8 +317,8 @@ const SetScheduleModal = ({ closeModal, selectedImages, twitterAccounts, redditA
           </div>
         )}
       </>
-    )
-  }
+    );
+  };
 
   const renderScheduleInterval = () => {
     return (
@@ -334,8 +334,8 @@ const SetScheduleModal = ({ closeModal, selectedImages, twitterAccounts, redditA
           </div>
         )}
       </>
-    )
-  }
+    );
+  };
 
   const renderHourSelect = () => {
     return (
@@ -354,8 +354,8 @@ const SetScheduleModal = ({ closeModal, selectedImages, twitterAccounts, redditA
           </div>
         )}
       </>
-    )
-  }
+    );
+  };
 
   const renderTimeSelect = () => {
     return (
@@ -389,8 +389,8 @@ const SetScheduleModal = ({ closeModal, selectedImages, twitterAccounts, redditA
           </div>
         )}
       </>
-    )
-  }
+    );
+  };
 
   const renderDaySelect = () => {
     return (
@@ -409,8 +409,8 @@ const SetScheduleModal = ({ closeModal, selectedImages, twitterAccounts, redditA
           </div>
         )}
       </>
-    )
-  }
+    );
+  };
 
   const renderMandatoryHashtags = () => {
     return (
@@ -422,13 +422,13 @@ const SetScheduleModal = ({ closeModal, selectedImages, twitterAccounts, redditA
           </div>
         )}
       </>
-    )
-  }
+    );
+  };
 
   const renderSubredditSelect = () => {
     return (
       <>
-         {selectedWebsite === 'reddit' && subredditList.length > 0 && (
+        {selectedWebsite === 'reddit' && subredditList.length > 0 && (
           <div className="subredditSelect">
             <div className="subreddit-selector" ref={dropdownRef}>
               <button onClick={toggleDropdown}>Select Subreddits</button>
@@ -455,8 +455,8 @@ const SetScheduleModal = ({ closeModal, selectedImages, twitterAccounts, redditA
           </div>
         )}
       </>
-    )
-  }
+    );
+  };
 
   const getButtonClassName = () => {
     let className = 'modalSelect';

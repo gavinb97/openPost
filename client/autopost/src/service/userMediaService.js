@@ -3,194 +3,194 @@ import { Buffer } from 'buffer';
 
 
 const getMimeTypeFromExtension = (extension) => {
-    const mimeTypes = {
-        'png': 'image/png',
-        'jpg': 'image/jpeg',
-        'jpeg': 'image/jpeg',
-        'gif': 'image/gif',
-        'bmp': 'image/bmp',
-        'webp': 'image/webp',
-        'mp4': 'video/mp4',
-        'avi': 'video/x-msvideo',
-        'mov': 'video/quicktime',
-        'wmv': 'video/x-ms-wmv',
-        // Add other MIME types as needed
-    };
+  const mimeTypes = {
+    'png': 'image/png',
+    'jpg': 'image/jpeg',
+    'jpeg': 'image/jpeg',
+    'gif': 'image/gif',
+    'bmp': 'image/bmp',
+    'webp': 'image/webp',
+    'mp4': 'video/mp4',
+    'avi': 'video/x-msvideo',
+    'mov': 'video/quicktime',
+    'wmv': 'video/x-ms-wmv',
+    // Add other MIME types as needed
+  };
 
-    return mimeTypes[extension.toLowerCase()] || 'application/octet-stream';
+  return mimeTypes[extension.toLowerCase()] || 'application/octet-stream';
 };
 
 const base64ToBlob = (base64String, mimeType) => {
-    // Decode base64 string into a Buffer
-    const buffer = Buffer.from(base64String, 'base64');
+  // Decode base64 string into a Buffer
+  const buffer = Buffer.from(base64String, 'base64');
 
-    // Create a Blob from the Buffer
-    const blob = new Blob([buffer], { type: mimeType });
+  // Create a Blob from the Buffer
+  const blob = new Blob([buffer], { type: mimeType });
 
-    return blob;
+  return blob;
 };
 
 const convertFileToBase64 = (file) => new Promise((resolve, reject) => {
-    const reader = new FileReader();
+  const reader = new FileReader();
 
-    reader.onload = (event) => {
-        const base64String = event.target.result.split(',')[1];  // Remove 'data:image;base64,' prefix
-        resolve(base64String);
-    };
-    reader.onerror = (error) => reject(error);
+  reader.onload = (event) => {
+    const base64String = event.target.result.split(',')[1];  // Remove 'data:image;base64,' prefix
+    resolve(base64String);
+  };
+  reader.onerror = (error) => reject(error);
 
-    reader.readAsDataURL(file);
+  reader.readAsDataURL(file);
 });
 
 export const updateFileNamesAsync = async (files, uploadedFileNames) => {
-    const renamedFiles = [];
+  const renamedFiles = [];
 
-    for (const file of files) {
-        // Find the filename with the identifier in the uploadedFileNames array
-        console.log(uploadedFileNames)
-        const matchingFileName = uploadedFileNames.find(name => name.endsWith(file.name));
+  for (const file of files) {
+    // Find the filename with the identifier in the uploadedFileNames array
+    console.log(uploadedFileNames);
+    const matchingFileName = uploadedFileNames.find(name => name.endsWith(file.name));
 
-        // Only include the file if a matching file name is found and it's different from the original
-        if (matchingFileName && matchingFileName !== file.name) {
-            // Extract the file extension from the matching file name
-            const fileExtension = matchingFileName.split('.').pop();
+    // Only include the file if a matching file name is found and it's different from the original
+    if (matchingFileName && matchingFileName !== file.name) {
+      // Extract the file extension from the matching file name
+      const fileExtension = matchingFileName.split('.').pop();
 
-            // Get the MIME type based on the file extension
-            const mimeType = getMimeTypeFromExtension(fileExtension);
+      // Get the MIME type based on the file extension
+      const mimeType = getMimeTypeFromExtension(fileExtension);
 
-            // Create a new file object with the updated name
-            const updatedFile = new File([file], matchingFileName, { type: mimeType, lastModified: file.lastModified });
+      // Create a new file object with the updated name
+      const updatedFile = new File([file], matchingFileName, { type: mimeType, lastModified: file.lastModified });
 
-            const base64file = await convertFileToBase64(updatedFile);
+      const base64file = await convertFileToBase64(updatedFile);
 
-            const fileObject = {
-                fileName: matchingFileName,
-                fileData: base64file,
-            };
+      const fileObject = {
+        fileName: matchingFileName,
+        fileData: base64file,
+      };
 
-            renamedFiles.push(fileObject);
-        } else {
-            console.log('No matching file name found for:', file.name);
-        }
+      renamedFiles.push(fileObject);
+    } else {
+      console.log('No matching file name found for:', file.name);
     }
+  }
 
-    console.log('Renamed files:', renamedFiles);
-    return renamedFiles;
+  console.log('Renamed files:', renamedFiles);
+  return renamedFiles;
 };
 
 
 export const uploadFile = (file, fileName, username) => {
-    return new Promise((resolve, reject) => {
-        const endpoint = 'http://localhost:3455/upload';
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
+  return new Promise((resolve, reject) => {
+    const endpoint = 'http://localhost:3455/upload';
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
 
-        reader.onload = async () => {
-            const base64String = reader.result.split(',')[1];
-            const blob = base64ToBlob(base64String);
+    reader.onload = async () => {
+      const base64String = reader.result.split(',')[1];
+      const blob = base64ToBlob(base64String);
 
-            const bodyForm = new FormData();
-            bodyForm.append('file', blob, fileName);
-            bodyForm.append('categories', JSON.stringify([]));
-            bodyForm.append('username', username);
+      const bodyForm = new FormData();
+      bodyForm.append('file', blob, fileName);
+      bodyForm.append('categories', JSON.stringify([]));
+      bodyForm.append('username', username);
 
-            try {
-                const uploadResponse = await axios.post(
-                    endpoint,
-                    bodyForm,
-                    {
-                        headers: {
-                            'Content-Type': 'multipart/form-data',
-                        },
-                    }
-                );
-                resolve(uploadResponse.data); // Resolve the promise with the response data
-            } catch (error) {
-                console.error('Error uploading file:', error);
-                reject(error); // Reject the promise with the error
-            }
-        };
+      try {
+        const uploadResponse = await axios.post(
+          endpoint,
+          bodyForm,
+          {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },
+          }
+        );
+        resolve(uploadResponse.data); // Resolve the promise with the response data
+      } catch (error) {
+        console.error('Error uploading file:', error);
+        reject(error); // Reject the promise with the error
+      }
+    };
 
-        reader.onerror = (error) => {
-            console.error('Error reading file:', error);
-            reject(error); // Reject the promise with the error
-        };
-    });
+    reader.onerror = (error) => {
+      console.error('Error reading file:', error);
+      reject(error); // Reject the promise with the error
+    };
+  });
 };
 
 export const fetchAllFilesByUser = async (username) => {
-    const endpoint = 'http://localhost:3455/files';
-    try {
-      const response = await axios.post(endpoint, { username: username});
+  const endpoint = 'http://localhost:3455/files';
+  try {
+    const response = await axios.post(endpoint, { username: username});
       
-      return response.data
-    } catch (error) {
-      console.error('Error fetching files:', error);
-      // Handle errors, such as displaying an error message to the user
-    }
-  };
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching files:', error);
+    // Handle errors, such as displaying an error message to the user
+  }
+};
 
-  export const fetchAllVideosByUser = async (username) => {
-    const endpoint = 'http://localhost:3455/videos';
-    try {
-      const response = await axios.post(endpoint, { username: username});
+export const fetchAllVideosByUser = async (username) => {
+  const endpoint = 'http://localhost:3455/videos';
+  try {
+    const response = await axios.post(endpoint, { username: username});
       
-      return response.data
-    } catch (error) {
-      console.error('Error fetching files:', error);
-      // Handle errors, such as displaying an error message to the user
-    }
-  };
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching files:', error);
+    // Handle errors, such as displaying an error message to the user
+  }
+};
 
 
 
 
 export const fetchAllFiles = async () => {
-    const endpoint = 'http://localhost:3455/files';
-    try {
-      const response = await axios.get(endpoint);
+  const endpoint = 'http://localhost:3455/files';
+  try {
+    const response = await axios.get(endpoint);
       
-      return response.data
-    } catch (error) {
-      console.error('Error fetching files:', error);
-      // Handle errors, such as displaying an error message to the user
-    }
-  };
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching files:', error);
+    // Handle errors, such as displaying an error message to the user
+  }
+};
 
 
 export const getPhotoFilesByName = async () => {
 
-}
+};
 
 
 export const deleteByName = async (fileNames, username) => {
-    try {
-        const response = await axios.post('http://localhost:3455/deletebyname', {fileNames, username},
-        {
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
-    } catch (error) {
-        console.error('Error deleting files:', error.response.data);
-    }
-}
+  try {
+    const response = await axios.post('http://localhost:3455/deletebyname', {fileNames, username},
+      {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+  } catch (error) {
+    console.error('Error deleting files:', error.response.data);
+  }
+};
 
 export const getPhotoMetadata = async (fileNames, username) => {
-    const endpoint = 'http://localhost:3455/getphotometadata'
-    try {
-        const response = await axios.post(endpoint, {fileNames, username});
-        return response.data;
-    } catch (error) {
-        console.error('Error fetching photo metadata:', error);
-        return null;
-    }
+  const endpoint = 'http://localhost:3455/getphotometadata';
+  try {
+    const response = await axios.post(endpoint, {fileNames, username});
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching photo metadata:', error);
+    return null;
+  }
 };
 
 export const updatePhotoMetadata = async (newData, username) => {
-    try {
-        const response = await axios.post('http://localhost:3455/updatephotometadata', {newData, username});
-    } catch (error) {
-        console.error('Error updating photo metadata:', error.response.data.error);
-    }
+  try {
+    const response = await axios.post('http://localhost:3455/updatephotometadata', {newData, username});
+  } catch (error) {
+    console.error('Error updating photo metadata:', error.response.data.error);
+  }
 };
