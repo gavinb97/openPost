@@ -30,6 +30,8 @@ export const getUpdatedDetails = async (userName) => {
   const endpoint = 'http://localhost:3455/updateddetails';
   try {
     const response = await axios.post(endpoint, {username: userName });
+    console.log(response.data)
+    console.log('response data^6')
     return response.data;
   } catch (error) {
     console.error('Failed to Login', error);

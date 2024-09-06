@@ -18,7 +18,8 @@ const Payment = () => {
     };
 
     getEmail();
-    if (!user.pro) {
+    if (user.pro === 'false') {
+      console.log('user is not pro')
       const script = document.createElement('script');
       script.src = 'https://js.stripe.com/v3/pricing-table.js';
       script.async = true;
@@ -28,6 +29,9 @@ const Payment = () => {
       };
         
     } else {
+      console.log('user is pro')
+      console.log(user)
+      console.log(user.pro)
       // create portal link just in case
       const getPortalUrl = async () => {
         const response = await getBillingPortal(user.customerId);
@@ -35,6 +39,7 @@ const Payment = () => {
       };
       getPortalUrl().then((url) => {
         setPortalUrl(url);
+        console.log('portal url set')
       });
             
     }
@@ -53,7 +58,7 @@ const Payment = () => {
     <>
       <div>
         <Navbar></Navbar>
-        {email && !user.pro && 
+        {email && user && user.pro === 'false' && 
             
             <div className="payment-page-container">
               <div className="payment-box"> 
@@ -65,7 +70,7 @@ const Payment = () => {
             </div>}
 
 
-        {email && user.pro && 
+        {email && user && user.pro === 'true'  && 
             
             <div className="payment-page-container">
               <div className="youHavePremium">

@@ -70,9 +70,13 @@ function Profile () {
             const userContext = {
               username: user.username || user.user,
               jwt: user.jwt,
+              customerId: user.customerId,
+              pro: user.pro || 'false',
               creds,
             };
-  
+            console.log(user)
+            console.log('userconeext below')
+            console.log(userContext)
             loginContext(userContext);
           } else {
             setIsLoggedIn({

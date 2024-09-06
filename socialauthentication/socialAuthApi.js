@@ -258,7 +258,7 @@ router.post('/updateddetails', async (req, res) => {
     const user = await getUpdatedUserDetails(username);
     const token = jwt.sign({ username: user.username }, JWT_SECRET, { expiresIn: '168h' });
         
-    const returnUserObj = { username, jwt: token, pro: user.pro, customerId: user.customerId};
+    const returnUserObj = { username, jwt: token, pro: user.pro, customerId: user.stripe_customer_id};
     console.log('sending updated user data');
     res.status(200).json(returnUserObj);
   } catch (error) {

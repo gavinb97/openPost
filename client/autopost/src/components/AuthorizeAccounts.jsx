@@ -7,7 +7,8 @@ import '../App.css';
 
 const AuthorizeAccounts = ({ userData, handleOpenAccountDetails, setAccountDetails }) => {
   const { user, credentials, isLoggedIn, setIsLoggedIn, isLoading } = userData;
-
+  console.log(user)
+  console.log('user ^^')
   const [twitterAccounts, setTwitterAccounts] = useState([]); 
   const [redditAccounts, setRedditAccounts] = useState([]); 
   const [youtubeAccounts, setYoutubeAccounts] = useState([]); 
