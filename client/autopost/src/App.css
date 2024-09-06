@@ -1,6 +1,3 @@
-.App {
-
-}
 
 .home-page {
   padding-top: 3rem;
@@ -259,9 +256,7 @@
   width: 100%;
 }
 
-.about-page-support-container {
 
-}
 
 .about-page-support-twotonebox-container {
   display: flex;
@@ -1331,10 +1326,6 @@
 
 }
 
-.image-container-outer {
-
-}
-
 .updateImageModalButtons {
   button {
     margin-top: 1vh;
@@ -1353,9 +1344,6 @@
   }
 }
 
-.ReactTags__tags.react-tags-wrapper {
-  
-}
 
 .ReactTags__tagInputField {
   width: 100%;
