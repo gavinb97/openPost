@@ -14,12 +14,15 @@ import { useAuth } from '../service/authContext';
 import { getUserCreds } from '../service/userService';
 import AuthorizeAccounts from '../components/AuthorizeAccounts';
 import AccountDetailsModal from '../components/AccountDetailsModal';
+import AccountLimitModal from '../components/AccountLimitModal'
 
 function Profile () {
   const navigate = useNavigate();
   const [showAccountDetailsModal, setShowAccountDetailsModal] = useState(false);
   const [accountDetails, setAccountDetails] = useState();
   const { user, logoutContext, loginContext  } = useAuth();
+
+  const [showLimitModal, setShowLimitModal] = useState(false)
 
   const [credentials, setCredentials] = useState({});
   const [isLoggedIn, setIsLoggedIn] = useState({
@@ -74,9 +77,7 @@ function Profile () {
               pro: user.pro || 'false',
               creds,
             };
-            console.log(user)
-            console.log('userconeext below')
-            console.log(userContext)
+           
             loginContext(userContext);
           } else {
             setIsLoggedIn({
@@ -113,6 +114,10 @@ function Profile () {
   const handleCloseAccountDetails = () => {
     setShowAccountDetailsModal(false);
   };
+
+  const handleCloseLimitModal = () => {
+    setShowLimitModal(false)
+  }
     
   if (user === null) return null;
     
@@ -128,8 +133,9 @@ function Profile () {
         <p>Login with Twitter, Reddit, Youtube or TikTok to get started</p>
       </div>
       {/* <SocialsLogin userData={userData}></SocialsLogin> */}
-      <AuthorizeAccounts userData={userData} handleOpenAccountDetails={handleOpenAccountDetails} setAccountDetails={setAccountDetails}></AuthorizeAccounts>
+      <AuthorizeAccounts userData={userData} handleOpenAccountDetails={handleOpenAccountDetails} setAccountDetails={setAccountDetails} setShowLimitModal={setShowLimitModal}></AuthorizeAccounts>
       {showAccountDetailsModal && <AccountDetailsModal closeModal={handleCloseAccountDetails} accountDetails={accountDetails}/>}
+      {showLimitModal && <AccountLimitModal closeModal={handleCloseLimitModal} limitReached={'authorizedAccounts'}/>}
     </div>
   );
 }

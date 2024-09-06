@@ -5,10 +5,9 @@ import { getYoutubeLoginUrl, revokeGoogleAccess } from '../service/youtubeServic
 import { getTikTokLoginUrl, revokeTikTokAccess } from '../service/tiktokService';
 import '../App.css'; 
 
-const AuthorizeAccounts = ({ userData, handleOpenAccountDetails, setAccountDetails }) => {
+const AuthorizeAccounts = ({ userData, handleOpenAccountDetails, setAccountDetails, setShowLimitModal }) => {
   const { user, credentials, isLoggedIn, setIsLoggedIn, isLoading } = userData;
-  console.log(user)
-  console.log('user ^^')
+
   const [twitterAccounts, setTwitterAccounts] = useState([]); 
   const [redditAccounts, setRedditAccounts] = useState([]); 
   const [youtubeAccounts, setYoutubeAccounts] = useState([]); 
@@ -46,16 +45,44 @@ const AuthorizeAccounts = ({ userData, handleOpenAccountDetails, setAccountDetai
         
   }, [userData]); 
 
+  const getNumberOfAuthorizedAccounts = (website) => {
+    switch (website) {
+      case 'Twitter':
+        return twitterAccounts.length
+      case 'Reddit':
+        return redditAccounts.length
+      case 'YouTube':
+        return youtubeAccounts.length
+      case 'TikTok':
+        return tiktokAccounts.length
+    }
+  }
+
   const handleLogin = async (website) => {
-    console.log(website);
+    // non pro users can only have 1 account per box
+    const accountCount = getNumberOfAuthorizedAccounts(website)
+
     const urls = {
       Twitter: getTwitterLoginUrl,
       Reddit: getRedditLoginUrl,
       YouTube: getYoutubeLoginUrl,
       TikTok: getTikTokLoginUrl
     };
-    const url = await urls[website](user.username);
-    window.location.href = url;
+
+    if (user.pro === 'true') {
+       const url = await urls[website](user.username);
+       window.location.href = url;
+    } else {
+      if (accountCount >= 1 ) {
+        // open modal
+        setShowLimitModal(true)
+      } else {
+        const url = await urls[website](user.username);
+        window.location.href = url;
+      }
+    }
+
+  
   };
     
   const services = [
