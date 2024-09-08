@@ -192,8 +192,8 @@ const insertRandomJob = async (job) => {
 };
 
 const insertActiveJob = async (job) => {
-  console.log('in insert active job')
-  console.log(job)
+  console.log('in insert active job');
+  console.log(job);
   let {
     job_set_id,
     message_ids,

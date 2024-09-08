@@ -1,6 +1,6 @@
 const amqp = require('amqplib');
 const {makePost, validateJob, reschedulePostJob} = require('./jobQueueService');
-const { getMessageIdsCountForJob, deleteMessageIdFromJob } = require('./jobsData')
+const { getMessageIdsCountForJob, deleteMessageIdFromJob } = require('./jobsData');
 
 async function setupQueue () {
   const connection = await amqp.connect('amqp://localhost');

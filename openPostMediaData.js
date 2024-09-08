@@ -74,9 +74,9 @@ const readPhotoDataFromDB = async (username) => {
 };
 
 const readPhotoDataFromDBUserAndFile = async (username, fileName) => {
-    console.log('in read photo from db')
-    console.log(username)
-    console.log(fileName)
+  console.log('in read photo from db');
+  console.log(username);
+  console.log(fileName);
   try {
     // Connect to the pool
     const client = await pool.connect();

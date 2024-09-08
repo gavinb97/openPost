@@ -46,7 +46,6 @@ const UpdateImageDataModal = ({ imageData, closeModal, updatePhotoMetadata, medi
     const fetchMetadata = async (fileNames) => {
       try {
         const metadata = await getPhotoMetadata(fileNames, user.username);
-        console.log(metadata);
         setUpdatedData(metadata);
       } catch (error) {
         console.error('Error fetching video metadata:', error);
@@ -54,16 +53,12 @@ const UpdateImageDataModal = ({ imageData, closeModal, updatePhotoMetadata, medi
     };
 
     if (updatedData.length === 0) {
-      console.log('No data available, fetching files...');
-      console.log(mediaFiles);
-
+    
       if (mediaFiles && uploadedFileNames) {
-        console.log('Media files available, converting to base64...');
         
         updateFileNamesAsync(mediaFiles, uploadedFileNames || mediaFiles.map(file => file.fileName))
           .then(async (fileData) => {
             setMedia(fileData);
-            console.log('fileData', fileData);
             fetchMetadata(uploadedFileNames || mediaFiles.map(file => file.fileName));
           })
           .catch((error) => {
@@ -140,7 +135,6 @@ const UpdateImageDataModal = ({ imageData, closeModal, updatePhotoMetadata, medi
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '1rem', marginTop: '1rem' }}>
                 <label style={{ marginRight: '10px' }}>Name:</label>
                 <p>{item.name}</p>
-                <p>{console.log(item)}</p>
                 {renderMedia(media.find(file => file.fileName === item.name))}
               </div>
               
