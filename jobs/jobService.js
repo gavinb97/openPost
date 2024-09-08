@@ -90,6 +90,8 @@ const createActiveJobObject = (obj, dbJobObject, jobs, originalSubreddits, remai
     duration_of_job: obj.durationOfJob || obj.duration_of_job || null,
     selected_subreddits: obj.selectedSubreddits || obj.selected_subreddits || [],
     handle: obj.handle,
+    includeCaption: obj.includeCaption,
+    captionType: obj.captionType,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString()
   };
@@ -622,7 +624,7 @@ const handleSetInterval = async (request) => {
         scheduledTime: Date.now() + delayInMilliseconds,
         image: isBridgeJob ? null : getNextImage(),
         includeCaption: isBridgeJob ? false : request.includeCaption,
-        captionType: isBridgeJob ? null : request.captionType,
+        captionType: request.captionType,
         handle: request.handle
       };
 
@@ -744,8 +746,8 @@ const rescheduleSetInterval = async (job) => {
         content: isBridgeJob ? 'Bridge job to ensure continuity' : `Post to ${job.selected_website}`,
         scheduledTime: Date.now() + delayInMilliseconds,
         image: isBridgeJob ? null : getNextImage(),
-        includeCaption: isBridgeJob ? false : job.include_caption,
-        captionType: isBridgeJob ? null : job.type_of_caption,
+        includeCaption: job.include_caption,
+        captionType: job.type_of_caption,
         handle: job.handle
       };
 

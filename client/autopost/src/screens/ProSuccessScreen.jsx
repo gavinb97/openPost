@@ -12,11 +12,7 @@ const ProSuccessScreen = () => {
   // so we can get new pro status and customerid for later
   useEffect(() => {
     getUpdatedDetails(user.username).then((details) => {
-      console.log(details);
-      console.log('*****');
       loginContext(details);
-      console.log('context set');
-      console.log(user);
     }).then(() => {
       setTimeout(() => {
         navigate('/profile');
