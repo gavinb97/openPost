@@ -47,20 +47,20 @@ const AuthorizeAccounts = ({ userData, handleOpenAccountDetails, setAccountDetai
 
   const getNumberOfAuthorizedAccounts = (website) => {
     switch (website) {
-      case 'Twitter':
-        return twitterAccounts.length
-      case 'Reddit':
-        return redditAccounts.length
-      case 'YouTube':
-        return youtubeAccounts.length
-      case 'TikTok':
-        return tiktokAccounts.length
+    case 'Twitter':
+      return twitterAccounts.length;
+    case 'Reddit':
+      return redditAccounts.length;
+    case 'YouTube':
+      return youtubeAccounts.length;
+    case 'TikTok':
+      return tiktokAccounts.length;
     }
-  }
+  };
 
   const handleLogin = async (website) => {
     // non pro users can only have 1 account per box
-    const accountCount = getNumberOfAuthorizedAccounts(website)
+    const accountCount = getNumberOfAuthorizedAccounts(website);
 
     const urls = {
       Twitter: getTwitterLoginUrl,
@@ -70,12 +70,12 @@ const AuthorizeAccounts = ({ userData, handleOpenAccountDetails, setAccountDetai
     };
 
     if (user.pro === 'true') {
-       const url = await urls[website](user.username);
-       window.location.href = url;
+      const url = await urls[website](user.username);
+      window.location.href = url;
     } else {
       if (accountCount >= 1 ) {
         // open modal
-        setShowLimitModal(true)
+        setShowLimitModal(true);
       } else {
         const url = await urls[website](user.username);
         window.location.href = url;

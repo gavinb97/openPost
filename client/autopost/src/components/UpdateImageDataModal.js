@@ -6,7 +6,9 @@ import { useAuth } from '../service/authContext';
 const UpdateImageDataModal = ({ imageData, closeModal, updatePhotoMetadata, mediaFiles, uploadedFileNames, user, clearMedia }) => {
   const [updatedData, setUpdatedData] = useState(imageData);
   const [media, setMedia] = useState(mediaFiles);
-  // console.log(imageData)
+
+  const [displayError, setDisplayError] = useState(false);
+
   const getMimeTypeFromExtension = (extension) => {
     const mimeTypes = {
       'png': 'image/png',
@@ -44,7 +46,7 @@ const UpdateImageDataModal = ({ imageData, closeModal, updatePhotoMetadata, medi
     const fetchMetadata = async (fileNames) => {
       try {
         const metadata = await getPhotoMetadata(fileNames, user.username);
-        console.log(metadata)
+        console.log(metadata);
         setUpdatedData(metadata);
       } catch (error) {
         console.error('Error fetching video metadata:', error);
@@ -73,14 +75,38 @@ const UpdateImageDataModal = ({ imageData, closeModal, updatePhotoMetadata, medi
   }, [updatedData, mediaFiles, uploadedFileNames, user.username]);
 
   const handleSave = () => {
-    console.log(imageData)
-    console.log(updatedData)
-    // Perform save operation with updatedData
-    updatePhotoMetadata(updatedData, user.username); // Pass updatedData to the function
-    if (clearMedia) {
-      clearMedia();
+  
+    // Check if updatedData exists and is an array
+    if (updatedData && Array.isArray(updatedData)) {
+      // Initialize a flag to check if there are missing fields
+      let missingData = false;
+  
+      // Iterate over each object in the updatedData array
+      updatedData.forEach((data) => {
+        // Check if description is null or an empty string
+        if (!data.description || data.description.trim() === '') {
+          missingData = true;
+        }
+  
+        // Check if categories is an empty array or has a length of 0
+        if (!data.categories || data.categories.length === 0) {
+          missingData = true;
+        }
+      });
+  
+      // If any missing data is found, display error and prevent further actions
+      if (missingData) {
+        setDisplayError(true); // Trigger error display
+        return; // Stop further execution if validation fails
+      }
+  
+      // If no errors, proceed with saving the data
+      updatePhotoMetadata(updatedData, user.username); 
+      if (clearMedia) {
+        clearMedia();
+      }
+      closeModal();
     }
-    closeModal();
   };
 
   const renderMedia = (file) => {
@@ -166,6 +192,7 @@ const UpdateImageDataModal = ({ imageData, closeModal, updatePhotoMetadata, medi
           ))}
           
           <div className='updateImageModalButtons' >
+            {displayError && <p style={{padding: '1rem', color: 'red'}}>Please ensure you've added descriptions and categories</p>}
             <button onClick={handleSave}>Save</button>
             <button onClick={closeModal}>Close</button>
           </div>

@@ -188,8 +188,8 @@ export const getPhotoMetadata = async (fileNames, username) => {
 };
 
 export const updatePhotoMetadata = async (newData, username) => {
-  console.log('in new data')
-  console.log(newData)
+  console.log('in new data');
+  console.log(newData);
   try {
     const response = await axios.post('http://localhost:3455/updatephotometadata', {newData, username});
   } catch (error) {

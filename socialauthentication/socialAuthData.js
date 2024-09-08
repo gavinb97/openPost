@@ -117,8 +117,8 @@ const getUpdatedDetails = async (username) => {
     }
 
     const user = res.rows[0];
-    console.log(user)
-    console.log('user ^^^')
+    console.log(user);
+    console.log('user ^^^');
     return user; 
   } catch (error) {
     throw new Error(`Authentication failed: ${error.message}`);

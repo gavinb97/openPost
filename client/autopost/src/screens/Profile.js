@@ -14,7 +14,7 @@ import { useAuth } from '../service/authContext';
 import { getUserCreds } from '../service/userService';
 import AuthorizeAccounts from '../components/AuthorizeAccounts';
 import AccountDetailsModal from '../components/AccountDetailsModal';
-import AccountLimitModal from '../components/AccountLimitModal'
+import AccountLimitModal from '../components/AccountLimitModal';
 
 function Profile () {
   const navigate = useNavigate();
@@ -22,7 +22,7 @@ function Profile () {
   const [accountDetails, setAccountDetails] = useState();
   const { user, logoutContext, loginContext  } = useAuth();
 
-  const [showLimitModal, setShowLimitModal] = useState(false)
+  const [showLimitModal, setShowLimitModal] = useState(false);
 
   const [credentials, setCredentials] = useState({});
   const [isLoggedIn, setIsLoggedIn] = useState({
@@ -116,8 +116,8 @@ function Profile () {
   };
 
   const handleCloseLimitModal = () => {
-    setShowLimitModal(false)
-  }
+    setShowLimitModal(false);
+  };
     
   if (user === null) return null;
     

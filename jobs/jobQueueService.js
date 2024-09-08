@@ -9,7 +9,7 @@ const { postToSubredditOnBehalfOfUser } = require('../socialauthentication/reddi
 const { makeGptCall } = require('./gptService');
 const { rescheduleRandomJobs, rescheduleHourInterval, rescheduleSetInterval } = require('./jobService');
 // const { setupQueue, enqueuePostJob, startWorker, getExistingQueue } = require('./jobQueue');
-const { readPhotoDataFromDBUserAndFile } = require('../openPostMediaData')
+const { readPhotoDataFromDBUserAndFile } = require('../openPostMediaData');
 
 const getExistingQueue = async () => {
   const connection = await amqp.connect('amqp://localhost');
@@ -203,7 +203,7 @@ const readPhotoDataFromFile = async (username, fileName) => {
 
 const createTweetText = async (job) => {
   // const photoData = await readPhotoDataFromFile(job.userId, job.image);
-  const photoData = await readPhotoDataFromDBUserAndFile(job.userId, job.image)
+  const photoData = await readPhotoDataFromDBUserAndFile(job.userId, job.image);
 
   const systemPrompt = 'You are a Gen Z/Millennial online user who constantly goes viral. You are known for your trendy and engaging tweets. Your task is to create tweets based on a description of a photo and a set of categories. Your tweets must be under 280 characters and can range from a single descriptor word, to a full description, to using hashtags. Always use the latest trends and vernacular to maximize engagement. Do not mention that you are an AI model, do not use emojis, never use emojis, and always respond with a string.';
 
@@ -225,7 +225,7 @@ const createTweetText = async (job) => {
 
 const createRedditTitle = async (job) => {
   // const photoData = await readPhotoDataFromFile(job.userId, job.image);
-  const photoData = await readPhotoDataFromDBUserAndFile(job.userId, job.image)
+  const photoData = await readPhotoDataFromDBUserAndFile(job.userId, job.image);
 
   const systemPrompt = 'You are an expert at crafting catchy and engaging titles for Reddit posts. Your task is to generate a title based on the description of an image and a set of categories. The title must be short (no more than 100 characters), witty, and attention-grabbing to ensure organic engagement. Do not mention that you are an AI model, do not use emojis, never use emojis, and always respond with a string.';
 
@@ -241,7 +241,7 @@ const createRedditTitle = async (job) => {
 
 const createRedditPostBody = async (job) => {
   // const photoData = await readPhotoDataFromFile(job.userId, job.image);
-  const photoData = await readPhotoDataFromDBUserAndFile(job.userId, job.image)
+  const photoData = await readPhotoDataFromDBUserAndFile(job.userId, job.image);
 
   const systemPrompt = 'You are a master storyteller who crafts engaging and intriguing post bodies for Reddit. Your task is to generate a post body based on the description of an image and a set of categories. The post should always relate to the image but should not simply describe it. Instead, create a story or engaging content that draws the reader in and relates to the given image and categories. Do not mention that you are an AI model and always respond with a string. Dont use emojis, never use emojis.';
 

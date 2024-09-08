@@ -204,6 +204,7 @@ const SetScheduleModal = ({ closeModal, selectedImages, twitterAccounts, redditA
 
     console.log('Schedule Data:', job);
     await createScheduledJob(job);
+    closeModal();
   };
 
   const renderWebsiteDropDown = () => {
