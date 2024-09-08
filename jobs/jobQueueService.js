@@ -286,5 +286,6 @@ const getMediaIfExists = async (job, username) => {
 
 module.exports = {
   makePost,
-  validateJob
+  validateJob,
+  reschedulePostJob
 };

@@ -1,5 +1,6 @@
 const amqp = require('amqplib');
-const {makePost, validateJob} = require('./jobQueueService');
+const {makePost, validateJob, reschedulePostJob} = require('./jobQueueService');
+const { getMessageIdsCountForJob, deleteMessageIdFromJob } = require('./jobsData')
 
 async function setupQueue () {
   const connection = await amqp.connect('amqp://localhost');
@@ -45,6 +46,16 @@ async function startWorker (channel) {
     console.log(Date.now());
     if (job.content !== 'Bridge job to ensure continuity') {
       await makePost(job);
+    } else {
+      // consume bridge job
+      console.log('deleting messageID from job...');
+      const numberOfMessagesLeft = await getMessageIdsCountForJob(job.jobSetId);
+      console.log(`intial messages: ${numberOfMessagesLeft}`);
+      await deleteMessageIdFromJob(job.jobSetId, job.message_id);
+      const afterDelete = await getMessageIdsCountForJob(job.jobSetId);
+      console.log(`after delete messages: ${afterDelete}`);
+  
+      await reschedulePostJob(job);
     }
     
     // Acknowledge the message to remove it from the queue
