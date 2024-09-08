@@ -134,7 +134,6 @@ const reschedulePostJob = async (job) => {
 };
 
 const postToTwitter = async (creds, job) => {
-  console.log(creds);
   if (creds.twitterTokens?.access_token && creds.twitterTokens?.refresh_token) {
     // see if we have media
     const path = await getMediaIfExists(job, job.userId);
@@ -258,6 +257,7 @@ const createRedditPostBody = async (job) => {
 const getMediaIfExists = async (job, username) => {
   const photoFolderPath = `${process.env.PHOTODATA_PATH}${username}${process.env.PHOTO_FOLDER}`;
   const videoFolderPath = `${process.env.PHOTODATA_PATH}${username}${process.env.VIDEO_FOLDER}`;
+
   const mediaFileName = job.image;
   const mediaPhotoFilePath = path.join(photoFolderPath, mediaFileName);
   const mediaVideoFilePath = path.join(videoFolderPath, mediaFileName);

@@ -151,6 +151,7 @@ const tweetOnBehalfOfUser = async (accessToken, accessSecret, tweetText) => {
 };
 
 const tweetMediaOnBehalfOfUser = async (accessToken, accessSecret, tweetText, mediaPath) => {
+  console.log('in tweet on behalf of user')
   try {
     // Initialize the Twitter client with the provided tokens
     const twitterClient = new TwitterApi({
