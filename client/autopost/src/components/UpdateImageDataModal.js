@@ -6,7 +6,7 @@ import { useAuth } from '../service/authContext';
 const UpdateImageDataModal = ({ imageData, closeModal, updatePhotoMetadata, mediaFiles, uploadedFileNames, user, clearMedia }) => {
   const [updatedData, setUpdatedData] = useState(imageData);
   const [media, setMedia] = useState(mediaFiles);
-
+  // console.log(imageData)
   const getMimeTypeFromExtension = (extension) => {
     const mimeTypes = {
       'png': 'image/png',
@@ -31,7 +31,7 @@ const UpdateImageDataModal = ({ imageData, closeModal, updatePhotoMetadata, medi
     let fieldName = name.split('-')[0]; // This will extract 'NSFW' from 'NSFW-0'
 
     // If the change is from radio buttons for NSFW, convert value to boolean
-    if (fieldName === 'NSFW') {
+    if (fieldName === 'nsfw') {
       actualValue = value === 'true'; // Converts the string 'true'/'false' to boolean
     }
 
@@ -44,6 +44,7 @@ const UpdateImageDataModal = ({ imageData, closeModal, updatePhotoMetadata, medi
     const fetchMetadata = async (fileNames) => {
       try {
         const metadata = await getPhotoMetadata(fileNames, user.username);
+        console.log(metadata)
         setUpdatedData(metadata);
       } catch (error) {
         console.error('Error fetching video metadata:', error);
@@ -72,6 +73,8 @@ const UpdateImageDataModal = ({ imageData, closeModal, updatePhotoMetadata, medi
   }, [updatedData, mediaFiles, uploadedFileNames, user.username]);
 
   const handleSave = () => {
+    console.log(imageData)
+    console.log(updatedData)
     // Perform save operation with updatedData
     updatePhotoMetadata(updatedData, user.username); // Pass updatedData to the function
     if (clearMedia) {
@@ -111,6 +114,7 @@ const UpdateImageDataModal = ({ imageData, closeModal, updatePhotoMetadata, medi
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '1rem', marginTop: '1rem' }}>
                 <label style={{ marginRight: '10px' }}>Name:</label>
                 <p>{item.name}</p>
+                <p>{console.log(item)}</p>
                 {renderMedia(media.find(file => file.fileName === item.name))}
               </div>
               
@@ -139,18 +143,18 @@ const UpdateImageDataModal = ({ imageData, closeModal, updatePhotoMetadata, medi
                 <label style={{ marginRight: 10 }}>NSFW:</label>
                 <input
                   type="radio"
-                  name={`NSFW-${index}`} // Unique name for each set
+                  name={`nsfw-${index}`} // Unique name for each set
                   value="true"
-                  checked={item.NSFW === true}
+                  checked={item.nsfw === 'true' || item.nsfw === true}
                   onChange={(e) => handleChange(e, index)}
                   style={{ marginRight: 5 }}
                 />
                 <label style={{ marginRight: 10 }}>Yes</label>
                 <input
                   type="radio"
-                  name={`NSFW-${index}`} // Unique name for each set
+                  name={`nsfw-${index}`} // Unique name for each set
                   value="false"
-                  checked={item.NSFW === false}
+                  checked={item.nsfw === 'false' || item.nsfw === false}
                   onChange={(e) => handleChange(e, index)}
                   style={{ marginRight: 5 }}
                 />

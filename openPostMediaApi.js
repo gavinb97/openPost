@@ -9,6 +9,7 @@ const path = require('path');
 const { appendOrWriteToJsonFile, deleteFromPhotoData } = require('./utils');
 const sharp = require('sharp');
 const axios = require('axios');
+const { writePhotoMetadata, readPhotoDataFromDB, updateMetadataDB, deleteFromPhotoDataDB } = require('./openPostMediaData')
 
 const router = express.Router();
 router.use(cookieParser());
@@ -42,10 +43,11 @@ router.post('/upload', upload.single('file'), async (req, res) => {
       name: fileName,
       description: description,
       categories: categories,
-      NSFW: true
+      nsfw: 'false'
     };
-
-    appendOrWriteToJsonFile(`${process.env.PHOTODATA_PATH}${username}/photoMetaData/photoData.txt`, metadata);
+    // TODO write to db instead of file
+    await writePhotoMetadata(metadata, username)
+    // appendOrWriteToJsonFile(`${process.env.PHOTODATA_PATH}${username}/photoMetaData/photoData.txt`, metadata);
 
     const ext = path.extname(fileName).toLowerCase();
     let uploadDir;
@@ -169,8 +171,8 @@ router.post('/deletebyname', async (req, res) => {
       console.error(`Error deleting file "${fileName}":`, err);
     }
   }
-
-  deleteFromPhotoData(username, filesToDelete);
+  await deleteFromPhotoDataDB(username, filesToDelete)
+  // deleteFromPhotoData(username, filesToDelete);
 
   res.status(200).send('Files deletion request received.');
 });
@@ -194,7 +196,8 @@ router.get('/filesWithContent', async (req, res) => {
 
 router.post('/getphotometadata', async (req, res) => {
   const fileNames = req.body.fileNames;
-  const photoData = await readPhotoDataFromFile(req.body.username);
+  // const photoData = await readPhotoDataFromFile(req.body.username);
+  const photoData = await readPhotoDataFromDB(req.body.username)
   const metadata = photoData.filter(obj => fileNames.includes(obj.name));
 
   res.json(metadata);
@@ -205,7 +208,8 @@ router.post('/updatephotometadata', async (req, res) => {
     const newData = req.body.newData;
     const username = req.body.username;
 
-    const existingData = await readPhotoDataFromFile(username);
+    // const existingData = await readPhotoDataFromFile(username);
+    const existingData = await readPhotoDataFromDB(username)
 
     newData.forEach(newObj => {
       const index = existingData.findIndex(obj => obj.name === newObj.name);
@@ -216,7 +220,8 @@ router.post('/updatephotometadata', async (req, res) => {
       }
     });
 
-    await writePhotoDataToFile(existingData, username);
+    // await writePhotoDataToFile(existingData, username);
+    await updateMetadataDB(existingData)
 
     res.status(200).json({ message: 'Photo metadata updated successfully.' });
   } catch (error) {
