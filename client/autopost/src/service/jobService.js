@@ -157,8 +157,6 @@ export const validateAndFormatScheduleData = async (request) => {
     captionType,
     handle
   } = request;
-  console.log('re quest');
-  console.log(request);
   // Validate required fields
   if (!username) {
     throw new Error('Username is required');

@@ -41,7 +41,6 @@ function UserLandingScreen () {
     // fetch total number of jobs
     if (user) {
       getJobsByUsername(user.username).then((jobs) => {
-        console.log(jobs);
         setJobCount(jobs.activeJobs.length);
       });
     }

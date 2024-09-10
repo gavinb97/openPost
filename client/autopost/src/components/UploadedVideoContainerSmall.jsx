@@ -18,9 +18,7 @@ const UploadedVideoContainerSmall = ({ videoFiles, setvideoFiles, imagesLoaded, 
   const [showScheduleModal, setShowScheduleModal] = useState(false);
   const [videoMetadata, setvideoMetadata] = useState([]);
 
-  // const [jobCount, setJobCount] = useState();
   const [showLimitModal, setShowLimitModal] = useState(false);
-  // const [reloadJobs, setReloadJobs] = useState(false)
 
   useEffect(() => {
     if (selectedVideos.length > 0) {
@@ -30,15 +28,6 @@ const UploadedVideoContainerSmall = ({ videoFiles, setvideoFiles, imagesLoaded, 
     }
   }, [selectedVideos]);
 
-  // useEffect(() => {
-  //   // fetch total number of jobs
-  //   if (user) {
-  //     getJobsByUsername(user.username).then((jobs) => {
-  //       console.log(jobs);
-  //       setJobCount(jobs.activeJobs.length);
-  //     });
-  //   }
-  // }, [ , reloadJobs]);
 
   const fetchPhotoMetadata = async (selectedImageIndexes) => {
     try {
@@ -74,12 +63,17 @@ const UploadedVideoContainerSmall = ({ videoFiles, setvideoFiles, imagesLoaded, 
   };
 
   const handleScheduleClick = () => {
-    console.log(jobCount)
-    if (jobCount >= 5) {
-      setShowLimitModal(true);
+    if (user.pro === 'false') {
+      if (jobCount >= 5) {
+        setShowLimitModal(true);
+      } else {
+        setShowScheduleModal(true);
+      }
     } else {
+      console.log('user is pro')
       setShowScheduleModal(true);
     }
+    
   };
 
   const renderPhotoActionButtons = () => {

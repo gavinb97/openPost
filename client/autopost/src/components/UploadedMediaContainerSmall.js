@@ -20,10 +20,8 @@ const UploadedMediaContainerSmall = ({mediaFiles, setMediaFiles, imagesLoaded, t
   const [showScheduleModal, setShowScheduleModal] = useState(false);
   const [imageMetadata, setImageMetadata] = useState([]);
 
-  // const [jobCount, setJobCount] = useState();
   const [showLimitModal, setShowLimitModal] = useState(false);
 
-  // const [reloadJobs, setReloadJobs] = useState(false)
 
   useEffect(() => {
     if (selectedImages.length > 0) {
@@ -33,15 +31,6 @@ const UploadedMediaContainerSmall = ({mediaFiles, setMediaFiles, imagesLoaded, t
     }
   }, [selectedImages]);
 
-  // useEffect(() => {
-  //   // fetch total number of jobs
-  //   if (user) {
-  //     getJobsByUsername(user.username).then((jobs) => {
-  //       console.log(jobs);
-  //       setJobCount(jobs.activeJobs.length);
-  //     });
-  //   }
-  // }, [ , reloadJobs]);
 
   const fetchPhotoMetadata = async (selectedImageIndexes) => {
     try {
@@ -81,15 +70,15 @@ const UploadedMediaContainerSmall = ({mediaFiles, setMediaFiles, imagesLoaded, t
   };
 
   const handleScheduleClick = () => {
-    // TODO job count check if user is not pro. if not pro they can have 5 total jobs
-    console.log(jobCount)
-    if (jobCount >= 5) {
-      setShowLimitModal(true);
+    if (user.pro === 'false') {
+      if (jobCount >= 5) {
+        setShowLimitModal(true);
+      } else {
+        setShowScheduleModal(true);
+      }
     } else {
       setShowScheduleModal(true);
     }
-
-    
   };
 
   const renderPhotoActionButtons = () => {
