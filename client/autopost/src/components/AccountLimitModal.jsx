@@ -5,6 +5,8 @@ import { useNavigate } from 'react-router-dom';
 const AccountLimitModal = ({ closeModal, user, limitReached}) => {
   const navigate = useNavigate();
 
+  const [work, setWork] = useState(limitReached === 'work');
+
   const getProButtonClick = () => {
     navigate('/pro');
   };
@@ -23,6 +25,10 @@ const AccountLimitModal = ({ closeModal, user, limitReached}) => {
       return (
         <h2>This is a pro feature</h2>
       );
+    case 'work':
+      return (
+        <h2>Sorry to get your hopes up</h2>
+      );
     }
   };
 
@@ -40,6 +46,11 @@ const AccountLimitModal = ({ closeModal, user, limitReached}) => {
       return (
         <p>Subscribe to Pro to unlock</p>
       );
+    case 'work':
+      return (
+        <p>This feature is coming soon</p>
+      );
+        
     }
   };
 
@@ -54,7 +65,7 @@ const AccountLimitModal = ({ closeModal, user, limitReached}) => {
         {determineBodyText()}
           
         <div className='updateImageModalButtons' >
-          <button onClick={getProButtonClick}>Get Pro</button>
+          {!work && <button onClick={getProButtonClick}>Get Pro</button>}
           <button onClick={closeModal}>Close</button>
         </div>
           

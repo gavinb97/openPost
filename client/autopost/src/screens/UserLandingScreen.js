@@ -246,7 +246,7 @@ function UserLandingScreen () {
       {showDMJobModal && <StartDMJobModal closeModal={handleCloseDMModal} twitterAccounts={twitterAccounts} redditAccounts={redditAccounts} youtubeAccounts={youtubeAccounts} tiktokAccounts={tiktokAccounts}/>}
       {showLoginPromptModal && <LoginPromptModal closeModal={handleCloseLoginPromptModal}></LoginPromptModal>}
       <div className='limitmodalLandingscreen'>
-        {showLimitModal && <AccountLimitModal closeModal={closeLimitModal} user={user} limitReached={'post'}/>}
+        {showLimitModal && <AccountLimitModal closeModal={closeLimitModal} user={user} limitReached={'work'}/>}
       </div>
       
     </div>
