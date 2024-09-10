@@ -7,7 +7,7 @@ import { useAuth } from '../service/authContext';
 
 const daysOfWeek = ['S', 'M', 'T', 'W', 'Th', 'F', 'Sa'];
 
-const SetScheduleModal = ({ closeModal, selectedImages, twitterAccounts, redditAccounts, youtubeAccounts, tiktokAccounts }) => {
+const SetScheduleModal = ({ closeModal, selectedImages, twitterAccounts, redditAccounts, youtubeAccounts, tiktokAccounts, setReloadJobs }) => {
   const { user } = useAuth();
  
   const [selectedWebsite, setSelectedWebsite] = useState(); // State for selected website
@@ -204,6 +204,7 @@ const SetScheduleModal = ({ closeModal, selectedImages, twitterAccounts, redditA
 
     console.log('Schedule Data:', job);
     await createScheduledJob(job);
+    setReloadJobs(true)
     closeModal();
   };
 

@@ -15,6 +15,10 @@ const AccountLimitModal = ({ closeModal, user, limitReached}) => {
       return (
         <h2>You've reached your free account limit</h2>
       );
+    case 'job':
+      return (
+        <h2>You've reached your free job limit</h2>
+      );
     }
   };
 
@@ -23,6 +27,10 @@ const AccountLimitModal = ({ closeModal, user, limitReached}) => {
     case 'authorizedAccounts':
       return (
         <p>Subscribe to Pro to authorize more accounts</p>
+      );
+    case 'job':
+      return (
+        <p>Subscribe to Pro to create more jobs</p>
       );
     }
   };

@@ -17,6 +17,7 @@ import StartDMJobModal from '../components/StartDMJobModal';
 import LoginPromptModal from '../components/LoginPromptModal';
 import useMethods from './UserLandingScreenMethods';
 import UploadedVideoContainerSmall from '../components/UploadedVideoContainerSmall';
+import {getJobsByUsername, deleteJob} from '../service/jobService';
 
 function UserLandingScreen () {
   const { mediaFiles, imagesLoaded, setMediaFiles, videoFiles, setvideoFiles} = useMethods();
@@ -32,6 +33,19 @@ function UserLandingScreen () {
   const [redditAccounts, setRedditAccounts] = useState([]); 
   const [youtubeAccounts, setYoutubeAccounts] = useState([]); 
   const [tiktokAccounts, setTiktokAccounts] = useState([]); 
+
+  const [jobCount, setJobCount] = useState();
+  const [reloadJobs, setReloadJobs] = useState(false)
+
+  useEffect(() => {
+    // fetch total number of jobs
+    if (user) {
+      getJobsByUsername(user.username).then((jobs) => {
+        console.log(jobs);
+        setJobCount(jobs.activeJobs.length);
+      });
+    }
+  }, [ , reloadJobs]);
 
   const { user  } = useAuth();
 
@@ -115,7 +129,7 @@ function UserLandingScreen () {
       <div className='photo-post-job-container' style={{ textAlign: 'center' }}>
         <h2>Photo Post Job</h2>
         <p>Click an image or multiple images to start a photo post job</p>
-        <UploadedMediaContainerSmall mediaFiles={mediaFiles} imagesLoaded={imagesLoaded} setMediaFiles={setMediaFiles} twitterAccounts={twitterAccounts} redditAccounts={redditAccounts} youtubeAccounts={youtubeAccounts} tiktokAccounts={tiktokAccounts}></UploadedMediaContainerSmall>
+        <UploadedMediaContainerSmall jobCount={jobCount} reloadJobs={reloadJobs} setReloadJobs={setReloadJobs} mediaFiles={mediaFiles} imagesLoaded={imagesLoaded} setMediaFiles={setMediaFiles} twitterAccounts={twitterAccounts} redditAccounts={redditAccounts} youtubeAccounts={youtubeAccounts} tiktokAccounts={tiktokAccounts}></UploadedMediaContainerSmall>
       </div>
     );
   };
@@ -125,7 +139,7 @@ function UserLandingScreen () {
       <div className='photo-post-job-container' style={{ textAlign: 'center' }}>
         <h2>Video Post Job</h2>
         <p>Click an video or multiple videos to start a video post job</p>
-        <UploadedVideoContainerSmall videoFiles={videoFiles} imagesLoaded={imagesLoaded} setvideoFiles={setvideoFiles} twitterAccounts={twitterAccounts} redditAccounts={redditAccounts} youtubeAccounts={youtubeAccounts} tiktokAccounts={tiktokAccounts}></UploadedVideoContainerSmall>
+        <UploadedVideoContainerSmall jobCount={jobCount} reloadJobs={reloadJobs} setReloadJobs={setReloadJobs} videoFiles={videoFiles} imagesLoaded={imagesLoaded} setvideoFiles={setvideoFiles} twitterAccounts={twitterAccounts} redditAccounts={redditAccounts} youtubeAccounts={youtubeAccounts} tiktokAccounts={tiktokAccounts}></UploadedVideoContainerSmall>
       </div>
     );
   };

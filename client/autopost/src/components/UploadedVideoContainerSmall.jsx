@@ -4,9 +4,12 @@ import { deleteByName, getPhotoMetadata, updatePhotoMetadata } from '../service/
 import UpdateImageDataModal from './UpdateImageDataModal';
 import SetScheduleModal from '../components/SetScheduleModal';
 import { useAuth } from '../service/authContext';
+import {getJobsByUsername, deleteJob} from '../service/jobService';
 import './../App.css';
 
-const UploadedVideoContainerSmall = ({ videoFiles, setvideoFiles, imagesLoaded, twitterAccounts, redditAccounts, youtubeAccounts, tiktokAccounts }) => {
+import AccountLimitModal from './AccountLimitModal';
+
+const UploadedVideoContainerSmall = ({ videoFiles, setvideoFiles, imagesLoaded, twitterAccounts, redditAccounts, youtubeAccounts, tiktokAccounts, reloadJobs, setReloadJobs, jobCount }) => {
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -15,6 +18,10 @@ const UploadedVideoContainerSmall = ({ videoFiles, setvideoFiles, imagesLoaded, 
   const [showScheduleModal, setShowScheduleModal] = useState(false);
   const [videoMetadata, setvideoMetadata] = useState([]);
 
+  // const [jobCount, setJobCount] = useState();
+  const [showLimitModal, setShowLimitModal] = useState(false);
+  // const [reloadJobs, setReloadJobs] = useState(false)
+
   useEffect(() => {
     if (selectedVideos.length > 0) {
       fetchPhotoMetadata(selectedVideos);
@@ -22,6 +29,16 @@ const UploadedVideoContainerSmall = ({ videoFiles, setvideoFiles, imagesLoaded, 
       setvideoMetadata([]);
     }
   }, [selectedVideos]);
+
+  // useEffect(() => {
+  //   // fetch total number of jobs
+  //   if (user) {
+  //     getJobsByUsername(user.username).then((jobs) => {
+  //       console.log(jobs);
+  //       setJobCount(jobs.activeJobs.length);
+  //     });
+  //   }
+  // }, [ , reloadJobs]);
 
   const fetchPhotoMetadata = async (selectedImageIndexes) => {
     try {
@@ -57,7 +74,12 @@ const UploadedVideoContainerSmall = ({ videoFiles, setvideoFiles, imagesLoaded, 
   };
 
   const handleScheduleClick = () => {
-    setShowScheduleModal(true);
+    console.log(jobCount)
+    if (jobCount >= 5) {
+      setShowLimitModal(true);
+    } else {
+      setShowScheduleModal(true);
+    }
   };
 
   const renderPhotoActionButtons = () => {
@@ -79,6 +101,10 @@ const UploadedVideoContainerSmall = ({ videoFiles, setvideoFiles, imagesLoaded, 
         </button>
       </div>
     );
+  };
+
+  const closeLimitModal = () => {
+    setShowLimitModal(false);
   };
 
   const handleImageClick = (index) => {
@@ -114,7 +140,8 @@ const UploadedVideoContainerSmall = ({ videoFiles, setvideoFiles, imagesLoaded, 
         </div>
         <div>
           {showModal && <UpdateImageDataModal imageData={videoMetadata} closeModal={closeModal} updatePhotoMetadata={updatePhotoMetadata} user={user} />}
-          {showScheduleModal && <SetScheduleModal closeModal={closeModal} selectedImages={selectedVideoNames} twitterAccounts={twitterAccounts} redditAccounts={redditAccounts} youtubeAccounts={youtubeAccounts} tiktokAccounts={tiktokAccounts}></SetScheduleModal>} 
+          {showScheduleModal && <SetScheduleModal setReloadJobs={setReloadJobs} closeModal={closeModal} selectedImages={selectedVideoNames} twitterAccounts={twitterAccounts} redditAccounts={redditAccounts} youtubeAccounts={youtubeAccounts} tiktokAccounts={tiktokAccounts}></SetScheduleModal>} 
+          {showLimitModal && <AccountLimitModal closeModal={closeLimitModal} user={user} limitReached={'job'}/>}
         </div>
       </div>
     );

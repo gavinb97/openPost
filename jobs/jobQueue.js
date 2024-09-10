@@ -48,7 +48,9 @@ async function startWorker (channel) {
       await makePost(job);
     } else {
       // consume bridge job
-      console.log('deleting messageID from job...');
+      console.log('gonna try to consume bridge job')
+      try {
+        console.log('deleting messageID from job...');
       const numberOfMessagesLeft = await getMessageIdsCountForJob(job.jobSetId);
       console.log(`intial messages: ${numberOfMessagesLeft}`);
       await deleteMessageIdFromJob(job.jobSetId, job.message_id);
@@ -56,6 +58,11 @@ async function startWorker (channel) {
       console.log(`after delete messages: ${afterDelete}`);
   
       await reschedulePostJob(job);
+      } catch (e) {
+        console.log(e)
+        console.log('whoops')
+      }
+      
     }
     
     // Acknowledge the message to remove it from the queue

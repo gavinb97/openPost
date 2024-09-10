@@ -4,9 +4,13 @@ import { fetchAllFiles, deleteByName, getPhotoMetadata, updatePhotoMetadata, fet
 import UpdateImageDataModal from './UpdateImageDataModal';
 import SetScheduleModal from '../components/SetScheduleModal';
 import { useAuth } from '../service/authContext';
-import './../App.css';
+import {getJobsByUsername, deleteJob} from '../service/jobService';
+import AccountDetailsModal from './AccountDetailsModal';
 
-const UploadedMediaContainerSmall = ({mediaFiles, setMediaFiles, imagesLoaded, twitterAccounts, redditAccounts, youtubeAccounts, tiktokAccounts}) => {
+import './../App.css';
+import AccountLimitModal from './AccountLimitModal';
+
+const UploadedMediaContainerSmall = ({mediaFiles, setMediaFiles, imagesLoaded, twitterAccounts, redditAccounts, youtubeAccounts, tiktokAccounts, reloadJobs, setReloadJobs, jobCount}) => {
   const { user } = useAuth();
 
   const navigate = useNavigate();
@@ -16,6 +20,11 @@ const UploadedMediaContainerSmall = ({mediaFiles, setMediaFiles, imagesLoaded, t
   const [showScheduleModal, setShowScheduleModal] = useState(false);
   const [imageMetadata, setImageMetadata] = useState([]);
 
+  // const [jobCount, setJobCount] = useState();
+  const [showLimitModal, setShowLimitModal] = useState(false);
+
+  // const [reloadJobs, setReloadJobs] = useState(false)
+
   useEffect(() => {
     if (selectedImages.length > 0) {
       fetchPhotoMetadata(selectedImages);
@@ -23,6 +32,16 @@ const UploadedMediaContainerSmall = ({mediaFiles, setMediaFiles, imagesLoaded, t
       setImageMetadata([]);
     }
   }, [selectedImages]);
+
+  // useEffect(() => {
+  //   // fetch total number of jobs
+  //   if (user) {
+  //     getJobsByUsername(user.username).then((jobs) => {
+  //       console.log(jobs);
+  //       setJobCount(jobs.activeJobs.length);
+  //     });
+  //   }
+  // }, [ , reloadJobs]);
 
   const fetchPhotoMetadata = async (selectedImageIndexes) => {
     try {
@@ -57,8 +76,20 @@ const UploadedMediaContainerSmall = ({mediaFiles, setMediaFiles, imagesLoaded, t
     setShowScheduleModal(false);
   };
 
+  const closeLimitModal = () => {
+    setShowLimitModal(false);
+  };
+
   const handleScheduleClick = () => {
-    setShowScheduleModal(true);
+    // TODO job count check if user is not pro. if not pro they can have 5 total jobs
+    console.log(jobCount)
+    if (jobCount >= 5) {
+      setShowLimitModal(true);
+    } else {
+      setShowScheduleModal(true);
+    }
+
+    
   };
 
   const renderPhotoActionButtons = () => {
@@ -126,7 +157,8 @@ const UploadedMediaContainerSmall = ({mediaFiles, setMediaFiles, imagesLoaded, t
         <div>
           {/* Pass selected image names to SetScheduleModal */}
           {showModal && <UpdateImageDataModal imageData={imageMetadata} closeModal={closeModal} updatePhotoMetadata={updatePhotoMetadata} user={user} />}
-          {showScheduleModal && <SetScheduleModal closeModal={closeModal} selectedImages={selectedImageNames} twitterAccounts={twitterAccounts} redditAccounts={redditAccounts} youtubeAccounts={youtubeAccounts} tiktokAccounts={tiktokAccounts}></SetScheduleModal>} 
+          {showScheduleModal && <SetScheduleModal setReloadJobs={setReloadJobs} closeModal={closeModal} selectedImages={selectedImageNames} twitterAccounts={twitterAccounts} redditAccounts={redditAccounts} youtubeAccounts={youtubeAccounts} tiktokAccounts={tiktokAccounts}></SetScheduleModal>} 
+          {showLimitModal && <AccountLimitModal closeModal={closeLimitModal} user={user} limitReached={'job'}/>}
         </div>
       </div>
     );
