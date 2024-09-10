@@ -48,19 +48,19 @@ async function startWorker (channel) {
       await makePost(job);
     } else {
       // consume bridge job
-      console.log('gonna try to consume bridge job')
+      console.log('gonna try to consume bridge job');
       try {
         console.log('deleting messageID from job...');
-      const numberOfMessagesLeft = await getMessageIdsCountForJob(job.jobSetId);
-      console.log(`intial messages: ${numberOfMessagesLeft}`);
-      await deleteMessageIdFromJob(job.jobSetId, job.message_id);
-      const afterDelete = await getMessageIdsCountForJob(job.jobSetId);
-      console.log(`after delete messages: ${afterDelete}`);
+        const numberOfMessagesLeft = await getMessageIdsCountForJob(job.jobSetId);
+        console.log(`intial messages: ${numberOfMessagesLeft}`);
+        await deleteMessageIdFromJob(job.jobSetId, job.message_id);
+        const afterDelete = await getMessageIdsCountForJob(job.jobSetId);
+        console.log(`after delete messages: ${afterDelete}`);
   
-      await reschedulePostJob(job);
+        await reschedulePostJob(job);
       } catch (e) {
-        console.log(e)
-        console.log('whoops')
+        console.log(e);
+        console.log('whoops');
       }
       
     }

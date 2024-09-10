@@ -70,7 +70,6 @@ const UploadedVideoContainerSmall = ({ videoFiles, setvideoFiles, imagesLoaded, 
         setShowScheduleModal(true);
       }
     } else {
-      console.log('user is pro')
       setShowScheduleModal(true);
     }
     

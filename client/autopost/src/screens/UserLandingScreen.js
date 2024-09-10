@@ -18,6 +18,7 @@ import LoginPromptModal from '../components/LoginPromptModal';
 import useMethods from './UserLandingScreenMethods';
 import UploadedVideoContainerSmall from '../components/UploadedVideoContainerSmall';
 import {getJobsByUsername, deleteJob} from '../service/jobService';
+import AccountLimitModal from '../components/AccountLimitModal';
 
 function UserLandingScreen () {
   const { mediaFiles, imagesLoaded, setMediaFiles, videoFiles, setvideoFiles} = useMethods();
@@ -35,7 +36,9 @@ function UserLandingScreen () {
   const [tiktokAccounts, setTiktokAccounts] = useState([]); 
 
   const [jobCount, setJobCount] = useState();
-  const [reloadJobs, setReloadJobs] = useState(false)
+  const [reloadJobs, setReloadJobs] = useState(false);
+
+  const [showLimitModal, setShowLimitModal] = useState(false);
 
   useEffect(() => {
     // fetch total number of jobs
@@ -103,23 +106,48 @@ function UserLandingScreen () {
   };
 
   const handleShowPostJobModal = () => {
-    setShowPostJobModal(true);
+    if (user.pro === 'true') {
+      setShowPostJobModal(true);
+    } else {
+      setShowLimitModal(true);
+    }
+    
   };
 
   const handleShowCommentModal = () => {
-    setShowCommentJobModal(true);
+    if (user.pro === 'true') {
+      setShowCommentJobModal(true);
+    } else {
+      setShowLimitModal(true);
+    } 
+    
   };
 
   const handleCloseCommentModal = () => {
-    setShowCommentJobModal(false);
+    if (user.pro === 'true') {
+      setShowCommentJobModal(false);
+    } else {
+      setShowLimitModal(true);
+    }
+    
   };
 
   const handleShowDMModal = () => {
-    setShowDMJobModal(true);
+    if (user.pro === 'true') {
+      setShowDMJobModal(true);
+    } else {
+      setShowLimitModal(true);
+    }
+    
   };
 
   const handleCloseDMModal = () => {
-    setShowDMJobModal(false);
+    if (user.pro === 'true') {
+      setShowDMJobModal(false);
+    } else {
+      setShowLimitModal(true);
+    }
+    
   };
 
 
@@ -186,6 +214,10 @@ function UserLandingScreen () {
     );
   };
 
+  const closeLimitModal = () => {
+    setShowLimitModal(false);
+  };
+
   
    
   return (
@@ -213,6 +245,10 @@ function UserLandingScreen () {
       {showCommentJobModal && <StartCommentJobModal closeModal={handleCloseCommentModal} twitterAccounts={twitterAccounts} redditAccounts={redditAccounts} youtubeAccounts={youtubeAccounts} tiktokAccounts={tiktokAccounts}/>}
       {showDMJobModal && <StartDMJobModal closeModal={handleCloseDMModal} twitterAccounts={twitterAccounts} redditAccounts={redditAccounts} youtubeAccounts={youtubeAccounts} tiktokAccounts={tiktokAccounts}/>}
       {showLoginPromptModal && <LoginPromptModal closeModal={handleCloseLoginPromptModal}></LoginPromptModal>}
+      <div className='limitmodalLandingscreen'>
+        {showLimitModal && <AccountLimitModal closeModal={closeLimitModal} user={user} limitReached={'post'}/>}
+      </div>
+      
     </div>
   );
 
