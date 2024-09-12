@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import TagInputComponent from './TagInputComponent'; // Import the TagInputComponent
 import './../App.css';
-import { validateAndFormatPostJobData } from '../service/jobService';
+import { validateAndFormatPostJobData, createScheduledJob } from '../service/jobService';
 import { getSFWSubreddits } from '../service/redditService';
 import { useAuth } from '../service/authContext';
 
@@ -31,39 +31,48 @@ const StartPostJobModal = ({ closeModal, selectedImages, twitterAccounts, reddit
   
   const [postType, setPostType] = useState('ai');
 
+  const [selectedAccount, setSelectedAccount] = useState()
+
   useEffect(() => {
-    if (selectedWebsite === 'reddit') {
+    if (selectedWebsite === 'reddit' && selectedAccount) {
       const fetchSubreddits = async () => {
         try {
-          const subreddits = await getSFWSubreddits(user);
-  
+          const credsArray = user.creds;
+        
+          const accountCreds = credsArray.find((creds) => creds.handle === selectedAccount);
+          const subreddits = await getSFWSubreddits(accountCreds);
+          
           const subredditObjects = subreddits.map((subredditName, index) => ({
             name: subredditName,
             id: `${index + 1}`, // ID using numerical values
           }));
-  
+
           setSubredditList(subredditObjects);
-          setSelectedSubreddits(subredditObjects);
+          // setSelectedSubreddits(subredditObjects);
         } catch (error) {
           console.error('Error fetching subreddits:', error);
         }
       };
-  
+
       fetchSubreddits();
     } else {
       setSubredditList([]);
       setSelectedSubreddits([]);
     }
-  }, [selectedWebsite, user]);
+  }, [selectedWebsite, user, selectedAccount]);
   
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
   
   const toggleDropdown = () => setIsOpen(!isOpen);
   
-  useEffect(() => {
-    setSelectedSubreddits(subredditList);
-  }, [subredditList]);
+  // useEffect(() => {
+  //   setSelectedSubreddits(subredditList);
+  // }, [subredditList]);
+
+  const handleAccountChange = (event) => {
+    setSelectedAccount(event.target.value);
+  };
   
   const handleCheckboxChange = (event) => {
     const { value } = event.target;
@@ -216,9 +225,10 @@ const StartPostJobModal = ({ closeModal, selectedImages, twitterAccounts, reddit
       aiPrompt,
       redditPosts
     };
+    
     console.log(scheduleData);
     const job = await validateAndFormatPostJobData(scheduleData);
-
+    await createScheduledJob(job)
     console.log(job);
     console.log('da job above');
   };
@@ -671,6 +681,99 @@ const StartPostJobModal = ({ closeModal, selectedImages, twitterAccounts, reddit
         
   
   };
+
+  const selectAccountDropDown = () => {
+    
+    const renderAccountOptions = () => {
+      let accounts = [];
+
+      switch (selectedWebsite) {
+      case 'twitter':
+        accounts = twitterAccounts;
+        break;
+      case 'reddit':
+        accounts = redditAccounts;
+        break;
+      case 'tiktok':
+        accounts = tiktokAccounts;
+        break;
+      case 'youtube':
+        accounts = youtubeAccounts;
+        break;
+      default:
+        break;
+      }
+
+      return accounts.map((account) => (
+        <option key={account.handle} value={account.handle}>
+          {account.handle}
+        </option>
+      ));
+    };
+
+    return (
+      <>
+        {selectedWebsite && (
+          <div className="input-group">
+            <label htmlFor="account">Account:</label>
+            <select className='modalSelect' id="account" value={selectedAccount} onChange={handleAccountChange}>
+              <option>Select Account</option>
+              {renderAccountOptions()}
+            </select>
+          </div>
+        )}
+      </>
+    );
+  };
+
+  const renderWebsiteDropDown = () => {
+
+    return (
+      <div className="input-group">
+        <label htmlFor="website">Website:</label>
+        <select className='modalSelect' id="website" value={selectedWebsite} onChange={handleWebsiteChange}>
+          <option>Select Website</option>
+          {twitterAccounts.length > 0 && <option value="twitter">Twitter</option>}
+          {redditAccounts.length > 0 && <option value="reddit">Reddit</option>}
+          {tiktokAccounts.length > 0 && <option value="tiktok">TikTok</option>}
+          {youtubeAccounts.length > 0 && <option value="youtube">Youtube Shorts</option>}
+        </select>
+      </div>
+    );
+  };
+
+  const renderSubredditSelect = () => {
+    return (
+      <>
+        {selectedWebsite === 'reddit' && subredditList.length > 0 && (
+          <div className="subredditSelect">
+            <div className="subreddit-selector" ref={dropdownRef}>
+              <button onClick={toggleDropdown}>Select Subreddits</button>
+              {isOpen && (
+                <div className="dropdown-menu">
+                  <div className="grid-container">
+                    {subredditList.map((subreddit) => (
+                      <div key={subreddit.id} className="grid-item">
+                        <label>
+                          <input
+                            type="checkbox"
+                            value={subreddit.id}
+                            checked={selectedSubreddits.some((sub) => sub.id === subreddit.id)}
+                            onChange={handleCheckboxChange}
+                          />
+                          <span>{subreddit.name}</span>
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </>
+    );
+  };
   
   return (
     <div className="SetScheduleModal-modal-container" style={{ marginBottom: '2%', textAlign: 'center' }}>
@@ -679,14 +782,8 @@ const StartPostJobModal = ({ closeModal, selectedImages, twitterAccounts, reddit
         <h2>Start Post Job</h2>
 
 
-        <div className="input-group">
-          <label htmlFor="website">Website:</label>
-          <select id="website" value={selectedWebsite} onChange={handleWebsiteChange}>
-            <option value="twitter">Twitter</option>
-            <option value="reddit">Reddit</option>
-          </select>
-        </div>
-
+        {renderWebsiteDropDown()}
+        {selectAccountDropDown()}
         {renderPostTypeSelect()}
   
         <div className="input-group">
@@ -748,32 +845,7 @@ const StartPostJobModal = ({ closeModal, selectedImages, twitterAccounts, reddit
             </div>
           )} */}
   
-        {selectedWebsite === 'reddit' && postType === 'ai' && subredditList.length > 0 && (
-          <div className="your-component">
-            <div className="subreddit-selector" ref={dropdownRef}>
-              <button onClick={toggleDropdown}>Select Subreddits</button>
-              {isOpen && (
-                <div className="dropdown-menu">
-                  <div className="grid-container">
-                    {subredditList.map((subreddit) => (
-                      <div key={subreddit.id} className="grid-item">
-                        <label>
-                          <input
-                            type="checkbox"
-                            value={subreddit.id}
-                            checked={selectedSubreddits.some((sub) => sub.id === subreddit.id)}
-                            onChange={handleCheckboxChange}
-                          />
-                          <span>{subreddit.name}</span>
-                        </label>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
+        {renderSubredditSelect()}
   
         <button onClick={handleSave}>Save</button>
         <button onClick={closeModal}>Close</button>

@@ -35,6 +35,9 @@ const makePost = async (job) => {
   // validate that job is active 
   const validJob = await validateJob(job);
   if (validJob) {
+    try {
+
+    
     const creds = await getCredsByUsernameAndHandle(job.userId, job.handle);
 
     switch (job.website) {
@@ -50,6 +53,10 @@ const makePost = async (job) => {
     default:
       console.log('no website, cant do anything...');
     }
+
+  } catch (e) {
+    console.log(e)
+  }
   }
     
 };

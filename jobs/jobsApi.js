@@ -13,9 +13,12 @@ let channelPromise = setupQueue();
 channelPromise.then(startWorker);
 
 router.post('/jobs', async (req, res) => {
-  const jobs = await formatRequest(req.body);
-  console.log(jobs);
+  
+  
   try {
+    const jobs = await formatRequest(req.body);
+    console.log(jobs);
+
     const channel = await channelPromise;
 
     for (const job of jobs) {

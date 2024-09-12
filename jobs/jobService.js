@@ -6,25 +6,37 @@ const formatRequest = async (request) => {
   console.log('in format request ^^');
   let jobs;
 
-  switch (request.selectedWebsite) {
-  case 'reddit':
-    jobs = await handleScheduleType(request);
-    break;
-  case 'twitter': 
-    jobs = await handleScheduleType(request);
-    break;
-  case 'tiktok':
-    jobs = await handleScheduleType(request);
-    break;
-  case 'youtube':
-    jobs = await handleScheduleType(request);
-    break;
-  default:
-    console.log('No website selected, something must be wrong');
+  if (request?.jobType === 'postJob') {
+    console.log('got a postjob')
+    // throw new Error('somethign with the postjob')
+    jobs = []
+  } else {
+    jobs = await handleMediaPostJob(request, jobs)
   }
-    
+   
   return jobs;
 };
+
+const handleMediaPostJob = async (request, jobs) => {
+  switch (request.selectedWebsite) {
+    case 'reddit':
+      jobs = await handleScheduleType(request);
+      break;
+    case 'twitter': 
+      jobs = await handleScheduleType(request);
+      break;
+    case 'tiktok':
+      jobs = await handleScheduleType(request);
+      break;
+    case 'youtube':
+      jobs = await handleScheduleType(request);
+      break;
+    default:
+      console.log('No website selected, something must be wrong');
+    }
+
+  return jobs
+}
 
 const createRandomJobObject = (obj, jobSetId, originalImages, remainingImages, scheduledTime, originalSubreddits, remainingSubreddits) => {
   return {

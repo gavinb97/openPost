@@ -758,7 +758,7 @@ const getCredsByUsernameAndHandle = async (username, handle) => {
     }
   } catch (error) {
     console.error('Error getting user credentials from user_creds table:', error);
-    throw error;
+    // throw error;
   }
 };
 
