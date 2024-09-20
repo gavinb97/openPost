@@ -17,6 +17,7 @@ const StartPostJobModal = ({ closeModal, selectedImages, twitterAccounts, reddit
   const [hourInterval, setHourInterval] = useState(1); // State for hour interval
   const [timesOfDay, setTimesOfDay] = useState([]);
   const [durationOfJob, setDurationOfJob] = useState();
+  const [numberOfPosts, setNumberOfPosts] = useState()
   const [selectedDays, setSelectedDays] = useState({
     S: false,
     M: false,
@@ -48,7 +49,7 @@ const StartPostJobModal = ({ closeModal, selectedImages, twitterAccounts, reddit
           }));
 
           setSubredditList(subredditObjects);
-          // setSelectedSubreddits(subredditObjects);
+          
         } catch (error) {
           console.error('Error fetching subreddits:', error);
         }
@@ -66,10 +67,6 @@ const StartPostJobModal = ({ closeModal, selectedImages, twitterAccounts, reddit
   
   const toggleDropdown = () => setIsOpen(!isOpen);
   
-  // useEffect(() => {
-  //   setSelectedSubreddits(subredditList);
-  // }, [subredditList]);
-
   const handleAccountChange = (event) => {
     setSelectedAccount(event.target.value);
   };
@@ -143,6 +140,10 @@ const StartPostJobModal = ({ closeModal, selectedImages, twitterAccounts, reddit
   const handleDurationChange = (e) => {
     setDurationOfJob(e.target.value);
   };
+
+  const handleNumberOfPostsChange = (e) => {
+    setNumberOfPosts(e.target.value)
+  }
 
   const renderTimeInput = () => {
     return (
@@ -237,7 +238,7 @@ const StartPostJobModal = ({ closeModal, selectedImages, twitterAccounts, reddit
     return (
       <div className="input-group">
         <label htmlFor="postTypeSelect">Post Type:</label>
-        <select id="postTypeSelect" value={postType} onChange={handlePostTypeChange}>
+        <select className='modalSelect' id="postTypeSelect" value={postType} onChange={handlePostTypeChange}>
           <option value="ai">Ai Generated</option>
           <option value="User">User Generated</option>
         </select>
@@ -638,18 +639,21 @@ const StartPostJobModal = ({ closeModal, selectedImages, twitterAccounts, reddit
 
   const renderAIPrompt = () => {
     return (
-      <div>
-        <div style={{ marginBottom: '10px' }}>
-          <label style={{ marginRight: '10px' }}>Style:</label>
-          <input
+      <div className='aiInputContainer'>
+        <div className='aibox'>
+<div className='aiInputs'>
+          <label className='ailabel' style={{ marginRight: '10px' }}>Style:</label>
+          <textarea
             type="text"
             value={aiPrompt.style}
             onChange={(e) => handleAIPromptChange('style', e.target.value)}
           />
+          {/* <p className='aitext'>This prompt helps with the voice of the post</p> */}
         </div>
-        <div style={{ marginBottom: '10px' }}>
-          <label style={{ marginRight: '10px' }}>Type of Content:</label>
-          <input
+        </div>
+        <div className='aiInputs'>
+          <label className='ailabel' style={{ marginRight: '10px' }}>Type of Content:</label>
+          <textarea
             type="text"
             value={aiPrompt.contentType}
             onChange={(e) => handleAIPromptChange('contentType', e.target.value)}
@@ -659,28 +663,22 @@ const StartPostJobModal = ({ closeModal, selectedImages, twitterAccounts, reddit
     );
   };
 
-  const renderDurationBox = () => {
+  const renderNumberOfPostsBox = () => {
     if (scheduleType === 'random') {
       return (
         <div className="input-group">
-          <label htmlFor="durationSelect">Job duration: </label>
-          <select id="durationSelect" value={durationOfJob} onChange={handleDurationChange}>
-            <option value="">Select duration</option>
-            <option value="999">Forever</option>
-            <option value="1">1 day</option>
-            <option value="2">2 day</option>
-            <option value="3">3 day</option>
-            <option value="4">4 day</option>
-            <option value="5">5 day</option>
+          <label htmlFor="durationSelect">Number of posts: </label>
+          <select className= 'modalSelect' id="durationSelect" value={numberOfPosts} onChange={handleNumberOfPostsChange}>
+            <option value="">Number of posts</option>
+            {Array.from({ length: 50 }, (_, i) => (
+              <option key={i + 1} value={i + 1}>{i + 1}</option>
+            ))}
           </select>
-          
         </div>
       );
     }
-    
-        
-  
-  };
+  };  
+
 
   const selectAccountDropDown = () => {
     
@@ -717,7 +715,7 @@ const StartPostJobModal = ({ closeModal, selectedImages, twitterAccounts, reddit
           <div className="input-group">
             <label htmlFor="account">Account:</label>
             <select className='modalSelect' id="account" value={selectedAccount} onChange={handleAccountChange}>
-              <option>Select Account</option>
+              <option value='select'>Select Account</option>
               {renderAccountOptions()}
             </select>
           </div>
@@ -745,7 +743,7 @@ const StartPostJobModal = ({ closeModal, selectedImages, twitterAccounts, reddit
   const renderSubredditSelect = () => {
     return (
       <>
-        {selectedWebsite === 'reddit' && subredditList.length > 0 && (
+        {selectedWebsite === 'reddit' && postType === 'ai' && subredditList.length > 0 && (
           <div className="subredditSelect">
             <div className="subreddit-selector" ref={dropdownRef}>
               <button onClick={toggleDropdown}>Select Subreddits</button>
@@ -774,48 +772,65 @@ const StartPostJobModal = ({ closeModal, selectedImages, twitterAccounts, reddit
       </>
     );
   };
-  
-  return (
-    <div className="SetScheduleModal-modal-container" style={{ marginBottom: '2%', textAlign: 'center' }}>
-      <div className="SetScheduleModal-modal-backdrop" onClick={closeModal}></div>
-      <div className="SetScheduleModal">
-        <h2>Start Post Job</h2>
 
+  const renderScheduleType = () => {
+    return (
+      <div className="input-group">
+        <label htmlFor="scheduleTypeSelect">Schedule Type:</label>
+        <select className='modalSelect' id="scheduleTypeSelect" value={scheduleType} onChange={handleScheduleTypeChange}>
+          <option value="random">Random</option>
+          <option value="scheduled">Scheduled</option>
+        </select>
+      </div>
+    );
+  };
 
-        {renderWebsiteDropDown()}
-        {selectAccountDropDown()}
-        {renderPostTypeSelect()}
-  
-        <div className="input-group">
-          <label htmlFor="scheduleTypeSelect">Schedule Type:</label>
-          <select id="scheduleTypeSelect" value={scheduleType} onChange={handleScheduleTypeChange}>
-            <option value="random">Random</option>
-            <option value="scheduled">Scheduled</option>
-          </select>
-        </div>
-
-        {renderDurationBox()}
+  const renderScheduleInterval = () => {
+    return (
+      <>
         {scheduleType === 'scheduled' && (
           <div className="input-group">
             <label htmlFor="scheduleIntervalSelect">Schedule Interval:</label>
-            <select id="scheduleIntervalSelect" value={scheduleInterval} onChange={handleScheduleIntervalChange}>
+            <select className='modalSelect' id="scheduleIntervalSelect" value={scheduleInterval} onChange={handleScheduleIntervalChange}>
               <option value="">Select interval</option>
               <option value="hour">Hour Intervals</option>
               <option value="set">Set Times</option>
             </select>
           </div>
         )}
+      </>
+    );
+  };
 
-        {scheduleType === 'random' && postType !== 'ai' && renderPostOrder()}
+  const renderJobDurationForRandomJobs = () => {
+    return(
+      <>
+        {scheduleType === 'random' && (
+          <div className="input-group">
+            <label htmlFor="durationSelect">Job duration: </label>
+            <select className='modalSelect' id="durationSelect" value={durationOfJob} onChange={handleDurationChange}>
+              <option value="">Select duration</option>
+              <option value="999">Forever</option>
+              <option value="1">1 iteration</option>
+              <option value="2">2 iterations</option>
+              <option value="3">3 iterations</option>
+              <option value="4">4 iterations</option>
+              <option value="5">5 iterations</option>
+            </select>
+            <p>*a single iteration is every photo selected posted a singular time</p>
+          </div>
+        )}
+      </>
+    );
+  };
 
-        {renderUserGeneratedReddit()}
-        {renderUserGeneratedRedditSetSchedule()}
-          
-  
+  const renderHourIntervalSelect = () => {
+    return (
+      <>
         {scheduleType === 'scheduled' && scheduleInterval === 'hour' && (
           <div className="input-group">
             <label>Post every: </label>
-            <select value={hourInterval} onChange={handleHourIntervalChange}>
+            <select className='modalSelect' value={hourInterval} onChange={handleHourIntervalChange}>
               {[...Array(24)].map((_, index) => (
                 <option key={index} value={index + 1}>
                   {index + 1}
@@ -825,6 +840,58 @@ const StartPostJobModal = ({ closeModal, selectedImages, twitterAccounts, reddit
             <span>hours</span>
           </div>
         )}
+      </>
+    )
+  }
+
+  const getButtonClassName = () => {
+    let className = 'modalSelect';
+  
+    if (!selectedWebsite || !selectedAccount) {
+      className += ' disabledButton';
+    }
+
+    if (selectedAccount === 'select') {
+      className += ' disabledButton';
+    }
+
+    if (aiPrompt?.style.length < 10 || aiPrompt?.contentType.length < 10) {
+      className += ' disabledButton';
+    }
+
+    if (!numberOfPosts && scheduleType === 'random') {
+      className += ' disabledButton';
+    }
+
+
+    // Add more validation checks here if needed in the future
+    return className;
+  };
+  
+  return (
+    <div className="SetScheduleModal-modal-container" style={{ marginBottom: '2%', textAlign: 'center' }}>
+      <div className="SetScheduleModal-modal-backdrop" onClick={closeModal}></div>
+      <div className="postJobModal">
+        <h2>Start Post Job</h2>
+
+
+        {renderWebsiteDropDown()}
+        {selectAccountDropDown()}
+        {renderPostTypeSelect()}
+  
+        {renderScheduleType()}
+
+        {/* {renderJobDurationForRandomJobs()} */}
+        {renderNumberOfPostsBox()}
+        {renderScheduleInterval()}
+
+        {scheduleType === 'random' && postType !== 'ai' && renderPostOrder()}
+
+        {renderUserGeneratedReddit()}
+        {renderUserGeneratedRedditSetSchedule()}
+          
+  
+        {renderHourIntervalSelect()}
 
         {postType === 'ai' && renderAIPrompt()}
   
@@ -847,8 +914,8 @@ const StartPostJobModal = ({ closeModal, selectedImages, twitterAccounts, reddit
   
         {renderSubredditSelect()}
   
-        <button onClick={handleSave}>Save</button>
-        <button onClick={closeModal}>Close</button>
+        <button className={getButtonClassName()} onClick={handleSave}>Save</button>
+        <button className='modalSelect' onClick={closeModal}>Close</button>
       </div>
     </div>
   );

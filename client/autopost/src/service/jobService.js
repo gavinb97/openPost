@@ -121,11 +121,12 @@ export const validateAndFormatPostJobData = (request) => {
   }
 
   // Include selected subreddits and reddit posts if the website is Reddit and postType is not 'ai'
-  if (selectedWebsite.toLowerCase() === 'reddit' && postType !== 'ai') {
-    jobObject.redditPosts = redditPosts;
+  if (selectedWebsite.toLowerCase() === 'reddit' && postType === 'ai') {
     if (selectedSubreddits) {
       jobObject.selectedSubreddits = selectedSubreddits;
     }
+  } else if (selectedWebsite.toLowerCase() === 'reddit' && postType === 'User') {
+      jobObject.redditPosts = redditPosts;
   } else if (selectedWebsite.toLowerCase() === 'twitter' && postType !== 'ai') {
     jobObject.tweetInputs = tweetInputs;
   }
