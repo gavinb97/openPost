@@ -11,7 +11,8 @@ const UploadPictureBox = ({ onSuccessUpload }) => {
   const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [imageMetadata, setImageMetadata] = useState([]);
   const [namesOfFiles, setNamesOfFiles] = useState([]);
-
+  console.log(user.jwt)
+  console.log('jwt ^^^^')
   const closeModal = () => {
     setShowUpdateModal(false);
   };
@@ -45,7 +46,7 @@ const UploadPictureBox = ({ onSuccessUpload }) => {
     if (files.length > 0) {
       for (const file of files) {
         try {
-          const response = await uploadFile(file, file.name, user.username);
+          const response = await uploadFile(file, file.name, user.username, user.jwt);
           uploadedFileNames.push(response.file);
         } catch (error) {
           console.error('Error uploading file:', error);

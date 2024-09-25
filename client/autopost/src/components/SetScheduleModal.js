@@ -38,7 +38,7 @@ const SetScheduleModal = ({ closeModal, selectedImages, twitterAccounts, redditA
           const credsArray = user.creds;
         
           const accountCreds = credsArray.find((creds) => creds.handle === selectedAccount);
-          const subreddits = await getSFWSubreddits(accountCreds);
+          const subreddits = await getSFWSubreddits(accountCreds, user.jwt);
           
           const subredditObjects = subreddits.map((subredditName, index) => ({
             name: subredditName,
@@ -201,9 +201,9 @@ const SetScheduleModal = ({ closeModal, selectedImages, twitterAccounts, redditA
 
     
     const job = await validateAndFormatScheduleData(scheduleData);
-
+    console.log(user)
     console.log('Schedule Data:', job);
-    await createScheduledJob(job);
+    await createScheduledJob(job, user.jwt);
     setReloadJobs(true);
     closeModal();
   };

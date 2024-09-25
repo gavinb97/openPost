@@ -79,7 +79,9 @@ export const updateFileNamesAsync = async (files, uploadedFileNames) => {
 };
 
 
-export const uploadFile = (file, fileName, username) => {
+export const uploadFile = (file, fileName, username, userJwt) => {
+  console.log(userJwt)
+  console.log('****')
   return new Promise((resolve, reject) => {
     const endpoint = 'http://localhost:3455/upload';
     const reader = new FileReader();
@@ -101,6 +103,7 @@ export const uploadFile = (file, fileName, username) => {
           {
             headers: {
               'Content-Type': 'multipart/form-data',
+              Authorization: `Bearer ${userJwt}`, // Passing the userJwt as a Bearer token
             },
           }
         );
@@ -118,26 +121,42 @@ export const uploadFile = (file, fileName, username) => {
   });
 };
 
-export const fetchAllFilesByUser = async (username) => {
+export const fetchAllFilesByUser = async (username, userJwt) => {
   const endpoint = 'http://localhost:3455/files';
+  
   try {
-    const response = await axios.post(endpoint, { username: username});
-      
-    return response.data;
+    const response = await axios.post(endpoint, 
+      { username }, // Payload data
+      {
+        headers: {
+          Authorization: `Bearer ${userJwt}`, // Passing the userJwt as a Bearer token
+        },
+      }
+    );
+
+    return response.data; // Return the response data
   } catch (error) {
     console.error('Error fetching files:', error);
     // Handle errors, such as displaying an error message to the user
   }
 };
 
-export const fetchAllVideosByUser = async (username) => {
+export const fetchAllVideosByUser = async (username, userJwt) => {
   const endpoint = 'http://localhost:3455/videos';
+  
   try {
-    const response = await axios.post(endpoint, { username: username});
-      
-    return response.data;
+    const response = await axios.post(endpoint, 
+      { username }, // Payload data
+      {
+        headers: {
+          Authorization: `Bearer ${userJwt}`, // Passing the userJwt as a Bearer token
+        },
+      }
+    );
+
+    return response.data; // Return the response data
   } catch (error) {
-    console.error('Error fetching files:', error);
+    console.error('Error fetching videos:', error);
     // Handle errors, such as displaying an error message to the user
   }
 };
@@ -163,36 +182,66 @@ export const getPhotoFilesByName = async () => {
 };
 
 
-export const deleteByName = async (fileNames, username) => {
+export const deleteByName = async (fileNames, username, userJwt) => {
   try {
-    const response = await axios.post('http://localhost:3455/deletebyname', {fileNames, username},
+    const response = await axios.post('http://localhost:3455/deletebyname', 
+      { fileNames, username },
       {
         headers: {
-          'Content-Type': 'application/json'
-        }
-      });
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${userJwt}`, // Passing the userJwt as a Bearer token
+        },
+      }
+    );
+
+    // Optional: Handle the response if needed
+    if (response.status === 200) {
+      console.log('Files deleted successfully:', response.data);
+    }
   } catch (error) {
-    console.error('Error deleting files:', error.response.data);
+    console.error('Error deleting files:', error.response?.data || error.message);
   }
 };
 
-export const getPhotoMetadata = async (fileNames, username) => {
+export const getPhotoMetadata = async (fileNames, username, userJwt) => {
   const endpoint = 'http://localhost:3455/getphotometadata';
+
   try {
-    const response = await axios.post(endpoint, {fileNames, username});
-    return response.data;
+    const response = await axios.post(endpoint, 
+      { fileNames, username },
+      {
+        headers: {
+          Authorization: `Bearer ${userJwt}`, // Passing the userJwt as a Bearer token
+        },
+      }
+    );
+    
+    return response.data; // Return the response data
   } catch (error) {
     console.error('Error fetching photo metadata:', error);
-    return null;
+    return null; // Return null in case of error
   }
 };
 
-export const updatePhotoMetadata = async (newData, username) => {
+export const updatePhotoMetadata = async (newData, username, userJwt) => {
   console.log('in new data');
   console.log(newData);
+
   try {
-    const response = await axios.post('http://localhost:3455/updatephotometadata', {newData, username});
+    const response = await axios.post('http://localhost:3455/updatephotometadata', 
+      { newData, username },
+      {
+        headers: {
+          Authorization: `Bearer ${userJwt}`, // Passing the userJwt as a Bearer token
+        },
+      }
+    );
+
+    // Optional: Handle the response if needed
+    if (response.status === 200) {
+      console.log('Photo metadata updated successfully:', response.data);
+    }
   } catch (error) {
-    console.error('Error updating photo metadata:', error.response.data.error);
+    console.error('Error updating photo metadata:', error.response?.data?.error || error.message);
   }
 };

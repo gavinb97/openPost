@@ -16,8 +16,8 @@ const useMethods = () => {
       navigate('/login');
     } else {
       const getAllMedia = async () => {
-        const files = await fetchAllFilesByUser(user.username);
-        const videos = await fetchAllVideosByUser(user.username);
+        const files = await fetchAllFilesByUser(user.username, user.jwt);
+        const videos = await fetchAllVideosByUser(user.username, user.jwt);
         setMediaFiles(files);
         setVideoFiles(videos);
         setImagesLoaded(true);

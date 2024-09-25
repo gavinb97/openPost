@@ -10,6 +10,7 @@ const { appendOrWriteToJsonFile, deleteFromPhotoData } = require('./utils');
 const sharp = require('sharp');
 const axios = require('axios');
 const { writePhotoMetadata, readPhotoDataFromDB, updateMetadataDB, deleteFromPhotoDataDB } = require('./openPostMediaData');
+const { authenticateToken } = require('./socialauthentication/authService')
 
 const router = express.Router();
 router.use(cookieParser());
@@ -32,7 +33,7 @@ const upload = multer({ storage: storage });
 
 // Define your endpoints here
 
-router.post('/upload', upload.single('file'), async (req, res) => {
+router.post('/upload', authenticateToken, upload.single('file'), async (req, res) => {
   try {
     const fileName = req.file.filename;
     const username = req.body.username;
@@ -78,7 +79,7 @@ router.post('/upload', upload.single('file'), async (req, res) => {
   }
 });
 
-router.post('/files', async (req, res) => {
+router.post('/files', authenticateToken, async (req, res) => {
   const username = req.body.username;
   const uploadsFolder = path.join(__dirname, 'apiresources', 'uploads', username, 'photos');
   try {
@@ -105,7 +106,7 @@ router.post('/files', async (req, res) => {
 });
 
 
-router.post('/videos', async (req, res) => {
+router.post('/videos', authenticateToken, async (req, res) => {
   const username = req.body.username;
   const uploadsFolder = path.join(__dirname, 'apiresources', 'uploads', username, 'videos');
   try {
@@ -131,7 +132,7 @@ router.post('/videos', async (req, res) => {
   }
 });
 
-router.post('/deletebyname', async (req, res) => {
+router.post('/deletebyname', authenticateToken, async (req, res) => {
   const fileNames = req.body.fileNames;
   const username = req.body.username;
   const filesToDelete = Array.isArray(fileNames) ? fileNames : [fileNames];
@@ -194,7 +195,7 @@ router.get('/filesWithContent', async (req, res) => {
   }
 });
 
-router.post('/getphotometadata', async (req, res) => {
+router.post('/getphotometadata', authenticateToken, async (req, res) => {
   const fileNames = req.body.fileNames;
   // const photoData = await readPhotoDataFromFile(req.body.username);
   const photoData = await readPhotoDataFromDB(req.body.username);
@@ -203,7 +204,7 @@ router.post('/getphotometadata', async (req, res) => {
   res.json(metadata);
 });
 
-router.post('/updatephotometadata', async (req, res) => {
+router.post('/updatephotometadata', authenticateToken, async (req, res) => {
   try {
     const newData = req.body.newData;
     const username = req.body.username;
@@ -249,7 +250,7 @@ const writePhotoDataToFile = async (data, username) => {
   }
 };
 
-router.post('/setSchedule', async (req, res) => {
+router.post('/setSchedule', authenticateToken, async (req, res) => {
   const scheduleData = req.body.scheduleData;
 
   try {

@@ -1,20 +1,30 @@
 import axios from 'axios';
 
-export const getTikTokLoginUrl = async (username) => {
+export const getTikTokLoginUrl = async (username, userJwt) => {
   const endpoint = 'http://localhost:3455/tiktokloginurl';
+
   try {
-    const response = await axios.post(endpoint, {username: username});
+    const response = await axios.post(endpoint, 
+      { username }, // Payload data
+      {
+        headers: {
+          Authorization: `Bearer ${userJwt}`, // Passing the userJwt as a Bearer token
+        },
+      }
+    );
+    
     return response.data;
   } catch (error) {
-    console.error('Error fetching login URL:', error);
-    // Handle errors, such as displaying an error message to the user
+    console.error('Error fetching TikTok login URL:', error);
     throw error; // Re-throw the error to propagate it further if needed
   }
 };
 
 
-export const revokeTikTokAccess = async (username, accessToken, handle) => {
+
+export const revokeTikTokAccess = async (username, accessToken, handle, userJwt) => {
   const endpoint = 'http://localhost:3455/revoketiktok';
+
   try {
     // Prepare the request payload
     const requestBody = {
@@ -23,8 +33,12 @@ export const revokeTikTokAccess = async (username, accessToken, handle) => {
       handle: handle
     };
 
-    // Send a POST request to the server
-    const response = await axios.post(endpoint, requestBody);
+    // Send a POST request to the server with Authorization header
+    const response = await axios.post(endpoint, requestBody, {
+      headers: {
+        Authorization: `Bearer ${userJwt}`, // Passing the userJwt as a Bearer token
+      },
+    });
 
     // Check for successful response
     if (response.status === 200) {

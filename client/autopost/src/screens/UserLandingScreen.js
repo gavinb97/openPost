@@ -43,7 +43,7 @@ function UserLandingScreen () {
   useEffect(() => {
     // fetch total number of jobs
     if (user) {
-      getJobsByUsername(user.username).then((jobs) => {
+      getJobsByUsername(user.username, user.jwt).then((jobs) => {
         setJobCount(jobs.activeJobs.length);
       });
     }
@@ -52,7 +52,7 @@ function UserLandingScreen () {
   const { user  } = useAuth();
 
   useEffect(() => {
-    getUserCreds(user.username)
+    getUserCreds(user.username, user.jwt)
       .then((creds) => {
         if (creds && creds.length > 0) {
           const twitter = []; 
@@ -113,6 +113,11 @@ function UserLandingScreen () {
     // }
     
   };
+
+  const handleReplyJobModal = () => {
+    console.log('reply job')
+    setShowLimitModal(true)
+  }
 
   const handleShowCommentModal = () => {
     if (user.pro === 'true') {
@@ -198,7 +203,7 @@ function UserLandingScreen () {
       <div className='jobbox'>
         <h2>Reply Job</h2>
         <p>Automatically reply to users to build engagement</p>
-        <button onClick={() => handleShowPostJobModal()}>Start Reply Job</button>
+        <button onClick={() => handleReplyJobModal()}>Start Reply Job</button>
         <br></br>
       </div>
     );

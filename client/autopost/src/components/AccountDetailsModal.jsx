@@ -9,12 +9,12 @@ import {  revokeTikTokAccess } from '../service/tiktokService';
 
 const AccountDetailsModal = ({ closeModal, accountDetails, setAccountDetails}) => {
  
-
+  console.log(accountDetails)
   const revoke = (accountDetails) => {
-    if (accountDetails.twitterTokens.access_token !== null) revokeTwitterAccess(accountDetails.user, accountDetails.handle);
-    if (accountDetails.redditTokens.access_token !== null) revokeRedditAccess(accountDetails.user, accountDetails.redditTokens.access_token, accountDetails.handle);
-    if (accountDetails.youtubeTokens.access_token !== null) revokeGoogleAccess(accountDetails.user, accountDetails.youtubeTokens.access_token, accountDetails.handle);
-    if (accountDetails.tiktokTokens.access_token !== null) revokeTikTokAccess(accountDetails.user, accountDetails.tiktokTokens.access_token, accountDetails.handle);
+    if (accountDetails.twitterTokens.access_token !== null) revokeTwitterAccess(accountDetails.user, accountDetails.handle, accountDetails.jwt);
+    if (accountDetails.redditTokens.access_token !== null) revokeRedditAccess(accountDetails.user, accountDetails.redditTokens.access_token, accountDetails.handle, accountDetails.jwt);
+    if (accountDetails.youtubeTokens.access_token !== null) revokeGoogleAccess(accountDetails.user, accountDetails.youtubeTokens.access_token, accountDetails.handle, accountDetails.jwt);
+    if (accountDetails.tiktokTokens.access_token !== null) revokeTikTokAccess(accountDetails.user, accountDetails.tiktokTokens.access_token, accountDetails.handle, accountDetails.jwt);
     closeModal();
   };
 

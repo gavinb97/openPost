@@ -41,7 +41,7 @@ function Profile () {
     if (user !== null) {
       setIsLoading(true); // Start loading
   
-      getUserCreds(user.username || user.user)
+      getUserCreds(user.username || user.user, user.jwt)
         .then((creds) => {
           if (creds && creds.length > 0) {
             const isLoggedIn = {

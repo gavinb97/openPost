@@ -41,7 +41,7 @@ const StartPostJobModal = ({ closeModal, selectedImages, twitterAccounts, reddit
           const credsArray = user.creds;
         
           const accountCreds = credsArray.find((creds) => creds.handle === selectedAccount);
-          const subreddits = await getSFWSubreddits(accountCreds);
+          const subreddits = await getSFWSubreddits(accountCreds, user.jwt);
           
           const subredditObjects = subreddits.map((subredditName, index) => ({
             name: subredditName,
@@ -224,7 +224,8 @@ const StartPostJobModal = ({ closeModal, selectedImages, twitterAccounts, reddit
       postType,
       tweetInputs,
       aiPrompt,
-      redditPosts
+      redditPosts,
+      numberOfPosts
     };
     
     console.log(scheduleData);

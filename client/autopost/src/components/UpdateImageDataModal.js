@@ -45,7 +45,7 @@ const UpdateImageDataModal = ({ imageData, closeModal, updatePhotoMetadata, medi
   useEffect(() => {
     const fetchMetadata = async (fileNames) => {
       try {
-        const metadata = await getPhotoMetadata(fileNames, user.username);
+        const metadata = await getPhotoMetadata(fileNames, user.username, user.jwt);
         setUpdatedData(metadata);
       } catch (error) {
         console.error('Error fetching video metadata:', error);
@@ -96,7 +96,7 @@ const UpdateImageDataModal = ({ imageData, closeModal, updatePhotoMetadata, medi
       }
   
       // If no errors, proceed with saving the data
-      updatePhotoMetadata(updatedData, user.username); 
+      updatePhotoMetadata(updatedData, user.username, user.jwt); 
       if (clearMedia) {
         clearMedia();
       }

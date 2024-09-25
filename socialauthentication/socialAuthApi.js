@@ -7,10 +7,9 @@ const { writeTextToFile, updateUserTokens } = require('../utils');
 const bodyParser = require('body-parser');
 const { updateYouTubeTokens } = require('./socialAuthData');
 const jwt = require('jsonwebtoken');
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+const JWT_SECRET = process.env.JWT_SECRET
 const {google} = require('googleapis');
 const { fulfillCheckout } = require('./authService');
-
 
 const {
   generateTwitterAuthUrl,
@@ -91,7 +90,7 @@ router.get('/redditcallback', async (req, res) => {
   res.redirect('http://localhost:3000/profile');
 });
 
-router.post('/redditloginurl', async (req, res) => {
+router.post('/redditloginurl', authenticateToken, async (req, res) => {
   console.log('sending login url');
   const username = req.body.username || 'someUser';
   try {
@@ -103,7 +102,7 @@ router.post('/redditloginurl', async (req, res) => {
   }
 });
 
-router.post('/googleloginurl', async (req, res) => {
+router.post('/googleloginurl', authenticateToken, async (req, res) => {
   console.log(req.body.username);
   const username = req.body.username;
   const { url, oauth2Client } = await authorizeFirstGoogleTimeUrl(username);
@@ -111,7 +110,7 @@ router.post('/googleloginurl', async (req, res) => {
   res.send(url);
 }); 
 
-router.post('/revokereddit', async (req, res) => {
+router.post('/revokereddit', authenticateToken, async (req, res) => {
   console.log('revoking reddit access');
   const username = req.body.username || 'someUser';
   const accessToken = req.body.accesstoken;
@@ -163,7 +162,7 @@ router.get('/gcallback', async (req, res) => {
   }
 });
 
-router.post('/revokeGoogleAccess', async (req, res) => {
+router.post('/revokeGoogleAccess', authenticateToken, async (req, res) => {
   const accessToken = req.body.accessToken;
   const username = req.body.username;
   const handle = req.body.handle;
@@ -186,7 +185,7 @@ router.get('/callback', async (req, res) => {
   res.redirect('http://localhost:3000/profile');
 });
 
-router.post('/tiktokloginurl', async (req, res) => {
+router.post('/tiktokloginurl', authenticateToken, async (req, res) => {
   console.log('sending tiktok login url');
   const username = req.body.username || 'somedude';
   try {
@@ -198,7 +197,7 @@ router.post('/tiktokloginurl', async (req, res) => {
   }
 });
 
-router.post('/revoketiktok', async (req, res) => {
+router.post('/revoketiktok', authenticateToken, async (req, res) => {
   console.log('revoking tiktok authorization');
   const username = req.body.username || 'somedude';
   const accessToken = req.body.accesstoken;
@@ -249,7 +248,7 @@ router.post('/login', async (req, res) => {
   }
 });
 
-router.post('/updateddetails', async (req, res) => {
+router.post('/updateddetails', authenticateToken, async (req, res) => {
   const { username } = req.body;
   if (!username) {
     return res.status(400).json({ message: 'Username and password are required.' });
@@ -268,7 +267,7 @@ router.post('/updateddetails', async (req, res) => {
 });
 
 
-router.post('/getUserCreds', async (req, res) => {
+router.post('/getUserCreds', authenticateToken, async (req, res) => {
   const { username } = req.body;
   if (!username) {
     return res.status(400).json({ message: 'Username is required.' });
@@ -282,7 +281,7 @@ router.post('/getUserCreds', async (req, res) => {
   }
 });
 
-router.post('/getsfwsubreddits', async (req, res) => {
+router.post('/getsfwsubreddits', authenticateToken, async (req, res) => {
   const token = req.body.token;
   if (!token) {
     return res.status(400).json({ message: 'Token is required.' });
@@ -296,7 +295,7 @@ router.post('/getsfwsubreddits', async (req, res) => {
   }
 });
 
-router.post('/getemail', async (req, res) => {
+router.post('/getemail', authenticateToken, async (req, res) => {
   const { username } = req.body;
 
   // Validate that the username is provided in the request body
@@ -317,7 +316,7 @@ router.post('/getemail', async (req, res) => {
   }
 });
 
-router.post('/billing_session_url', async (req, res) => {
+router.post('/billing_session_url', authenticateToken,  async (req, res) => {
   const stripe = require('stripe')(process.env.STRIPE_KEY);
 
   const customerId = req.body.customerId;

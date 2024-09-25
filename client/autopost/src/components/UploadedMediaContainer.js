@@ -17,7 +17,7 @@ const UploadedMediaContainer = forwardRef((props, ref) => {
 
   const getAllMedia = async () => {
     try {
-      const files = await fetchAllFilesByUser(user.username);
+      const files = await fetchAllFilesByUser(user.username, user.jwt);
       setMediaFiles(files);
     } catch (error) {
       console.error('Error fetching media:', error);
@@ -39,7 +39,7 @@ const UploadedMediaContainer = forwardRef((props, ref) => {
   const fetchPhotoMetadata = async (selectedImageIndexes) => {
     try {
       const selectedFileNames = selectedImageIndexes.map(index => mediaFiles[index].fileName);
-      const metadata = await getPhotoMetadata(selectedFileNames, user.username);
+      const metadata = await getPhotoMetadata(selectedFileNames, user.username, user.jwt);
       setImageMetadata(metadata);
     } catch (error) {
       console.error('Error fetching photo metadata:', error);
@@ -49,7 +49,7 @@ const UploadedMediaContainer = forwardRef((props, ref) => {
   const handleDeleteClick = async () => {
     try {
       const selectedFileNames = selectedImages.map(index => mediaFiles[index].fileName);
-      await deleteByName(selectedFileNames, user.username);
+      await deleteByName(selectedFileNames, user.username, user.jwt);
       const updatedFiles = mediaFiles.filter((file, index) => !selectedImages.includes(index));
       setMediaFiles(updatedFiles);
       setSelectedImages([]);
@@ -59,6 +59,7 @@ const UploadedMediaContainer = forwardRef((props, ref) => {
   };
 
   const handleEditClick = () => {
+    console.log('edit clicked')
     setShowModal(true);
   };
 

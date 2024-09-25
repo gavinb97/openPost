@@ -1,22 +1,39 @@
 import axios from 'axios';
 
-export const createScheduledJob = async (schedule) => {
+
+export const createScheduledJob = async (schedule, userJwt) => {
   const endpoint = 'http://localhost:3455/setSchedule';
+  
   try {
-    const response = await axios.post(endpoint, {scheduleData: schedule});
+    const response = await axios.post(endpoint, 
+      { scheduleData: schedule }, // Payload data
+      {
+        headers: {
+          Authorization: `Bearer ${userJwt}`, // Passing the userJwt as a Bearer token
+        },
+      }
+    );
+    
     return response.data;
   } catch (error) {
-    console.error('error setting schedu;e', error);
-    // Handle errors, such as displaying an error message to the user
+    console.error('Error setting schedule', error);
     throw error; // Re-throw the error to propagate it further if needed
   }
 };
 
-export const getJobsByUsername = async (user) => {
+export const getJobsByUsername = async (user, userJwt) => {
   const endpoint = 'http://localhost:3455/getjobs';
-    
+  
   try {
-    const response = await axios.post(endpoint, {username: user});
+    const response = await axios.post(endpoint, 
+      { username: user }, // Payload data with username
+      {
+        headers: {
+          Authorization: `Bearer ${userJwt}`, // Passing the userJwt as a Bearer token
+        },
+      }
+    );
+    
     return response.data;
   } catch (error) {
     console.error('Error retrieving jobs:', error);
@@ -24,19 +41,23 @@ export const getJobsByUsername = async (user) => {
   }
 };
 
-export const deleteJob = async (jobSetId) => {
+export const deleteJob = async (jobSetId, userJwt) => {
   const endpoint = 'http://localhost:3455/deletejob';
 
   try {
     const response = await axios.delete(endpoint, {
-      data: { jobSetId },
+      headers: {
+        Authorization: `Bearer ${userJwt}`, // Passing the userJwt as a Bearer token
+      },
+      data: { jobSetId }, // Payload data for DELETE request
     });
     return response.data;
   } catch (error) {
     console.error('Error deleting job:', error);
-    throw error;
+    throw error; // Re-throw the error to propagate it further if needed
   }
 };
+
 
 export const validateAndFormatPostJobData = (request) => {
   const {
@@ -55,7 +76,8 @@ export const validateAndFormatPostJobData = (request) => {
     postType,
     tweetInputs,
     aiPrompt,
-    redditPosts
+    redditPosts,
+    numberOfPosts
   } = request;
 
   // Validate required fields
@@ -134,6 +156,10 @@ export const validateAndFormatPostJobData = (request) => {
   // Handle postType
   if (postType === 'ai') {
     jobObject.aiPrompt = aiPrompt;
+  }
+
+  if (scheduleType === 'random' && postType === 'ai') {
+    jobObject.numberOfPosts = numberOfPosts
   }
 
   return jobObject;

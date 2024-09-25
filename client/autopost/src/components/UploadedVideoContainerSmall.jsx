@@ -32,7 +32,7 @@ const UploadedVideoContainerSmall = ({ videoFiles, setvideoFiles, imagesLoaded, 
   const fetchPhotoMetadata = async (selectedImageIndexes) => {
     try {
       const selectedFileNames = selectedImageIndexes.map(index => videoFiles[index].fileName);
-      const metadata = await getPhotoMetadata(selectedFileNames, user.username);
+      const metadata = await getPhotoMetadata(selectedFileNames, user.username, user.jwt);
       setvideoMetadata(metadata);
     } catch (error) {
       console.error('Error fetching photo metadata:', error);
@@ -43,7 +43,7 @@ const UploadedVideoContainerSmall = ({ videoFiles, setvideoFiles, imagesLoaded, 
     try {
       const selectedFileNames = selectedVideos.map(index => videoFiles[index].fileName);
       console.log('Deleting files:', selectedFileNames);
-      await deleteByName(selectedFileNames, user.username);
+      await deleteByName(selectedFileNames, user.username, user.jwt);
       const updatedFiles = videoFiles.filter((file, index) => !selectedVideos.includes(index));
       setvideoFiles(updatedFiles);
       setselectedVideos([]);

@@ -1,7 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import TagInputComponent from './TagInputComponent'; // Import the TagInputComponent
 import './../App.css';
-import { createScheduledJob, validateAndFormatScheduleData } from '../service/jobService';
 import { useAuth } from '../service/authContext';
 import { useNavigate } from 'react-router-dom';
 

@@ -1,5 +1,6 @@
 const { v4: uuidv4 } = require('uuid'); 
 const { insertScheduledJob, insertRandomJob, insertActiveJob } = require('./jobsData');
+const { formatPostJobs } = require('./postJobService')
 
 const formatRequest = async (request) => {
   console.log(request);
@@ -8,7 +9,7 @@ const formatRequest = async (request) => {
 
   if (request?.jobType === 'postJob') {
     console.log('got a postjob')
-    // throw new Error('somethign with the postjob')
+    jobs = await formatPostJobs(request)
     jobs = []
   } else {
     jobs = await handleMediaPostJob(request, jobs)

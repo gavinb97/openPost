@@ -4,7 +4,7 @@ const cors = require('cors');
 const { setupQueue, enqueuePostJob, startWorker, getExistingQueue } = require('./jobQueue');
 const { formatRequest } = require('./jobService');
 const { getActiveJobsByUserId, deleteActiveJobByJobSetId } = require('./jobsData');
-
+const { authenticateToken } = require('../socialauthentication/authService')
 const router = express.Router();
 router.use(bodyParser.json());
 router.use(cors());
@@ -33,7 +33,7 @@ router.post('/jobs', async (req, res) => {
   }
 });
 
-router.post('/getjobs', async (req, res) => {
+router.post('/getjobs', authenticateToken, async (req, res) => {
   const { username } = req.body;
 
   if (!username) {
@@ -49,7 +49,7 @@ router.post('/getjobs', async (req, res) => {
   }
 });
 
-router.delete('/deletejob', async (req, res) => {
+router.delete('/deletejob', authenticateToken, async (req, res) => {
   const { jobSetId } = req.body;
 
   if (!jobSetId) {

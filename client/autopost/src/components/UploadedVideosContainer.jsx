@@ -17,7 +17,7 @@ const UploadedVideosContainer = forwardRef((props, ref) => {
     
   const getAllVideos = async () => {
     try {
-      const fetchedVideos = await fetchAllVideosByUser(user.username);
+      const fetchedVideos = await fetchAllVideosByUser(user.username, user.jwt);
       setVideos(fetchedVideos);
     } catch (error) {
       console.error('Error fetching videos:', error);
@@ -39,7 +39,7 @@ const UploadedVideosContainer = forwardRef((props, ref) => {
   const fetchphotoMetadata = async (selectedVideoIndexes) => {
     try {
       const selectedVideoNames = selectedVideoIndexes.map(index => videos[index].fileName);
-      const metadata = await getPhotoMetadata(selectedVideoNames, user.username);
+      const metadata = await getPhotoMetadata(selectedVideoNames, user.username, user.jwt);
       setphotoMetadata(metadata);
     } catch (error) {
       console.error('Error fetching video metadata:', error);
@@ -49,7 +49,7 @@ const UploadedVideosContainer = forwardRef((props, ref) => {
   const handleDeleteClick = async () => {
     try {
       const selectedVideoNames = selectedVideos.map(index => videos[index].fileName);
-      await deleteByName(selectedVideoNames, user.username);
+      await deleteByName(selectedVideoNames, user.username, user.jwt);
       const updatedVideos = videos.filter((video, index) => !selectedVideos.includes(index));
       setVideos(updatedVideos);
       setSelectedVideos([]);

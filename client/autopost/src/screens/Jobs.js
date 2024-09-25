@@ -32,7 +32,7 @@ function Jobs () {
 
   const handleCancelJob = async (jobId) => {
     try {
-      await deleteJob(jobId);
+      await deleteJob(jobId, user.jwt);
       // Optionally, remove the job from the state to update the UI
       setJobs(jobs.filter(job => job.job_set_id !== jobId));
     } catch (error) {
@@ -41,7 +41,7 @@ function Jobs () {
   };
 
   const getJobs = async () => {
-    const jobs = await getJobsByUsername(user.username);
+    const jobs = await getJobsByUsername(user.username, user.jwt);
         
     setJobs(jobs.activeJobs);
     return jobs;

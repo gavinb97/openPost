@@ -40,7 +40,7 @@ function SocialsLogin ({ userData }) {
       youtube: getYoutubeLoginUrl,
       tiktok: getTikTokLoginUrl
     };
-    const url = await urls[media](user.username);
+    const url = await urls[media](user.username, user.jwt);
     window.location.href = url;
   };
 

@@ -70,14 +70,14 @@ const AuthorizeAccounts = ({ userData, handleOpenAccountDetails, setAccountDetai
     };
 
     if (user.pro === 'true') {
-      const url = await urls[website](user.username);
+      const url = await urls[website](user.username, user.jwt);
       window.location.href = url;
     } else {
       if (accountCount >= 1 ) {
         // open modal
         setShowLimitModal(true);
       } else {
-        const url = await urls[website](user.username);
+        const url = await urls[website](user.username, user.jwt);
         window.location.href = url;
       }
     }
@@ -132,6 +132,8 @@ const AuthorizeAccounts = ({ userData, handleOpenAccountDetails, setAccountDetai
   }; 
 
   const handleAccountClick = (data) => {
+    data.jwt = user.jwt
+    
     setAccountDetails(data);
     handleOpenAccountDetails(true);
   };

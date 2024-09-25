@@ -1,22 +1,38 @@
 import axios from 'axios';
 
-export const getTwitterLoginUrl = async (username) => {
+export const getTwitterLoginUrl = async (username, userJwt) => {
   const endpoint = 'http://localhost:3455/twitterloginurl';
+
   try {
-    const response = await axios.post(endpoint, {username: username});
+    const response = await axios.post(endpoint, 
+      { username }, // Payload data
+      {
+        headers: {
+          Authorization: `Bearer ${userJwt}`, // Passing the userJwt as a Bearer token
+        },
+      }
+    );
+    
     return response.data;
   } catch (error) {
-    console.error('Error fetching login URL:', error);
-    // Handle errors, such as displaying an error message to the user
+    console.error('Error fetching Twitter login URL:', error);
     throw error; // Re-throw the error to propagate it further if needed
   }
 };
 
 
-export const revokeTwitterAccess = async (username, handle) => {
+export const revokeTwitterAccess = async (username, handle, userJwt) => {
   const endpoint = 'http://localhost:3455/revoketwitter';
+
   try {
-    const response = await axios.post(endpoint, { username: username, handle: handle });
+    const response = await axios.post(endpoint, 
+      { username, handle }, // Payload data
+      {
+        headers: {
+          Authorization: `Bearer ${userJwt}`, // Passing the userJwt as a Bearer token
+        },
+      }
+    );
 
     // Log the server response to console
     if (response.status === 200) {

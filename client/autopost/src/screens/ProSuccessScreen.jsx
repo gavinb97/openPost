@@ -11,7 +11,7 @@ const ProSuccessScreen = () => {
   // when we get to this page, call the login function
   // so we can get new pro status and customerid for later
   useEffect(() => {
-    getUpdatedDetails(user.username).then((details) => {
+    getUpdatedDetails(user.username, user.jwt).then((details) => {
       loginContext(details);
     }).then(() => {
       setTimeout(() => {

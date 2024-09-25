@@ -13,7 +13,7 @@ const Payment = () => {
 
   useEffect(() => {
     const getEmail = async () => {
-      const email = await fetchUserEmail(user.username);
+      const email = await fetchUserEmail(user.username, user.jwt);
       setEmail(email);
     };
 
@@ -30,7 +30,7 @@ const Payment = () => {
     } else {
       // create portal link just in case
       const getPortalUrl = async () => {
-        const response = await getBillingPortal(user.customerId);
+        const response = await getBillingPortal(user.customerId, user.jwt);
         return response.data.url;
       };
       getPortalUrl().then((url) => {
