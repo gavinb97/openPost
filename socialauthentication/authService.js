@@ -105,15 +105,10 @@ const authenticateUser = async (username, password) => {
 };
 
 const authenticateToken = (req, res, next) => {
-  console.log('in authenticate token')
   const authHeader = req.headers['authorization'];
 
-  console.log(authHeader)
   const token = authHeader && authHeader.split(' ')[1];  // "Bearer TOKEN_HERE"
-  console.log(token)
   if (token == null) return res.sendStatus(401);
-    console.log(JWT_SECRET)
-    console.log('jwt secret')
   jwt.verify(token, JWT_SECRET, (err, user) => {
     if (err) return res.sendStatus(403);  // Forbidden if token is invalid
     

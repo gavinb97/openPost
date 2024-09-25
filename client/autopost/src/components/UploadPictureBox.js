@@ -11,8 +11,7 @@ const UploadPictureBox = ({ onSuccessUpload }) => {
   const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [imageMetadata, setImageMetadata] = useState([]);
   const [namesOfFiles, setNamesOfFiles] = useState([]);
-  console.log(user.jwt)
-  console.log('jwt ^^^^')
+
   const closeModal = () => {
     setShowUpdateModal(false);
   };
