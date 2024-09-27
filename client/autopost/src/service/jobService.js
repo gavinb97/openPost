@@ -107,12 +107,12 @@ export const validateAndFormatPostJobData = (request) => {
       // No need to throw an error, just omit selectedDays from jobObject
     } else {
       const daysSelected = Object.values(selectedDays).some(day => day);
-      if (!daysSelected) {
-        throw new Error('At least one day must be selected in selectedDays for scheduled schedule type');
-      }
-      if ((!timesOfDay || timesOfDay.length === 0) && scheduleInterval === 'set') {
-        throw new Error('At least one time must be specified in timesOfDay for scheduled schedule type');
-      }
+      // if (!daysSelected) {
+      //   throw new Error('At least one day must be selected in selectedDays for scheduled schedule type');
+      // }
+      // if ((!timesOfDay || timesOfDay.length === 0) && scheduleInterval === 'set') {
+      //   throw new Error('At least one time must be specified in timesOfDay for scheduled schedule type');
+      // }
     }
   } else if (scheduleType === 'random') {
     // No additional validation for random schedule type

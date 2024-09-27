@@ -230,7 +230,7 @@ const StartPostJobModal = ({ closeModal, selectedImages, twitterAccounts, reddit
     
     console.log(scheduleData);
     const job = await validateAndFormatPostJobData(scheduleData);
-    await createScheduledJob(job)
+    await createScheduledJob(job, user.jwt)
     console.log(job);
     console.log('da job above');
   };
@@ -665,7 +665,7 @@ const StartPostJobModal = ({ closeModal, selectedImages, twitterAccounts, reddit
   };
 
   const renderNumberOfPostsBox = () => {
-    if (scheduleType === 'random') {
+    if (scheduleType === 'random' && postType === 'ai') {
       return (
         <div className="input-group">
           <label htmlFor="durationSelect">Number of posts: </label>
