@@ -306,7 +306,7 @@ const StartPostJobModal = ({ closeModal, selectedImages, twitterAccounts, reddit
   };
 
   const renderAIGeneratedInputTimes = () => {
-    if (selectedWebsite === 'twitter' && postType === 'ai') {
+    if ( postType === 'ai' && scheduleInterval === 'set' && scheduleType !== 'random') {
       return (
         <div>
           {tweetInputs.map((input, index) => (
@@ -923,9 +923,13 @@ const StartPostJobModal = ({ closeModal, selectedImages, twitterAccounts, reddit
       className += ' disabledButton';
     }
 
-    if (aiPrompt?.style.length < 10 || aiPrompt?.contentType.length < 10) {
+    if (postType === 'ai') {
+      if (aiPrompt?.style.length < 10 || aiPrompt?.contentType.length < 10) {
       className += ' disabledButton';
     }
+    }
+
+    
 
     if (!numberOfPosts && scheduleType === 'random') {
       className += ' disabledButton';
