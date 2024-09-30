@@ -149,7 +149,7 @@ export const validateAndFormatPostJobData = (request) => {
     }
   } else if (selectedWebsite.toLowerCase() === 'reddit' && postType === 'User') {
       jobObject.redditPosts = redditPosts;
-  } else if (selectedWebsite.toLowerCase() === 'twitter' && postType !== 'ai') {
+  } else if (selectedWebsite.toLowerCase() === 'twitter') {
     jobObject.tweetInputs = tweetInputs;
   }
 
@@ -158,7 +158,7 @@ export const validateAndFormatPostJobData = (request) => {
     jobObject.aiPrompt = aiPrompt;
   }
 
-  if (scheduleType === 'random' && postType === 'ai') {
+  if ((scheduleType === 'random' && postType === 'ai') || (scheduleType === 'scheduled' && postType === 'ai' && scheduleInterval === 'hour')) {
     jobObject.numberOfPosts = numberOfPosts
   }
 

@@ -26,9 +26,8 @@ function LoginScreen () {
 
     try {
       const loginResponse = await login(username, password);
-      console.log(loginResponse);
       // Set context  
-      loginContext(loginResponse);
+      await loginContext(loginResponse);
       navigate('/jobscheduler');
     } catch (e) {
       console.log(e);

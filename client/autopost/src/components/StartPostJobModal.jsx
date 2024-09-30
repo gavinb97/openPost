@@ -304,6 +304,73 @@ const StartPostJobModal = ({ closeModal, selectedImages, twitterAccounts, reddit
     }));
     setTweetInputs(newInputs);
   };
+
+  const renderAIGeneratedInputTimes = () => {
+    if (selectedWebsite === 'twitter' && postType === 'ai') {
+      return (
+        <div>
+          {tweetInputs.map((input, index) => (
+            <div key={input.id} style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
+              <label style={{ marginRight: '10px' }}>{input.id}:</label>
+              {/* <input
+                type="text"
+                value={input.text}
+                onChange={(e) => handleInputChange(index, e.target.value)}
+                style={{ marginRight: '10px' }}
+                maxLength={280}
+              /> */}
+              {scheduleInterval === 'set' && (
+                <>
+                  <select
+                    style={{ marginRight: '10px' }}
+                    value={input.time.hour}
+                    onChange={(e) => handleTweetTimeChange(index, 'hour', e.target.value)}
+                  >
+                    {[...Array(12)].map((_, i) => (
+                      <option key={i} value={i + 1}>
+                        {i + 1}
+                      </option>
+                    ))}
+                  </select>
+                  <select
+                    style={{ marginRight: '10px' }}
+                    value={input.time.minute}
+                    onChange={(e) => handleTweetTimeChange(index, 'minute', e.target.value)}
+                  >
+                    {[...Array(60)].map((_, i) => (
+                      <option key={i} value={i < 10 ? `0${i}` : i}>
+                        {i < 10 ? `0${i}` : i}
+                      </option>
+                    ))}
+                  </select>
+                  <select
+                    style={{ marginRight: '10px' }}
+                    value={input.time.ampm}
+                    onChange={(e) => handleTweetTimeChange(index, 'ampm', e.target.value)}
+                  >
+                    <option value="AM">AM</option>
+                    <option value="PM">PM</option>
+                  </select>
+                  <input
+                    type="date"
+                    value={input.date}
+                    onChange={(e) => handleDateChange(index, e.target.value)}
+                    style={{ marginRight: '10px' }}
+                  />
+                </>
+              )}
+              {index === tweetInputs.length - 1 ? (
+                <button onClick={addInput}>+</button>
+              ) : (
+                <button onClick={() => deleteInput(index)}>-</button>
+              )}
+            </div>
+          ))}
+        </div>
+      );
+    }
+  };
+  
     
   const renderUserGeneratedInput = () => {
     if (selectedWebsite === 'twitter' && postType === 'User') {
@@ -665,7 +732,7 @@ const StartPostJobModal = ({ closeModal, selectedImages, twitterAccounts, reddit
   };
 
   const renderNumberOfPostsBox = () => {
-    if (scheduleType === 'random' && postType === 'ai') {
+    if ((scheduleType === 'random' && postType === 'ai') || (scheduleType === 'scheduled' && postType === 'ai' && scheduleInterval === 'hour')) {
       return (
         <div className="input-group">
           <label htmlFor="durationSelect">Number of posts: </label>
@@ -883,9 +950,9 @@ const StartPostJobModal = ({ closeModal, selectedImages, twitterAccounts, reddit
         {renderScheduleType()}
 
         {/* {renderJobDurationForRandomJobs()} */}
-        {renderNumberOfPostsBox()}
+        
         {renderScheduleInterval()}
-
+        {renderNumberOfPostsBox()}
         {scheduleType === 'random' && postType !== 'ai' && renderPostOrder()}
 
         {renderUserGeneratedReddit()}
@@ -896,16 +963,15 @@ const StartPostJobModal = ({ closeModal, selectedImages, twitterAccounts, reddit
 
         {postType === 'ai' && renderAIPrompt()}
   
-        {scheduleType === 'scheduled' && scheduleInterval === 'set' && postType === 'ai' && renderTimeInput()}
+        {/* {scheduleType === 'scheduled' && scheduleInterval === 'set' && postType === 'ai' && renderTimeInput()} */}
   
-        {scheduleType === 'scheduled' && scheduleInterval === 'set' && postType === 'ai' && renderDayOfWeekSelect()}
+        {/* {scheduleType === 'scheduled' && scheduleInterval === 'set' && postType === 'ai' && renderDayOfWeekSelect()} */}
 
         {scheduleType === 'scheduled' && renderUserGeneratedInput()}
 
         {renderUserGeneratedInputRandomSchedule()}
 
-        
-  
+        {renderAIGeneratedInputTimes()}
         {/* {(selectedWebsite === 'twitter' || selectedWebsite === 'youtube' || selectedWebsite === 'tiktok') && (
             <div>
               <label>Mandatory hashtags (Optional): </label>
