@@ -201,7 +201,7 @@ const SetScheduleModal = ({ closeModal, selectedImages, twitterAccounts, redditA
 
     
     const job = await validateAndFormatScheduleData(scheduleData);
-    console.log(user)
+    console.log(user);
     console.log('Schedule Data:', job);
     await createScheduledJob(job, user.jwt);
     setReloadJobs(true);

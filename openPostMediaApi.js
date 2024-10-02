@@ -10,7 +10,7 @@ const { appendOrWriteToJsonFile, deleteFromPhotoData } = require('./utils');
 const sharp = require('sharp');
 const axios = require('axios');
 const { writePhotoMetadata, readPhotoDataFromDB, updateMetadataDB, deleteFromPhotoDataDB } = require('./openPostMediaData');
-const { authenticateToken } = require('./socialauthentication/authService')
+const { authenticateToken } = require('./socialauthentication/authService');
 
 const router = express.Router();
 router.use(cookieParser());

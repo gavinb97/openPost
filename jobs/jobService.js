@@ -1,6 +1,6 @@
 const { v4: uuidv4 } = require('uuid'); 
 const { insertScheduledJob, insertRandomJob, insertActiveJob } = require('./jobsData');
-const { formatPostJobs } = require('./postJobService')
+const { formatPostJobs } = require('./postJobService');
 
 const formatRequest = async (request) => {
   console.log(request);
@@ -8,11 +8,11 @@ const formatRequest = async (request) => {
   let jobs;
 
   if (request?.jobType === 'postJob') {
-    console.log('got a postjob')
-    jobs = await formatPostJobs(request)
-    jobs = []
+    console.log('got a postjob');
+    jobs = await formatPostJobs(request);
+    jobs = [];
   } else {
-    jobs = await handleMediaPostJob(request, jobs)
+    jobs = await handleMediaPostJob(request, jobs);
   }
    
   return jobs;
@@ -20,24 +20,24 @@ const formatRequest = async (request) => {
 
 const handleMediaPostJob = async (request, jobs) => {
   switch (request.selectedWebsite) {
-    case 'reddit':
-      jobs = await handleScheduleType(request);
-      break;
-    case 'twitter': 
-      jobs = await handleScheduleType(request);
-      break;
-    case 'tiktok':
-      jobs = await handleScheduleType(request);
-      break;
-    case 'youtube':
-      jobs = await handleScheduleType(request);
-      break;
-    default:
-      console.log('No website selected, something must be wrong');
-    }
+  case 'reddit':
+    jobs = await handleScheduleType(request);
+    break;
+  case 'twitter': 
+    jobs = await handleScheduleType(request);
+    break;
+  case 'tiktok':
+    jobs = await handleScheduleType(request);
+    break;
+  case 'youtube':
+    jobs = await handleScheduleType(request);
+    break;
+  default:
+    console.log('No website selected, something must be wrong');
+  }
 
-  return jobs
-}
+  return jobs;
+};
 
 const createRandomJobObject = (obj, jobSetId, originalImages, remainingImages, scheduledTime, originalSubreddits, remainingSubreddits) => {
   return {
@@ -111,6 +111,8 @@ const createActiveJobObject = (obj, dbJobObject, jobs, originalSubreddits, remai
 
   return activeJobObject;
 };
+
+
 
 
 const handleJobInsertion = async (request, dbObject, activeJobObject) => {

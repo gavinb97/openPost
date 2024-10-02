@@ -107,7 +107,7 @@ function UserLandingScreen () {
 
   const handleShowPostJobModal = () => {
     // if (user.pro === 'true') {
-      setShowPostJobModal(true);
+    setShowPostJobModal(true);
     // } else {
     //   setShowLimitModal(true);
     // }
@@ -115,9 +115,9 @@ function UserLandingScreen () {
   };
 
   const handleReplyJobModal = () => {
-    console.log('reply job')
-    setShowLimitModal(true)
-  }
+    console.log('reply job');
+    setShowLimitModal(true);
+  };
 
   const handleShowCommentModal = () => {
     if (user.pro === 'true') {

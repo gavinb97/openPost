@@ -4,7 +4,7 @@ const cors = require('cors');
 const { setupQueue, enqueuePostJob, startWorker, getExistingQueue } = require('./jobQueue');
 const { formatRequest } = require('./jobService');
 const { getActiveJobsByUserId, deleteActiveJobByJobSetId } = require('./jobsData');
-const { authenticateToken } = require('../socialauthentication/authService')
+const { authenticateToken } = require('../socialauthentication/authService');
 const router = express.Router();
 router.use(bodyParser.json());
 router.use(cors());

@@ -106,8 +106,8 @@ const authenticateUser = async (username, password) => {
 
 const authenticateToken = (req, res, next) => {
   const authHeader = req.headers['authorization'];
-  console.log(authHeader)
-  console.log('auth header ^^')
+  console.log(authHeader);
+  console.log('auth header ^^');
   const token = authHeader && authHeader.split(' ')[1];  // "Bearer TOKEN_HERE"
   if (token == null) return res.sendStatus(401);
   jwt.verify(token, JWT_SECRET, (err, user) => {

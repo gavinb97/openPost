@@ -132,7 +132,7 @@ const AuthorizeAccounts = ({ userData, handleOpenAccountDetails, setAccountDetai
   }; 
 
   const handleAccountClick = (data) => {
-    data.jwt = user.jwt
+    data.jwt = user.jwt;
     
     setAccountDetails(data);
     handleOpenAccountDetails(true);

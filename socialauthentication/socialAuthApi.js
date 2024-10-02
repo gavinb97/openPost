@@ -7,7 +7,7 @@ const { writeTextToFile, updateUserTokens } = require('../utils');
 const bodyParser = require('body-parser');
 const { updateYouTubeTokens } = require('./socialAuthData');
 const jwt = require('jsonwebtoken');
-const JWT_SECRET = process.env.JWT_SECRET
+const JWT_SECRET = process.env.JWT_SECRET;
 const {google} = require('googleapis');
 const { fulfillCheckout } = require('./authService');
 

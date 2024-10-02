@@ -80,8 +80,8 @@ export const updateFileNamesAsync = async (files, uploadedFileNames) => {
 
 
 export const uploadFile = (file, fileName, username, userJwt) => {
-  console.log(userJwt)
-  console.log('****')
+  console.log(userJwt);
+  console.log('****');
   return new Promise((resolve, reject) => {
     const endpoint = 'http://localhost:3455/upload';
     const reader = new FileReader();

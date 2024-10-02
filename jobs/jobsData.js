@@ -633,6 +633,387 @@ const getJobSetById = async (jobSetId) => {
   }
 };
 
+const insertPostJob = async (postJob) => {
+  console.log('Inserting post job');
+  console.log(postJob);
+
+  let {
+    job_set_id,
+    message_ids,
+    numberOfMessages,
+    userid,
+    jobType,
+    username,
+    selectedWebsite,
+    picturePostOrder,
+    scheduleType,
+    scheduleInterval,
+    hourInterval,
+    timesOfDay,
+    selectedDays,
+    selectedImages,
+    durationOfJob,
+    selectedSubreddits,
+    postType,
+    tweetInputs,
+    aiPrompt,
+    redditPosts,
+    numberOfPosts
+  } = postJob;
+
+  // Convert message_ids array to PostgreSQL array literal
+  const messageIdsLiteral = message_ids && message_ids.length
+    ? `{${message_ids.map(id => `'${id}'`).join(',')}}`
+    : 'ARRAY[]::TEXT[]'; // Handle empty array
+
+  // Handle times_of_day being null or empty
+  const timesOfDayArray = timesOfDay ? timesOfDay.map(({ hour, minute, ampm }) => {
+    return `${hour}:${minute.padStart(2, '0')}${ampm}`;
+  }) : [];
+  const timesOfDayJson = timesOfDayArray.length ? JSON.stringify(timesOfDayArray) : null;
+
+  // Handle selected_days being null or empty
+  const dayNamesMap = {
+    S: 'Sunday',
+    M: 'Monday',
+    T: 'Tuesday',
+    W: 'Wednesday',
+    Th: 'Thursday',
+    F: 'Friday',
+    Sa: 'Saturday'
+  };
+
+  const selectedDaysArray = selectedDays ? Object.entries(selectedDays)
+    .filter(([day, isSelected]) => isSelected)
+    .map(([day]) => dayNamesMap[day]) : [];
+  const selectedDaysJson = selectedDaysArray.length ? JSON.stringify(selectedDaysArray) : null;
+
+  const query = `
+    INSERT INTO postjobs (
+      job_set_id,
+      message_ids,
+      numberOfMessages,
+      userid,
+      jobType,
+      username,
+      selectedWebsite,
+      picturePostOrder,
+      scheduleType,
+      scheduleInterval,
+      hourInterval,
+      timesOfDay,
+      selectedDays,
+      selectedImages,
+      durationOfJob,
+      selectedSubreddits,
+      postType,
+      tweetInputs,
+      aiPrompt,
+      redditPosts,
+      numberOfPosts
+    ) VALUES (
+      $1, $2, $3, $4, $5, $6, $7, $8::INT[], $9, $10, $11, $12, $13, $14::TEXT[], $15, $16::jsonb[], $17, $18::jsonb[], $19, $20::jsonb[], $21
+    ) RETURNING id;
+  `;
+
+  const values = [
+    job_set_id,
+    messageIdsLiteral,           
+    numberOfMessages,
+    userid,
+    jobType,
+    username,
+    selectedWebsite,
+    {},     
+    scheduleType,
+    scheduleInterval || null,    
+    hourInterval || null,        
+    timesOfDayJson,              
+    selectedDaysJson,            
+    selectedImages,      
+    durationOfJob || 999,       
+    selectedSubreddits,      
+    postType,
+    tweetInputs,             
+    aiPrompt,                
+    redditPosts,             
+    parseInt(numberOfPosts, 10)  
+  ];
+
+  try {
+    const client = await pool.connect();
+    const res = await client.query(query, values);
+    client.release();
+
+    return res.rows[0]; // Return the inserted post job object
+  } catch (err) {
+    console.error('Error inserting post job', err);
+    throw err;
+  }
+};
+
+
+const updatePostJob = async (postJob) => {
+  let {
+    job_set_id,
+    message_ids,
+    numberOfMessages,
+    userid,
+    jobType,
+    username,
+    selectedWebsite,
+    picturePostOrder,
+    scheduleType,
+    scheduleInterval,
+    hourInterval,
+    timesOfDay,
+    selectedDays,
+    selectedImages,
+    durationOfJob,
+    selectedSubreddits,
+    postType,
+    tweetInputs,
+    aiPrompt,
+    redditPosts,
+    numberOfPosts
+  } = postJob;
+
+  // Convert message_ids array to a PostgreSQL array literal
+  const messageIdsLiteral = `{${message_ids.map(id => `'${id}'`).join(',')}}`;
+
+  // Handle timesOfDay being an array of strings
+  const timesOfDayArray = timesOfDay ? timesOfDay.map(time => time) : [];
+  const timesOfDayJson = JSON.stringify(timesOfDayArray);
+
+  // Handle selectedDays being an array of day names
+  const selectedDaysArray = selectedDays ? selectedDays : [];
+  const selectedDaysJson = JSON.stringify(selectedDaysArray);
+
+  const query = `
+        UPDATE postjobs SET
+            message_ids = $1,
+            numberOfMessages = $2,
+            userid = $3,
+            jobType = $4,
+            username = $5,
+            selectedWebsite = $6,
+            picturePostOrder = $7,
+            scheduleType = $8,
+            scheduleInterval = $9,
+            hourInterval = $10,
+            timesOfDay = $11,
+            selectedDays = $12,
+            selectedImages = $13,
+            durationOfJob = $14,
+            selectedSubreddits = $15,
+            postType = $16,
+            tweetInputs = $17,
+            aiPrompt = $18,
+            redditPosts = $19,
+            numberOfPosts = $20,
+            updated_at = NOW()
+        WHERE job_set_id = $21
+        RETURNING id;
+    `;
+
+  const values = [
+    messageIdsLiteral, // Use the PostgreSQL array literal
+    numberOfMessages,
+    userid,
+    jobType,
+    username,
+    selectedWebsite,
+    picturePostOrder,
+    scheduleType,
+    scheduleInterval,
+    hourInterval,
+    timesOfDayJson, // Use the JSON formatted data
+    selectedDaysJson,
+    selectedImages,
+    durationOfJob,
+    selectedSubreddits,
+    postType,
+    tweetInputs,
+    aiPrompt,
+    redditPosts,
+    numberOfPosts,
+    job_set_id // Use job_set_id for the WHERE clause
+  ];
+
+  try {
+    const client = await pool.connect();
+    const res = await client.query(query, values);
+    client.release();
+
+    return res.rows[0]; // Return the updated post job object
+  } catch (err) {
+    console.error('Error updating post job', err);
+    throw err;
+  }
+};
+
+const deleteMessageIdFromPostJob = async (job_set_id, message_id) => {
+  console.log('Attempting to delete message id from post job...');
+
+  const selectQuery = `
+        SELECT message_ids
+        FROM postjobs
+        WHERE job_set_id = $1;
+    `;
+
+  const updateQuery = `
+        UPDATE postjobs
+        SET message_ids = $1, updated_at = NOW()
+        WHERE job_set_id = $2;
+    `;
+
+  try {
+    const client = await pool.connect();
+
+    // Retrieve the current message_ids for the post job
+    const res = await client.query(selectQuery, [job_set_id]);
+    if (res.rows.length === 0) {
+      client.release();
+      throw new Error(`Post job with job_set_id ${job_set_id} not found.`);
+    }
+
+    let { message_ids } = res.rows[0];
+    console.log(message_ids);
+    console.log('Message ids from rows ^^^');
+
+    // Ensure message_id is formatted correctly for comparison
+    const formattedMessageId = message_id; // Adjust based on your database schema
+
+    // Remove the message_id from the array
+    const updatedMessageIds = message_ids.filter(id => id !== formattedMessageId);
+    console.log(updatedMessageIds);
+    console.log('Updated message ids from rows ^^^');
+
+    // Update the post job with the new message_ids array
+    await client.query(updateQuery, [updatedMessageIds, job_set_id]);
+    client.release();
+
+    console.log('Message ID deleted successfully from post job.');
+  } catch (err) {
+    console.error('Error deleting message_id from post job', err);
+    throw err;
+  }
+};
+
+const getMessageIdsCountForPostJob = async (job_set_id) => {
+  const query = `
+        SELECT message_ids
+        FROM postjobs
+        WHERE job_set_id = $1;
+    `;
+
+  try {
+    const client = await pool.connect();
+    const res = await client.query(query, [job_set_id]);
+    client.release();
+
+    if (res.rows.length === 0) {
+      throw new Error(`Post job with job_set_id ${job_set_id} not found.`);
+    }
+
+    const { message_ids } = res.rows[0];
+    // Assuming message_ids is stored as an array in the database
+    return message_ids.length; // Return the count of message_ids
+  } catch (err) {
+    console.error('Error getting message_ids count for post job', err);
+    throw err;
+  }
+};
+
+const deletePostJobByJobSetId = async (jobSetId) => {
+  const query = `
+        DELETE FROM postjobs
+        WHERE job_set_id = $1
+        RETURNING *;
+    `;
+
+  try {
+    const client = await pool.connect();
+    const res = await client.query(query, [jobSetId]);
+    client.release();
+
+    if (res.rows.length === 0) {
+      throw new Error(`Post job with job_set_id ${jobSetId} not found.`);
+    }
+
+    return res.rows[0]; // Return the deleted post job
+  } catch (err) {
+    console.error('Error deleting post job', err);
+    throw err;
+  }
+};
+
+const getPostJobsByUserId = async (userId) => {
+  const query = `
+        SELECT *
+        FROM postjobs
+        WHERE user_id = $1;
+    `;
+
+  try {
+    const client = await pool.connect();
+    const res = await client.query(query, [userId]);
+    client.release();
+
+    return res.rows; // Return an array of post jobs
+  } catch (err) {
+    console.error('Error retrieving post jobs', err);
+    throw err;
+  }
+};
+
+const getPostJobById = async (postJobId) => {
+  const query = `
+        SELECT 
+            post_job_id,
+            user_id,
+            message_ids,
+            content,
+            scheduled_time,
+            original_images,
+            remaining_images,
+            selected_website,
+            schedule_type,
+            times_of_day,
+            selected_days,
+            schedule_interval,
+            hour_interval,
+            duration_of_job,
+            selected_subreddits,
+            remaining_subreddits,
+            include_caption,
+            type_of_caption,
+            handle,
+            created_at,
+            updated_at
+        FROM postjobs
+        WHERE post_job_id = $1;
+    `;
+
+  const values = [postJobId];
+
+  try {
+    const client = await pool.connect();
+    const res = await client.query(query, values);
+    client.release();
+
+    if (res.rows.length === 0) {
+      throw new Error(`No post job found with post_job_id: ${postJobId}`);
+    }
+
+    return res.rows[0]; // Return the post job details
+  } catch (err) {
+    console.error('Error retrieving post job by ID', err);
+    throw err;
+  }
+};
+
+
 
 module.exports = {
   insertScheduledJob,
@@ -645,5 +1026,6 @@ module.exports = {
   getMessageIdsCountForJob,
   getJobSetById,
   updateActiveJob,
-  getDurationOfJob
+  getDurationOfJob,
+  insertPostJob
 };

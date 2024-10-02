@@ -17,7 +17,7 @@ const StartPostJobModal = ({ closeModal, selectedImages, twitterAccounts, reddit
   const [hourInterval, setHourInterval] = useState(1); // State for hour interval
   const [timesOfDay, setTimesOfDay] = useState([]);
   const [durationOfJob, setDurationOfJob] = useState();
-  const [numberOfPosts, setNumberOfPosts] = useState()
+  const [numberOfPosts, setNumberOfPosts] = useState();
   const [selectedDays, setSelectedDays] = useState({
     S: false,
     M: false,
@@ -32,7 +32,7 @@ const StartPostJobModal = ({ closeModal, selectedImages, twitterAccounts, reddit
   
   const [postType, setPostType] = useState('ai');
 
-  const [selectedAccount, setSelectedAccount] = useState()
+  const [selectedAccount, setSelectedAccount] = useState();
 
   useEffect(() => {
     if (selectedWebsite === 'reddit' && selectedAccount) {
@@ -142,8 +142,8 @@ const StartPostJobModal = ({ closeModal, selectedImages, twitterAccounts, reddit
   };
 
   const handleNumberOfPostsChange = (e) => {
-    setNumberOfPosts(e.target.value)
-  }
+    setNumberOfPosts(e.target.value);
+  };
 
   const renderTimeInput = () => {
     return (
@@ -230,7 +230,7 @@ const StartPostJobModal = ({ closeModal, selectedImages, twitterAccounts, reddit
     
     console.log(scheduleData);
     const job = await validateAndFormatPostJobData(scheduleData);
-    await createScheduledJob(job, user.jwt)
+    await createScheduledJob(job, user.jwt);
     console.log(job);
     console.log('da job above');
   };
@@ -709,15 +709,15 @@ const StartPostJobModal = ({ closeModal, selectedImages, twitterAccounts, reddit
     return (
       <div className='aiInputContainer'>
         <div className='aibox'>
-<div className='aiInputs'>
-          <label className='ailabel' style={{ marginRight: '10px' }}>Style:</label>
-          <textarea
-            type="text"
-            value={aiPrompt.style}
-            onChange={(e) => handleAIPromptChange('style', e.target.value)}
-          />
-          {/* <p className='aitext'>This prompt helps with the voice of the post</p> */}
-        </div>
+          <div className='aiInputs'>
+            <label className='ailabel' style={{ marginRight: '10px' }}>Style:</label>
+            <textarea
+              type="text"
+              value={aiPrompt.style}
+              onChange={(e) => handleAIPromptChange('style', e.target.value)}
+            />
+            {/* <p className='aitext'>This prompt helps with the voice of the post</p> */}
+          </div>
         </div>
         <div className='aiInputs'>
           <label className='ailabel' style={{ marginRight: '10px' }}>Type of Content:</label>
@@ -909,8 +909,8 @@ const StartPostJobModal = ({ closeModal, selectedImages, twitterAccounts, reddit
           </div>
         )}
       </>
-    )
-  }
+    );
+  };
 
   const getButtonClassName = () => {
     let className = 'modalSelect';
@@ -925,8 +925,8 @@ const StartPostJobModal = ({ closeModal, selectedImages, twitterAccounts, reddit
 
     if (postType === 'ai') {
       if (aiPrompt?.style.length < 10 || aiPrompt?.contentType.length < 10) {
-      className += ' disabledButton';
-    }
+        className += ' disabledButton';
+      }
     }
 
     

@@ -38,25 +38,25 @@ const makePost = async (job) => {
     try {
 
     
-    const creds = await getCredsByUsernameAndHandle(job.userId, job.handle);
+      const creds = await getCredsByUsernameAndHandle(job.userId, job.handle);
 
-    switch (job.website) {
-    case 'twitter':
-      console.log('twitter');
-      await postToTwitter(creds, job);
+      switch (job.website) {
+      case 'twitter':
+        console.log('twitter');
+        await postToTwitter(creds, job);
             
-      break;
-    case 'reddit':
-      console.log('reddit');
-      await postToReddit(creds, job);
-      break;
-    default:
-      console.log('no website, cant do anything...');
-    }
+        break;
+      case 'reddit':
+        console.log('reddit');
+        await postToReddit(creds, job);
+        break;
+      default:
+        console.log('no website, cant do anything...');
+      }
 
-  } catch (e) {
-    console.log(e)
-  }
+    } catch (e) {
+      console.log(e);
+    }
   }
     
 };

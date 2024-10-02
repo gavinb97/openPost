@@ -59,7 +59,7 @@ const UploadedMediaContainer = forwardRef((props, ref) => {
   };
 
   const handleEditClick = () => {
-    console.log('edit clicked')
+    console.log('edit clicked');
     setShowModal(true);
   };
 
