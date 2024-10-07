@@ -760,12 +760,6 @@ const StartPostJobModal = ({ closeModal, selectedImages, twitterAccounts, reddit
       case 'reddit':
         accounts = redditAccounts;
         break;
-      case 'tiktok':
-        accounts = tiktokAccounts;
-        break;
-      case 'youtube':
-        accounts = youtubeAccounts;
-        break;
       default:
         break;
       }
@@ -801,8 +795,8 @@ const StartPostJobModal = ({ closeModal, selectedImages, twitterAccounts, reddit
           <option>Select Website</option>
           {twitterAccounts.length > 0 && <option value="twitter">Twitter</option>}
           {redditAccounts.length > 0 && <option value="reddit">Reddit</option>}
-          {tiktokAccounts.length > 0 && <option value="tiktok">TikTok</option>}
-          {youtubeAccounts.length > 0 && <option value="youtube">Youtube Shorts</option>}
+          {/* {tiktokAccounts.length > 0 && <option value="tiktok">TikTok</option>}
+          {youtubeAccounts.length > 0 && <option value="youtube">Youtube Shorts</option>} */}
         </select>
       </div>
     );
