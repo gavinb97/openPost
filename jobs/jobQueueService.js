@@ -32,6 +32,7 @@ async function enqueuePostJob (channel, job) {
 }
 
 const makePost = async (job) => {
+  
   // validate that job is active 
   const validJob = await validateJob(job);
   if (validJob) {

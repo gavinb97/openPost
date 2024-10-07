@@ -710,9 +710,10 @@ const insertPostJob = async (postJob) => {
       tweetInputs,
       aiPrompt,
       redditPosts,
-      numberOfPosts
+      numberOfPosts,
+      postsCreated
     ) VALUES (
-      $1, $2, $3, $4, $5, $6, $7, $8::INT[], $9, $10, $11, $12, $13, $14::TEXT[], $15, $16::jsonb[], $17, $18::jsonb[], $19, $20::jsonb[], $21
+      $1, $2, $3, $4, $5, $6, $7, $8::INT[], $9, $10, $11, $12, $13, $14::TEXT[], $15, $16::jsonb[], $17, $18::jsonb[], $19, $20::jsonb[], $21, $22
     ) RETURNING id;
   `;
 
@@ -737,7 +738,8 @@ const insertPostJob = async (postJob) => {
     tweetInputs,             
     aiPrompt,                
     redditPosts,             
-    parseInt(numberOfPosts, 10)  
+    parseInt(numberOfPosts, 10),
+    numberOfMessages // posts created is the number of messages created.
   ];
 
   try {
@@ -778,16 +780,32 @@ const updatePostJob = async (postJob) => {
     numberOfPosts
   } = postJob;
 
-  // Convert message_ids array to a PostgreSQL array literal
-  const messageIdsLiteral = `{${message_ids.map(id => `'${id}'`).join(',')}}`;
+  // Convert message_ids array to PostgreSQL array literal
+  const messageIdsLiteral = message_ids && message_ids.length
+    ? `{${message_ids.map(id => `'${id}'`).join(',')}}`
+    : 'ARRAY[]::TEXT[]'; // Handle empty array
 
-  // Handle timesOfDay being an array of strings
-  const timesOfDayArray = timesOfDay ? timesOfDay.map(time => time) : [];
-  const timesOfDayJson = JSON.stringify(timesOfDayArray);
+  // Handle times_of_day being null or empty
+  const timesOfDayArray = timesOfDay ? timesOfDay.map(({ hour, minute, ampm }) => {
+    return `${hour}:${minute.padStart(2, '0')}${ampm}`;
+  }) : [];
+  const timesOfDayJson = timesOfDayArray.length ? JSON.stringify(timesOfDayArray) : null;
 
-  // Handle selectedDays being an array of day names
-  const selectedDaysArray = selectedDays ? selectedDays : [];
-  const selectedDaysJson = JSON.stringify(selectedDaysArray);
+  // Handle selected_days being null or empty
+  const dayNamesMap = {
+    S: 'Sunday',
+    M: 'Monday',
+    T: 'Tuesday',
+    W: 'Wednesday',
+    Th: 'Thursday',
+    F: 'Friday',
+    Sa: 'Saturday'
+  };
+
+  const selectedDaysArray = selectedDays ? Object.entries(selectedDays)
+    .filter(([day, isSelected]) => isSelected)
+    .map(([day]) => dayNamesMap[day]) : [];
+  const selectedDaysJson = selectedDaysArray.length ? JSON.stringify(selectedDaysArray) : null;
 
   const query = `
         UPDATE postjobs SET
@@ -797,19 +815,19 @@ const updatePostJob = async (postJob) => {
             jobType = $4,
             username = $5,
             selectedWebsite = $6,
-            picturePostOrder = $7,
+            picturePostOrder = $7::INT[],
             scheduleType = $8,
             scheduleInterval = $9,
             hourInterval = $10,
             timesOfDay = $11,
             selectedDays = $12,
-            selectedImages = $13,
+            selectedImages = $13::TEXT[],
             durationOfJob = $14,
-            selectedSubreddits = $15,
+            selectedSubreddits = $15::jsonb[],
             postType = $16,
-            tweetInputs = $17,
-            aiPrompt = $18,
-            redditPosts = $19,
+            tweetInputs = $17::jsonb[],
+            aiPrompt = $18::jsonb[],
+            redditPosts = $19::jsonb[],
             numberOfPosts = $20,
             updated_at = NOW()
         WHERE job_set_id = $21
@@ -825,19 +843,19 @@ const updatePostJob = async (postJob) => {
     selectedWebsite,
     picturePostOrder,
     scheduleType,
-    scheduleInterval,
-    hourInterval,
-    timesOfDayJson, // Use the JSON formatted data
-    selectedDaysJson,
-    selectedImages,
-    durationOfJob,
-    selectedSubreddits,
+    scheduleInterval || null,    // Handle potential null
+    hourInterval || null,        // Handle potential null
+    timesOfDayJson,              // Use the JSON formatted data
+    selectedDaysJson,            // Use the JSON formatted data
+    selectedImages,              // Assume selectedImages is an array
+    durationOfJob || 999,        // Default value if null
+    selectedSubreddits,          // Assume this is a JSONB array
     postType,
-    tweetInputs,
-    aiPrompt,
-    redditPosts,
-    numberOfPosts,
-    job_set_id // Use job_set_id for the WHERE clause
+    tweetInputs,                 // JSONB array
+    aiPrompt,                    // JSONB array
+    redditPosts,                 // JSONB array
+    parseInt(numberOfPosts, 10), // Ensure numberOfPosts is an integer
+    job_set_id                   // job_set_id for WHERE clause
   ];
 
   try {
@@ -852,6 +870,7 @@ const updatePostJob = async (postJob) => {
   }
 };
 
+
 const deleteMessageIdFromPostJob = async (job_set_id, message_id) => {
   console.log('Attempting to delete message id from post job...');
 
@@ -863,7 +882,7 @@ const deleteMessageIdFromPostJob = async (job_set_id, message_id) => {
 
   const updateQuery = `
         UPDATE postjobs
-        SET message_ids = $1, updated_at = NOW()
+        SET message_ids = $1
         WHERE job_set_id = $2;
     `;
 
@@ -970,29 +989,31 @@ const getPostJobsByUserId = async (userId) => {
 const getPostJobById = async (postJobId) => {
   const query = `
         SELECT 
-            post_job_id,
-            user_id,
+            id,
+            job_set_id,
             message_ids,
-            content,
-            scheduled_time,
-            original_images,
-            remaining_images,
-            selected_website,
-            schedule_type,
-            times_of_day,
-            selected_days,
-            schedule_interval,
-            hour_interval,
-            duration_of_job,
-            selected_subreddits,
-            remaining_subreddits,
-            include_caption,
-            type_of_caption,
-            handle,
-            created_at,
-            updated_at
+            number_of_messages,
+            userid,
+            jobtype,
+            username,
+            selectedwebsite,
+            picuturepostorder,
+            scheduletype,
+            scheduleinterval,
+            hourinterval,
+            timesofday,
+            selecteddays,
+            selectedimages,
+            durationofjob,
+            selectedsubreddits,
+            posttype,
+            tweetinputs,
+            aiprompt,
+            redditposts,
+            numberofposts,
+            postsCreated
         FROM postjobs
-        WHERE post_job_id = $1;
+        WHERE job_set_id = $1;
     `;
 
   const values = [postJobId];
@@ -1013,6 +1034,31 @@ const getPostJobById = async (postJobId) => {
   }
 };
 
+const isPostJobPresent = async (jobSetId) => {
+  const query = `
+        SELECT EXISTS (
+            SELECT 1
+            FROM postjobs
+            WHERE job_set_id = $1
+        );
+    `;
+
+  const values = [jobSetId];
+
+  try {
+    const client = await pool.connect();
+    const res = await client.query(query, values);
+    client.release();
+
+    // Return true if the post job ID exists, otherwise false
+    return res.rows[0].exists;
+  } catch (err) {
+    console.error('Error checking if post job is present', err);
+    throw err;
+  }
+};
+
+
 
 
 module.exports = {
@@ -1027,5 +1073,10 @@ module.exports = {
   getJobSetById,
   updateActiveJob,
   getDurationOfJob,
-  insertPostJob
+  insertPostJob,
+  isPostJobPresent,
+  getMessageIdsCountForPostJob,
+  deleteMessageIdFromPostJob,
+  getPostJobById,
+  deletePostJobByJobSetId
 };

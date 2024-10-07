@@ -154,6 +154,60 @@ const handleAiRandomTwitterPosts = (request) => {
   return jobs; // Return the array of job objects
 };
 
+const rescheduleRandomAiTwitterJobs = async (activeJob) => {
+    const jobs = [];
+    const maxDurationInMilliseconds = 48 * 60 * 60 * 1000; // 48 hours in milliseconds
+    const minIntervalInMilliseconds = 10 * 60 * 1000; // 10 minutes in milliseconds
+    const maxIntervalInMilliseconds = 8 * 60 * 60 * 1000; // 8 hours in milliseconds
+    
+    // Determine the number of remaining posts to create
+    const postsRemaining = activeJob.numberofposts - activeJob.postsCreated;
+    if (postsRemaining <= 0) {
+      return { jobs, activeJob }; // No jobs needed if all posts are created
+    }
+  
+    let accumulatedDelay = 0;
+    let jobId = activeJob.postsCreated + 1; // Continue job IDs from the already created ones
+    const jobSetId = activeJob.job_set_id; // Keep using the existing job set ID
+  
+    // Create new jobs for the remaining posts within the 48-hour window
+    for (let i = 0; i < postsRemaining; i++) {
+      let intervalInMilliseconds;
+  
+      // Randomize the interval between posts
+      do {
+        intervalInMilliseconds = Math.floor(Math.random() * maxIntervalInMilliseconds);
+      } while (intervalInMilliseconds < minIntervalInMilliseconds);
+  
+      // Accumulate the delay time for each job
+      accumulatedDelay += intervalInMilliseconds;
+  
+      // Ensure the job is within the 48-hour window
+      if (accumulatedDelay <= maxDurationInMilliseconds) {
+        const job = {
+          message_id: uuidv4(), // Unique ID for each job
+          jobSetId: jobSetId, // Same ID for all jobs in this set
+          userId: activeJob.userid, // Use the user ID from the active job
+          content: `Random AI post for ${activeJob.selectedwebsite}`, // Default content for AI post
+          scheduledTime: Date.now() + accumulatedDelay, // Scheduled time in milliseconds
+          aiPrompt: activeJob.aiprompt, // The AI prompt for generating the content
+          jobType: activeJob.jobtype // Job type from the active job
+        };
+  
+        jobs.push(job); // Add the job to the array
+        jobId++;
+      } else {
+        break; // Stop adding jobs if it exceeds the 48-hour window
+      }
+    }
+  
+    // Update the active job's postsCreated field to reflect the new jobs
+    activeJob.postsCreated += jobs.length;
+  
+    return { jobs, activeJob };
+  };
+  
+
 
 const handleUserRandomTwitterPosts = (request) => {
   console.log('in handle user random twitter');
@@ -820,5 +874,6 @@ const handleUserRandomRedditPosts = (request) => {
 
 
 module.exports = {
-  formatPostJobs
+  formatPostJobs,
+  rescheduleRandomAiTwitterJobs
 };

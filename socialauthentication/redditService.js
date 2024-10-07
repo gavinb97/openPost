@@ -429,6 +429,32 @@ const postImageToSubreddit = async (subredditName, accessToken, imageUrl, title,
   }
 };
 
+const postTextToSubreddit = async (subredditName, accessToken, title, text) => {
+  const endpoint = 'https://oauth.reddit.com/api/submit';
+
+  const bodyForm = new FormData();
+  bodyForm.append('title', title);
+  bodyForm.append('sr', subredditName);
+  bodyForm.append('kind', text ? 'self' : 'link'); // 'self' for text posts, 'link' for title-only
+  if (text) {
+    bodyForm.append('text', text); // Add text only if it's provided
+  }
+
+  try {
+    const response = await axios.post(endpoint, bodyForm, {
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'User-Agent': 'web:bodycalc:v1.0 (by /u/BugResponsible9056)',
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error posting to subreddit:', error);
+    throw error;
+  }
+};
+
+
 const getTopPostOfSubreddit = async (subredditName, accessToken) => {
   const endpoint = `https://oauth.reddit.com/r/${subredditName}/top.json?limit=1`;
   try {
@@ -813,7 +839,8 @@ module.exports = {
   getSubreddits,
   getSubredditsWithNSFWTag,
   getSafeForWorkSubreddits,
-  postToSubredditOnBehalfOfUser
+  postToSubredditOnBehalfOfUser,
+  postTextToSubreddit
 };
 
 

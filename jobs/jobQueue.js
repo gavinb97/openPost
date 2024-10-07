@@ -45,7 +45,12 @@ async function startWorker (channel) {
     console.log(`${job.scheduledTime}`);
     console.log(Date.now());
     if (job.content !== 'Bridge job to ensure continuity') {
-      await makePost(job);
+      if (job?.jobType === 'postJob') {
+        
+      } else {
+        await makePost(job);
+      }
+      
     } else {
       // consume bridge job
       console.log('gonna try to consume bridge job');
