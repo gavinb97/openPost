@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import Navbar from '../components/Navbar';
-
+import { submitContactForm } from '../service/userService';
 const ContactSupport = () => {
 
   useEffect(()=>{
@@ -18,6 +18,18 @@ const ContactSupport = () => {
   // Handle changes in the question textarea
   const handleQuestionChange = (event) => {
     setQuestion(event.target.value);
+  };
+
+  const handleSubmitClick = async () => {
+    console.log('attempting to insert');
+    try {
+      await submitContactForm({email: email, question: question});
+      setEmail('');
+      setQuestion('');
+    } catch (e) {
+      console.log('failed to submit contact form');
+    }
+    
   };
 
   const renderForm = () => {
@@ -44,7 +56,7 @@ const ContactSupport = () => {
             </label>
             <br />
             <br />
-            <button type='submit'>Submit</button>
+            <button onClick={handleSubmitClick} >Submit</button>
           </form>
         </div>
                

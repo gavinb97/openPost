@@ -4,7 +4,7 @@ const path = require('path');
 const jwt = require('jsonwebtoken');
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key'; 
 const { findUserCredentials } = require('../utils');
-const { getUpdatedDetails, registerUserDB, authenticateUserDB, getCredsByUser, getUserEmailByUsername, updateProStatus, deactivateProStatus } = require('./socialAuthData');
+const { getUpdatedDetails, registerUserDB, authenticateUserDB, getCredsByUser, getUserEmailByUsername, updateProStatus, deactivateProStatus, insertIntoContactForm } = require('./socialAuthData');
 const stripe = require('stripe')(process.env.STRIPE_KEY);
 
 const getUserByUsername = async (filename, username) => {
@@ -177,6 +177,11 @@ const cancelMembership = async (sessionId) => {
   await deactivateProStatus(email);
 };
 
+const submitContactForm = async (contactFormData) => {
+  // TODO some validations
+  await insertIntoContactForm(contactFormData);
+};
+
 module.exports = {
   getUserByUsername,
   registerUser,
@@ -186,5 +191,6 @@ module.exports = {
   fulfillCheckout,
   fetchUserEmail,
   cancelMembership,
-  getUpdatedUserDetails
+  getUpdatedUserDetails,
+  submitContactForm
 };

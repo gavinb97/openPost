@@ -108,5 +108,22 @@ export const getBillingPortal = async (customerId, userJwt) => {
   }
 };
 
+export const submitContactForm = async (contactFormData) => {
+  const endpoint = 'http://localhost:3455/contactFormSubmit';
+
+  try {
+    const response = await axios.post(endpoint, contactFormData, {
+      headers: {
+        'Content-Type': 'application/json', // Specify the content type
+      },
+    });
+
+    return response.data; // Return the response data (could include confirmation or ID)
+  } catch (error) {
+    console.error('Failed to submit contact form', error);
+    throw error; // Re-throw the error to propagate it further if needed
+  }
+};
+
 
 

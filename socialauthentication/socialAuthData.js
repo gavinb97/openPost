@@ -908,9 +908,42 @@ const deactivateProStatus = async (email) => {
 };
 
 
+const insertIntoContactForm = async (contactFormData) => {
+  console.log('Inserting into contact form');
+  console.log(contactFormData);
+
+  const { username, email, question } = contactFormData;
+
+  const query = `
+    INSERT INTO contactform (
+      username,
+      email,
+      question
+    ) VALUES (
+      $1, $2, $3
+    ) RETURNING id;
+  `;
+
+  const values = [username, email, question];
+
+  try {
+    const client = await pool.connect();
+    try {
+      const res = await client.query(query, values);
+      return res.rows[0]; // Return the newly created contact form entry
+    } finally {
+      client.release();
+    }
+  } catch (err) {
+    console.error('Error inserting into contact form', err);
+    throw err;
+  }
+};
+
+
 module.exports = { 
   registerUserDB, authenticateUserDB, getCredsByUser, updateTwitterCodeVerifier,
   updateTwitterTokens, revokeTwitterTokens, getTwitterCodeVerifierByUsername, updateRedditTokens, revokeRedditTokens,
   updateTikTokTokens, revokeTikTokTokens, updateYouTubeTokens, revokeYouTubeTokens, getUserNames, getCredsByUsernameAndHandle,
-  getUserEmailByUsername, updateProStatus, deactivateProStatus, getUpdatedDetails
+  getUserEmailByUsername, updateProStatus, deactivateProStatus, getUpdatedDetails, insertIntoContactForm
 };

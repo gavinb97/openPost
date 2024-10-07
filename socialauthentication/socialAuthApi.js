@@ -36,7 +36,7 @@ const {
 } = require('./youtubeService');
 
 const { getTikTokLoginUrl, getAccessTokenAndOpenId, revokeAccess } = require('./tiktokService');
-const { getUserByUsername, registerUser, authenticateUser, authenticateToken, getUserCreds, fetchUserEmail, getUpdatedUserDetails } = require('./authService');
+const { getUserByUsername, registerUser, authenticateUser, authenticateToken, getUserCreds, fetchUserEmail, getUpdatedUserDetails, submitContactForm } = require('./authService');
 
 router.use(cookieParser());
 router.use(cors());
@@ -334,6 +334,15 @@ router.post('/billing_session_url', authenticateToken,  async (req, res) => {
     }
   } catch (error) {
     console.log(error);
+  }
+});
+
+router.post('/contactFormSubmit', async (req, res) => {
+  const contactFormData = req.body;
+  try {
+    await submitContactForm(contactFormData);
+  } catch (e) {
+    console.log('error inserting contact form');
   }
 });
 
