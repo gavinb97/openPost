@@ -1078,5 +1078,6 @@ module.exports = {
   getMessageIdsCountForPostJob,
   deleteMessageIdFromPostJob,
   getPostJobById,
-  deletePostJobByJobSetId
+  deletePostJobByJobSetId,
+  updatePostJob
 };
