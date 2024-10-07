@@ -146,7 +146,7 @@ const UploadedMediaContainerSmall = ({mediaFiles, setMediaFiles, imagesLoaded, t
         <div>
           {/* Pass selected image names to SetScheduleModal */}
           {showModal && <UpdateImageDataModal imageData={imageMetadata} closeModal={closeModal} updatePhotoMetadata={updatePhotoMetadata} user={user} />}
-          {showScheduleModal && <SetScheduleModal setReloadJobs={setReloadJobs} closeModal={closeModal} selectedImages={selectedImageNames} twitterAccounts={twitterAccounts} redditAccounts={redditAccounts} youtubeAccounts={youtubeAccounts} tiktokAccounts={tiktokAccounts}></SetScheduleModal>} 
+          {showScheduleModal && <SetScheduleModal setReloadJobs={setReloadJobs} closeModal={closeModal} selectedImages={selectedImageNames} twitterAccounts={twitterAccounts} redditAccounts={redditAccounts} youtubeAccounts={youtubeAccounts} tiktokAccounts={tiktokAccounts} videoOrPhoto={'photo'}></SetScheduleModal>} 
           {showLimitModal && <AccountLimitModal closeModal={closeLimitModal} user={user} limitReached={'job'}/>}
         </div>
       </div>

@@ -7,7 +7,7 @@ import { useAuth } from '../service/authContext';
 
 const daysOfWeek = ['S', 'M', 'T', 'W', 'Th', 'F', 'Sa'];
 
-const SetScheduleModal = ({ closeModal, selectedImages, twitterAccounts, redditAccounts, youtubeAccounts, tiktokAccounts, setReloadJobs }) => {
+const SetScheduleModal = ({ closeModal, selectedImages, twitterAccounts, redditAccounts, youtubeAccounts, tiktokAccounts, setReloadJobs, videoOrPhoto }) => {
   const { user } = useAuth();
  
   const [selectedWebsite, setSelectedWebsite] = useState(); // State for selected website
@@ -217,8 +217,8 @@ const SetScheduleModal = ({ closeModal, selectedImages, twitterAccounts, redditA
           <option>Select Website</option>
           {twitterAccounts.length > 0 && <option value="twitter">Twitter</option>}
           {redditAccounts.length > 0 && <option value="reddit">Reddit</option>}
-          {/* {tiktokAccounts.length > 0 && <option value="tiktok">TikTok</option>}
-          {youtubeAccounts.length > 0 && <option value="youtube">Youtube Shorts</option>} */}
+          {videoOrPhoto === 'video' && tiktokAccounts.length > 0 && <option value="tiktok">TikTok</option>}
+          {videoOrPhoto === 'video' && youtubeAccounts.length > 0 && <option value="youtube">Youtube Shorts</option>}
         </select>
       </div>
     );
@@ -240,6 +240,12 @@ const SetScheduleModal = ({ closeModal, selectedImages, twitterAccounts, redditA
         break;
       case 'reddit':
         accounts = redditAccounts;
+        break;
+      case 'youtube':
+        accounts = youtubeAccounts;
+        break;
+      case 'tiktok': 
+        accounts = tiktokAccounts;
         break;
       default:
         break;

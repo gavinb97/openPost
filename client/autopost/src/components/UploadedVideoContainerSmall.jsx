@@ -133,7 +133,7 @@ const UploadedVideoContainerSmall = ({ videoFiles, setvideoFiles, imagesLoaded, 
         </div>
         <div>
           {showModal && <UpdateImageDataModal imageData={videoMetadata} closeModal={closeModal} updatePhotoMetadata={updatePhotoMetadata} user={user} />}
-          {showScheduleModal && <SetScheduleModal setReloadJobs={setReloadJobs} closeModal={closeModal} selectedImages={selectedVideoNames} twitterAccounts={twitterAccounts} redditAccounts={redditAccounts} youtubeAccounts={youtubeAccounts} tiktokAccounts={tiktokAccounts}></SetScheduleModal>} 
+          {showScheduleModal && <SetScheduleModal setReloadJobs={setReloadJobs} closeModal={closeModal} selectedImages={selectedVideoNames} twitterAccounts={twitterAccounts} redditAccounts={redditAccounts} youtubeAccounts={youtubeAccounts} tiktokAccounts={tiktokAccounts} videoOrPhoto={'video'}></SetScheduleModal>} 
           {showLimitModal && <AccountLimitModal closeModal={closeLimitModal} user={user} limitReached={'job'}/>}
         </div>
       </div>
