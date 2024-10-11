@@ -225,7 +225,8 @@ const StartPostJobModal = ({ closeModal, selectedImages, twitterAccounts, reddit
       tweetInputs,
       aiPrompt,
       redditPosts,
-      numberOfPosts
+      numberOfPosts,
+      handle: selectedAccount
     };
     
     console.log(scheduleData);

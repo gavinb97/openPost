@@ -52,7 +52,8 @@ const createPostJobObject = (obj, jobs) => {
     tweetInputs: obj.tweetInputs || [], // Array of tweet inputs (if applicable)
     aiPrompt: obj.aiPrompt || null, // AI prompt object (if applicable)
     redditPosts: obj.redditPosts || [], // Array of Reddit posts (if applicable)
-    numberOfPosts: obj.numberOfPosts || 0 // Total number of posts to be created
+    numberOfPosts: obj.numberOfPosts || 0, // Total number of posts to be created
+    handle: obj.handle || jobs.handle
   };
   
   return postJobObject;
@@ -147,7 +148,9 @@ const handleAiRandomTwitterPosts = (request) => {
         content: `Random AI post for ${request.selectedWebsite}`, // Default content for AI post
         scheduledTime: Date.now() + accumulatedDelay, // Scheduled time in milliseconds
         aiPrompt: request.aiPrompt, // The AI prompt for generating the content
-        jobType: request.jobType
+        jobType: request.jobType,
+        handle: request.handle,
+        website: request.selectedWebsite
       };
 
       jobs.push(job); // Add job to the array
@@ -199,7 +202,9 @@ const rescheduleRandomAiRedditJobs = async (activeJob) => {
           subreddit: subreddit.name, // Subreddit to post to
           scheduledTime: Date.now() + accumulatedDelay, // Scheduled time in milliseconds
           aiPrompt: activeJob.aiPrompt, // The AI prompt for generating the content
-          jobType: activeJob.jobType // Job type from the active job
+          jobType: activeJob.jobType, // Job type from the active job
+          handle: request.handle,
+          website: request.selectedWebsite
         };
   
         jobs.push(job); // Add the job to the array
@@ -257,7 +262,9 @@ const rescheduleRandomAiTwitterJobs = async (activeJob) => {
         content: `Random AI post for ${activeJob.selectedwebsite}`, // Default content for AI post
         scheduledTime: Date.now() + accumulatedDelay, // Scheduled time in milliseconds
         aiPrompt: activeJob.aiprompt, // The AI prompt for generating the content
-        jobType: activeJob.jobtype // Job type from the active job
+        jobType: activeJob.jobtype, // Job type from the active job
+        handle: request.handle,
+        website: request.selectedwebsite
       };
   
       jobs.push(job); // Add the job to the array
@@ -291,8 +298,8 @@ const rescheduleSetScheduledTwitterAiPosts = async (request) => {
   let scheduledJobFound = false;
   
   // Iterate through the tweetInputs to create jobs
-  for (let i = 0; i < request.tweetInputs.length; i++) {
-    const tweetInput = request.tweetInputs[i];
+  for (let i = 0; i < request.tweetinputs.length; i++) {
+    const tweetInput = request.tweetinputs[i];
   
     // Parse the date and time from the tweetInput
     const tweetDateStr = tweetInput.date; // Example format: '2024-09-27'
@@ -327,7 +334,9 @@ const rescheduleSetScheduledTwitterAiPosts = async (request) => {
         content: `AI-generated post for ${request.selectedWebsite}`, // Content for the post
         aiPrompt: request.aiPrompt || 'Generated AI prompt', // Placeholder or provided AI prompt
         scheduledTime: scheduledTime, // The exact scheduled time in milliseconds
-        jobType: request.jobType
+        jobType: request.jobType,
+        handle: request.handle,
+        website: request.selectedwebsite
       };
       console.log(`AI Job Created: ${JSON.stringify(job)}`);
       jobs.push(job); // Add the job to the array
@@ -348,24 +357,30 @@ const rescheduleSetScheduledTwitterAiPosts = async (request) => {
       content: 'Bridge job to ensure continuity', // Content for the bridge job
       aiPrompt: 'Bridge AI prompt', // Placeholder AI prompt for the bridge job
       scheduledTime: now + bridgeJobInterval, // Scheduled 24 hours from now
-      jobType: 'bridge' // Indicate it's a bridge job
+      jobType: 'bridge', // Indicate it's a bridge job
+      handle: request.handle,
+      website: request.selectedwebsite
     };
   
     console.log(`Bridge Job Created: ${JSON.stringify(bridgeJob)}`);
     jobs.push(bridgeJob); // Add the bridge job to the array
   }
+  const nonBridgeJobs = jobs.filter(job => job.jobType !== 'bridge');
   
   // Active job object for DB insertion
   const activeJobObject = {
-    jobSetId: jobSetId,
-    jobs: jobs,
-    originalImages: request.images || [], // Add any original images from the request
-    remainingImages: request.images || [], // Assume all images are remaining initially
-    userId: request.username || 'defaultUserId',
-    scheduledAt: Date.now()
+    jobSetId,
+    username: request.username,
+    postsScheduled: jobs.length,
+    postsCreated: request.postscreated + nonBridgeJobs.length, // Update the posts created count
+    // scheduledPosts: jobs,
+    jobType: request.jobtype,
+    handle: request.handle,
+    website: request.selectedwebsite
   };
   
-  console.log(`Active Job Object Created: ${JSON.stringify(activeJobObject)}`);
+  console.log(`Active Job Object Created: }`);
+  console.log(activeJobObject)
   return { jobs, activeJobObject }; // Return the jobs and the active job object
 };
   
@@ -405,7 +420,9 @@ const handleUserRandomTwitterPosts = (request) => {
         content: `User post for ${request.selectedWebsite}`,
         tweet: request.tweetInputs[i].text, // Use text from tweetInputs
         scheduledTime: Date.now() + accumulatedDelay, // Scheduled time in milliseconds
-        jobType: request.jobType
+        jobType: request.jobType,
+        handle: request.handle,
+        website: request.selectedWebsite
       };
 
       jobs.push(job); // Add job to the array
@@ -450,7 +467,9 @@ const handleHourScheduledAiPost = (request) => {
         content: `Scheduled hourly AI post for ${request.selectedWebsite}`, // Default content for the AI post
         scheduledTime: nextScheduledTime, // The exact scheduled time in milliseconds
         aiPrompt: request.aiPrompt, // Use the AI prompt from the request
-        jobType: request.jobType
+        jobType: request.jobType,
+        handle: request.handle,
+        website: request.selectedWebsite
       };
       console.log(`AI Job Created: ${JSON.stringify(job)}`);
       jobs.push(job); // Add the job to the array
@@ -501,7 +520,9 @@ const handleHourScheduledTwitterPosts = (request) => {
         content: `Scheduled hourly post for ${request.selectedWebsite}`, // Content for the post
         tweet: tweetInput.text, // Use the text from tweetInputs
         scheduledTime: nextScheduledTime, // The exact scheduled time in milliseconds
-        jobType: request.jobType
+        jobType: request.jobType,
+        handle: request.handle,
+        website: request.selectedWebsite
       };
       console.log(`Job Created: ${JSON.stringify(job)}`);
       jobs.push(job); // Add the job to the array
@@ -550,7 +571,9 @@ const rescheduleHourScheduledTwitterPosts = async (request) => {
         content: `Rescheduled hourly post for ${request.selectedWebsite}`, // Content for the post
         tweet: tweetInput.text, // Use the text from tweetInputs
         scheduledTime: nextScheduledTime, // The exact scheduled time in milliseconds
-        jobType: request.jobType
+        jobType: request.jobType,
+        handle: request.handle,
+        website: request.selectedWebsite
       };
       console.log(`Job Created: ${JSON.stringify(job)}`);
       jobs.push(job); // Add the job to the array
@@ -612,7 +635,9 @@ const rescheduleHourScheduledTwitterAiPosts = async (request) => {
         content: `Scheduled hourly post for ${selectedWebsite}`, // Content for the post
         tweet: tweetInput.text, // Use the text from tweetInputs
         scheduledTime: nextScheduledTime, // The exact scheduled time in milliseconds
-        jobType: jobType
+        jobType: jobType,
+        handle: request.handle,
+        website: request.selectedWebsite
       };
       console.log(`Job Created: ${JSON.stringify(job)}`);
       jobs.push(job); // Add the job to the array
@@ -631,7 +656,8 @@ const rescheduleHourScheduledTwitterAiPosts = async (request) => {
     postsScheduled: jobs.length,
     postsCreated: postsCreated + jobs.length, // Update the posts created count
     scheduledPosts: jobs,
-    jobType
+    jobType,
+    handle: request.handle
   };
   
   console.log(`Jobs Rescheduled: ${JSON.stringify(jobs)}`);
@@ -690,7 +716,9 @@ const handleSetScheduledTwitterAiPosts = (request) => {
         content: `AI-generated post for ${request.selectedWebsite}`, // Content for the post
         aiPrompt: request.aiPrompt || 'Generated AI prompt', // Placeholder or provided AI prompt
         scheduledTime: scheduledTime, // The exact scheduled time in milliseconds
-        jobType: request.jobType
+        jobType: request.jobType,
+        handle: request.handle,
+        website: request.selectedWebsite
       };
       console.log(`AI Job Created: ${JSON.stringify(job)}`);
       jobs.push(job); // Add the job to the array
@@ -757,7 +785,9 @@ const handleSetScheduledTwitterPosts = (request) => {
         content: `Scheduled post for ${request.selectedWebsite}`, // Content for the post
         tweet: tweetInput.text, // Use the text from tweetInputs
         scheduledTime: scheduledTime, // The exact scheduled time in milliseconds
-        jobType: request.jobType
+        jobType: request.jobType,
+        handle: request.handle,
+        website: request.selectedWebsite
       };
       console.log(`Job Created: ${JSON.stringify(job)}`);
       jobs.push(job); // Add the job to the array
@@ -831,7 +861,9 @@ const rescheduleSetScheduledTwitterUserPosts = async (request, postsCreated, num
         content: `Scheduled user post for ${request.selectedWebsite}`, // Content for the post
         tweet: tweetInput.text, // Use the text from tweetInputs
         scheduledTime: scheduledTime, // The exact scheduled time in milliseconds
-        jobType: request.jobType
+        jobType: request.jobType,
+        handle: request.handle,
+        website: request.selectedWebsite
       };
       console.log(`User Job Created: ${JSON.stringify(job)}`);
       jobs.push(job); // Add the job to the array
@@ -853,7 +885,9 @@ const rescheduleSetScheduledTwitterUserPosts = async (request, postsCreated, num
       content: 'Bridge job to ensure continuity for user posts', // Content for the bridge job
       tweet: 'Bridge post', // Placeholder tweet for the bridge job
       scheduledTime: now + bridgeJobInterval, // Scheduled 24 hours from now
-      jobType: 'bridge' // Indicate it's a bridge job
+      jobType: 'bridge' ,// Indicate it's a bridge job
+      handle: request.handle,
+      website: request.selectedWebsite
     };
   
     console.log(`Bridge Job Created: ${JSON.stringify(bridgeJob)}`);
@@ -867,7 +901,8 @@ const rescheduleSetScheduledTwitterUserPosts = async (request, postsCreated, num
     originalImages: request.images || [], // Add any original images from the request
     remainingImages: request.images || [], // Assume all images are remaining initially
     userId: request.username || 'defaultUserId',
-    scheduledAt: Date.now()
+    scheduledAt: Date.now(),
+    handle: request.handle
   };
   
   console.log(`Active Job Object Created: ${JSON.stringify(activeJobObject)}`);
@@ -984,7 +1019,9 @@ const handleSetScheduledRedditPosts = (request) => {
         postBody: redditPost.body, // Body content of the Reddit post
         subreddits: redditPost.subreddits, // Array of subreddits
         scheduledTime: scheduledTime, // The exact scheduled time in milliseconds
-        jobType: request.jobType
+        jobType: request.jobType,
+        handle: request.handle,
+        website: request.selectedWebsite
       };
       console.log(`Job Created: ${JSON.stringify(job)}`);
       jobs.push(job); // Add the job to the array
@@ -1059,7 +1096,9 @@ const rescheduleSetScheduledRedditUserPosts = async (request, postsCreated, numb
         postBody: redditPost.body, // Body content of the Reddit post
         subreddits: redditPost.subreddits, // Array of subreddits
         scheduledTime: scheduledTime, // The exact scheduled time in milliseconds
-        jobType: request.jobType
+        jobType: request.jobType,
+        handle: request.handle,
+        website: request.selectedWebsite
       };
       console.log(`User Job Created: ${JSON.stringify(job)}`);
       jobs.push(job); // Add the job to the array
@@ -1083,7 +1122,9 @@ const rescheduleSetScheduledRedditUserPosts = async (request, postsCreated, numb
       postBody: 'This is a bridge post to maintain scheduling', // Placeholder body for the bridge job
       subreddits: ['testSubreddit'], // Placeholder subreddit
       scheduledTime: now + bridgeJobInterval, // Scheduled 24 hours from now
-      jobType: 'bridge' // Indicate it's a bridge job
+      jobType: 'bridge', // Indicate it's a bridge job
+      handle: request.handle,
+      website: request.selectedWebsite
     };
 
     console.log(`Bridge Job Created: ${JSON.stringify(bridgeJob)}`);
@@ -1097,7 +1138,7 @@ const rescheduleSetScheduledRedditUserPosts = async (request, postsCreated, numb
     originalImages: request.images || [], // Add any original images from the request
     remainingImages: request.images || [], // Assume all images are remaining initially
     userId: request.username || 'defaultUserId',
-    scheduledAt: Date.now()
+    handle: request.handle
   };
 
   console.log(`Active Job Object Created: ${JSON.stringify(activeJobObject)}`);
@@ -1140,7 +1181,9 @@ const handleHourScheduledRedditPosts = (request) => {
         postBody: redditPost.body, // Body content of the Reddit post
         subreddits: redditPost.subreddits, // Array of subreddits
         scheduledTime: nextScheduledTime, // The exact scheduled time in milliseconds
-        jobType: request.jobType
+        jobType: request.jobType,
+        handle: request.handle,
+        website: request.selectedWebsite
       };
       console.log(`Job Created: ${JSON.stringify(job)}`);
       jobs.push(job); // Add the job to the array
@@ -1191,7 +1234,9 @@ const rescheduleHourScheduledRedditPosts = async (request) => {
         postBody: redditPost.body, // Body content of the Reddit post
         subreddits: redditPost.subreddits, // Array of subreddits
         scheduledTime: nextScheduledTime, // The exact scheduled time in milliseconds
-        jobType: request.jobType
+        jobType: request.jobType,
+        handle: request.handle,
+        website: request.selectedWebsite
       };
       console.log(`Job Created: ${JSON.stringify(job)}`);
       jobs.push(job); // Add the job to the array
@@ -1246,7 +1291,9 @@ const handleSetScheduledHourlyAiPostsReddit = (request) => {
         subreddits: request.selectedSubreddits.map(subreddit => subreddit.name), // Add all selected subreddits to the job
         scheduledTime: nextScheduledTime, // The exact scheduled time in milliseconds
         aiPrompt: request.aiPrompt, // Use the AI prompt from the request
-        jobType: request.jobType
+        jobType: request.jobType,
+        handle: request.handle,
+        website: request.selectedWebsite
       };
       console.log(`AI Job Created: ${JSON.stringify(job)}`);
       jobs.push(job); // Add the job to the array
@@ -1303,7 +1350,9 @@ const rescheduleHourScheduledRedditAiPosts = async (request) => {
         subreddits: selectedSubreddits.map(subreddit => subreddit.name), // Add selected subreddits
         scheduledTime: nextScheduledTime, // The exact scheduled time in milliseconds
         aiPrompt: aiPrompt, // Use the AI prompt from the request
-        jobType: jobType
+        jobType: jobType,
+        handle: request.handle,
+        website: request.selectedWebsite
       };
       console.log(`Job Created: ${JSON.stringify(job)}`);
       jobs.push(job); // Add the job to the array
@@ -1322,7 +1371,8 @@ const rescheduleHourScheduledRedditAiPosts = async (request) => {
     postsScheduled: jobs.length,
     postsCreated: postsCreated + jobs.length, // Update the posts created count
     scheduledPosts: jobs,
-    jobType
+    jobType,
+    handle: request.handle
   };
   
   console.log(`Jobs Rescheduled: ${JSON.stringify(jobs)}`);
@@ -1366,7 +1416,9 @@ const handleSetScheduledAiPostsReddit = (request) => {
         subreddits: request.selectedSubreddits.map(subreddit => subreddit.name), // Add all selected subreddits to the job
         scheduledTime: nextScheduledTime, // The exact scheduled time in milliseconds
         aiPrompt: request.aiPrompt || 'Generated AI prompt', // Placeholder or provided AI prompt
-        jobType: request.jobType
+        jobType: request.jobType,
+        handle: request.handle,
+        website: request.selectedWebsite
       };
       console.log(`AI Job Created: ${JSON.stringify(job)}`);
       jobs.push(job); // Add the job to the array
@@ -1421,7 +1473,9 @@ const rescheduleSetScheduledRedditAiPosts = async (request) => {
         subreddit: subreddit.name, // Subreddit name for this job
         aiPrompt: request.aiPrompt || 'Generated AI prompt', // Placeholder or provided AI prompt
         scheduledTime: nextScheduledTime, // The exact scheduled time in milliseconds
-        jobType: request.jobType
+        jobType: request.jobType,
+        handle: request.handle,
+        website: request.selectedWebsite
       };
       console.log(`AI Job Created: ${JSON.stringify(job)}`);
       jobs.push(job); // Add the job to the array
@@ -1446,7 +1500,9 @@ const rescheduleSetScheduledRedditAiPosts = async (request) => {
       content: 'Bridge job to ensure continuity for Reddit posts', // Content for the bridge job
       aiPrompt: 'Bridge AI prompt', // Placeholder AI prompt for the bridge job
       scheduledTime: now + bridgeJobInterval, // Scheduled 24 hours from now
-      jobType: 'bridge' // Indicate it's a bridge job
+      jobType: 'bridge', // Indicate it's a bridge job
+      handle: request.handle,
+      website: request.selectedWebsite
     };
   
     console.log(`Bridge Job Created: ${JSON.stringify(bridgeJob)}`);
@@ -1455,10 +1511,13 @@ const rescheduleSetScheduledRedditAiPosts = async (request) => {
   
   // Active job object for DB insertion
   const activeJobObject = {
-    jobSetId: jobSetId,
-    jobs: jobs,
-    userId: request.username || 'defaultUserId',
-    scheduledAt: Date.now()
+    jobSetId,
+    username,
+    postsScheduled: jobs.length,
+    postsCreated: postsCreated + jobs.length, // Update the posts created count
+    scheduledPosts: jobs,
+    jobType,
+    handle: request.handle
   };
   
   console.log(`Active Job Object Created: ${JSON.stringify(activeJobObject)}`);
@@ -1502,7 +1561,9 @@ const handleAiRandomRedditPosts = (request) => {
           subreddit: subreddit.name, // Subreddit to post to
           scheduledTime: Date.now() + accumulatedDelay, // Scheduled time in milliseconds
           aiPrompt: request.aiPrompt, // The AI prompt for generating the content
-          jobType: request.jobType
+          jobType: request.jobType,
+          handle: request.handle,
+          website: request.selectedWebsite
         };
 
         jobs.push(job); // Add job to the array
@@ -1557,7 +1618,9 @@ const handleUserRandomRedditPosts = (request) => {
           body: request.redditPosts[i].body, // Body content of the Reddit post
           scheduledTime: Date.now() + accumulatedDelay, // Scheduled time in milliseconds
           aiPrompt: request.aiPrompt, // AI prompt for generating additional content (if applicable)
-          jobType: request.jobType
+          jobType: request.jobType,
+          handle: request.handle,
+          website: request.selectedWebsite
         };
 
         jobs.push(job); // Add job to the array

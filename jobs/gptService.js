@@ -10,6 +10,7 @@ const makeGptCall = async (prompt, systemPrompt) => {
   let chatGpt = await createGPT();
   const promptString = prompt;
   const systemPromptString = systemPrompt;
+
   try {
     const chatCompletion = await chatGpt.chat.completions.create({
       model: 'gpt-3.5-turbo',
@@ -17,7 +18,7 @@ const makeGptCall = async (prompt, systemPrompt) => {
         {role: 'system', content: systemPromptString},
         {role: 'user', content: promptString}
       ],
-      max_tokens: 4000
+      max_completion_tokens: 4000
     });
     return chatCompletion.choices[0].message.content;
   } catch (error){

@@ -10,7 +10,6 @@ const formatRequest = async (request) => {
   if (request?.jobType === 'postJob') {
     console.log('got a postjob');
     jobs = await formatPostJobs(request);
-    jobs = [];
   } else {
     jobs = await handleMediaPostJob(request, jobs);
   }

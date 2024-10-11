@@ -1,5 +1,6 @@
 const amqp = require('amqplib');
 const {makePost, validateJob, reschedulePostJob} = require('./jobQueueService');
+const { makePostJobPost } = require('./postJobQueueService')
 const { getMessageIdsCountForJob, deleteMessageIdFromJob } = require('./jobsData');
 
 async function setupQueue () {
@@ -45,8 +46,10 @@ async function startWorker (channel) {
     console.log(`${job.scheduledTime}`);
     console.log(Date.now());
     if (job.content !== 'Bridge job to ensure continuity') {
-      if (job?.jobType === 'postJob') {
-        
+      if (job.content === 'AI-generated post for twitter') {
+        console.log('executing job')
+        console.log(job)
+        await makePostJobPost(job)
       } else {
         await makePost(job);
       }

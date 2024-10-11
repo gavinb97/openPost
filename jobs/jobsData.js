@@ -467,6 +467,8 @@ const getActiveJobsByUserId = async (userId) => {
 };
 
 const deleteActiveJobByJobSetId = async (jobSetId) => {
+  console.log(jobSetId)
+  console.log('job set id from within delete function')
   const query = `
         DELETE FROM active_jobs
         WHERE job_set_id = $1
@@ -658,7 +660,8 @@ const insertPostJob = async (postJob) => {
     tweetInputs,
     aiPrompt,
     redditPosts,
-    numberOfPosts
+    numberOfPosts,
+    handle
   } = postJob;
 
   // Convert message_ids array to PostgreSQL array literal
@@ -711,9 +714,10 @@ const insertPostJob = async (postJob) => {
       aiPrompt,
       redditPosts,
       numberOfPosts,
-      postsCreated
+      postsCreated,
+      handle
     ) VALUES (
-      $1, $2, $3, $4, $5, $6, $7, $8::INT[], $9, $10, $11, $12, $13, $14::TEXT[], $15, $16::jsonb[], $17, $18::jsonb[], $19, $20::jsonb[], $21, $22
+      $1, $2, $3, $4, $5, $6, $7, $8::INT[], $9, $10, $11, $12, $13, $14::TEXT[], $15, $16::jsonb[], $17, $18::jsonb[], $19, $20::jsonb[], $21, $22, $23
     ) RETURNING id;
   `;
 
@@ -739,7 +743,8 @@ const insertPostJob = async (postJob) => {
     aiPrompt,                
     redditPosts,             
     parseInt(numberOfPosts, 10),
-    numberOfMessages // posts created is the number of messages created.
+    numberOfMessages, // posts created is the number of messages created.
+    handle
   ];
 
   try {
@@ -777,13 +782,14 @@ const updatePostJob = async (postJob) => {
     tweetInputs,
     aiPrompt,
     redditPosts,
-    numberOfPosts
+    numberOfPosts,
+    handle
   } = postJob;
 
   // Convert message_ids array to PostgreSQL array literal
   const messageIdsLiteral = message_ids && message_ids.length
     ? `{${message_ids.map(id => `'${id}'`).join(',')}}`
-    : 'ARRAY[]::TEXT[]'; // Handle empty array
+    : {}; // Handle empty array
 
   // Handle times_of_day being null or empty
   const timesOfDayArray = timesOfDay ? timesOfDay.map(({ hour, minute, ampm }) => {
@@ -826,10 +832,10 @@ const updatePostJob = async (postJob) => {
             selectedSubreddits = $15::jsonb[],
             postType = $16,
             tweetInputs = $17::jsonb[],
-            aiPrompt = $18::jsonb[],
+            aiPrompt = $18::jsonb,
             redditPosts = $19::jsonb[],
             numberOfPosts = $20,
-            updated_at = NOW()
+            handle = $22
         WHERE job_set_id = $21
         RETURNING id;
     `;
@@ -841,7 +847,7 @@ const updatePostJob = async (postJob) => {
     jobType,
     username,
     selectedWebsite,
-    picturePostOrder,
+    {},
     scheduleType,
     scheduleInterval || null,    // Handle potential null
     hourInterval || null,        // Handle potential null
@@ -854,8 +860,9 @@ const updatePostJob = async (postJob) => {
     tweetInputs,                 // JSONB array
     aiPrompt,                    // JSONB array
     redditPosts,                 // JSONB array
-    parseInt(numberOfPosts, 10), // Ensure numberOfPosts is an integer
-    job_set_id                   // job_set_id for WHERE clause
+    numberOfPosts, // Ensure numberOfPosts is an integer
+    job_set_id,                   // job_set_id for WHERE clause
+    handle
   ];
 
   try {
@@ -873,18 +880,20 @@ const updatePostJob = async (postJob) => {
 
 const deleteMessageIdFromPostJob = async (job_set_id, message_id) => {
   console.log('Attempting to delete message id from post job...');
+  console.log('Message ID to delete:', message_id);
+  console.log('Job set ID:', job_set_id);
 
   const selectQuery = `
-        SELECT message_ids
-        FROM postjobs
-        WHERE job_set_id = $1;
-    `;
+    SELECT message_ids
+    FROM postjobs
+    WHERE job_set_id = $1;
+  `;
 
   const updateQuery = `
-        UPDATE postjobs
-        SET message_ids = $1
-        WHERE job_set_id = $2;
-    `;
+    UPDATE postjobs
+    SET message_ids = $1
+    WHERE job_set_id = $2;
+  `;
 
   try {
     const client = await pool.connect();
@@ -897,27 +906,36 @@ const deleteMessageIdFromPostJob = async (job_set_id, message_id) => {
     }
 
     let { message_ids } = res.rows[0];
-    console.log(message_ids);
-    console.log('Message ids from rows ^^^');
 
-    // Ensure message_id is formatted correctly for comparison
-    const formattedMessageId = message_id; // Adjust based on your database schema
+    // If message_ids are stored as a string, remove any surrounding quotes
+    if (typeof message_ids === 'string') {
+      message_ids = JSON.parse(message_ids);
+    }
 
-    // Remove the message_id from the array
-    const updatedMessageIds = message_ids.filter(id => id !== formattedMessageId);
-    console.log(updatedMessageIds);
-    console.log('Updated message ids from rows ^^^');
+    console.log('Original message IDs:', message_ids);
 
-    // Update the post job with the new message_ids array
+    // Remove surrounding quotes from message_id
+    const formattedMessageId = message_id.replace(/^['"]|['"]$/g, '');
+
+    // Filter out the message_id from the array
+    const updatedMessageIds = message_ids.filter(id => id.replace(/^['"]|['"]$/g, '') !== formattedMessageId);
+    console.log('Updated message IDs:', updatedMessageIds);
+
+    // Handle empty array case for PostgreSQL
+    // const finalMessageIds = updatedMessageIds.length > 0 ? updatedMessageIds : null;
+
+    // Update the post job with the new message_ids array or set it to NULL if the array is empty
     await client.query(updateQuery, [updatedMessageIds, job_set_id]);
-    client.release();
 
+    client.release();
     console.log('Message ID deleted successfully from post job.');
   } catch (err) {
     console.error('Error deleting message_id from post job', err);
     throw err;
   }
 };
+
+
 
 const getMessageIdsCountForPostJob = async (job_set_id) => {
   const query = `
@@ -992,12 +1010,12 @@ const getPostJobById = async (postJobId) => {
             id,
             job_set_id,
             message_ids,
-            number_of_messages,
+            numberofmessages,
             userid,
             jobtype,
             username,
             selectedwebsite,
-            picuturepostorder,
+            picturepostorder,
             scheduletype,
             scheduleinterval,
             hourinterval,
@@ -1011,7 +1029,8 @@ const getPostJobById = async (postJobId) => {
             aiprompt,
             redditposts,
             numberofposts,
-            postsCreated
+            postsCreated,
+            handle
         FROM postjobs
         WHERE job_set_id = $1;
     `;

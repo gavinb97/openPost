@@ -77,7 +77,8 @@ export const validateAndFormatPostJobData = (request) => {
     tweetInputs,
     aiPrompt,
     redditPosts,
-    numberOfPosts
+    numberOfPosts,
+    handle
   } = request;
 
   // Validate required fields
@@ -126,7 +127,8 @@ export const validateAndFormatPostJobData = (request) => {
     username,
     selectedWebsite,
     scheduleType,
-    postType
+    postType,
+    handle
   };
 
   // Additional validation and formatting based on schedule type
