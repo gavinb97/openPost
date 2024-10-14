@@ -379,8 +379,8 @@ const rescheduleSetScheduledTwitterAiPosts = async (request) => {
     website: request.selectedwebsite
   };
   
-  console.log(`Active Job Object Created: }`);
-  console.log(activeJobObject)
+  console.log('Active Job Object Created: }');
+  console.log(activeJobObject);
   return { jobs, activeJobObject }; // Return the jobs and the active job object
 };
   

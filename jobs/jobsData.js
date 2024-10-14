@@ -467,10 +467,31 @@ const getActiveJobsByUserId = async (userId) => {
 };
 
 const deleteActiveJobByJobSetId = async (jobSetId) => {
-  console.log(jobSetId)
-  console.log('job set id from within delete function')
+  console.log(jobSetId);
+  console.log('job set id from within delete function');
   const query = `
         DELETE FROM active_jobs
+        WHERE job_set_id = $1
+        RETURNING *;
+    `;
+
+  try {
+    const client = await pool.connect();
+    const res = await client.query(query, [jobSetId]);
+    client.release();
+
+    return res.rows[0]; // Return the deleted job
+  } catch (err) {
+    console.error('Error deleting active job', err);
+    throw err;
+  }
+};
+
+const deleteActivePostJobByJobSetId = async (jobSetId) => {
+  console.log(jobSetId);
+  console.log('job set id from within delete function');
+  const query = `
+        DELETE FROM postjobs
         WHERE job_set_id = $1
         RETURNING *;
     `;
@@ -1077,6 +1098,24 @@ const isPostJobPresent = async (jobSetId) => {
   }
 };
 
+const getActivePostJobsByUserId = async (userId) => {
+  const query = `
+        SELECT *
+        FROM postjobs
+        WHERE userid = $1;
+    `;
+
+  try {
+    const client = await pool.connect();
+    const res = await client.query(query, [userId]);
+    client.release();
+
+    return res.rows;
+  } catch (err) {
+    console.error('Error retrieving active jobs', err);
+    throw err;
+  }
+};
 
 
 
@@ -1098,5 +1137,7 @@ module.exports = {
   deleteMessageIdFromPostJob,
   getPostJobById,
   deletePostJobByJobSetId,
-  updatePostJob
+  updatePostJob,
+  getActivePostJobsByUserId,
+  deleteActivePostJobByJobSetId
 };

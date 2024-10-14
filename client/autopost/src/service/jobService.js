@@ -41,6 +41,26 @@ export const getJobsByUsername = async (user, userJwt) => {
   }
 };
 
+export const getPostJobsByUsername = async (user, userJwt) => {
+  const endpoint = 'http://localhost:3455/getpostjobs';
+  
+  try {
+    const response = await axios.post(endpoint, 
+      { username: user }, // Payload data with username
+      {
+        headers: {
+          Authorization: `Bearer ${userJwt}`, // Passing the userJwt as a Bearer token
+        },
+      }
+    );
+    
+    return response.data;
+  } catch (error) {
+    console.error('Error retrieving jobs:', error);
+    throw error; // Re-throw the error to propagate it further if needed
+  }
+};
+
 export const deleteJob = async (jobSetId, userJwt) => {
   const endpoint = 'http://localhost:3455/deletejob';
 

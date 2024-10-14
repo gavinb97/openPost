@@ -1,7 +1,7 @@
 
 
 
-const plug = 'jacob'
+const plug = 'jacob';
 
-let grams = 28
+let grams = 28;
 

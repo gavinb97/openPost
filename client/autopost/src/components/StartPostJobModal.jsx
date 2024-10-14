@@ -234,6 +234,7 @@ const StartPostJobModal = ({ closeModal, selectedImages, twitterAccounts, reddit
     await createScheduledJob(job, user.jwt);
     console.log(job);
     console.log('da job above');
+    // closeModal()
   };
 
   const renderPostTypeSelect = () => {

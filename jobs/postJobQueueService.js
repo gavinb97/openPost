@@ -4,11 +4,11 @@ const { isPostJobPresent, getMessageIdsCountForPostJob, deleteMessageIdFromPostJ
 const { tweetOnBehalfOfUser } = require('../socialauthentication/twitterService');
 const { postToSubredditOnBehalfOfUser, postTextToSubreddit } = require('../socialauthentication/redditService');
 const { rescheduleHourScheduledRedditPosts, rescheduleHourScheduledRedditAiPosts, rescheduleSetScheduledRedditUserPosts, rescheduleSetScheduledRedditAiPosts, rescheduleRandomAiRedditJobs, rescheduleHourScheduledTwitterPosts, rescheduleHourScheduledTwitterAiPosts, rescheduleRandomAiTwitterJobs, rescheduleSetScheduledTwitterAiPosts, rescheduleSetScheduledTwitterUserPosts } = require('./postJobService');
-const { makeGptCall } = require('./gptService')
+const { makeGptCall } = require('./gptService');
 // const { getExistingQueue } = require('./jobQueue')
 const makePostJobPost = async (job) => {
-  console.log('in make job post')
-  console.log(job)
+  console.log('in make job post');
+  console.log(job);
   const validJob = await validateJob(job);
   if (validJob) {
     try {
@@ -38,8 +38,8 @@ const makePostJobPost = async (job) => {
 
 const validateJob = async (job) => {
   const jobID = job.jobSetId;
-  console.log(jobID)
-  console.log('jobsetid ^^^')
+  console.log(jobID);
+  console.log('jobsetid ^^^');
   const validJob = await isPostJobPresent(jobID);
   validJob ? console.log('job is valid') : console.log('job has been cancelled');
   
@@ -54,9 +54,9 @@ const postToTwitter = async (creds, job) => {
     }
 
     if (job?.aiPrompt) {
-      console.log('creating tweet')
+      console.log('creating tweet');
       const tweetText = await createTweetText(job);
-      console.log('tweeting')
+      console.log('tweeting');
       await tweetOnBehalfOfUser(creds.twitterTokens?.access_token, creds.twitterTokens?.refresh_token, tweetText);
     }
 
@@ -102,7 +102,7 @@ const updateMessages = async (job) => {
   console.log('deleting messageID from job...');
   const numberOfMessagesLeft = await getMessageIdsCountForPostJob(job.jobSetId);
   console.log(`intial messages: ${numberOfMessagesLeft}`);
-  console.log(job)
+  console.log(job);
   await deleteMessageIdFromPostJob(job.jobSetId, job.message_id);
   const afterDelete = await getMessageIdsCountForPostJob(job.jobSetId);
   console.log(`after delete messages: ${afterDelete}`);
@@ -112,11 +112,11 @@ const createTweetText = async (job) => {
   let tweetText;
   try {
     do {
-      tweetText = await makeGptCall(job.aiPrompt.style, job.aiPrompt.contentType);
+      tweetText = await makeGptCall(job.aiPrompt.contentType, job.aiPrompt.style);
       tweetText = tweetText.replaceAll('"', '');
-      } while (tweetText.length > 280);
+    } while (tweetText.length > 280);
   } catch (e) {
-    console.log(e)
+    console.log(e);
   }
   
  
@@ -129,7 +129,7 @@ const createTweetText = async (job) => {
 const createRedditTitle = async (job) => {
   let title;
   do {
-    title = await makeGptCall(job.aiPrompt.style, job.aiPrompt.contentType);
+    title = await makeGptCall(job.aiPrompt.contentType, job.aiPrompt.style);
     title = title.replaceAll('"', '');
   } while (title.length > 100);
   return title;
@@ -139,7 +139,7 @@ const createRedditPostBody = async (job) => {
 
   let body;
      
-  body = await makeGptCall(job.aiPrompt.style, job.aiPrompt.contentType);
+  body = await makeGptCall(job.aiPrompt.contentType, job.aiPrompt.style);
   body = body.replaceAll('"', '');
   
   return body;
@@ -190,11 +190,13 @@ const rescheduleTwitterPostJob = async (job) => {
           await addJobsToQueue(jobs);
           await updatePostJob(activeJobObject);
         } else {
-          const { jobs, activeJobObject } = await rescheduleSetScheduledTwitterUserPosts(activeJob);
-          await queueAndUpdateJobs(jobs, activeJobObject);
+          // TODO - do not reschedule user tweets because tweets cant be duplicated
 
-          await addJobsToQueue(jobs);
-          await updatePostJob(activeJobObject);
+          // const { jobs, activeJobObject } = await rescheduleSetScheduledTwitterUserPosts(activeJob);
+          // await queueAndUpdateJobs(jobs, activeJobObject);
+
+          // await addJobsToQueue(jobs);
+          // await updatePostJob(activeJobObject);
         }
 
 

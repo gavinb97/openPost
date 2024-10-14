@@ -18,3 +18,6 @@ apiresources/uploads/
 creds.json
 openPost/socialauthentication/authData/*.json
 /home/gavin/Desktop/open/openPost/socialauthentication/authData\creds.json
+
+.DS_store
+client/.DS_Store

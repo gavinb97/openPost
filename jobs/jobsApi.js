@@ -3,7 +3,7 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const { setupQueue, enqueuePostJob, startWorker, getExistingQueue } = require('./jobQueue');
 const { formatRequest } = require('./jobService');
-const { getActiveJobsByUserId, deleteActiveJobByJobSetId } = require('./jobsData');
+const { getActivePostJobsByUserId, getActiveJobsByUserId, deleteActiveJobByJobSetId, deleteActivePostJobByJobSetId } = require('./jobsData');
 const { authenticateToken } = require('../socialauthentication/authService');
 const router = express.Router();
 router.use(bodyParser.json());
@@ -49,6 +49,22 @@ router.post('/getjobs', authenticateToken, async (req, res) => {
   }
 });
 
+router.post('/getpostjobs', authenticateToken, async (req, res) => {
+  const { username } = req.body;
+
+  if (!username) {
+    return res.status(400).json({ error: 'Username is required' });
+  }
+
+  try {
+    const activeJobs = await getActivePostJobsByUserId(username);
+    res.status(200).json({ activeJobs });
+  } catch (error) {
+    console.error('Error retrieving jobs:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
 router.delete('/deletejob', authenticateToken, async (req, res) => {
   const { jobSetId } = req.body;
 
@@ -58,9 +74,8 @@ router.delete('/deletejob', authenticateToken, async (req, res) => {
 
   try {
     const deletedJob = await deleteActiveJobByJobSetId(jobSetId);
-    if (!deletedJob) {
-      return res.status(404).json({ error: 'Job not found' });
-    }
+    await deleteActivePostJobByJobSetId(jobSetId);
+   
 
     res.status(200).json({ message: 'Job deleted successfully', job: deletedJob });
   } catch (error) {

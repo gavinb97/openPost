@@ -811,6 +811,23 @@
   max-width: 500px; /* Set maximum width */
 }
 
+.jobsdetailsmodal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: white;
+  border-radius: 8px;
+  padding: 20px;
+  z-index: 1000;
+  box-shadow: 0 0 10px #00aff0;
+  max-height: 75vh; /* Set maximum height to 75% of viewport height */
+  overflow-y: auto; /* Enable vertical scrolling when content exceeds max-height */
+  width: 75%; /* Set width to 75% of viewport width */
+  max-width: 500px; /* Set maximum width */
+  text-align: center;
+}
+
 .image-box {
   /* Add other styles */
   border: 1px solid transparent; /* Initially set to transparent */
@@ -1257,8 +1274,9 @@
   border-radius: 0.5rem;
   overflow: hidden;
   box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.1);
-  
 }
+
+
 
 .active-job-box:hover {
   background-color: #00aff0;
@@ -1283,7 +1301,7 @@
   color: white;
 }
 
-.job-details button {
+.canceljobbuttonbox button {
   font-size: 1rem;
   padding: 0.4rem 0.8rem;
   border: none;
@@ -1292,6 +1310,11 @@
   cursor: pointer;
   border-radius: 0.3rem;
   flex-shrink: 0; /* Prevent the button from shrinking */
+}
+
+.canceljobbuttonbox {
+  display: flex;
+  justify-content: flex-end;
 }
 
 /* Adjust for smaller screens */

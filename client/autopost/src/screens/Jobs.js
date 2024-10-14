@@ -3,13 +3,16 @@ import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import { useAuth } from '../service/authContext';
 import JobsTable from '../components/JobsTable';
-import {getJobsByUsername, deleteJob} from '../service/jobService';
+import {getJobsByUsername, deleteJob, getPostJobsByUsername} from '../service/jobService';
 import JobsBoxes from '../components/JobsBoxes';
 import JobPromptModal from '../components/JobPromptModal';
+import JobDetailsModal from '../components/JobDetailsModal';
 
 function Jobs () {
   const [showModal, setShowModal] = useState(false);
   const [jobs, setJobs] = useState();
+
+  const [selectedJob, setSelectedJob] = useState();
 
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -22,7 +25,8 @@ function Jobs () {
     }
   }, []);
     
-  const handleClick = () => {
+  const handleClick = (job) => {
+    setSelectedJob(job);
     setShowModal(true);
   };
 
@@ -42,11 +46,15 @@ function Jobs () {
 
   const getJobs = async () => {
     const jobs = await getJobsByUsername(user.username, user.jwt);
-        
-    setJobs(jobs.activeJobs);
+    const postJobs = await getPostJobsByUsername(user.username, user.jwt);
+    console.log(postJobs);
+    console.log(jobs);
+    const allJobs = jobs.activeJobs.concat(postJobs.activeJobs);
+    setJobs(allJobs);
     return jobs;
   };
 
+ 
    
 
   return (
@@ -59,8 +67,9 @@ function Jobs () {
         {/* <div className='jobs-table-container'>
                     {jobs && <JobsTable jobs={jobs} onCancelJob={handleCancelJob} />}
                 </div> */}
-        <JobsBoxes jobs={jobs} onCancelJob={handleCancelJob}/>
+        <JobsBoxes jobs={jobs} onCancelJob={handleCancelJob} boxClick={handleClick}/>
         {jobs && jobs.length === 0 && <JobPromptModal />}
+        {showModal && <JobDetailsModal closeModal={handleClose} jobDetails={selectedJob} />}
       </div>
     </div>
   );
