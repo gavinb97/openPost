@@ -4,7 +4,9 @@ const JobDetailsModal = ({ closeModal, jobDetails}) => {
 
   const renderTypeOfJob = () => {
 
-    if (jobDetails.tweetinputs.length >= 1 || jobDetails.redditposts.length >= 1) {
+    console.log(jobDetails);
+
+    if (jobDetails?.tweetinputs?.length >= 1 || jobDetails?.redditposts?.length >= 1) {
       return (
         <p>Text Post Job</p>
       );
@@ -24,10 +26,10 @@ const JobDetailsModal = ({ closeModal, jobDetails}) => {
          
           <div style={{borderBottom: '.25rem solid #00aff0'}}></div>
           {renderTypeOfJob()}
-          <p>Website: {jobDetails.selectedwebsite}</p>
+          <p>Website: {jobDetails.selectedwebsite || jobDetails.selected_website}</p>
           <p>Account: {jobDetails.handle}</p>
-          <p>Type of schedule: {jobDetails.scheduleinterval}</p>
-          <p>Type of post: {jobDetails.posttype}</p>
+          <p>Type of schedule: {jobDetails.scheduleinterval || jobDetails.schedule_interval}</p>
+          <p>Type of post: {jobDetails.posttype || jobDetails.type_of_caption}</p>
           <div className='updateImageModalButtons' >
             <button onClick={closeModal}>Close</button>
           </div>

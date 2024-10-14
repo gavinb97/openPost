@@ -5,7 +5,7 @@ const JobsBoxes = ({ jobs, onCancelJob, boxClick }) => {
 
   const renderTypeOfJob = (job) => {
 
-    if (job.tweetinputs.length >= 1 || job.redditposts.length >= 1) {
+    if (job?.tweetinputs?.length >= 1 || job?.redditposts?.length >= 1) {
       return (
         <p>Text Post Job</p>
       );
