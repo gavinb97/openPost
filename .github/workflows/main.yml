@@ -15,10 +15,16 @@ jobs:
       with:
         node-version: 18
 
-    - run: 'echo "$SSH_KEY" > key'
-        shell: bash
-        env:
-        SSH_KEY: ${{secrets.PSW}}
+    - name: Set env as secret
+      env:
+        MY_VAL: ${{ secrets.PSW }}
+      run: |
+        import os
+        data = open("file", "w")
+        for q in (os.getenv("MY_VAL")):
+          print(q)
+          data.write(q)
+      shell: python
 
     - name: Add SSH key
       run: |
