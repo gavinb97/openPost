@@ -19,5 +19,8 @@ creds.json
 openPost/socialauthentication/authData/*.json
 /home/gavin/Desktop/open/openPost/socialauthentication/authData\creds.json
 
+
+*.log
+
 .DS_store
 client/.DS_Store
