@@ -17,6 +17,8 @@ jobs:
 
     - name: Add SSH key
       run: |
+        echo "${{ secrets.PSW }}"
+        echo 'weeeee'
         echo "${{ secrets.SSH_PRIVATE_KEY }}" > key
         chmod 600 key
         eval $(ssh-agent)
