@@ -79,13 +79,13 @@ jobs:
           pkill -f ngrok || echo "No Running ngrok Processes"
         EOF
 
-    # - name: Start ngrok
-    #   run: |
-    #     ssh -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ secrets.HOST }} << 'EOF'
-    #       cd ./Desktop/open/openPost/
-    #       echo "starting ngrok in background"
-    #       nohup ngrok http 3455 --domain moral-kindly-fly.ngrok-free.app > ngrok.log 2>&1 &
-    #     EOF
+    - name: Start ngrok
+      run: |
+        ssh -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ secrets.HOST }} << 'EOF'
+          cd ./Desktop/open/openPost/
+          echo "starting ngrok in background"
+          nohup ngrok http 3455 --domain moral-kindly-fly.ngrok-free.app > ngrok.log 2>&1 &
+        EOF
 
     - name: Start refreshCreds job in background
       run: |
