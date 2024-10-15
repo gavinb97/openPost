@@ -24,3 +24,5 @@ openPost/socialauthentication/authData/*.json
 
 .DS_store
 client/.DS_Store
+
+package-lock.json
