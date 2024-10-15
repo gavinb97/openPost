@@ -8,6 +8,18 @@ import Navbar from '../components/Navbar';
 
 
 function HomeScreen () {
+
+  // useEffect(() => {
+  
+  //     // Find and remove the Google Ads script if the user is premium
+  //     const adsScript = document.querySelector('script[src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1024690452826457"]');
+  //     if (adsScript) {
+  //       adsScript.remove();
+  //       console.log("Ads disabled for premium users");
+  //     }
+    
+  // }, []);
+
   const navigate = useNavigate();
     
   const renderWelcome = () => {

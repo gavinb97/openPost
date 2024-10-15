@@ -122,8 +122,8 @@ export const uploadFile = (file, fileName, username, userJwt) => {
 };
 
 export const fetchAllFilesByUser = async (username, userJwt) => {
-  const endpoint = 'http://localhost:3455/files';
-  
+  // const endpoint = 'http://localhost:3455/files';
+  const endpoint = 'https://moral-kindly-fly.ngrok-free.app/files';
   try {
     const response = await axios.post(endpoint, 
       { username }, // Payload data
@@ -142,8 +142,8 @@ export const fetchAllFilesByUser = async (username, userJwt) => {
 };
 
 export const fetchAllVideosByUser = async (username, userJwt) => {
-  const endpoint = 'http://localhost:3455/videos';
-  
+  // const endpoint = 'http://localhost:3455/videos';
+  const endpoint = 'https://moral-kindly-fly.ngrok-free.app/videos';
   try {
     const response = await axios.post(endpoint, 
       { username }, // Payload data
@@ -165,7 +165,8 @@ export const fetchAllVideosByUser = async (username, userJwt) => {
 
 
 export const fetchAllFiles = async () => {
-  const endpoint = 'http://localhost:3455/files';
+  // const endpoint = 'http://localhost:3455/files';
+  const endpoint = 'https://moral-kindly-fly.ngrok-free.app/files';
   try {
     const response = await axios.get(endpoint);
       
@@ -184,7 +185,7 @@ export const getPhotoFilesByName = async () => {
 
 export const deleteByName = async (fileNames, username, userJwt) => {
   try {
-    const response = await axios.post('http://localhost:3455/deletebyname', 
+    const response = await axios.post('https://moral-kindly-fly.ngrok-free.app/deletebyname', 
       { fileNames, username },
       {
         headers: {
@@ -204,7 +205,7 @@ export const deleteByName = async (fileNames, username, userJwt) => {
 };
 
 export const getPhotoMetadata = async (fileNames, username, userJwt) => {
-  const endpoint = 'http://localhost:3455/getphotometadata';
+  const endpoint = 'https://moral-kindly-fly.ngrok-free.app/getphotometadata';
 
   try {
     const response = await axios.post(endpoint, 
@@ -228,7 +229,7 @@ export const updatePhotoMetadata = async (newData, username, userJwt) => {
   console.log(newData);
 
   try {
-    const response = await axios.post('http://localhost:3455/updatephotometadata', 
+    const response = await axios.post('https://moral-kindly-fly.ngrok-free.app/updatephotometadata', 
       { newData, username },
       {
         headers: {

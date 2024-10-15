@@ -3,8 +3,8 @@ import axios from 'axios';
 
 
 export const getRedditLoginUrl = async (username, userJwt) => {
-  const endpoint = 'http://localhost:3455/redditloginurl';
-  
+  // const endpoint = 'http://localhost:3455/redditloginurl';
+  const endpoint = 'https://moral-kindly-fly.ngrok-free.app/redditloginurl';
   try {
     const response = await axios.post(endpoint, 
       { username }, // Payload data
@@ -25,8 +25,8 @@ export const getRedditLoginUrl = async (username, userJwt) => {
 
 
 export const revokeRedditAccess = async (username, accessToken, handle, userJwt) => {
-  const endpoint = 'http://localhost:3455/revokereddit';
-  
+  // const endpoint = 'http://localhost:3455/revokereddit';
+  const endpoint = 'https://moral-kindly-fly.ngrok-free.app/revokereddit';
   try {
     const requestBody = {
       username: username,
@@ -53,8 +53,8 @@ export const revokeRedditAccess = async (username, accessToken, handle, userJwt)
 
 
 export const getSFWSubreddits = async (user, userJwt) => {
-  const endpoint = 'http://localhost:3455/getsfwsubreddits';
-
+  // const endpoint = 'http://localhost:3455/getsfwsubreddits';
+  const endpoint = 'https://moral-kindly-fly.ngrok-free.app/getsfwsubreddits';
   try {
     const response = await axios.post(endpoint, 
       { token: user.redditTokens.access_token }, // Payload data

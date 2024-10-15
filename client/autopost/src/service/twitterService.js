@@ -1,8 +1,8 @@
 import axios from 'axios';
 
 export const getTwitterLoginUrl = async (username, userJwt) => {
-  const endpoint = 'http://localhost:3455/twitterloginurl';
-
+  // const endpoint = 'http://localhost:3455/twitterloginurl';
+  const endpoint = 'https://moral-kindly-fly.ngrok-free.app/twitterloginurl';
   try {
     const response = await axios.post(endpoint, 
       { username }, // Payload data
@@ -22,8 +22,8 @@ export const getTwitterLoginUrl = async (username, userJwt) => {
 
 
 export const revokeTwitterAccess = async (username, handle, userJwt) => {
-  const endpoint = 'http://localhost:3455/revoketwitter';
-
+  // const endpoint = 'http://localhost:3455/revoketwitter';
+  const endpoint = 'https://moral-kindly-fly.ngrok-free.app/revoketwitter';
   try {
     const response = await axios.post(endpoint, 
       { username, handle }, // Payload data

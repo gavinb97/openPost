@@ -3,7 +3,7 @@ import axios from 'axios';
 
 
 export const getYoutubeLoginUrl = async (username, userJwt) => {
-  const endpoint = 'http://localhost:3455/googleloginurl';
+  const endpoint = 'https://moral-kindly-fly.ngrok-free.app/googleloginurl';
   
   try {
     const response = await axios.post(endpoint, 
@@ -24,7 +24,7 @@ export const getYoutubeLoginUrl = async (username, userJwt) => {
 
 
 export const revokeGoogleAccess = async (username, accessToken, handle, userJwt) => {
-  const endpoint = 'http://localhost:3455/revokeGoogleAccess';
+  const endpoint = 'https://moral-kindly-fly.ngrok-free.app/revokeGoogleAccess';
 
   try {
     // Make a POST request to the revokeGoogleAccess endpoint
