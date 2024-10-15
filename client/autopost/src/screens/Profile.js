@@ -21,8 +21,7 @@ function Profile () {
   const [showAccountDetailsModal, setShowAccountDetailsModal] = useState(false);
   const [accountDetails, setAccountDetails] = useState();
   const { user, logoutContext, loginContext  } = useAuth();
-  console.log(user);
-  console.log('user !!!!');
+  
   const [showLimitModal, setShowLimitModal] = useState(false);
 
   const [credentials, setCredentials] = useState({});

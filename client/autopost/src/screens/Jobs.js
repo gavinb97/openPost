@@ -47,8 +47,6 @@ function Jobs () {
   const getJobs = async () => {
     const jobs = await getJobsByUsername(user.username, user.jwt);
     const postJobs = await getPostJobsByUsername(user.username, user.jwt);
-    console.log(postJobs);
-    console.log(jobs);
     const allJobs = jobs.activeJobs.concat(postJobs.activeJobs);
     setJobs(allJobs);
     return jobs;
