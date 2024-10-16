@@ -2,7 +2,7 @@ import axios from 'axios';
 
 export const getTikTokLoginUrl = async (username, userJwt) => {
   // const endpoint = 'http://localhost:3455/tiktokloginurl';
-  const endpoint = 'https://moral-kindly-fly.ngrok-free.app/tiktokloginurl';
+  const endpoint = 'https://onlypostsai.com/api/tiktokloginurl';
   try {
     const response = await axios.post(endpoint, 
       { username }, // Payload data
@@ -24,7 +24,7 @@ export const getTikTokLoginUrl = async (username, userJwt) => {
 
 export const revokeTikTokAccess = async (username, accessToken, handle, userJwt) => {
   // const endpoint = 'http://localhost:3455/revoketiktok';
-  const endpoint = 'https://moral-kindly-fly.ngrok-free.app/revoketiktok';
+  const endpoint = 'https://onlypostsai.com/api/revoketiktok';
   try {
     // Prepare the request payload
     const requestBody = {

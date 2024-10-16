@@ -3,7 +3,7 @@ import axios from 'axios';
 
 
 export const getYoutubeLoginUrl = async (username, userJwt) => {
-  const endpoint = 'https://moral-kindly-fly.ngrok-free.app/googleloginurl';
+  const endpoint = 'https://onlypostsai.com/api/googleloginurl';
   
   try {
     const response = await axios.post(endpoint, 
@@ -24,7 +24,7 @@ export const getYoutubeLoginUrl = async (username, userJwt) => {
 
 
 export const revokeGoogleAccess = async (username, accessToken, handle, userJwt) => {
-  const endpoint = 'https://moral-kindly-fly.ngrok-free.app/revokeGoogleAccess';
+  const endpoint = 'https://onlypostsai.com/api/revokeGoogleAccess';
 
   try {
     // Make a POST request to the revokeGoogleAccess endpoint

@@ -4,7 +4,7 @@ import axios from 'axios';
 
 export const getRedditLoginUrl = async (username, userJwt) => {
   // const endpoint = 'http://localhost:3455/redditloginurl';
-  const endpoint = 'https://moral-kindly-fly.ngrok-free.app/redditloginurl';
+  const endpoint = 'https://onlypostsai.com/api/redditloginurl';
   try {
     const response = await axios.post(endpoint, 
       { username }, // Payload data
@@ -26,7 +26,7 @@ export const getRedditLoginUrl = async (username, userJwt) => {
 
 export const revokeRedditAccess = async (username, accessToken, handle, userJwt) => {
   // const endpoint = 'http://localhost:3455/revokereddit';
-  const endpoint = 'https://moral-kindly-fly.ngrok-free.app/revokereddit';
+  const endpoint = 'https://onlypostsai.com/api/revokereddit';
   try {
     const requestBody = {
       username: username,
@@ -54,7 +54,7 @@ export const revokeRedditAccess = async (username, accessToken, handle, userJwt)
 
 export const getSFWSubreddits = async (user, userJwt) => {
   // const endpoint = 'http://localhost:3455/getsfwsubreddits';
-  const endpoint = 'https://moral-kindly-fly.ngrok-free.app/getsfwsubreddits';
+  const endpoint = 'https://onlypostsai.com/api/getsfwsubreddits';
   try {
     const response = await axios.post(endpoint, 
       { token: user.redditTokens.access_token }, // Payload data
