@@ -83,7 +83,7 @@ export const uploadFile = (file, fileName, username, userJwt) => {
   console.log(userJwt);
   console.log('****');
   return new Promise((resolve, reject) => {
-    const endpoint = 'http://localhost:3455/upload';
+    const endpoint = 'https://localhost:3455/upload';
     const reader = new FileReader();
     reader.readAsDataURL(file);
 
@@ -122,8 +122,8 @@ export const uploadFile = (file, fileName, username, userJwt) => {
 };
 
 export const fetchAllFilesByUser = async (username, userJwt) => {
-  // const endpoint = 'http://localhost:3455/files';
-  const endpoint = 'http://only-posts.com/api/files';
+  // const endpoint = 'https://localhost:3455/files';
+  const endpoint = 'https://only-posts.com/api/files';
   try {
     const response = await axios.post(endpoint, 
       { username }, // Payload data
@@ -142,8 +142,8 @@ export const fetchAllFilesByUser = async (username, userJwt) => {
 };
 
 export const fetchAllVideosByUser = async (username, userJwt) => {
-  // const endpoint = 'http://localhost:3455/videos';
-  const endpoint = 'http://only-posts.com/api/videos';
+  // const endpoint = 'https://localhost:3455/videos';
+  const endpoint = 'https://only-posts.com/api/videos';
   try {
     const response = await axios.post(endpoint, 
       { username }, // Payload data
@@ -165,8 +165,8 @@ export const fetchAllVideosByUser = async (username, userJwt) => {
 
 
 export const fetchAllFiles = async () => {
-  // const endpoint = 'http://localhost:3455/files';
-  const endpoint = 'http://only-posts.com/api/files';
+  // const endpoint = 'https://localhost:3455/files';
+  const endpoint = 'https://only-posts.com/api/files';
   try {
     const response = await axios.get(endpoint);
       
@@ -185,7 +185,7 @@ export const getPhotoFilesByName = async () => {
 
 export const deleteByName = async (fileNames, username, userJwt) => {
   try {
-    const response = await axios.post('http://only-posts.com/api/deletebyname', 
+    const response = await axios.post('https://only-posts.com/api/deletebyname', 
       { fileNames, username },
       {
         headers: {
@@ -205,7 +205,7 @@ export const deleteByName = async (fileNames, username, userJwt) => {
 };
 
 export const getPhotoMetadata = async (fileNames, username, userJwt) => {
-  const endpoint = 'http://only-posts.com/api/getphotometadata';
+  const endpoint = 'https://only-posts.com/api/getphotometadata';
 
   try {
     const response = await axios.post(endpoint, 
@@ -229,7 +229,7 @@ export const updatePhotoMetadata = async (newData, username, userJwt) => {
   console.log(newData);
 
   try {
-    const response = await axios.post('http://only-posts.com/api/updatephotometadata', 
+    const response = await axios.post('https://only-posts.com/api/updatephotometadata', 
       { newData, username },
       {
         headers: {
