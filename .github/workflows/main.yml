@@ -44,6 +44,7 @@ jobs:
     - name: pull and install api
       run: |
         ssh -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ secrets.HOST }} << 'EOF'
+          echo "${{ secrets.PSW }}" | sudo -S su - && sudo su
           cd ./Desktop/open/openPost/
           export NVM_DIR=~/.nvm
           source ~/.nvm/nvm.sh
@@ -62,9 +63,11 @@ jobs:
     - name: build client
       run: |
         ssh -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ secrets.HOST }} << 'EOF'
+          echo "${{ secrets.PSW }}" | sudo -S su - && sudo su
           cd ./Desktop/open/openPost/client/autopost
           export NVM_DIR=~/.nvm
           source ~/.nvm/nvm.sh
+          rm -rf build
           rm -rf node_modules
           rm package-lock.json
           echo "installing..."
