@@ -346,4 +346,8 @@ router.post('/contactFormSubmit', async (req, res) => {
   }
 });
 
+router.post('/health', async (req, res) => {
+  res.send('oooooo weeeeeeeee')
+})
+
 module.exports = router;
