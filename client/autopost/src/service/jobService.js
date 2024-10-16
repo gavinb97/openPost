@@ -3,7 +3,7 @@ import axios from 'axios';
 
 export const createScheduledJob = async (schedule, userJwt) => {
   // const endpoint = 'http://localhost:3455/setSchedule';
-  const endpoint = 'https://only-posts.com/api/setSchedule';
+  const endpoint = 'http://only-posts.com/api/setSchedule';
   try {
     const response = await axios.post(endpoint, 
       { scheduleData: schedule }, // Payload data
@@ -23,7 +23,7 @@ export const createScheduledJob = async (schedule, userJwt) => {
 
 export const getJobsByUsername = async (user, userJwt) => {
   // const endpoint = 'http://localhost:3455/getjobs';
-  const endpoint = 'https://only-posts.com/api/getjobs';
+  const endpoint = 'http://only-posts.com/api/getjobs';
   try {
     const response = await axios.post(endpoint, 
       { username: user }, // Payload data with username
@@ -43,7 +43,7 @@ export const getJobsByUsername = async (user, userJwt) => {
 
 export const getPostJobsByUsername = async (user, userJwt) => {
   // const endpoint = 'http://localhost:3455/getpostjobs';
-  const endpoint = 'https://only-posts.com/api/getpostjobs';
+  const endpoint = 'http://only-posts.com/api/getpostjobs';
   try {
     const response = await axios.post(endpoint, 
       { username: user }, // Payload data with username
@@ -63,7 +63,7 @@ export const getPostJobsByUsername = async (user, userJwt) => {
 
 export const deleteJob = async (jobSetId, userJwt) => {
   // const endpoint = 'http://localhost:3455/deletejob';
-  const endpoint = 'https://only-posts.com/api/deletejob';
+  const endpoint = 'http://only-posts.com/api/deletejob';
 
   try {
     const response = await axios.delete(endpoint, {
