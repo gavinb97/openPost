@@ -99,53 +99,103 @@ const UploadedMediaContainer = forwardRef((props, ref) => {
     setSelectedImages(newSelectedImages);
   };
 
-  return (
-    <div style={{ textAlign: 'center' }}>
-      <div style={{ display: 'inline-flex', alignItems: 'center', borderBottom: '.25rem solid #00aff0'}}>
-        <button onClick={handleRefreshClick} style={{backgroundColor: '#0091ea', color: 'white', marginTop: '.5rem', marginLeft: '1rem', borderRadius: '1rem', border: 0 }}>Refresh</button>
-        <h2 style={{ marginLeft: '1rem', marginRight: '1rem' }}>Uploaded Photos</h2>
-      </div>
-            
-      {selectedImages.length > 0 && (
-        <div style={{ display: 'flex', justifyContent: 'center' }}>
-          <button style={{ backgroundColor: 'red', color: 'white', marginTop: '.5rem', padding: '1rem', borderRadius: '1rem', border: 0}} onClick={handleDeleteClick}>
-                        Delete
-          </button>
-          <button  style={{ backgroundColor: '#0091ea', color: 'white', marginTop: '.5rem', marginLeft: '1rem', borderRadius: '1rem', border: 0 }} onClick={handleEditClick}>
-                        View / Edit
-          </button>
-          <button style={{ backgroundColor: '#0091ea', color: 'white', marginTop: '.5rem', marginLeft: '1rem', borderRadius: '1rem', border: 0 }} onClick={handleSelectAll}>
-            {selectedImages.length === mediaFiles.length ? 'Unselect All' : 'Select All'}
-          </button>
+  if (mediaFiles) {
+    return (
+      <div style={{ textAlign: 'center' }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', borderBottom: '.25rem solid #00aff0'}}>
+          <button onClick={handleRefreshClick} style={{backgroundColor: '#0091ea', color: 'white', marginTop: '.5rem', marginLeft: '1rem', borderRadius: '1rem', border: 0 }}>Refresh</button>
+          <h2 style={{ marginLeft: '1rem', marginRight: '1rem' }}>Uploaded Photos</h2>
         </div>
-      )}
-            
-      <div className="image-container" style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center' }}>
-        {mediaFiles.map((fileObject, index) => (
-          <div key={index} className={`image-box ${selectedImages.includes(index) ? 'selected' : ''}`} style={{ margin: '10px', textAlign: 'center', width: '200px' }} onClick={() => handleImageSelect(index)}>
-            <input
-              type="checkbox"
-              checked={selectedImages.includes(index)}
-              onChange={() => handleImageSelect(index)}
-            />
-            <div className="image-wrapper">
-              <img
-                src={`data:image/png;base64,${fileObject.fileData}`}
-                alt={fileObject.fileName}
-                className="image"
-                style={{ width: '100%', height: 'auto', maxWidth: '100%' }}
-              />
-            </div>
+              
+        {selectedImages.length > 0 && (
+          <div style={{ display: 'flex', justifyContent: 'center' }}>
+            <button style={{ backgroundColor: 'red', color: 'white', marginTop: '.5rem', padding: '1rem', borderRadius: '1rem', border: 0}} onClick={handleDeleteClick}>
+                          Delete
+            </button>
+            <button  style={{ backgroundColor: '#0091ea', color: 'white', marginTop: '.5rem', marginLeft: '1rem', borderRadius: '1rem', border: 0 }} onClick={handleEditClick}>
+                          View / Edit
+            </button>
+            <button style={{ backgroundColor: '#0091ea', color: 'white', marginTop: '.5rem', marginLeft: '1rem', borderRadius: '1rem', border: 0 }} onClick={handleSelectAll}>
+              {selectedImages.length === mediaFiles.length ? 'Unselect All' : 'Select All'}
+            </button>
           </div>
-        ))}
+        )}
+              
+        <div className="image-container" style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center' }}>
+          {mediaFiles.map((fileObject, index) => (
+            <div key={index} className={`image-box ${selectedImages.includes(index) ? 'selected' : ''}`} style={{ margin: '10px', textAlign: 'center', width: '200px' }} onClick={() => handleImageSelect(index)}>
+              <input
+                type="checkbox"
+                checked={selectedImages.includes(index)}
+                onChange={() => handleImageSelect(index)}
+              />
+              <div className="image-wrapper">
+                <img
+                  src={`data:image/png;base64,${fileObject.fileData}`}
+                  alt={fileObject.fileName}
+                  className="image"
+                  style={{ width: '100%', height: 'auto', maxWidth: '100%' }}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+  
+        <div>
+          {showModal && <UpdateImageDataModal imageData={imageMetadata} mediaFiles={mediaFiles} closeModal={closeModal} updatePhotoMetadata={updatePhotoMetadata} user={user} />} 
+          {showScheduleModal && <SetScheduleModal closeModal={closeModal}></SetScheduleModal>}
+        </div>
       </div>
+    );
+  }
 
-      <div>
-        {showModal && <UpdateImageDataModal imageData={imageMetadata} mediaFiles={mediaFiles} closeModal={closeModal} updatePhotoMetadata={updatePhotoMetadata} user={user} />} 
-        {showScheduleModal && <SetScheduleModal closeModal={closeModal}></SetScheduleModal>}
-      </div>
-    </div>
-  );
+  // return (
+  //   <div style={{ textAlign: 'center' }}>
+  //     <div style={{ display: 'inline-flex', alignItems: 'center', borderBottom: '.25rem solid #00aff0'}}>
+  //       <button onClick={handleRefreshClick} style={{backgroundColor: '#0091ea', color: 'white', marginTop: '.5rem', marginLeft: '1rem', borderRadius: '1rem', border: 0 }}>Refresh</button>
+  //       <h2 style={{ marginLeft: '1rem', marginRight: '1rem' }}>Uploaded Photos</h2>
+  //     </div>
+            
+  //     {selectedImages.length > 0 && (
+  //       <div style={{ display: 'flex', justifyContent: 'center' }}>
+  //         <button style={{ backgroundColor: 'red', color: 'white', marginTop: '.5rem', padding: '1rem', borderRadius: '1rem', border: 0}} onClick={handleDeleteClick}>
+  //                       Delete
+  //         </button>
+  //         <button  style={{ backgroundColor: '#0091ea', color: 'white', marginTop: '.5rem', marginLeft: '1rem', borderRadius: '1rem', border: 0 }} onClick={handleEditClick}>
+  //                       View / Edit
+  //         </button>
+  //         <button style={{ backgroundColor: '#0091ea', color: 'white', marginTop: '.5rem', marginLeft: '1rem', borderRadius: '1rem', border: 0 }} onClick={handleSelectAll}>
+  //           {selectedImages.length === mediaFiles.length ? 'Unselect All' : 'Select All'}
+  //         </button>
+  //       </div>
+  //     )}
+            
+  //     <div className="image-container" style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center' }}>
+  //       {mediaFiles.map((fileObject, index) => (
+  //         <div key={index} className={`image-box ${selectedImages.includes(index) ? 'selected' : ''}`} style={{ margin: '10px', textAlign: 'center', width: '200px' }} onClick={() => handleImageSelect(index)}>
+  //           <input
+  //             type="checkbox"
+  //             checked={selectedImages.includes(index)}
+  //             onChange={() => handleImageSelect(index)}
+  //           />
+  //           <div className="image-wrapper">
+  //             <img
+  //               src={`data:image/png;base64,${fileObject.fileData}`}
+  //               alt={fileObject.fileName}
+  //               className="image"
+  //               style={{ width: '100%', height: 'auto', maxWidth: '100%' }}
+  //             />
+  //           </div>
+  //         </div>
+  //       ))}
+  //     </div>
+
+  //     <div>
+  //       {showModal && <UpdateImageDataModal imageData={imageMetadata} mediaFiles={mediaFiles} closeModal={closeModal} updatePhotoMetadata={updatePhotoMetadata} user={user} />} 
+  //       {showScheduleModal && <SetScheduleModal closeModal={closeModal}></SetScheduleModal>}
+  //     </div>
+  //   </div>
+  // );
 });
 
 

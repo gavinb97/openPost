@@ -146,40 +146,75 @@ const UploadedVideosContainer = forwardRef((props, ref) => {
     );
   };
     
-
-  return (
-    <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-      <div style={{ display: 'inline-flex', alignItems: 'center', borderBottom: '.25rem solid #00aff0' }}>
-        <button onClick={handleRefreshClick} style={{backgroundColor: '#0091ea', color: 'white', marginTop: '.5rem', marginLeft: '1rem', borderRadius: '1rem', border: 0 }}>Refresh</button>
-        <h2 style={{ marginLeft: '1rem', marginRight: '1rem' }}>Uploaded Videos</h2>
-      </div>
-            
-      {selectedVideos.length > 0 && (
-        <div style={{ display: 'flex', justifyContent: 'center' }}>
-          <button style={{ backgroundColor: 'red', color: 'white', marginTop: '.5rem', padding: '1rem', borderRadius: '1rem', border: 0}} onClick={handleDeleteClick}>
-                        Delete
-          </button>
-          <button style={{ backgroundColor: '#0091ea', color: 'white', marginTop: '.5rem', marginLeft: '1rem', borderRadius: '1rem', border: 0  }} onClick={handleEditClick}>
-                        View / Edit
-          </button>
-          <button style={{ backgroundColor: '#0091ea', color: 'white', marginTop: '.5rem', marginLeft: '1rem', borderRadius: '1rem', border: 0 }} onClick={handleSelectAll}>
-            {selectedVideos.length === videos.length ? 'Unselect All' : 'Select All'}
-          </button>
+  if (videos) {
+    return (
+      <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', borderBottom: '.25rem solid #00aff0' }}>
+          <button onClick={handleRefreshClick} style={{backgroundColor: '#0091ea', color: 'white', marginTop: '.5rem', marginLeft: '1rem', borderRadius: '1rem', border: 0 }}>Refresh</button>
+          <h2 style={{ marginLeft: '1rem', marginRight: '1rem' }}>Uploaded Videos</h2>
         </div>
-      )}
-            
-      <div className="video-container" style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center' }}>
-        {videos.map((video, index) => (
-          renderVideo(video, index)
-        ))}
+              
+        {selectedVideos.length > 0 && (
+          <div style={{ display: 'flex', justifyContent: 'center' }}>
+            <button style={{ backgroundColor: 'red', color: 'white', marginTop: '.5rem', padding: '1rem', borderRadius: '1rem', border: 0}} onClick={handleDeleteClick}>
+                          Delete
+            </button>
+            <button style={{ backgroundColor: '#0091ea', color: 'white', marginTop: '.5rem', marginLeft: '1rem', borderRadius: '1rem', border: 0  }} onClick={handleEditClick}>
+                          View / Edit
+            </button>
+            <button style={{ backgroundColor: '#0091ea', color: 'white', marginTop: '.5rem', marginLeft: '1rem', borderRadius: '1rem', border: 0 }} onClick={handleSelectAll}>
+              {selectedVideos.length === videos.length ? 'Unselect All' : 'Select All'}
+            </button>
+          </div>
+        )}
+              
+        <div className="video-container" style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center' }}>
+          {videos.map((video, index) => (
+            renderVideo(video, index)
+          ))}
+        </div>
+  
+        <div>
+          {showModal && <UpdateImageDataModal imageData={photoMetadata} mediaFiles={videos} closeModal={closeModal} updatePhotoMetadata={updatePhotoMetadata} user={user} />} 
+          {showScheduleModal && <SetScheduleModal closeModal={closeModal}></SetScheduleModal>}
+        </div>
       </div>
+    );
+  }
 
-      <div>
-        {showModal && <UpdateImageDataModal imageData={photoMetadata} mediaFiles={videos} closeModal={closeModal} updatePhotoMetadata={updatePhotoMetadata} user={user} />} 
-        {showScheduleModal && <SetScheduleModal closeModal={closeModal}></SetScheduleModal>}
-      </div>
-    </div>
-  );
+  // return (
+  //   <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+  //     <div style={{ display: 'inline-flex', alignItems: 'center', borderBottom: '.25rem solid #00aff0' }}>
+  //       <button onClick={handleRefreshClick} style={{backgroundColor: '#0091ea', color: 'white', marginTop: '.5rem', marginLeft: '1rem', borderRadius: '1rem', border: 0 }}>Refresh</button>
+  //       <h2 style={{ marginLeft: '1rem', marginRight: '1rem' }}>Uploaded Videos</h2>
+  //     </div>
+            
+  //     {selectedVideos.length > 0 && (
+  //       <div style={{ display: 'flex', justifyContent: 'center' }}>
+  //         <button style={{ backgroundColor: 'red', color: 'white', marginTop: '.5rem', padding: '1rem', borderRadius: '1rem', border: 0}} onClick={handleDeleteClick}>
+  //                       Delete
+  //         </button>
+  //         <button style={{ backgroundColor: '#0091ea', color: 'white', marginTop: '.5rem', marginLeft: '1rem', borderRadius: '1rem', border: 0  }} onClick={handleEditClick}>
+  //                       View / Edit
+  //         </button>
+  //         <button style={{ backgroundColor: '#0091ea', color: 'white', marginTop: '.5rem', marginLeft: '1rem', borderRadius: '1rem', border: 0 }} onClick={handleSelectAll}>
+  //           {selectedVideos.length === videos.length ? 'Unselect All' : 'Select All'}
+  //         </button>
+  //       </div>
+  //     )}
+            
+  //     <div className="video-container" style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center' }}>
+  //       {videos.map((video, index) => (
+  //         renderVideo(video, index)
+  //       ))}
+  //     </div>
+
+  //     <div>
+  //       {showModal && <UpdateImageDataModal imageData={photoMetadata} mediaFiles={videos} closeModal={closeModal} updatePhotoMetadata={updatePhotoMetadata} user={user} />} 
+  //       {showScheduleModal && <SetScheduleModal closeModal={closeModal}></SetScheduleModal>}
+  //     </div>
+  //   </div>
+  // );
 });
 
 UploadedVideosContainer.displayName = 'UploadedVideosContainer';
