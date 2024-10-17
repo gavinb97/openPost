@@ -17,10 +17,10 @@ const corsOptions = {
 
 app.use(cors(corsOptions)) 
 
-app.use(stripeRoute) 
-app.use(openPostMediaApi) 
-app.use(jobsApi) 
-app.use(socialAuthApi) 
+app.use('/api', stripeRoute) 
+app.use('/api', openPostMediaApi) 
+app.use('/api', jobsApi) 
+app.use('/api', socialAuthApi) 
 
 // Load SSL certificate and key
 const sslOptions = {
