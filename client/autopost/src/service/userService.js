@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 export const register = async (userName, userPassword, userEmail) => {
-  const endpoint = 'http://only-posts.com/api/register';
+  const endpoint = 'https://only-posts.com/api/register';
   try {
     const response = await axios.post(endpoint, {username: userName, password: userPassword, email: userEmail});
     return response.data;
@@ -15,7 +15,7 @@ export const register = async (userName, userPassword, userEmail) => {
  
 
 export const login = async (userName, userPassword, userEmail) => {
-  const endpoint = 'http://only-posts.com/api/login';
+  const endpoint = 'https://only-posts.com/api/login';
 
   try {
     const response = await axios.post(endpoint, {username: userName, password: userPassword});
@@ -27,7 +27,7 @@ export const login = async (userName, userPassword, userEmail) => {
 };
 
 export const getUpdatedDetails = async (userName, userJwt) => {
-  const endpoint = 'http://only-posts.com/api/updateddetails';
+  const endpoint = 'https://only-posts.com/api/updateddetails';
 
   try {
     const response = await axios.post(endpoint, 
@@ -49,7 +49,7 @@ export const getUpdatedDetails = async (userName, userJwt) => {
 };
 
 export const getUserCreds = async (username, userJwt) => {
-  const endpoint = 'http://only-posts.com/api/getUserCreds';
+  const endpoint = 'https://only-posts.com/api/getUserCreds';
 
   try {
     const response = await axios.post(endpoint, 
@@ -69,7 +69,7 @@ export const getUserCreds = async (username, userJwt) => {
 };
 
 export const fetchUserEmail = async (username, userJwt) => {
-  const endpoint = 'http://only-posts.com/api/getemail';
+  const endpoint = 'https://only-posts.com/api/getemail';
 
   try {
     const response = await axios.post(endpoint, 
@@ -89,7 +89,7 @@ export const fetchUserEmail = async (username, userJwt) => {
 };
 
 export const getBillingPortal = async (customerId, userJwt) => {
-  const endpoint = 'http://only-posts.com/api/billing_session_url';
+  const endpoint = 'https://only-posts.com/api/billing_session_url';
 
   try {
     const response = await axios.post(endpoint, 
@@ -109,7 +109,7 @@ export const getBillingPortal = async (customerId, userJwt) => {
 };
 
 export const submitContactForm = async (contactFormData) => {
-  const endpoint = 'http://only-posts.com/api/contactFormSubmit';
+  const endpoint = 'https://only-posts.com/api/contactFormSubmit';
 
   try {
     const response = await axios.post(endpoint, contactFormData, {
