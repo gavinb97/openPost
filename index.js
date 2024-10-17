@@ -15,7 +15,7 @@ const corsOptions = {
   optionsSuccessStatus: 200,
 };
 
-app.use(cors(corsOptions)) 
+app.use(cors()) 
 
 app.use(stripeRoute) 
 app.use(openPostMediaApi) 
@@ -23,10 +23,10 @@ app.use(jobsApi)
 app.use(socialAuthApi) 
 
 // Load SSL certificate and key
-const sslOptions = {
-  key: fs.readFileSync('./certs/only-posts.com.key'),
-  cert: fs.readFileSync('./certs/only-posts.com.pem')
-} 
+// const sslOptions = {
+//   key: fs.readFileSync('./certs/only-posts.com.key'),
+//   cert: fs.readFileSync('./certs/only-posts.com.pem')
+// } 
 
 // 3455
 const PORT = process.env.PORT || 3455 
