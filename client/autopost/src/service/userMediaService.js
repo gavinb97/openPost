@@ -83,7 +83,7 @@ export const uploadFile = (file, fileName, username, userJwt) => {
   console.log(userJwt);
   console.log('****');
   return new Promise((resolve, reject) => {
-    const endpoint = 'https://localhost:3455/upload';
+    const endpoint = 'https://only-posts.com/api/upload';
     const reader = new FileReader();
     reader.readAsDataURL(file);
 
