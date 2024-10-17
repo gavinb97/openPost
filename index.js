@@ -11,7 +11,7 @@ const socialAuthApi = require('./socialauthentication/socialAuthApi')
 const app = express() 
 
 const corsOptions = {
-  origin: ['https://only-posts.com/', 'https://onlypostsai.com/', ],
+  origin: ['https://only-posts.com', 'https://onlypostsai.com' ],
   optionsSuccessStatus: 200,
 };
 
