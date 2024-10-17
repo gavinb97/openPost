@@ -32,7 +32,6 @@ const UploadPictureBox = ({ onSuccessUpload }) => {
   };
 
   const handleUploadClick = async () => {
-    console.log('in handle upload click');
     const pictureInput = document.getElementById('pictureUpload');
     const videoInput = document.getElementById('videoUpload');
 

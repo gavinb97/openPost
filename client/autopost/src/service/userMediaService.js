@@ -47,7 +47,6 @@ export const updateFileNamesAsync = async (files, uploadedFileNames) => {
 
   for (const file of files) {
     // Find the filename with the identifier in the uploadedFileNames array
-    console.log(uploadedFileNames);
     const matchingFileName = uploadedFileNames.find(name => name.endsWith(file.name));
 
     // Only include the file if a matching file name is found and it's different from the original
@@ -74,14 +73,11 @@ export const updateFileNamesAsync = async (files, uploadedFileNames) => {
     }
   }
 
-  console.log('Renamed files:', renamedFiles);
   return renamedFiles;
 };
 
 
 export const uploadFile = (file, fileName, username, userJwt) => {
-  console.log(userJwt);
-  console.log('****');
   return new Promise((resolve, reject) => {
     const endpoint = 'https://only-posts.com/api/upload';
     const reader = new FileReader();
@@ -225,8 +221,6 @@ export const getPhotoMetadata = async (fileNames, username, userJwt) => {
 };
 
 export const updatePhotoMetadata = async (newData, username, userJwt) => {
-  console.log('in new data');
-  console.log(newData);
 
   try {
     const response = await axios.post('https://only-posts.com/api/updatephotometadata', 
