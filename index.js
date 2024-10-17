@@ -32,6 +32,10 @@ const sslOptions = {
 const PORT = process.env.PORT || 3455 
 
 // Start HTTPS server
-https.createServer(sslOptions, app).listen(PORT, () => {
-  console.log(`HTTPS Server is running on port ${PORT}`) 
-}) 
+// https.createServer(sslOptions, app).listen(PORT, () => {
+//   console.log(`HTTPS Server is running on port ${PORT}`) 
+// }) 
+
+app.listen(PORT, () => {
+  console.log('HTTP server is running at PORT 3455')
+})
