@@ -32,7 +32,7 @@ const generateTwitterAuthUrl1 = async (username) => {
    
   const clientId = process.env.CLIENT_ID;
  
-  const redirectUri = 'https://moral-kindly-fly.ngrok-free.app/xcallback';
+  const redirectUri = 'https://only-posts.com/api/xcallback';
   // Construct the authorization URL
   const authUrl = `${oauthUrl}?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=${responseType}&scope=${encodeURIComponent(scope)}&state=${encodeURIComponent(state)}&code_challenge=${encodeURIComponent(codeVerifier)}&code_challenge_method=${encodeURIComponent(codeChallengeMethod)}`;
    
@@ -201,7 +201,7 @@ const tweetMediaOnBehalfOfUser = async (accessToken, accessSecret, tweetText, me
 
 const generateTwitterAuthUrl = async (username) => {
   const requestTokenUrl = 'https://api.twitter.com/oauth/request_token';
-  const callbackUrl = encodeURIComponent(`https://moral-kindly-fly.ngrok-free.app/xcallback?state=${username}`);
+  const callbackUrl = encodeURIComponent(`https://only-posts.com/api/xcallback?state=${username}`);
   const consumerKey = encodeURIComponent(process.env.APP_KEY);
   const nonce = generateNonce();
   const timestamp = Math.floor(Date.now() / 1000);
