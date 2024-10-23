@@ -3,7 +3,7 @@ import axios from 'axios';
 
 export const createScheduledJob = async (schedule, userJwt) => {
   // const endpoint = 'https://localhost:3455/setSchedule';
-  const endpoint = 'https://only-posts.com/api/setSchedule';
+  const endpoint = 'https://only-posts.com/api/jobs';
   try {
     const response = await axios.post(endpoint, 
       { scheduleData: schedule }, // Payload data
