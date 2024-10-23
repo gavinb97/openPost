@@ -9,7 +9,6 @@ import {  revokeTikTokAccess } from '../service/tiktokService';
 
 const AccountDetailsModal = ({ closeModal, accountDetails, setAccountDetails}) => {
  
-  console.log(accountDetails);
   const revoke = (accountDetails) => {
     if (accountDetails.twitterTokens.access_token !== null) revokeTwitterAccess(accountDetails.user, accountDetails.handle, accountDetails.jwt);
     if (accountDetails.redditTokens.access_token !== null) revokeRedditAccess(accountDetails.user, accountDetails.redditTokens.access_token, accountDetails.handle, accountDetails.jwt);

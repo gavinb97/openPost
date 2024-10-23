@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 const AccountLimitModal = ({ closeModal, user, limitReached}) => {
   const navigate = useNavigate();
 
-  const [work, setWork] = useState(limitReached === 'work');
+  const [work, setWork] = useState(limitReached);
 
   const getProButtonClick = () => {
     navigate('/pro');

@@ -11,7 +11,7 @@ const socialAuthApi = require('./socialauthentication/socialAuthApi')
 const app = express() 
 
 const corsOptions = {
-  origin: ['https://only-posts.com', 'https://onlypostsai.com' ],
+  origin: ['https://only-posts.com', 'https://onlypostsai.com', 'http://localhost:3000' ],
   optionsSuccessStatus: 200,
 };
 
@@ -23,9 +23,14 @@ app.use('/api', jobsApi)
 app.use('/api', socialAuthApi) 
 
 // Load SSL certificate and key
+// const sslOptions = {
+//   key: fs.readFileSync('./certs/only-posts.com.key'),
+//   cert: fs.readFileSync('./certs/only-posts.com.pem')
+// } 
+
 const sslOptions = {
-  key: fs.readFileSync('./certs/only-posts.com.key'),
-  cert: fs.readFileSync('./certs/only-posts.com.pem')
+  key: fs.readFileSync('localhost+2-key.pem'),
+  cert: fs.readFileSync('localhost+2.pem')
 } 
 
 // 3455

@@ -17,7 +17,7 @@ import StartDMJobModal from '../components/StartDMJobModal';
 import LoginPromptModal from '../components/LoginPromptModal';
 import useMethods from './UserLandingScreenMethods';
 import UploadedVideoContainerSmall from '../components/UploadedVideoContainerSmall';
-import {getJobsByUsername, deleteJob} from '../service/jobService';
+import {getJobsByUsername, deleteJob, getPostJobsByUsername} from '../service/jobService';
 import AccountLimitModal from '../components/AccountLimitModal';
 
 function UserLandingScreen () {
@@ -42,9 +42,15 @@ function UserLandingScreen () {
 
   useEffect(() => {
     // fetch total number of jobs
+
+    const getJobs = async () => {
+      const jobs = await getJobsByUsername(user.username, user.jwt)
+      const postJobs = await getPostJobsByUsername(user.username, user.jwt);
+      return jobs.activeJobs.concat(postJobs.activeJobs);
+    }
     if (user) {
-      getJobsByUsername(user.username, user.jwt).then((jobs) => {
-        setJobCount(jobs.activeJobs.length);
+      getJobs().then((jobs) => {
+        setJobCount(jobs.length);
       });
     }
   }, [ , reloadJobs]);
@@ -120,12 +126,13 @@ function UserLandingScreen () {
   };
 
   const handleShowCommentModal = () => {
-    if (user.pro === 'true') {
-      setShowCommentJobModal(true);
-    } else {
-      setShowLimitModal(true);
-    } 
-    
+    // if (user.pro === 'true') {
+    //   setShowCommentJobModal(true);
+    // } else {
+    //   setShowLimitModal(true);
+    // } 
+    console.log('comment job');
+    setShowLimitModal(true);
   };
 
   const handleCloseCommentModal = () => {

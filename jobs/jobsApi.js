@@ -16,7 +16,7 @@ router.post('/jobs', async (req, res) => {
   
   
   try {
-    const jobs = await formatRequest(req.body);
+    const jobs = await formatRequest(req.body.scheduleData);
     console.log(jobs);
 
     const channel = await channelPromise;

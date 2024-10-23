@@ -254,7 +254,7 @@ router.post('/setSchedule', authenticateToken, async (req, res) => {
   const scheduleData = req.body.scheduleData;
 
   try {
-    const response = await axios.post('http://localhost:3455/jobs', scheduleData);
+    const response = await axios.post('https://localhost:3455/api/jobs', scheduleData);
     res.status(response.status).send(response.data);
   } catch (error) {
     console.error('Error sending schedule data to jobs endpoint:', error);
