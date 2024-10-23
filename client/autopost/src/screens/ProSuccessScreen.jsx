@@ -27,7 +27,7 @@ const ProSuccessScreen = () => {
         <h1>Thank you for supporting OnlyPosts!</h1>
         <br></br>
         <p>Please wait while we redirect you...</p>
-        <p>Click <a className='redirectAnchor' href="https://only-posts.com">here</a> if you are not redirected automatically</p>
+        <p>Click <a className='redirectAnchor' href="https://only-posts.com/profile">here</a> if you are not redirected automatically</p>
       </div>
 
     </div>

@@ -323,7 +323,7 @@ router.post('/billing_session_url', authenticateToken,  async (req, res) => {
   try {
     const session = await stripe.billingPortal.sessions.create({
       customer: customerId,
-      return_url: 'http://only-posts.com/prosuccess',
+      return_url: 'https://only-posts.com/prosuccess',
     });
     if (session) {
       res.status(200).json({
