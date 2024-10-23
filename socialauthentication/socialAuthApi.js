@@ -49,7 +49,7 @@ router.get('/xcallback', async (req, res) => {
   try {
     const code = req.query.code;
     const oauth1Token = await getOAuth1AccessToken(req.query.state, req.query.oauth_token, req.query.oauth_verifier);
-    res.redirect('http://localhost:3000/profile');
+    res.redirect('http://only-posts.com/profile');
   } catch (error) {
     console.error('Error:', error);
     res.status(500).json({ error: 'Internal Server Error' });
@@ -87,7 +87,7 @@ router.get('/redditcallback', async (req, res) => {
   const codeFromCallback = req.query.code;
   const state = req.query.state;
   await getRedditAccessToken(codeFromCallback, state);
-  res.redirect('http://localhost:3000/profile');
+  res.redirect('http://only-posts.com/profile');
 });
 
 router.post('/redditloginurl', authenticateToken, async (req, res) => {
@@ -155,10 +155,10 @@ router.get('/gcallback', async (req, res) => {
     // Update the tokens along with the YouTube username
     await updateYouTubeTokens(state.trim(), tokens.access_token, tokens.refresh_token, username.trim());
 
-    res.redirect('http://localhost:3000/profile');
+    res.redirect('http://only-posts.com/profile');
   } catch (error) {
     console.error('Error retrieving YouTube channel information:', error);
-    res.redirect('http://localhost:3000/profile');
+    res.redirect('http://only-posts.com/profile');
   }
 });
 
@@ -182,7 +182,7 @@ router.get('/callback', async (req, res) => {
   const response = await getAccessTokenAndOpenId(code, state);
   const keyStrings = `accessToken: ${response.accessToken}  refreshToken: ${response.refreshToken}`;
   writeTextToFile(keyStrings, 'tiktokkeys.txt');
-  res.redirect('http://localhost:3000/profile');
+  res.redirect('http://only-posts.com/profile');
 });
 
 router.post('/tiktokloginurl', authenticateToken, async (req, res) => {
@@ -323,7 +323,7 @@ router.post('/billing_session_url', authenticateToken,  async (req, res) => {
   try {
     const session = await stripe.billingPortal.sessions.create({
       customer: customerId,
-      return_url: 'http://localhost:3000/pro',
+      return_url: 'http://only-posts.com/prosuccess',
     });
     if (session) {
       res.status(200).json({
