@@ -81,10 +81,10 @@ function App () {
 
   return (
     <AuthProvider>
-      {/* <RouterProvider router={router}>
+      <RouterProvider router={router}>
     
-      </RouterProvider> */}
-      <h1>Site under maintenance...</h1>
+      </RouterProvider>
+      {/* <h1>Site under maintenance...</h1> */}
     </AuthProvider>
   );
 }
