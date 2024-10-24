@@ -113,10 +113,12 @@ function UserLandingScreen () {
 
   const handleShowPostJobModal = () => {
     // if (user.pro === 'true') {
-    setShowPostJobModal(true);
+    // setShowPostJobModal(true);
     // } else {
     //   setShowLimitModal(true);
     // }
+
+    setShowLimitModal(true);
     
   };
 
@@ -150,7 +152,7 @@ function UserLandingScreen () {
     } else {
       setShowLimitModal(true);
     }
-    
+
   };
 
   const handleCloseDMModal = () => {
