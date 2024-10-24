@@ -2,7 +2,7 @@ import axios from 'axios';
 
 export const getTwitterLoginUrl = async (username, userJwt) => {
   // const endpoint = 'https://localhost:3455/twitterloginurl';
-  const endpoint = 'https://only-posts.com/api/twitterloginurl';
+  const endpoint = 'https://localhost:3455/api/twitterloginurl';
   try {
     const response = await axios.post(endpoint, 
       { username }, // Payload data
@@ -23,7 +23,7 @@ export const getTwitterLoginUrl = async (username, userJwt) => {
 
 export const revokeTwitterAccess = async (username, handle, userJwt) => {
   // const endpoint = 'https://localhost:3455/revoketwitter';
-  const endpoint = 'https://only-posts.com/api/revoketwitter';
+  const endpoint = 'https://localhost:3455/api/revoketwitter';
   try {
     const response = await axios.post(endpoint, 
       { username, handle }, // Payload data

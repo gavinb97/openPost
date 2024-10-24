@@ -1,114 +1,114 @@
-name: Deploy to linux
+# name: Deploy to linux
 
-on: push
+# on: push
 
-jobs:
-  build:
-    name: Build
-    runs-on: self-hosted
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
+# jobs:
+#   build:
+#     name: Build
+#     runs-on: self-hosted
+#     steps:
+#     - name: Checkout repository
+#       uses: actions/checkout@v2
      
-    - name: Set up Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: 18
+#     - name: Set up Node.js
+#       uses: actions/setup-node@v4
+#       with:
+#         node-version: 18
 
-    # - name: Set env as secret
-    #   env:
-    #     MY_VAL: ${{ secrets.PSW }}
-    #   run: |
-    #     import os
-    #     data = open("file", "w")
-    #     for q in (os.getenv("MY_VAL")):
-    #       print(q)
-    #       data.write(q)
-    #   shell: python
+#     # - name: Set env as secret
+#     #   env:
+#     #     MY_VAL: ${{ secrets.PSW }}
+#     #   run: |
+#     #     import os
+#     #     data = open("file", "w")
+#     #     for q in (os.getenv("MY_VAL")):
+#     #       print(q)
+#     #       data.write(q)
+#     #   shell: python
 
-    - name: Add SSH key
-      run: |
+#     - name: Add SSH key
+#       run: |
         
-        echo "${{ secrets.SSH_PRIVATE_KEY }}" > key
-        chmod 600 key
-        eval $(ssh-agent)
-        ssh-add key
+#         echo "${{ secrets.SSH_PRIVATE_KEY }}" > key
+#         chmod 600 key
+#         eval $(ssh-agent)
+#         ssh-add key
 
-    - name: Configure Git to use SSH
-      run: |
-        ssh -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ secrets.HOST }} << 'EOF'
-          cd ./Desktop/open/openPost/
-          git remote set-url origin git@github.com:gavinb97/openPost.git
-        EOF
+#     - name: Configure Git to use SSH
+#       run: |
+#         ssh -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ secrets.HOST }} << 'EOF'
+#           cd ./Desktop/open/openPost/
+#           git remote set-url origin git@github.com:gavinb97/openPost.git
+#         EOF
 
-    - name: pull and install api
-      run: |
-        ssh -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ secrets.HOST }} << 'EOF'
-          cd ./Desktop/open/openPost/
-          export NVM_DIR=~/.nvm
-          source ~/.nvm/nvm.sh
-          echo "checking node version"
-          node -v
-          echo "in directory, killing any running processes..."
-          pkill -f node || echo "No Running Processes"
-          rm -rf node_modules
-          rm package-lock.json
-          echo "Pulling newest code..."
-          git pull
-          echo "installing..."
-          npm install
-        EOF
+#     - name: pull and install api
+#       run: |
+#         ssh -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ secrets.HOST }} << 'EOF'
+#           cd ./Desktop/open/openPost/
+#           export NVM_DIR=~/.nvm
+#           source ~/.nvm/nvm.sh
+#           echo "checking node version"
+#           node -v
+#           echo "in directory, killing any running processes..."
+#           pkill -f node || echo "No Running Processes"
+#           rm -rf node_modules
+#           rm package-lock.json
+#           echo "Pulling newest code..."
+#           git pull
+#           echo "installing..."
+#           npm install
+#         EOF
     
-    - name: build client
-      run: |
-        ssh -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ secrets.HOST }} << 'EOF'
-          cd ./Desktop/open/openPost/client/autopost
-          export NVM_DIR=~/.nvm
-          source ~/.nvm/nvm.sh
-          rm -rf build
-          rm -rf node_modules
-          rm package-lock.json
-          echo "installing..."
-          npm install
-          npm run build
-        EOF
+#     - name: build client
+#       run: |
+#         ssh -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ secrets.HOST }} << 'EOF'
+#           cd ./Desktop/open/openPost/client/autopost
+#           export NVM_DIR=~/.nvm
+#           source ~/.nvm/nvm.sh
+#           rm -rf build
+#           rm -rf node_modules
+#           rm package-lock.json
+#           echo "installing..."
+#           npm install
+#           npm run build
+#         EOF
 
-    - name: Kill existing ngrok session
-      run: |
-        ssh -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ secrets.HOST }} << 'EOF'
-          echo "Killing any running ngrok sessions..."
-          pkill -f ngrok || echo "No Running ngrok Processes"
-        EOF
+#     - name: Kill existing ngrok session
+#       run: |
+#         ssh -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ secrets.HOST }} << 'EOF'
+#           echo "Killing any running ngrok sessions..."
+#           pkill -f ngrok || echo "No Running ngrok Processes"
+#         EOF
 
-    # - name: Start ngrok
-    #   run: |
-    #     ssh -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ secrets.HOST }} << 'EOF'
-    #       cd ./Desktop/open/openPost/
-    #       echo "starting ngrok in background"
-    #       nohup ngrok http 3455 --domain moral-kindly-fly.ngrok-free.app > ngrok.log 2>&1 &
-    #     EOF
+#     # - name: Start ngrok
+#     #   run: |
+#     #     ssh -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ secrets.HOST }} << 'EOF'
+#     #       cd ./Desktop/open/openPost/
+#     #       echo "starting ngrok in background"
+#     #       nohup ngrok http 3455 --domain moral-kindly-fly.ngrok-free.app > ngrok.log 2>&1 &
+#     #     EOF
 
 
-    - name: Start refreshCreds job in background
-      run: |
-        ssh -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ secrets.HOST }} << 'EOF'
-          cd ./Desktop/open/openPost/
-          echo "starting refresh creds job in background"
-          nohup npm run refreshCreds > refreshCreds.log 2>&1 &
-        EOF
+#     - name: Start refreshCreds job in background
+#       run: |
+#         ssh -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ secrets.HOST }} << 'EOF'
+#           cd ./Desktop/open/openPost/
+#           echo "starting refresh creds job in background"
+#           nohup npm run refreshCreds > refreshCreds.log 2>&1 &
+#         EOF
 
-    - name: Start api
-      run: |
-        ssh -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ secrets.HOST }} << 'EOF'
-          cd ./Desktop/open/openPost/
-          echo "starting api in background"
-          nohup npm start > openPostApi.log 2>&1 &
-        EOF
+#     - name: Start api
+#       run: |
+#         ssh -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ secrets.HOST }} << 'EOF'
+#           cd ./Desktop/open/openPost/
+#           echo "starting api in background"
+#           nohup npm start > openPostApi.log 2>&1 &
+#         EOF
 
-    - name: Start client
-      run: |
-        ssh -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ secrets.HOST }} << 'EOF'
-          cd ./Desktop/open/openPost/
-          echo "starting client in background"
-          nohup npm run client > openPostClient.log 2>&1 &
-        EOF
+#     - name: Start client
+#       run: |
+#         ssh -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ secrets.HOST }} << 'EOF'
+#           cd ./Desktop/open/openPost/
+#           echo "starting client in background"
+#           nohup npm run client > openPostClient.log 2>&1 &
+#         EOF
