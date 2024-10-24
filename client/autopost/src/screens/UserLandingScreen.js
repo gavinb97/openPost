@@ -44,10 +44,10 @@ function UserLandingScreen () {
     // fetch total number of jobs
 
     const getJobs = async () => {
-      const jobs = await getJobsByUsername(user.username, user.jwt)
+      const jobs = await getJobsByUsername(user.username, user.jwt);
       const postJobs = await getPostJobsByUsername(user.username, user.jwt);
       return jobs.activeJobs.concat(postJobs.activeJobs);
-    }
+    };
     if (user) {
       getJobs().then((jobs) => {
         setJobCount(jobs.length);
