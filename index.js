@@ -23,15 +23,15 @@ app.use('/api', jobsApi);
 app.use('/api', socialAuthApi); 
 
 // Load SSL certificate and key
-// const sslOptions = {
-//   key: fs.readFileSync('./certs/only-posts.com.key'),
-//   cert: fs.readFileSync('./certs/only-posts.com.pem')
-// } 
-
 const sslOptions = {
-  key: fs.readFileSync('localhost+2-key.pem'),
-  cert: fs.readFileSync('localhost+2.pem')
-}; 
+  key: fs.readFileSync('./certs/only-posts.com.key'),
+  cert: fs.readFileSync('./certs/only-posts.com.pem')
+} 
+
+// const sslOptions = {
+//   key: fs.readFileSync('localhost+2-key.pem'),
+//   cert: fs.readFileSync('localhost+2.pem')
+// }; 
 
 // 3455
 const PORT = process.env.PORT || 3455; 
