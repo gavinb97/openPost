@@ -30,6 +30,7 @@ const Payment = () => {
       // create portal link just in case
       const getPortalUrl = async () => {
         const response = await getBillingPortal(user.customerId, user.jwt);
+        console.log(response.data)
         return response.data.url;
       };
       getPortalUrl().then((url) => {
