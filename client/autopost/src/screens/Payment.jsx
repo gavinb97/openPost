@@ -51,7 +51,7 @@ const Payment = () => {
     <>
       <div>
         <Navbar></Navbar>
-        {/* {email && user && (user.pro === 'false' || user.pro === false) && 
+        {email && user && (user.pro === 'false' || user.pro === false) && 
             
             <div className="payment-page-container">
               <div className="payment-box"> 
@@ -60,10 +60,11 @@ const Payment = () => {
                   customer-email={email}>
                 </stripe-pricing-table>
               </div>
-            </div>} */}
+            </div>}
 
-{email && user && (user.pro === 'false' || user.pro === false) && 
-            
+        
+    
+        {/* {email && user && (user.pro === 'false' || user.pro === false) && 
             <div className="payment-page-container">
               <div className="payment-box"> 
                 <stripe-pricing-table pricing-table-id="prctbl_1PuO9FB6XZmVBA3cf3939cnP"
@@ -71,7 +72,7 @@ const Payment = () => {
                   customer-email={email}>
                 </stripe-pricing-table>
               </div>
-            </div>}
+            </div>} */}
 
 
         {email && user && (user.pro === 'true' || user.pro === true)  && 

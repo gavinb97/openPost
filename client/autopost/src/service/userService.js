@@ -39,8 +39,6 @@ export const getUpdatedDetails = async (userName, userJwt) => {
       }
     );
 
-    console.log(response.data);
-    console.log('response data^6');
     return response.data; // Return the response data
   } catch (error) {
     console.error('Failed to fetch updated details', error);
