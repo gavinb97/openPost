@@ -38,8 +38,8 @@ const makePost = async (job) => {
   if (validJob) {
     try {
 
-    
-      const creds = await getCredsByUsernameAndHandle(job.userId, job.handle);
+      console.log(job)
+      const creds = await getCredsByUsernameAndHandle(job?.userId || job?.username, job.handle);
 
       switch (job.website) {
       case 'twitter':
