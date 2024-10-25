@@ -1,6 +1,6 @@
 const amqp = require('amqplib');
 const { getCredsByUser, getCredsByUsernameAndHandle } = require('../socialauthentication/socialAuthData');
-const { isPostJobPresent, getMessageIdsCountForPostJob, deleteMessageIdFromPostJob, getPostJobById, deletePostJobByJobSetId, updatePostJob } = require('./jobsData');
+const { isPostJobPresent, getMessageIdsCountForPostJob, deleteMessageIdFromPostJob, getPostJobById, deletePostJobByJobSetId, updatePostJob, deleteTweetInputFromPostJob } = require('./jobsData');
 const { tweetOnBehalfOfUser } = require('../socialauthentication/twitterService');
 const { postToSubredditOnBehalfOfUser, postTextToSubreddit } = require('../socialauthentication/redditService');
 const { rescheduleHourScheduledRedditPosts, rescheduleHourScheduledRedditAiPosts, rescheduleSetScheduledRedditUserPosts, rescheduleSetScheduledRedditAiPosts, rescheduleRandomAiRedditJobs, rescheduleHourScheduledTwitterPosts, rescheduleHourScheduledTwitterAiPosts, rescheduleRandomAiTwitterJobs, rescheduleSetScheduledTwitterAiPosts, rescheduleSetScheduledTwitterUserPosts } = require('./postJobService');
@@ -63,6 +63,9 @@ const postToTwitter = async (creds, job) => {
       
     await updateMessages(job);
         
+    // remove tweetinput
+    await deleteTweetInput(job)
+
     await rescheduleTwitterPostJob(job);
   } else {
     console.log('didnt send anything');
@@ -107,6 +110,10 @@ const updateMessages = async (job) => {
   const afterDelete = await getMessageIdsCountForPostJob(job.jobSetId);
   console.log(`after delete messages: ${afterDelete}`);
 };
+
+const deleteTweetInput = async (job) => {
+  await deleteTweetInputFromPostJob(job.jobSetId, job.tweet)
+}
 
 const createTweetText = async (job) => {
   let tweetText;
@@ -190,13 +197,23 @@ const rescheduleTwitterPostJob = async (job) => {
           await addJobsToQueue(jobs);
           await updatePostJob(activeJobObject);
         } else {
+          console.log(activeJob)
+          // we need to check and see if there are more messages to post. if the tweetinputs still has some, we need to schedule them if they are within the timeframe of the queue
+          console.log('Twitter user tweets can only be posted once. not doing anything...')
           // TODO - do not reschedule user tweets because tweets cant be duplicated
-
-          // const { jobs, activeJobObject } = await rescheduleSetScheduledTwitterUserPosts(activeJob);
-          // await queueAndUpdateJobs(jobs, activeJobObject);
-
-          // await addJobsToQueue(jobs);
-          // await updatePostJob(activeJobObject);
+          // if number of posts created is equal to the number of tweet inputs the we need to delete the job
+          const numberOfPostsCreated = activeJob.postscreated
+          const numberOfTweetInputs = activeJob.tweetinputs.length
+          console.log(numberOfTweetInputs)
+          if (numberOfTweetInputs === 0) {
+            console.log('we need to delete the job')
+            await deletePostJobByJobSetId(activeJob.job_set_id)
+            console.log('job deleted')
+          } else {
+            console.log('there are more posts to post')
+            await rescheduleSetScheduledTwitterUserPosts(activeJob, activeJob.postscreated, activeJob.numberofposts)
+            console.log('jobs scheduled?')
+          }
         }
 
 
