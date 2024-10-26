@@ -317,7 +317,7 @@ router.post('/getemail', authenticateToken, async (req, res) => {
 });
 
 router.post('/billing_session_url', authenticateToken,  async (req, res) => {
-  console.log('getting billing url')
+  console.log('getting billing url');
   const stripe = require('stripe')(process.env.STRIPE_KEY);
 
   const customerId = req.body.customerId;

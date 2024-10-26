@@ -38,10 +38,10 @@ const makePost = async (job) => {
   if (validJob) {
     try {
 
-      console.log(job)
+      console.log(job);
 
-      const jobFromDb = await getJobSetById(job.jobSetId)
-      const handle = jobFromDb.handle
+      const jobFromDb = await getJobSetById(job.jobSetId);
+      const handle = jobFromDb.handle;
       const creds = await getCredsByUsernameAndHandle(job?.userId || job?.username, handle);
 
 

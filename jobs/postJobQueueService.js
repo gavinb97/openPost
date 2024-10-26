@@ -13,8 +13,8 @@ const makePostJobPost = async (job) => {
   if (validJob) {
     try {
   
-      const jobFromDb = await getPostJobById(job.jobSetId)
-      const handle = jobFromDb.handle
+      const jobFromDb = await getPostJobById(job.jobSetId);
+      const handle = jobFromDb.handle;
       const creds = await getCredsByUsernameAndHandle(job.userId, handle);
 
       switch (job.website) {
@@ -65,7 +65,7 @@ const postToTwitter = async (creds, job) => {
     await updateMessages(job);
         
     // remove tweetinput
-    await deleteTweetInput(job)
+    await deleteTweetInput(job);
 
     await rescheduleTwitterPostJob(job);
   } else {
@@ -113,8 +113,13 @@ const updateMessages = async (job) => {
 };
 
 const deleteTweetInput = async (job) => {
-  await deleteTweetInputFromPostJob(job.jobSetId, job.tweet)
-}
+  try {
+    await deleteTweetInputFromPostJob(job.jobSetId, job.tweet);
+  } catch (e) {
+    console.log(e)
+  }
+  
+};
 
 const createTweetText = async (job) => {
   let tweetText;
@@ -178,9 +183,6 @@ const rescheduleTwitterPostJob = async (job) => {
         // shedule more posts - return jobs and updated job object
         const {jobs, jobObject} = await rescheduleRandomAiTwitterJobs(activeJob);
 
-        // await addJobsToQueue(jobs)
-        // update job in db
-        // TODO ^^
         await queueAndUpdateJobs(jobs, jobObject);
       } else {
         // we've completed the job, delete it
@@ -192,33 +194,37 @@ const rescheduleTwitterPostJob = async (job) => {
         console.log('inside reschedule set time jobs... jobs below');
       
         if (activeJob.posttype === 'ai') {
-          const { jobs, activeJobObject } = await rescheduleSetScheduledTwitterAiPosts(activeJob);
-          await queueAndUpdateJobs(jobs, activeJobObject);
 
-          await addJobsToQueue(jobs);
-          await updatePostJob(activeJobObject);
-        } else {
-          console.log(activeJob)
-          // we need to check and see if there are more messages to post. if the tweetinputs still has some, we need to schedule them if they are within the timeframe of the queue
-          console.log('Twitter user tweets can only be posted once. not doing anything...')
-          // TODO - do not reschedule user tweets because tweets cant be duplicated
-          // if number of posts created is equal to the number of tweet inputs the we need to delete the job
-          const numberOfPostsCreated = activeJob.postscreated
-          const numberOfTweetInputs = activeJob.tweetinputs.length
-          console.log(numberOfTweetInputs)
+          const numberOfTweetInputs = activeJob.tweetinputs.length;
+          console.log(numberOfTweetInputs);
           if (numberOfTweetInputs === 0) {
-            console.log('we need to delete the job')
-            await deletePostJobByJobSetId(activeJob.job_set_id)
-            console.log('job deleted')
+            console.log('we need to delete the job');
+            await deletePostJobByJobSetId(activeJob.job_set_id);
+            console.log('job deleted');
           } else {
-            console.log('there are more posts to post')
-            const {jobs, newJobObject} = await rescheduleSetScheduledTwitterUserPosts(activeJob, activeJob.postscreated, activeJob.numberofposts)
-            console.log('jobs scheduled?')
+            console.log('there are more posts to post');
+            const {jobs, newJobObject} = await rescheduleSetScheduledTwitterAiPosts(activeJob);
+            console.log('jobs scheduled!');
+
+            await queueAndUpdateJobs(jobs, newJobObject);
+          }
+        } else {
+          console.log(activeJob);
+          // we need to check and see if there are more messages to post. if the tweetinputs still has some, we need to schedule them if they are within the timeframe of the queue
+          // const numberOfPostsCreated = activeJob.postscreated
+          const numberOfTweetInputs = activeJob.tweetinputs.length;
+          console.log(numberOfTweetInputs);
+          if (numberOfTweetInputs === 0) {
+            console.log('we need to delete the job');
+            await deletePostJobByJobSetId(activeJob.job_set_id);
+            console.log('job deleted');
+          } else {
+            console.log('there are more posts to post');
+            const {jobs, newJobObject} = await rescheduleSetScheduledTwitterUserPosts(activeJob, activeJob.postscreated, activeJob.numberofposts);
+            console.log('jobs scheduled?');
 
             await queueAndUpdateJobs(jobs, newJobObject);
 
-            await addJobsToQueue(jobs);
-            await updatePostJob(newJobObject);
           }
         }
 
@@ -234,8 +240,6 @@ const rescheduleTwitterPostJob = async (job) => {
           await queueAndUpdateJobs(jobs, activeJobObject);
         }
 
-        await addJobsToQueue(jobs);
-        await updatePostJob(activeJobObject);
       }
     }
   } else {

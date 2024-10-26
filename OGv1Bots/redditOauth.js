@@ -394,8 +394,8 @@ const postImageToSubreddit = async (subredditName, accessToken, imageUrl, title,
 };
 
 const getTopPostOfSubreddit = async (subredditName, accessToken) => {
-  console.log(accessToken)
-  console.log('Access token ^^^^^')
+  console.log(accessToken);
+  console.log('Access token ^^^^^');
   const endpoint = `https://oauth.reddit.com/r/${subredditName}/top.json?limit=1`;
   try {
     const response = await axios.get(endpoint, {
@@ -679,12 +679,12 @@ const getSubredditPosters = async (subredditName, accessToken, limit) => {
 
 const getUsersAndWriteToFile = async (subreddit, tokens, numberOfPosts) => {
   
-  let arrayOfPostIds
+  let arrayOfPostIds;
   try {
-     arrayOfPostIds = await getTopPostsOfSubreddit(subreddit , tokens.access_token, numberOfPosts);
+    arrayOfPostIds = await getTopPostsOfSubreddit(subreddit , tokens.access_token, numberOfPosts);
   } catch (e) {
-    console.log(e)
-    console.log('error getting top posts')
+    console.log(e);
+    console.log('error getting top posts');
   }
   
   const userArray = [];
@@ -869,7 +869,7 @@ const testy = async () => {
 
 const tokens = {
   access_token: 'eyJhbGciOiJSUzI1NiIsImtpZCI6IlNIQTI1NjpzS3dsMnlsV0VtMjVmcXhwTU40cWY4MXE2OWFFdWFyMnpLMUdhVGxjdWNZIiwidHlwIjoiSldUIn0.eyJzdWIiOiJ1c2VyIiwiZXhwIjoxNzI5ODk4NDE1LjIwMzExMSwiaWF0IjoxNzI5ODEyMDE1LjIwMzExMSwianRpIjoidXBsWlFrNTY1U09kN3NtNlRJRnU3MGJTOU50aW1RIiwiY2lkIjoid1R0TUdiQlRIcDRzSHAxcDlMdGQ1ZyIsImxpZCI6InQyXzFiZXJuOWN4N2siLCJhaWQiOiJ0Ml8xYmVybjljeDdrIiwibGNhIjoxNzI5NjQzNDY1MTcyLCJzY3AiOiJlSndjeXpFS2dEQU1CZEM3X0RrM0VvZlVmQ1JEUlpLMDBOdExYUi04QXpsYVh1R05FTkM4SU9nclJ3dWFlU1VFYl9qVVltZW0zdHdTVklQczJ2LVFPbmQzNDFOZUMtY1hBQURfX3owYkhqQSIsInJjaWQiOiJNRG9oSzBVWjZFdTQ0YlAxMy1QMFNuUnRZY3F6V1FtemZTVENwQzRRblhBIiwiZmxvIjo4fQ.fGGn3mc3Z_0oXJcXZtvblecHZSd0mAAISda6BjS402_KUw8SovNUSjoQSFpmIbErRmszLx3cxkEXv4sCee_MTmt4S6qd_fiIxq2rQ-gphTKXPpcFLy8kJXpSTezwFMUwE6-JKfacqYpoF42dckwz3acR67RtE2Rw7e0vKHwbnK8_H7X-0vXI4Ag_SZIdB4SRQHgfFoTKyXi57FwaGpzAUpbfZlQFw4jmSaBKQ04gIK_CEXA_A-HPKpKNzAZKJn8gzVzTmmf9WL_uBNAX8ayfDb-p4rkwtRZi87H0nk9SNMPKNpoZezJM8D8eaL8FVSa8CAdr2Ubv4ih7ukBCRO3Ovw'
-}
+};
 
 // getUsersAndWriteToFile('Entrepreneur', tokens, 2)
 
@@ -883,7 +883,7 @@ const getPosts = async () => {
   // await getUsersAndWriteToFile('Entrepreneur', tokens, 2)
   // await getTopPostUsernamesAndWriteToFile('Entrepreneur', tokens, 15)
 
-  await sendMessageToUser(tokens.access_token, 'Helpful_Alarm2362', 'hey bruv', 'lets go grab some foob')
-}
+  await sendMessageToUser(tokens.access_token, 'Helpful_Alarm2362', 'hey bruv', 'lets go grab some foob');
+};
 
-getPosts()
+getPosts();

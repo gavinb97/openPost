@@ -31,16 +31,16 @@ const Payment = () => {
       const getPortalUrl = async () => {
         try {
           const response = await getBillingPortal(user.customerId, user.jwt);
-          console.log(response.data)
+          console.log(response.data);
           return response.data.url;
         } catch (e) {
-          console.log(e)
+          console.log(e);
         }
         
       };
       getPortalUrl().then((url) => {
         setPortalUrl(url);
-        console.log('url set')
+        console.log('url set');
       });
             
     }

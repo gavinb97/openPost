@@ -26,7 +26,7 @@ app.use('/api', socialAuthApi);
 const sslOptions = {
   key: fs.readFileSync('./certs/only-posts.com.key'),
   cert: fs.readFileSync('./certs/only-posts.com.pem')
-} 
+}; 
 
 // const sslOptions = {
 //   key: fs.readFileSync('localhost+2-key.pem'),
