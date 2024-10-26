@@ -118,7 +118,7 @@ export const uploadFile = (file, fileName, username, userJwt) => {
 };
 
 export const fetchAllFilesByUser = async (username, userJwt) => {
-  // const endpoint = 'https://localhost:3455/files';
+  // const endpoint = 'https://only-posts.com/files';
   const endpoint = 'https://only-posts.com/api/files';
   try {
     const response = await axios.post(endpoint, 
@@ -138,7 +138,7 @@ export const fetchAllFilesByUser = async (username, userJwt) => {
 };
 
 export const fetchAllVideosByUser = async (username, userJwt) => {
-  // const endpoint = 'https://localhost:3455/videos';
+  // const endpoint = 'https://only-posts.com/videos';
   const endpoint = 'https://only-posts.com/api/videos';
   try {
     const response = await axios.post(endpoint, 
@@ -161,7 +161,7 @@ export const fetchAllVideosByUser = async (username, userJwt) => {
 
 
 export const fetchAllFiles = async () => {
-  // const endpoint = 'https://localhost:3455/files';
+  // const endpoint = 'https://only-posts.com/files';
   const endpoint = 'https://only-posts.com/api/files';
   try {
     const response = await axios.get(endpoint);

@@ -30,30 +30,29 @@ const writePostJobToDb = async (request, jobs) => {
 };
 
 const createPostJobObject = (obj, jobs) => {
-
   const postJobObject = {
-    job_set_id: jobs[0]?.jobSetId || null, // Assuming jobSetId is passed in the obj parameter
+    job_set_id: jobs[0]?.jobSetId, // Assuming jobSetId is passed in the obj parameter
     message_ids: jobs.map(job => job.message_id), // Array of message IDs from jobs
     numberOfMessages: jobs.length, // Total number of messages
     userid: obj.username || 'defaultUserId', // User ID or default
     jobType: 'postJob', // Fixed job type
     username: obj.username || 'defaultUserId', // Username
-    selectedWebsite: obj.selectedWebsite || obj.selected_website, // Selected website
-    picturePostOrder: obj.picturePostOrder || null, // Order of picture posts
-    scheduleType: obj.scheduleType || null, // Schedule type (e.g., random)
-    scheduleInterval: obj.scheduleInterval || null, // Schedule interval
-    hourInterval: obj.hourInterval || null, // Hour interval
-    timesOfDay: obj.timesOfDay || null, // Times of day for posting
-    selectedDays: obj.selectedDays || null, // Selected days of the week
-    selectedImages: obj.selectedImages || [], // Array of selected images
-    durationOfJob: obj.durationOfJob || null, // Duration of the job
-    selectedSubreddits: obj.selectedSubreddits || [], // Array of selected subreddits
-    postType: obj.postType || null, // Type of post (e.g., User or AI)
-    tweetInputs: obj.tweetInputs || [], // Array of tweet inputs (if applicable)
-    aiPrompt: obj.aiPrompt || null, // AI prompt object (if applicable)
-    redditPosts: obj.redditPosts || [], // Array of Reddit posts (if applicable)
-    numberOfPosts: obj.numberOfPosts || 0, // Total number of posts to be created
-    handle: obj.handle || jobs.handle
+    selectedWebsite: obj?.selectedWebsite || obj?.selected_website || obj.selectedwebsite, // Selected website
+    picturePostOrder: obj?.picturePostOrder || null, // Order of picture posts
+    scheduleType: obj?.scheduleType || obj?.scheduletype || null, // Schedule type (e.g., random)
+    scheduleInterval: obj?.scheduleInterval || obj?.scheduleinterval || null, // Schedule interval
+    hourInterval: obj?.hourInterval || obj?.hourinterval || null, // Hour interval
+    timesOfDay: obj?.timesOfDay || obj?.timesofday || null, // Times of day for posting
+    selectedDays: obj?.selectedDays || obj?.selecteddays || null, // Selected days of the week
+    selectedImages: obj?.selectedImages || obj?.selectedimages || [], // Array of selected images
+    durationOfJob: obj?.durationOfJob || obj?.durationofjob || null, // Duration of the job
+    selectedSubreddits: obj?.selectedSubreddits || obj?.selectedsubreddits || [], // Array of selected subreddits
+    postType: obj?.postType || obj?.posttype || null, // Type of post (e.g., User or AI)
+    tweetInputs: obj?.tweetInputs || obj?.tweetinputs || [], // Array of tweet inputs (if applicable)
+    aiPrompt: obj?.aiPrompt || obj?.aiprompt || null, // AI prompt object (if applicable)
+    redditPosts: obj?.redditPosts || obj?.redditposts || [], // Array of Reddit posts (if applicable)
+    numberOfPosts: obj?.numberOfPosts || obj?.tweetInputs.length || obj?.tweetinputs, // Total number of posts to be created
+    handle: obj?.handle || jobs?.handle
   };
   
   return postJobObject;
@@ -825,8 +824,8 @@ const rescheduleSetScheduledTwitterUserPosts = async (request, postsCreated, num
   }
   
   // Iterate through the tweetInputs to create jobs
-  for (let i = 0; i < request.tweetInputs.length && postsCreated < numberOfPosts; i++) {
-    const tweetInput = request.tweetInputs[i];
+  for (let i = 0; i < request.tweetinputs.length && postsCreated < numberOfPosts; i++) {
+    const tweetInput = request.tweetinputs[i];
   
     // Parse the date and time from the tweetInput
     const tweetDateStr = tweetInput.date; // Example format: '2024-09-27'
@@ -861,9 +860,9 @@ const rescheduleSetScheduledTwitterUserPosts = async (request, postsCreated, num
         content: `Scheduled user post for ${request.selectedWebsite}`, // Content for the post
         tweet: tweetInput.text, // Use the text from tweetInputs
         scheduledTime: scheduledTime, // The exact scheduled time in milliseconds
-        jobType: request.jobType,
+        jobType: request.jobtype,
         handle: request.handle,
-        website: request.selectedWebsite
+        website: request.selectedwebsite
       };
       console.log(`User Job Created: ${JSON.stringify(job)}`);
       jobs.push(job); // Add the job to the array
@@ -887,7 +886,7 @@ const rescheduleSetScheduledTwitterUserPosts = async (request, postsCreated, num
       scheduledTime: now + bridgeJobInterval, // Scheduled 24 hours from now
       jobType: 'bridge' ,// Indicate it's a bridge job
       handle: request.handle,
-      website: request.selectedWebsite
+      website: request.selectedwebsite
     };
   
     console.log(`Bridge Job Created: ${JSON.stringify(bridgeJob)}`);

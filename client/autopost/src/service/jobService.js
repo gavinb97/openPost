@@ -2,7 +2,7 @@ import axios from 'axios';
 
 
 export const createScheduledJob = async (schedule, userJwt) => {
-  // const endpoint = 'https://localhost:3455/setSchedule';
+  // const endpoint = 'https://only-posts.com/setSchedule';
   const endpoint = 'https://only-posts.com/api/jobs';
   try {
     const response = await axios.post(endpoint, 
@@ -22,7 +22,7 @@ export const createScheduledJob = async (schedule, userJwt) => {
 };
 
 export const getJobsByUsername = async (user, userJwt) => {
-  // const endpoint = 'https://localhost:3455/getjobs';
+  // const endpoint = 'https://only-posts.com/getjobs';
   const endpoint = 'https://only-posts.com/api/getjobs';
   try {
     const response = await axios.post(endpoint, 
@@ -42,7 +42,7 @@ export const getJobsByUsername = async (user, userJwt) => {
 };
 
 export const getPostJobsByUsername = async (user, userJwt) => {
-  // const endpoint = 'https://localhost:3455/getpostjobs';
+  // const endpoint = 'https://only-posts.com/getpostjobs';
   const endpoint = 'https://only-posts.com/api/getpostjobs';
   try {
     const response = await axios.post(endpoint, 
@@ -62,7 +62,7 @@ export const getPostJobsByUsername = async (user, userJwt) => {
 };
 
 export const deleteJob = async (jobSetId, userJwt) => {
-  // const endpoint = 'https://localhost:3455/deletejob';
+  // const endpoint = 'https://only-posts.com/deletejob';
   const endpoint = 'https://only-posts.com/api/deletejob';
 
   try {
@@ -174,6 +174,10 @@ export const validateAndFormatPostJobData = (request) => {
     jobObject.redditPosts = redditPosts;
   } else if (selectedWebsite.toLowerCase() === 'twitter') {
     jobObject.tweetInputs = tweetInputs;
+
+    // if (postType.toLowerCase() === 'ai') {
+    //   jobObject.tweetInputs = clearTweetTexts(tweetInputs)
+    // }
   }
 
   // Handle postType

@@ -898,6 +898,60 @@ const updatePostJob = async (postJob) => {
   }
 };
 
+const deleteTweetInputFromPostJob = async (job_set_id, tweetText) => {
+  console.log('Attempting to delete tweet input from post job...');
+  console.log('Tweet text to delete:', tweetText);
+  console.log('Job set ID:', job_set_id);
+
+  const selectQuery = `
+    SELECT tweetinputs
+    FROM postjobs
+    WHERE job_set_id = $1;
+  `;
+
+  const updateQuery = `
+    UPDATE postjobs
+    SET tweetinputs = $1
+    WHERE job_set_id = $2;
+  `;
+
+  try {
+    const client = await pool.connect();
+
+    // Retrieve the current tweetInputs for the post job
+    const res = await client.query(selectQuery, [job_set_id]);
+    if (res.rows.length === 0) {
+      client.release();
+      throw new Error(`Post job with job_set_id ${job_set_id} not found.`);
+    }
+
+    let { tweetinputs } = res.rows[0];
+
+    // If tweetInputs is not an array, return an error
+    if (!Array.isArray(tweetinputs)) {
+      throw new Error('tweetinputs is not an array');
+    }
+
+    console.log('Original tweetInputs:', tweetinputs);
+
+    // Filter out the tweet input containing the tweetText (fix: check input.text)
+    const updatedTweetInputs = tweetinputs.filter(
+      input => input.text !== tweetText
+    );
+
+    console.log('Updated tweetInputs:', updatedTweetInputs);
+
+    // Update the post job with the new tweetInputs array
+    await client.query(updateQuery, [updatedTweetInputs, job_set_id]);
+
+    client.release();
+    console.log('Tweet input deleted successfully from post job.');
+  } catch (err) {
+    console.error('Error deleting tweet input from post job', err);
+    throw err;
+  }
+};
+
 
 const deleteMessageIdFromPostJob = async (job_set_id, message_id) => {
   console.log('Attempting to delete message id from post job...');
@@ -1139,5 +1193,6 @@ module.exports = {
   deletePostJobByJobSetId,
   updatePostJob,
   getActivePostJobsByUserId,
-  deleteActivePostJobByJobSetId
+  deleteActivePostJobByJobSetId,
+  deleteTweetInputFromPostJob
 };
