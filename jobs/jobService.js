@@ -247,7 +247,8 @@ const scheduleRandomJobs = async (request, iterations) => {
         scheduledTime: Date.now() + delayTime, // This now represents the delay time
         image: getNextImage(),
         includeCaption: request.includeCaption,
-        captionType: request.captionType
+        captionType: request.captionType,
+        postType: 'media'
       };
 
       if (request.selectedWebsite === 'reddit') {
@@ -350,7 +351,8 @@ const rescheduleRandomJobs = async (job) => {
       image: getNextImage(),
       includeCaption: job.include_caption,
       captionType: job.type_of_caption,
-      handle: job.handle || ''
+      handle: job.handle || '',
+      postType: 'media'
     };
 
     if (job.selected_website === 'reddit') {
@@ -452,7 +454,8 @@ const handleHourInterval = async (request) => {
       image: getNextImage(),
       includeCaption: request.includeCaption,
       captionType: request.captionType,
-      handle: request.handle
+      handle: request.handle,
+      postType: 'media'
     };
 
     if (request.selectedWebsite === 'reddit') {
@@ -480,7 +483,8 @@ const handleHourInterval = async (request) => {
         scheduledTime: firstJob.scheduledTime + (i * intervalInMilliseconds), // Delay time for each subsequent job
         image: getNextImage(),
         includeCaption: request.includeCaption,
-        captionType: request.captionType
+        captionType: request.captionType,
+        postType: 'media'
       };
 
       if (request.selectedWebsite === 'reddit') {
@@ -535,7 +539,8 @@ const rescheduleHourInterval = async (job) => {
     image: getNextImage(),
     includeCaption: job.include_caption,
     captionType: job.type_of_caption,
-    handle: job.handle
+    handle: job.handle,
+    postType: 'media'
   };
 
   if (job.selected_website === 'reddit') {
@@ -563,7 +568,8 @@ const rescheduleHourInterval = async (job) => {
       scheduledTime: firstJob.scheduledTime + (i * intervalInMilliseconds), // Delay time for each subsequent job
       image: getNextImage(),
       includeCaption: job.include_caption,
-      captionType: job.type_of_caption
+      captionType: job.type_of_caption,
+      postType: 'media'
     };
 
     if (job.selected_website === 'reddit') {
@@ -639,7 +645,8 @@ const handleSetInterval = async (request) => {
         image: isBridgeJob ? null : getNextImage(),
         includeCaption: isBridgeJob ? false : request.includeCaption,
         captionType: request.captionType,
-        handle: request.handle
+        handle: request.handle,
+        postType: 'media'
       };
 
       if (request.selectedWebsite === 'reddit' && !isBridgeJob) {
@@ -762,7 +769,8 @@ const rescheduleSetInterval = async (job) => {
         image: isBridgeJob ? null : getNextImage(),
         includeCaption: job.include_caption,
         captionType: job.type_of_caption,
-        handle: job.handle
+        handle: job.handle,
+        postType: 'media'
       };
 
       if (job.selected_website === 'reddit' && !isBridgeJob) {

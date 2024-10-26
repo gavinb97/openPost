@@ -64,8 +64,14 @@ async function startWorker (channel) {
         await deleteMessageIdFromJob(job.jobSetId, job.message_id);
         const afterDelete = await getMessageIdsCountForJob(job.jobSetId);
         console.log(`after delete messages: ${afterDelete}`);
-  
-        await reschedulePostJob(job);
+        
+        if (job?.postType === 'media') {
+          // this is for media post jobs
+          await reschedulePostJob(job);
+        } else if (job?.postType === 'postJob') {
+          // TODO create function to reschedule jobs after all the brdige jobs are consumed
+        }
+        
       } catch (e) {
         console.log(e);
         console.log('whoops');

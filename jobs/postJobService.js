@@ -147,7 +147,7 @@ const handleAiRandomTwitterPosts = (request) => {
         content: `Random AI post for ${request.selectedWebsite}`, // Default content for AI post
         scheduledTime: Date.now() + accumulatedDelay, // Scheduled time in milliseconds
         aiPrompt: request.aiPrompt, // The AI prompt for generating the content
-        jobType: request.jobType,
+        jobType: 'postJob',
         handle: request.handle,
         website: request.selectedWebsite
       };
@@ -201,7 +201,7 @@ const rescheduleRandomAiRedditJobs = async (activeJob) => {
           subreddit: subreddit.name, // Subreddit to post to
           scheduledTime: Date.now() + accumulatedDelay, // Scheduled time in milliseconds
           aiPrompt: activeJob.aiPrompt, // The AI prompt for generating the content
-          jobType: activeJob.jobType, // Job type from the active job
+          jobType: 'postJob', // Job type from the active job
           handle: request.handle,
           website: request.selectedWebsite
         };
@@ -261,7 +261,7 @@ const rescheduleRandomAiTwitterJobs = async (activeJob) => {
         content: `Random AI post for ${activeJob.selectedwebsite}`, // Default content for AI post
         scheduledTime: Date.now() + accumulatedDelay, // Scheduled time in milliseconds
         aiPrompt: activeJob.aiprompt, // The AI prompt for generating the content
-        jobType: activeJob.jobtype, // Job type from the active job
+        jobType: 'postJob', // Job type from the active job
         handle: request.handle,
         website: request.selectedwebsite
       };
@@ -333,7 +333,7 @@ const rescheduleSetScheduledTwitterAiPosts = async (request) => {
         content: `AI-generated post for ${request.selectedWebsite}`, // Content for the post
         aiPrompt: request.aiPrompt || 'Generated AI prompt', // Placeholder or provided AI prompt
         scheduledTime: scheduledTime, // The exact scheduled time in milliseconds
-        jobType: request.jobType,
+        jobType: 'postJob',
         handle: request.handle,
         website: request.selectedwebsite
       };
@@ -356,7 +356,7 @@ const rescheduleSetScheduledTwitterAiPosts = async (request) => {
       content: 'Bridge job to ensure continuity', // Content for the bridge job
       aiPrompt: 'Bridge AI prompt', // Placeholder AI prompt for the bridge job
       scheduledTime: now + bridgeJobInterval, // Scheduled 24 hours from now
-      jobType: 'bridge', // Indicate it's a bridge job
+      jobType: 'postJob', // Indicate it's a bridge job
       handle: request.handle,
       website: request.selectedwebsite
     };
@@ -419,7 +419,7 @@ const handleUserRandomTwitterPosts = (request) => {
         content: `User post for ${request.selectedWebsite}`,
         tweet: request.tweetInputs[i].text, // Use text from tweetInputs
         scheduledTime: Date.now() + accumulatedDelay, // Scheduled time in milliseconds
-        jobType: request.jobType,
+        jobType: 'postJob',
         handle: request.handle,
         website: request.selectedWebsite
       };
@@ -466,7 +466,7 @@ const handleHourScheduledAiPost = (request) => {
         content: `Scheduled hourly AI post for ${request.selectedWebsite}`, // Default content for the AI post
         scheduledTime: nextScheduledTime, // The exact scheduled time in milliseconds
         aiPrompt: request.aiPrompt, // Use the AI prompt from the request
-        jobType: request.jobType,
+        jobType: 'postJob',
         handle: request.handle,
         website: request.selectedWebsite
       };
@@ -519,7 +519,7 @@ const handleHourScheduledTwitterPosts = (request) => {
         content: `Scheduled hourly post for ${request.selectedWebsite}`, // Content for the post
         tweet: tweetInput.text, // Use the text from tweetInputs
         scheduledTime: nextScheduledTime, // The exact scheduled time in milliseconds
-        jobType: request.jobType,
+        jobType: 'postJob',
         handle: request.handle,
         website: request.selectedWebsite
       };
@@ -570,7 +570,7 @@ const rescheduleHourScheduledTwitterPosts = async (request) => {
         content: `Rescheduled hourly post for ${request.selectedWebsite}`, // Content for the post
         tweet: tweetInput.text, // Use the text from tweetInputs
         scheduledTime: nextScheduledTime, // The exact scheduled time in milliseconds
-        jobType: request.jobType,
+        jobType: 'postJob',
         handle: request.handle,
         website: request.selectedWebsite
       };
@@ -634,7 +634,7 @@ const rescheduleHourScheduledTwitterAiPosts = async (request) => {
         content: `Scheduled hourly post for ${selectedWebsite}`, // Content for the post
         tweet: tweetInput.text, // Use the text from tweetInputs
         scheduledTime: nextScheduledTime, // The exact scheduled time in milliseconds
-        jobType: jobType,
+        jobType: 'postJob',
         handle: request.handle,
         website: request.selectedWebsite
       };
@@ -715,7 +715,7 @@ const handleSetScheduledTwitterAiPosts = (request) => {
         content: `AI-generated post for ${request.selectedWebsite}`, // Content for the post
         aiPrompt: request.aiPrompt || 'Generated AI prompt', // Placeholder or provided AI prompt
         scheduledTime: scheduledTime, // The exact scheduled time in milliseconds
-        jobType: request.jobType,
+        jobType: 'postJob',
         handle: request.handle,
         website: request.selectedWebsite
       };
@@ -784,7 +784,7 @@ const handleSetScheduledTwitterPosts = (request) => {
         content: `Scheduled post for ${request.selectedWebsite}`, // Content for the post
         tweet: tweetInput.text, // Use the text from tweetInputs
         scheduledTime: scheduledTime, // The exact scheduled time in milliseconds
-        jobType: request.jobType,
+        jobType: 'postJobs',
         handle: request.handle,
         website: request.selectedWebsite
       };
@@ -860,7 +860,7 @@ const rescheduleSetScheduledTwitterUserPosts = async (request, postsCreated, num
         content: `Scheduled user post for ${request.selectedWebsite}`, // Content for the post
         tweet: tweetInput.text, // Use the text from tweetInputs
         scheduledTime: scheduledTime, // The exact scheduled time in milliseconds
-        jobType: request.jobtype,
+        jobType: 'postJob',
         handle: request.handle,
         website: request.selectedwebsite
       };
@@ -884,7 +884,7 @@ const rescheduleSetScheduledTwitterUserPosts = async (request, postsCreated, num
       content: 'Bridge job to ensure continuity for user posts', // Content for the bridge job
       tweet: 'Bridge post', // Placeholder tweet for the bridge job
       scheduledTime: now + bridgeJobInterval, // Scheduled 24 hours from now
-      jobType: 'bridge' ,// Indicate it's a bridge job
+      jobType: 'postJob' ,// Indicate it's a bridge job
       handle: request.handle,
       website: request.selectedwebsite
     };
@@ -1018,7 +1018,7 @@ const handleSetScheduledRedditPosts = (request) => {
         postBody: redditPost.body, // Body content of the Reddit post
         subreddits: redditPost.subreddits, // Array of subreddits
         scheduledTime: scheduledTime, // The exact scheduled time in milliseconds
-        jobType: request.jobType,
+        jobType: 'postJob',
         handle: request.handle,
         website: request.selectedWebsite
       };
@@ -1095,7 +1095,7 @@ const rescheduleSetScheduledRedditUserPosts = async (request, postsCreated, numb
         postBody: redditPost.body, // Body content of the Reddit post
         subreddits: redditPost.subreddits, // Array of subreddits
         scheduledTime: scheduledTime, // The exact scheduled time in milliseconds
-        jobType: request.jobType,
+        jobType: 'postJob',
         handle: request.handle,
         website: request.selectedWebsite
       };
@@ -1121,7 +1121,7 @@ const rescheduleSetScheduledRedditUserPosts = async (request, postsCreated, numb
       postBody: 'This is a bridge post to maintain scheduling', // Placeholder body for the bridge job
       subreddits: ['testSubreddit'], // Placeholder subreddit
       scheduledTime: now + bridgeJobInterval, // Scheduled 24 hours from now
-      jobType: 'bridge', // Indicate it's a bridge job
+      jobType: 'postJob', // Indicate it's a bridge job
       handle: request.handle,
       website: request.selectedWebsite
     };
@@ -1499,7 +1499,7 @@ const rescheduleSetScheduledRedditAiPosts = async (request) => {
       content: 'Bridge job to ensure continuity for Reddit posts', // Content for the bridge job
       aiPrompt: 'Bridge AI prompt', // Placeholder AI prompt for the bridge job
       scheduledTime: now + bridgeJobInterval, // Scheduled 24 hours from now
-      jobType: 'bridge', // Indicate it's a bridge job
+      jobType: 'postJob', // Indicate it's a bridge job
       handle: request.handle,
       website: request.selectedWebsite
     };
@@ -1617,7 +1617,7 @@ const handleUserRandomRedditPosts = (request) => {
           body: request.redditPosts[i].body, // Body content of the Reddit post
           scheduledTime: Date.now() + accumulatedDelay, // Scheduled time in milliseconds
           aiPrompt: request.aiPrompt, // AI prompt for generating additional content (if applicable)
-          jobType: request.jobType,
+          jobType: 'postJob',
           handle: request.handle,
           website: request.selectedWebsite
         };
