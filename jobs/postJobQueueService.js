@@ -13,7 +13,7 @@ const makePostJobPost = async (job) => {
   if (validJob) {
     try {
   
-      const jobFromDb = getPostJobById(job.jobSetId)
+      const jobFromDb = await getPostJobById(job.jobSetId)
       const handle = jobFromDb.handle
       const creds = await getCredsByUsernameAndHandle(job.userId, handle);
 
