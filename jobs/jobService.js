@@ -42,7 +42,7 @@ const createRandomJobObject = (obj, jobSetId, originalImages, remainingImages, s
   return {
     job_set_id: jobSetId,
     user_id: obj.username || obj.user_id || 'defaultUserId',
-    content: `Post to ${obj.selectedWebsite || obj.selected_website}`,
+    content: `mediaPost`,
     scheduled_time: new Date(scheduledTime),
     original_images: originalImages,
     remaining_images: remainingImages,
@@ -61,7 +61,7 @@ const createScheduledJobObject = (obj, jobSetId, originalImages, remainingImages
   return {
     job_set_id: jobSetId,
     user_id: obj.username || obj.user_id || 'defaultUserId',
-    content: `Post to ${obj.selectedWebsite || obj.selected_website}`,
+    content: `mediaPost`,
     scheduled_time: new Date(scheduledTime),
     original_images: originalImages,
     remaining_images: remainingImages,
@@ -85,7 +85,7 @@ const createActiveJobObject = (obj, dbJobObject, jobs, originalSubreddits, remai
     message_ids: jobs.map(job => job.message_id),
     number_of_messages: jobs.length,
     user_id: dbJobObject.user_id,
-    content: `Post to ${obj.selectedWebsite || obj.selected_website}`,
+    content: `mediaPost`,
     scheduled_time: new Date(dbJobObject.scheduled_time),
     original_images: dbJobObject.original_images,
     remaining_images: dbJobObject.remaining_images,
@@ -243,7 +243,7 @@ const scheduleRandomJobs = async (request, iterations) => {
         jobSetId: jobSetId,
         userId: request.username || 'defaultUserId',
         website: request.selectedWebsite,
-        content: `Post to ${request.selectedWebsite}`,
+        content: `mediaPost`,
         scheduledTime: Date.now() + delayTime, // This now represents the delay time
         image: getNextImage(),
         includeCaption: request.includeCaption,
@@ -346,7 +346,7 @@ const rescheduleRandomJobs = async (job) => {
       jobSetId: job_set_id,
       userId: job.username || 'defaultUserId',
       website: job.selected_website,
-      content: `Post to ${job.selected_website}`,
+      content: `mediaPost`,
       scheduledTime: Date.now() + delayTime, // This now represents the delay time
       image: getNextImage(),
       includeCaption: job.include_caption,
@@ -449,7 +449,7 @@ const handleHourInterval = async (request) => {
       jobSetId: jobSetId, // Add the jobSetId to each job
       userId: request.username || 'defaultUserId',
       website: request.selectedWebsite,
-      content: `Post to ${request.selectedWebsite}`,
+      content: `mediaPost`,
       scheduledTime: Date.now() + 5000, // 5 seconds delay for the first job
       image: getNextImage(),
       includeCaption: request.includeCaption,
@@ -479,7 +479,7 @@ const handleHourInterval = async (request) => {
         jobSetId: jobSetId, // Add the jobSetId to each job
         userId: request.username || 'defaultUserId',
         website: request.selectedWebsite,
-        content: `Post to ${request.selectedWebsite}`,
+        content: `mediaPost`,
         scheduledTime: firstJob.scheduledTime + (i * intervalInMilliseconds), // Delay time for each subsequent job
         image: getNextImage(),
         includeCaption: request.includeCaption,
@@ -534,7 +534,7 @@ const rescheduleHourInterval = async (job) => {
     jobSetId: job.job_set_id, // Add the jobSetId to each job
     userId: job.username || 'defaultUserId',
     website: job.selected_website,
-    content: `Post to ${job.selected_website}`,
+    content: `mediaPost`,
     scheduledTime: Date.now() + 5000, // 5 seconds delay for the first job
     image: getNextImage(),
     includeCaption: job.include_caption,
@@ -564,7 +564,7 @@ const rescheduleHourInterval = async (job) => {
       jobSetId: job.job_set_id, // Add the jobSetId to each job
       userId: job.username || 'defaultUserId',
       website: job.selected_website,
-      content: `Post to ${job.selected_website}`,
+      content: `mediaPost`,
       scheduledTime: firstJob.scheduledTime + (i * intervalInMilliseconds), // Delay time for each subsequent job
       image: getNextImage(),
       includeCaption: job.include_caption,
@@ -640,7 +640,7 @@ const handleSetInterval = async (request) => {
         jobSetId: jobSetId, // Add the jobSetId to each job
         userId: request.username || 'defaultUserId',
         website: request.selectedWebsite,
-        content: isBridgeJob ? 'Bridge job to ensure continuity' : `Post to ${request.selectedWebsite}`,
+        content: isBridgeJob ? 'Bridge job to ensure continuity' : `mediaPost}`,
         scheduledTime: Date.now() + delayInMilliseconds,
         image: isBridgeJob ? null : getNextImage(),
         includeCaption: isBridgeJob ? false : request.includeCaption,
@@ -764,7 +764,7 @@ const rescheduleSetInterval = async (job) => {
         jobSetId: job.job_set_id, // Add the jobSetId to each job
         userId: job.username || 'defaultUserId',
         website: job.selected_website,
-        content: isBridgeJob ? 'Bridge job to ensure continuity' : `Post to ${job.selected_website}`,
+        content: isBridgeJob ? 'Bridge job to ensure continuity' : `mediaPost`,
         scheduledTime: Date.now() + delayInMilliseconds,
         image: isBridgeJob ? null : getNextImage(),
         includeCaption: job.include_caption,

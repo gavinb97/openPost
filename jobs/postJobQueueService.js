@@ -344,8 +344,16 @@ const addJobsToQueue = async (jobs) => {
   }
 };
 
-
+const reschedulePostJobs = async (job) => {
+   
+  if (job.selectedWebsite === 'twitter') {
+    await rescheduleTwitterPostJob(job)
+  } else if (job.selectedWebsite === 'reddit') {
+    await rescheduleRedditPostJob(job)
+  }
+}
 
 module.exports = {
-  makePostJobPost
+  makePostJobPost,
+  reschedulePostJobs
 };

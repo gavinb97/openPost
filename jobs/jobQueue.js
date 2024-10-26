@@ -1,6 +1,6 @@
 const amqp = require('amqplib');
-const {makePost, validateJob, reschedulePostJob} = require('./jobQueueService');
-const { makePostJobPost } = require('./postJobQueueService');
+const { makePost, validateJob, reschedulePostJob } = require('./jobQueueService');
+const { makePostJobPost, reschedulePostJobs } = require('./postJobQueueService');
 const { getMessageIdsCountForJob, deleteMessageIdFromJob } = require('./jobsData');
 
 async function setupQueue () {
@@ -46,42 +46,45 @@ async function startWorker (channel) {
     console.log(`${job.scheduledTime}`);
     console.log(Date.now());
     if (job.content !== 'Bridge job to ensure continuity') {
-      if (job.content === 'AI-generated post for twitter' || job.content === 'Scheduled post for twitter' || job.content.toLowerCase().trim() === 'scheduled hourly ai post for twitter') {
+      if (job.content !== 'mediaPost') {
         console.log('executing job');
         console.log(job);
         await makePostJobPost(job);
       } else {
         await makePost(job);
       }
-      
     } else {
-      // consume bridge job
-      console.log('gonna try to consume bridge job');
-      try {
-        console.log('deleting messageID from job...');
-        const numberOfMessagesLeft = await getMessageIdsCountForJob(job.jobSetId);
-        console.log(`intial messages: ${numberOfMessagesLeft}`);
-        await deleteMessageIdFromJob(job.jobSetId, job.message_id);
-        const afterDelete = await getMessageIdsCountForJob(job.jobSetId);
-        console.log(`after delete messages: ${afterDelete}`);
-        
-        if (job?.postType === 'media') {
-          // this is for media post jobs
-          await reschedulePostJob(job);
-        } else if (job?.postType === 'postJob') {
-          // TODO create function to reschedule jobs after all the brdige jobs are consumed
-        }
-        
-      } catch (e) {
-        console.log(e);
-        console.log('whoops');
-      }
-      
+      await consumeBridgeJob(job)
     }
     
     // Acknowledge the message to remove it from the queue
     channel.ack(message);
   });
+}
+
+const consumeBridgeJob = async (job) => {
+  console.log('gonna try to consume bridge job');
+  try {
+    console.log('deleting messageID from job...');
+    const numberOfMessagesLeft = await getMessageIdsCountForJob(job.jobSetId);
+    console.log(`intial messages: ${numberOfMessagesLeft}`);
+    await deleteMessageIdFromJob(job.jobSetId, job.message_id);
+    const afterDelete = await getMessageIdsCountForJob(job.jobSetId);
+    console.log(`after delete messages: ${afterDelete}`);
+    
+    if (job?.postType === 'media') {
+      // this is for media post jobs
+      await reschedulePostJob(job);
+    } else if (job?.postType === 'postJob') {
+      // TODO create function to reschedule jobs after all the brdige jobs are consumed
+      console.log('attempting to reschedule postjob after consuming all the bridge jobs')
+      await reschedulePostJobs(job)
+    }
+    
+  } catch (e) {
+    console.log(e);
+    console.log('whoops');
+  }
 }
 
 module.exports = { setupQueue, enqueuePostJob, startWorker, getExistingQueue };
