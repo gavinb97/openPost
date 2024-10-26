@@ -52,7 +52,7 @@ const createPostJobObject = (obj, jobs) => {
     aiPrompt: obj?.aiPrompt || obj?.aiprompt || null, // AI prompt object (if applicable)
     redditPosts: obj?.redditPosts || obj?.redditposts || [], // Array of Reddit posts (if applicable)
     numberOfPosts: obj?.numberOfPosts || obj?.tweetInputs.length || obj?.tweetinputs, // Total number of posts to be created
-    handle: obj?.handle || jobs.handle
+    handle: obj?.handle || jobs?.handle
   };
   
   return postJobObject;
@@ -824,8 +824,8 @@ const rescheduleSetScheduledTwitterUserPosts = async (request, postsCreated, num
   }
   
   // Iterate through the tweetInputs to create jobs
-  for (let i = 0; i < request.tweetInputs.length && postsCreated < numberOfPosts; i++) {
-    const tweetInput = request.tweetInputs[i];
+  for (let i = 0; i < request.tweetinputs.length && postsCreated < numberOfPosts; i++) {
+    const tweetInput = request.tweetinputs[i];
   
     // Parse the date and time from the tweetInput
     const tweetDateStr = tweetInput.date; // Example format: '2024-09-27'
@@ -860,9 +860,9 @@ const rescheduleSetScheduledTwitterUserPosts = async (request, postsCreated, num
         content: `Scheduled user post for ${request.selectedWebsite}`, // Content for the post
         tweet: tweetInput.text, // Use the text from tweetInputs
         scheduledTime: scheduledTime, // The exact scheduled time in milliseconds
-        jobType: request.jobType,
+        jobType: request.jobtype,
         handle: request.handle,
-        website: request.selectedWebsite
+        website: request.selectedwebsite
       };
       console.log(`User Job Created: ${JSON.stringify(job)}`);
       jobs.push(job); // Add the job to the array
@@ -886,7 +886,7 @@ const rescheduleSetScheduledTwitterUserPosts = async (request, postsCreated, num
       scheduledTime: now + bridgeJobInterval, // Scheduled 24 hours from now
       jobType: 'bridge' ,// Indicate it's a bridge job
       handle: request.handle,
-      website: request.selectedWebsite
+      website: request.selectedwebsite
     };
   
     console.log(`Bridge Job Created: ${JSON.stringify(bridgeJob)}`);

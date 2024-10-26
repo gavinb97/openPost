@@ -13,9 +13,10 @@ const makePostJobPost = async (job) => {
   if (validJob) {
     try {
   
-      
-      const creds = await getCredsByUsernameAndHandle(job.userId, job.handle);
-  
+      const jobFromDb = getPostJobById(job.jobSetId)
+      const handle = jobFromDb.handle
+      const creds = await getCredsByUsernameAndHandle(job.userId, handle);
+
       switch (job.website) {
       case 'twitter':
         console.log('twitter postJob');
@@ -211,8 +212,13 @@ const rescheduleTwitterPostJob = async (job) => {
             console.log('job deleted')
           } else {
             console.log('there are more posts to post')
-            await rescheduleSetScheduledTwitterUserPosts(activeJob, activeJob.postscreated, activeJob.numberofposts)
+            const {jobs, newJobObject} = await rescheduleSetScheduledTwitterUserPosts(activeJob, activeJob.postscreated, activeJob.numberofposts)
             console.log('jobs scheduled?')
+
+            await queueAndUpdateJobs(jobs, newJobObject);
+
+            await addJobsToQueue(jobs);
+            await updatePostJob(newJobObject);
           }
         }
 

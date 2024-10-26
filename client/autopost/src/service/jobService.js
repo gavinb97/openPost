@@ -2,8 +2,8 @@ import axios from 'axios';
 
 
 export const createScheduledJob = async (schedule, userJwt) => {
-  // const endpoint = 'https://localhost:3455/setSchedule';
-  const endpoint = 'https://localhost:3455/api/jobs';
+  // const endpoint = 'https://only-posts.com/setSchedule';
+  const endpoint = 'https://only-posts.com/api/jobs';
   try {
     const response = await axios.post(endpoint, 
       { scheduleData: schedule }, // Payload data
@@ -22,8 +22,8 @@ export const createScheduledJob = async (schedule, userJwt) => {
 };
 
 export const getJobsByUsername = async (user, userJwt) => {
-  // const endpoint = 'https://localhost:3455/getjobs';
-  const endpoint = 'https://localhost:3455/api/getjobs';
+  // const endpoint = 'https://only-posts.com/getjobs';
+  const endpoint = 'https://only-posts.com/api/getjobs';
   try {
     const response = await axios.post(endpoint, 
       { username: user }, // Payload data with username
@@ -42,8 +42,8 @@ export const getJobsByUsername = async (user, userJwt) => {
 };
 
 export const getPostJobsByUsername = async (user, userJwt) => {
-  // const endpoint = 'https://localhost:3455/getpostjobs';
-  const endpoint = 'https://localhost:3455/api/getpostjobs';
+  // const endpoint = 'https://only-posts.com/getpostjobs';
+  const endpoint = 'https://only-posts.com/api/getpostjobs';
   try {
     const response = await axios.post(endpoint, 
       { username: user }, // Payload data with username
@@ -62,8 +62,8 @@ export const getPostJobsByUsername = async (user, userJwt) => {
 };
 
 export const deleteJob = async (jobSetId, userJwt) => {
-  // const endpoint = 'https://localhost:3455/deletejob';
-  const endpoint = 'https://localhost:3455/api/deletejob';
+  // const endpoint = 'https://only-posts.com/deletejob';
+  const endpoint = 'https://only-posts.com/api/deletejob';
 
   try {
     const response = await axios.delete(endpoint, {
@@ -174,6 +174,10 @@ export const validateAndFormatPostJobData = (request) => {
     jobObject.redditPosts = redditPosts;
   } else if (selectedWebsite.toLowerCase() === 'twitter') {
     jobObject.tweetInputs = tweetInputs;
+
+    // if (postType.toLowerCase() === 'ai') {
+    //   jobObject.tweetInputs = clearTweetTexts(tweetInputs)
+    // }
   }
 
   // Handle postType

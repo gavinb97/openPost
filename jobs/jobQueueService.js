@@ -39,7 +39,9 @@ const makePost = async (job) => {
     try {
 
       console.log(job)
-      const creds = await getCredsByUsernameAndHandle(job?.userId || job?.username, job.handle);
+      const jobFromDb = getJobSetById(job.jobSetId)
+      const handle = jobFromDb.handle
+      const creds = await getCredsByUsernameAndHandle(job?.userId || job?.username, handle);
 
       switch (job.website) {
       case 'twitter':
