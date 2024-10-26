@@ -29,11 +29,18 @@ const Payment = () => {
     } else {
       // create portal link just in case
       const getPortalUrl = async () => {
-        const response = await getBillingPortal(user.customerId, user.jwt);
-        return response.data.url;
+        try {
+          const response = await getBillingPortal(user.customerId, user.jwt);
+          console.log(response.data)
+          return response.data.url;
+        } catch (e) {
+          console.log(e)
+        }
+        
       };
       getPortalUrl().then((url) => {
         setPortalUrl(url);
+        console.log('url set')
       });
             
     }
