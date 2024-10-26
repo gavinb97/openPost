@@ -898,9 +898,9 @@ const updatePostJob = async (postJob) => {
   }
 };
 
-const deleteTweetInputFromPostJob = async (job_set_id, tweetText) => {
+const deleteTweetInputFromPostJob = async (job_set_id, tweetInputToDelete) => {
   console.log('Attempting to delete tweet input from post job...');
-  console.log('Tweet text to delete:', tweetText);
+  console.log('Tweet input to delete:', tweetInputToDelete);
   console.log('Job set ID:', job_set_id);
 
   const selectQuery = `
@@ -934,10 +934,17 @@ const deleteTweetInputFromPostJob = async (job_set_id, tweetText) => {
 
     console.log('Original tweetInputs:', tweetinputs);
 
-    // Filter out the tweet input containing the tweetText (fix: check input.text)
-    const updatedTweetInputs = tweetinputs.filter(
-      input => input.text !== tweetText
-    );
+    // Filter out the tweet input based on a deep comparison of each field
+    const updatedTweetInputs = tweetinputs.filter(input => {
+      return !(
+        input.id === tweetInputToDelete.id &&
+        input.date === tweetInputToDelete.date &&
+        input.text === tweetInputToDelete.text &&
+        input.time.ampm === tweetInputToDelete.time.ampm &&
+        input.time.hour === tweetInputToDelete.time.hour &&
+        input.time.minute === tweetInputToDelete.time.minute
+      );
+    });
 
     console.log('Updated tweetInputs:', updatedTweetInputs);
 
@@ -951,6 +958,7 @@ const deleteTweetInputFromPostJob = async (job_set_id, tweetText) => {
     throw err;
   }
 };
+
 
 
 const deleteMessageIdFromPostJob = async (job_set_id, message_id) => {

@@ -73,6 +73,8 @@ const postToTwitter = async (creds, job) => {
   }
 };
 
+const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
 const postToReddit = async (creds, job) => {
   if (creds.redditTokens?.access_token && creds.redditTokens?.refresh_token) {
   
@@ -83,6 +85,7 @@ const postToReddit = async (creds, job) => {
       // post to each subreddit in the array
       job.subreddits.array.forEach( async (subreddit) =>  {
         await postTextToSubreddit(`r/${subreddit}`, creds.redditTokens.access_token, redditTitle, redditBody); 
+        await delay(2000);
       });
     }
 
@@ -90,6 +93,7 @@ const postToReddit = async (creds, job) => {
       // post to each subreddit in the array
       job.subreddits.array.forEach( async (subreddit) =>  {
         await postTextToSubreddit(`r/${subreddit}`, creds.redditTokens.access_token, job?.title, job?.postBody); 
+        await delay(2000);
       });
     }
 
@@ -346,9 +350,9 @@ const addJobsToQueue = async (jobs) => {
 
 const reschedulePostJobs = async (job) => {
    
-  if (job.selectedWebsite === 'twitter') {
+  if (job.website === 'twitter') {
     await rescheduleTwitterPostJob(job)
-  } else if (job.selectedWebsite === 'reddit') {
+  } else if (job.website === 'reddit') {
     await rescheduleRedditPostJob(job)
   }
 }
