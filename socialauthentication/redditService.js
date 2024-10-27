@@ -17,7 +17,7 @@ const {XMLParser} = require('fast-xml-parser');
 const {redditNSFWPostTitles, redditSFWPostTitles} = require('../strings');
 
 const redditAccessTokenUrl = 'https://www.reddit.com/api/v1/access_token';
-const redirect_uri = 'https://only-posts.com/api/redditcallback/';
+const redirect_uri = 'https://only-posts.com/api/redditcallback';
 
 const getRedditLoginUrl = async (username) => {
   const scopeSring = 'identity submit subscribe privatemessages edit mysubreddits read save';
