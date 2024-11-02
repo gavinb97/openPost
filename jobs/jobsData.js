@@ -660,6 +660,11 @@ const insertPostJob = async (postJob) => {
   console.log('Inserting post job');
   console.log(postJob);
 
+  if (!postJob.job_set_id) {
+    console.log('not writing to')
+    return null
+  }
+
   let {
     job_set_id,
     message_ids,
@@ -688,7 +693,7 @@ const insertPostJob = async (postJob) => {
   // Convert message_ids array to PostgreSQL array literal
   const messageIdsLiteral = message_ids && message_ids.length
     ? `{${message_ids.map(id => `'${id}'`).join(',')}}`
-    : 'ARRAY[]::TEXT[]'; // Handle empty array
+    : {}; // Handle empty array
 
   // Handle times_of_day being null or empty
   const timesOfDayArray = timesOfDay ? timesOfDay.map(({ hour, minute, ampm }) => {
@@ -783,7 +788,6 @@ const insertPostJob = async (postJob) => {
 
 const updatePostJob = async (postJob) => {
   let {
-    job_set_id,
     message_ids,
     numberOfMessages,
     userid,
@@ -806,7 +810,7 @@ const updatePostJob = async (postJob) => {
     numberOfPosts,
     handle
   } = postJob;
-
+  let job_set_id = postJob?.jobSetId || postJob?.job_set_id
   // Convert message_ids array to PostgreSQL array literal
   const messageIdsLiteral = message_ids && message_ids.length
     ? `{${message_ids.map(id => `'${id}'`).join(',')}}`

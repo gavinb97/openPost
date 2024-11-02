@@ -9,7 +9,7 @@ const { makeGptCall } = require('./gptService');
 const makePostJobPost = async (job) => {
   console.log('in make job post');
   console.log(job);
-  const validJob = await validateJob(job);
+  const validJob = await validatePostJob(job);
   if (validJob) {
     try {
   
@@ -37,7 +37,7 @@ const makePostJobPost = async (job) => {
   }
 };
 
-const validateJob = async (job) => {
+const validatePostJob = async (job) => {
   const jobID = job.jobSetId;
   console.log(jobID);
   console.log('jobsetid ^^^');
@@ -163,8 +163,14 @@ const createRedditPostBody = async (job) => {
 };
 
 const queueAndUpdateJobs = async (jobs, activeJobObject) => {
-  await addJobsToQueue(jobs);
-  await updatePostJob(activeJobObject);
+  console.log('attempting to queue and update post job')
+  try {
+    await addJobsToQueue(jobs);
+    await updatePostJob(activeJobObject);
+  } catch (e) {
+    console.log(e)
+  }
+  
 };
 
 const rescheduleTwitterPostJob = async (job) => {
@@ -224,10 +230,10 @@ const rescheduleTwitterPostJob = async (job) => {
             console.log('job deleted');
           } else {
             console.log('there are more posts to post');
-            const {jobs, newJobObject} = await rescheduleSetScheduledTwitterUserPosts(activeJob, activeJob.postscreated, activeJob.numberofposts);
+            const {jobs, activeJobObject} = await rescheduleSetScheduledTwitterUserPosts(activeJob, activeJob.postscreated, activeJob.numberofposts);
             console.log('jobs scheduled?');
-
-            await queueAndUpdateJobs(jobs, newJobObject);
+            console.log(activeJobObject)
+            await queueAndUpdateJobs(jobs, activeJobObject);
 
           }
         }
@@ -359,5 +365,6 @@ const reschedulePostJobs = async (job) => {
 
 module.exports = {
   makePostJobPost,
-  reschedulePostJobs
+  reschedulePostJobs,
+  validatePostJob
 };

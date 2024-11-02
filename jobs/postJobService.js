@@ -665,139 +665,188 @@ const rescheduleHourScheduledTwitterAiPosts = async (request) => {
   
 
 const handleSetScheduledTwitterAiPosts = (request) => {
-  console.log('in handle set scheduled AI posts');
-  console.log(request);
-
-  const jobs = [];
-  const maxDurationInMilliseconds = 48 * 60 * 60 * 1000; // 48 hours in milliseconds
-  const jobSetId = uuidv4(); // Unique ID for this job set
-
-  const now = Date.now(); // Current time in milliseconds
-  const maxDate = now + maxDurationInMilliseconds; // Max scheduling time: current time + 48 hours
-
-  console.log(`Current Time (now): ${new Date(now).toISOString()}`);
-  console.log(`Max Scheduling Time (maxDate): ${new Date(maxDate).toISOString()}`);
-
-  // Iterate through the tweetInputs to create jobs
-  for (let i = 0; i < request.tweetInputs.length; i++) {
-    const tweetInput = request.tweetInputs[i];
-
-    // Parse the date and time from the tweetInput
-    const tweetDateStr = tweetInput.date; // Example format: '2024-09-27'
-    const tweetTime = tweetInput.time; // Example format: { hour: '3', minute: '00', ampm: 'AM' }
-
-    console.log(`Processing AI Input: ${JSON.stringify(tweetInput)}`);
-
-    let hour = parseInt(tweetTime.hour, 10);
-    const minute = parseInt(tweetTime.minute, 10);
-    const ampm = tweetTime.ampm.toLowerCase();
-
-    // Adjust hour based on AM/PM
-    if (ampm === 'am' && hour === 12) {
-      hour = 0; // Handle midnight
-    } else if (ampm === 'pm' && hour !== 12) {
-      hour += 12; // Handle PM times except for noon
+    console.log('In handle set scheduled AI posts');
+    console.log(request);
+  
+    const jobs = [];
+    const maxDurationInMilliseconds = 48 * 60 * 60 * 1000; // 48 hours in milliseconds
+    const bridgeJobInterval = 24 * 60 * 60 * 1000; // 24 hours for bridge job
+    const jobSetId = uuidv4(); // Unique ID for this job set
+  
+    const now = Date.now(); // Current time in milliseconds
+    const maxDate = now + maxDurationInMilliseconds; // Max scheduling time: current time + 48 hours
+  
+    console.log(`Current Time (now): ${new Date(now).toISOString()}`);
+    console.log(`Max Scheduling Time (maxDate): ${new Date(maxDate).toISOString()}`);
+  
+    let scheduledJobFound = false;
+  
+    // Iterate through the tweetInputs to create jobs
+    for (let i = 0; i < request.tweetInputs.length; i++) {
+      const tweetInput = request.tweetInputs[i];
+  
+      // Parse the date and time from the tweetInput
+      const tweetDateStr = tweetInput.date; // Example format: '2024-09-27'
+      const tweetTime = tweetInput.time; // Example format: { hour: '3', minute: '00', ampm: 'AM' }
+  
+      console.log(`Processing AI Input: ${JSON.stringify(tweetInput)}`);
+  
+      let hour = parseInt(tweetTime.hour, 10);
+      const minute = parseInt(tweetTime.minute, 10);
+      const ampm = tweetTime.ampm.toLowerCase();
+  
+      // Adjust hour based on AM/PM
+      if (ampm === 'am' && hour === 12) {
+        hour = 0; // Handle midnight
+      } else if (ampm === 'pm' && hour !== 12) {
+        hour += 12; // Handle PM times except for noon
+      }
+  
+      // Create the scheduled time by combining date and time, assuming local time
+      const tweetDate = new Date(`${tweetDateStr}T00:00:00`); // Start at midnight of the tweet's date
+      tweetDate.setHours(hour, minute, 0, 0); // Set the correct hour and minute
+  
+      const scheduledTime = tweetDate.getTime(); // Convert the date object to milliseconds
+      console.log(`Scheduled Time for AI Post: ${new Date(scheduledTime).toISOString()}`);
+  
+      // Ensure the job is within the 48-hour window
+      if (scheduledTime <= maxDate && scheduledTime >= now) {
+        const job = {
+          message_id: uuidv4(), // Unique ID for each job
+          jobSetId: jobSetId, // Same ID for all jobs in this set
+          userId: request.username || 'defaultUserId', // Use provided username or default
+          content: `postJob`, // Content for the post
+          aiPrompt: request.aiPrompt || 'Generated AI prompt', // Placeholder or provided AI prompt
+          scheduledTime: scheduledTime, // The exact scheduled time in milliseconds
+          jobType: 'postJob',
+          handle: request.handle,
+          website: request.selectedWebsite
+        };
+        console.log(`AI Job Created: ${JSON.stringify(job)}`);
+        jobs.push(job); // Add the job to the array
+        scheduledJobFound = true;
+      } else {
+        console.log(`AI Job not created, scheduled time (${new Date(scheduledTime).toISOString()}) is outside the allowed window`);
+      }
     }
-
-    // Create the scheduled time by combining date and time, assuming local time
-    const tweetDate = new Date(`${tweetDateStr}T00:00:00`); // Start at midnight of the tweet's date
-    tweetDate.setHours(hour, minute, 0, 0); // Set the correct hour and minute
-
-    const scheduledTime = tweetDate.getTime(); // Convert the date object to milliseconds
-    console.log(`Scheduled Time for AI Post: ${new Date(scheduledTime).toISOString()}`);
-
-    // Ensure the job is within the 48-hour window
-    if (scheduledTime <= maxDate && scheduledTime >= now) {
-      const job = {
-        message_id: uuidv4(), // Unique ID for each job
+  
+    // If no jobs were scheduled within the 48-hour window, create a bridge job
+    if (!scheduledJobFound) {
+      console.log('No AI jobs found within the 48-hour window, creating a bridge job');
+  
+      const bridgeJob = {
+        message_id: uuidv4(), // Unique ID for the bridge job
         jobSetId: jobSetId, // Same ID for all jobs in this set
         userId: request.username || 'defaultUserId', // Use provided username or default
-        content: `AI-generated post for ${request.selectedWebsite}`, // Content for the post
-        aiPrompt: request.aiPrompt || 'Generated AI prompt', // Placeholder or provided AI prompt
-        scheduledTime: scheduledTime, // The exact scheduled time in milliseconds
-        jobType: 'postJob',
+        content: 'Bridge job to ensure continuity', // Content for the bridge job
+        aiPrompt: 'Bridge AI post', // Placeholder AI prompt for the bridge job
+        scheduledTime: now + bridgeJobInterval, // Scheduled 24 hours from now
+        jobType: 'bridgeJob', // Indicate it's a bridge job
         handle: request.handle,
         website: request.selectedWebsite
       };
-      console.log(`AI Job Created: ${JSON.stringify(job)}`);
-      jobs.push(job); // Add the job to the array
-    } else {
-      console.log(`AI Job not created, scheduled time (${new Date(scheduledTime).toISOString()}) is outside the allowed window`);
+  
+      console.log(`Bridge Job Created: ${JSON.stringify(bridgeJob)}`);
+      jobs.push(bridgeJob); // Add the bridge job to the array
     }
-  }
-
-  console.log(`AI Jobs Created: ${JSON.stringify(jobs)}`);
-  return jobs; // Return the array of job objects
-};
-
+  
+    console.log(`AI Jobs Created: ${JSON.stringify(jobs)}`);
+    return jobs; // Return the array of job objects
+  };
+  
 
 
 
 const handleSetScheduledTwitterPosts = (request) => {
-  console.log('in handle set scheduled twitter posts');
-  console.log(request);
-
-  const jobs = [];
-  const maxDurationInMilliseconds = 48 * 60 * 60 * 1000; // 48 hours in milliseconds
-  const jobSetId = uuidv4(); // Unique ID for this job set
-
-  const now = Date.now(); // Current time in milliseconds
-  const maxDate = now + maxDurationInMilliseconds; // Max scheduling time: current time + 48 hours
-
-  console.log(`Current Time (now): ${new Date(now).toISOString()}`);
-  console.log(`Max Scheduling Time (maxDate): ${new Date(maxDate).toISOString()}`);
-
-  // Iterate through the tweetInputs to create jobs
-  for (let i = 0; i < request.tweetInputs.length; i++) {
-    const tweetInput = request.tweetInputs[i];
-
-    // Parse the date and time from the tweetInput
-    const tweetDateStr = tweetInput.date; // Example format: '2024-09-27'
-    const tweetTime = tweetInput.time; // Example format: { hour: '3', minute: '00', ampm: 'AM' }
-
-    console.log(`Processing tweetInput: ${JSON.stringify(tweetInput)}`);
-
-    let hour = parseInt(tweetTime.hour, 10);
-    const minute = parseInt(tweetTime.minute, 10);
-    const ampm = tweetTime.ampm.toLowerCase();
-
-    // Adjust hour based on AM/PM
-    if (ampm === 'am' && hour === 12) {
-      hour = 0; // Handle midnight
-    } else if (ampm === 'pm' && hour !== 12) {
-      hour += 12; // Handle PM times except for noon
+    console.log('in handle set scheduled user twitter posts');
+    console.log(request);
+  
+    const jobs = [];
+    const maxDurationInMilliseconds = 48 * 60 * 60 * 1000; // 48 hours in milliseconds
+    const bridgeJobInterval = 24 * 60 * 60 * 1000; // 24 hours for bridge job
+    const jobSetId = uuidv4(); // Unique ID for this job set
+  
+    const now = Date.now(); // Current time in milliseconds
+    const maxDate = now + maxDurationInMilliseconds; // Max scheduling time: current time + 48 hours
+  
+    console.log(`Current Time (now): ${new Date(now).toISOString()}`);
+    console.log(`Max Scheduling Time (maxDate): ${new Date(maxDate).toISOString()}`);
+  
+    let scheduledJobFound = false;
+  
+    // Iterate through the tweetInputs to create jobs
+    for (let i = 0; i < request.tweetInputs.length; i++) {
+      const tweetInput = request.tweetInputs[i];
+  
+      // Parse the date and time from the tweetInput
+      const tweetDateStr = tweetInput.date; // Example format: '2024-09-27'
+      const tweetTime = tweetInput.time; // Example format: { hour: '3', minute: '00', ampm: 'AM' }
+  
+      console.log(`Processing tweetInput: ${JSON.stringify(tweetInput)}`);
+  
+      let hour = parseInt(tweetTime.hour, 10);
+      const minute = parseInt(tweetTime.minute, 10);
+      const ampm = tweetTime.ampm.toLowerCase();
+  
+      // Adjust hour based on AM/PM
+      if (ampm === 'am' && hour === 12) {
+        hour = 0; // Handle midnight
+      } else if (ampm === 'pm' && hour !== 12) {
+        hour += 12; // Handle PM times except for noon
+      }
+  
+      // Create the scheduled time by combining date and time, assuming local time
+      const tweetDate = new Date(`${tweetDateStr}T00:00:00`); // Start at midnight of the tweet's date
+      tweetDate.setHours(hour, minute, 0, 0); // Set the correct hour and minute
+  
+      const scheduledTime = tweetDate.getTime(); // Convert the date object to milliseconds
+      console.log(`Scheduled Time for Tweet: ${new Date(scheduledTime).toISOString()}`);
+  
+      // Ensure the job is within the 48-hour window
+      if (scheduledTime <= maxDate && scheduledTime >= now) {
+        const job = {
+          message_id: uuidv4(), // Unique ID for each job
+          jobSetId: jobSetId, // Same ID for all jobs in this set
+          userId: request.username || 'defaultUserId', // Use provided username or default
+          content: `postJob`, // Content for the post
+          tweet: tweetInput.text, // Use the text from tweetInputs
+          scheduledTime: scheduledTime, // The exact scheduled time in milliseconds
+          jobType: 'postJob',
+          handle: request.handle,
+          website: request.selectedWebsite
+        };
+        console.log(`Job Created: ${JSON.stringify(job)}`);
+        jobs.push(job); // Add the job to the array
+        scheduledJobFound = true;
+      } else {
+        console.log(`Job not created, scheduled time (${new Date(scheduledTime).toISOString()}) is outside the allowed window`);
+      }
     }
-
-    // Create the scheduled time by combining date and time, assuming local time
-    const tweetDate = new Date(`${tweetDateStr}T00:00:00`); // Start at midnight of the tweet's date
-    tweetDate.setHours(hour, minute, 0, 0); // Set the correct hour and minute
-
-    const scheduledTime = tweetDate.getTime(); // Convert the date object to milliseconds
-    console.log(`Scheduled Time for Tweet: ${new Date(scheduledTime).toISOString()}`);
-
-    // Ensure the job is within the 48-hour window
-    if (scheduledTime <= maxDate && scheduledTime >= now) {
-      const job = {
-        message_id: uuidv4(), // Unique ID for each job
+  
+    // If no jobs were scheduled within the 48-hour window, create a bridge job
+    if (!scheduledJobFound) {
+      console.log('No jobs found within the 48-hour window, creating a bridge job');
+  
+      const bridgeJob = {
+        message_id: uuidv4(), // Unique ID for the bridge job
         jobSetId: jobSetId, // Same ID for all jobs in this set
         userId: request.username || 'defaultUserId', // Use provided username or default
-        content: `Scheduled post for ${request.selectedWebsite}`, // Content for the post
-        tweet: tweetInput.text, // Use the text from tweetInputs
-        scheduledTime: scheduledTime, // The exact scheduled time in milliseconds
-        jobType: 'postJobs',
+        content: 'Bridge job to ensure continuity', // Content for the bridge job
+        tweet: 'Bridge post', // Placeholder tweet for the bridge job
+        scheduledTime: now + bridgeJobInterval, // Scheduled 24 hours from now
+        jobType: 'bridgeJob', // Indicate it's a bridge job
         handle: request.handle,
         website: request.selectedWebsite
       };
-      console.log(`Job Created: ${JSON.stringify(job)}`);
-      jobs.push(job); // Add the job to the array
-    } else {
-      console.log(`Job not created, scheduled time (${new Date(scheduledTime).toISOString()}) is outside the allowed window`);
+  
+      console.log(`Bridge Job Created: ${JSON.stringify(bridgeJob)}`);
+      jobs.push(bridgeJob); // Add the bridge job to the array
     }
-  }
-
-  console.log(`Jobs Created: ${JSON.stringify(jobs)}`);
-  return jobs; // Return the array of job objects
-};
+  
+    console.log(`Jobs Created: ${JSON.stringify(jobs)}`);
+    return jobs; // Return the array of job objects
+  };
+  
 
 
 const rescheduleSetScheduledTwitterUserPosts = async (request, postsCreated, numberOfPosts) => {
@@ -881,7 +930,7 @@ const rescheduleSetScheduledTwitterUserPosts = async (request, postsCreated, num
       message_id: uuidv4(), // Unique ID for each job
       jobSetId: jobSetId, // Same ID for all jobs in this set
       userId: request.username || 'defaultUserId', // Use provided username or default
-      content: 'Bridge job to ensure continuity for user posts', // Content for the bridge job
+      content: 'Bridge job to ensure continuity', // Content for the bridge job
       tweet: 'Bridge post', // Placeholder tweet for the bridge job
       scheduledTime: now + bridgeJobInterval, // Scheduled 24 hours from now
       jobType: 'postJob' ,// Indicate it's a bridge job
@@ -896,12 +945,10 @@ const rescheduleSetScheduledTwitterUserPosts = async (request, postsCreated, num
   // Active job object for DB insertion
   const activeJobObject = {
     jobSetId: jobSetId,
-    jobs: jobs,
-    originalImages: request.images || [], // Add any original images from the request
-    remainingImages: request.images || [], // Assume all images are remaining initially
     userId: request.username || 'defaultUserId',
     scheduledAt: Date.now(),
-    handle: request.handle
+    handle: request.handle,
+    message_ids: jobs.map(job => job.message_id)
   };
   
   console.log(`Active Job Object Created: ${JSON.stringify(activeJobObject)}`);
@@ -1116,7 +1163,7 @@ const rescheduleSetScheduledRedditUserPosts = async (request, postsCreated, numb
       message_id: uuidv4(), // Unique ID for each job
       jobSetId: jobSetId, // Same ID for all jobs in this set
       userId: request.username || 'defaultUserId', // Use provided username or default
-      content: 'Bridge job to ensure continuity for user posts', // Content for the bridge job
+      content: 'Bridge job to ensure continuity', // Content for the bridge job
       title: 'Bridge post', // Placeholder title for the bridge job
       postBody: 'This is a bridge post to maintain scheduling', // Placeholder body for the bridge job
       subreddits: ['testSubreddit'], // Placeholder subreddit

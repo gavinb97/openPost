@@ -345,12 +345,12 @@ const rescheduleRandomJobs = async (job) => {
       message_id: uuidv4(),
       jobSetId: job_set_id,
       userId: job.username || 'defaultUserId',
-      website: job.selected_website,
+      website: job.selected_website || job.website,
       content: `mediaPost`,
       scheduledTime: Date.now() + delayTime, // This now represents the delay time
       image: getNextImage(),
-      includeCaption: job.include_caption,
-      captionType: job.type_of_caption,
+      includeCaption: job.include_caption || job.includeCaption, 
+      captionType: job.type_of_caption || job.captionType,
       handle: job.handle || '',
       postType: 'media'
     };
@@ -533,12 +533,12 @@ const rescheduleHourInterval = async (job) => {
     message_id: uuidv4(),
     jobSetId: job.job_set_id, // Add the jobSetId to each job
     userId: job.username || 'defaultUserId',
-    website: job.selected_website,
+    website: job.selected_website || job.website,
     content: `mediaPost`,
     scheduledTime: Date.now() + 5000, // 5 seconds delay for the first job
     image: getNextImage(),
-    includeCaption: job.include_caption,
-    captionType: job.type_of_caption,
+    includeCaption: job.include_caption || job.includeCaption,
+    captionType: job.type_of_caption || job.captionType,
     handle: job.handle,
     postType: 'media'
   };
@@ -563,12 +563,12 @@ const rescheduleHourInterval = async (job) => {
       message_id: uuidv4(),
       jobSetId: job.job_set_id, // Add the jobSetId to each job
       userId: job.username || 'defaultUserId',
-      website: job.selected_website,
+      website: job.selected_website || job.website,
       content: `mediaPost`,
       scheduledTime: firstJob.scheduledTime + (i * intervalInMilliseconds), // Delay time for each subsequent job
       image: getNextImage(),
-      includeCaption: job.include_caption,
-      captionType: job.type_of_caption,
+      includeCaption: job.include_caption || job.includeCaption,
+      captionType: job.type_of_caption || job.captionType,
       postType: 'media'
     };
 
@@ -640,7 +640,7 @@ const handleSetInterval = async (request) => {
         jobSetId: jobSetId, // Add the jobSetId to each job
         userId: request.username || 'defaultUserId',
         website: request.selectedWebsite,
-        content: isBridgeJob ? 'Bridge job to ensure continuity' : `mediaPost}`,
+        content: isBridgeJob ? 'Bridge job to ensure continuity' : `mediaPost`,
         scheduledTime: Date.now() + delayInMilliseconds,
         image: isBridgeJob ? null : getNextImage(),
         includeCaption: isBridgeJob ? false : request.includeCaption,
@@ -763,14 +763,15 @@ const rescheduleSetInterval = async (job) => {
         message_id: uuidv4(),
         jobSetId: job.job_set_id, // Add the jobSetId to each job
         userId: job.username || 'defaultUserId',
-        website: job.selected_website,
+        website: job.selected_website || job.website,
         content: isBridgeJob ? 'Bridge job to ensure continuity' : `mediaPost`,
         scheduledTime: Date.now() + delayInMilliseconds,
         image: isBridgeJob ? null : getNextImage(),
-        includeCaption: job.include_caption,
-        captionType: job.type_of_caption,
+        includeCaption: job.include_caption || job.includeCaption,
+        captionType: job.type_of_caption || job.captionType,
         handle: job.handle,
         postType: 'media'
+        // TODO add ai prompt so that we dont lose the prompt after rescheduling
       };
 
       if (job.selected_website === 'reddit' && !isBridgeJob) {
