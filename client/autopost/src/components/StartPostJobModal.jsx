@@ -308,7 +308,7 @@ const StartPostJobModal = ({ closeModal, selectedImages, twitterAccounts, reddit
   };
 
   const renderAIGeneratedInputTimes = () => {
-    if ( postType === 'ai' && scheduleInterval === 'set' && scheduleType !== 'random') {
+    if ( selectedWebsite === 'twitter' && postType === 'ai' && scheduleInterval === 'set' && scheduleType !== 'random') {
       return (
         <div>
           {tweetInputs.map((input, index) => (
@@ -609,47 +609,55 @@ const StartPostJobModal = ({ closeModal, selectedImages, twitterAccounts, reddit
     
     
   const renderUserGeneratedRedditSetSchedule = () => {
-    if (selectedWebsite === 'reddit' && postType === 'User' && scheduleType === 'scheduled') {
+    if (selectedWebsite === 'reddit' && scheduleType === 'scheduled') {
       return (
         <div>
           {redditPosts.map((post, index) => (
             <div key={post.id} style={{ display: 'flex', flexDirection: 'column', marginBottom: '10px' }}>
               <label style={{ marginBottom: '5px' }}>{post.id}:</label>
-              <input
-                type="text"
-                placeholder="Post Title"
-                value={post.title}
-                onChange={(e) => handleRedditChange(index, 'title', e.target.value)}
-                style={{ marginBottom: '5px' }}
-              />
-              <textarea
-                placeholder="Post Body"
-                value={post.body}
-                onChange={(e) => handleRedditChange(index, 'body', e.target.value)}
-                style={{ marginBottom: '5px' }}
-              />
-              <div className="subreddit-selector">
-                <button onClick={() => toggleRedditDropdown(index)}>Select Subreddits</button>
-                {redditDropdownOpen && dropdownIndex === index && (
-                  <div className="dropdown-menu">
-                    <div className="grid-container">
-                      {subredditList.map((subreddit) => (
-                        <div key={subreddit.id} className="grid-item">
-                          <label>
-                            <input
-                              type="checkbox"
-                              value={subreddit.name}
-                              checked={post.subreddits.includes(subreddit.name)}
-                              onChange={() => handleSubredditSelection(index, subreddit.name)}
-                            />
-                            <span>{subreddit.name}</span>
-                          </label>
+  
+              {/* Render title, body, and subreddit selector only if postType is not 'ai' */}
+              {postType !== 'ai' && (
+                <>
+                  <input
+                    type="text"
+                    placeholder="Post Title"
+                    value={post.title}
+                    onChange={(e) => handleRedditChange(index, 'title', e.target.value)}
+                    style={{ marginBottom: '5px' }}
+                  />
+                  <textarea
+                    placeholder="Post Body"
+                    value={post.body}
+                    onChange={(e) => handleRedditChange(index, 'body', e.target.value)}
+                    style={{ marginBottom: '5px' }}
+                  />
+                  <div className="subreddit-selector">
+                    <button onClick={() => toggleRedditDropdown(index)}>Select Subreddits</button>
+                    {redditDropdownOpen && dropdownIndex === index && (
+                      <div className="dropdown-menu">
+                        <div className="grid-container">
+                          {subredditList.map((subreddit) => (
+                            <div key={subreddit.id} className="grid-item">
+                              <label>
+                                <input
+                                  type="checkbox"
+                                  value={subreddit.name}
+                                  checked={post.subreddits.includes(subreddit.name)}
+                                  onChange={() => handleSubredditSelection(index, subreddit.name)}
+                                />
+                                <span>{subreddit.name}</span>
+                              </label>
+                            </div>
+                          ))}
                         </div>
-                      ))}
-                    </div>
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
+                </>
+              )}
+  
+              {/* Time and date inputs, always rendered */}
               {scheduleInterval === 'set' && (
                 <div style={{ display: 'flex', alignItems: 'center', marginBottom: '5px' }}>
                   <select
@@ -690,6 +698,7 @@ const StartPostJobModal = ({ closeModal, selectedImages, twitterAccounts, reddit
                   />
                 </div>
               )}
+  
               {index === redditPosts.length - 1 ? (
                 <button onClick={addRedditPost}>+</button>
               ) : (
@@ -701,6 +710,9 @@ const StartPostJobModal = ({ closeModal, selectedImages, twitterAccounts, reddit
       );
     }
   };
+  
+
+  
   const [aiPrompt, setAIPrompt] = useState({ style: '', contentType: '' });
 
   const handleAIPromptChange = (field, value) => {

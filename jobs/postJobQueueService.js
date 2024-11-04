@@ -1,6 +1,6 @@
 const amqp = require('amqplib');
 const { getCredsByUser, getCredsByUsernameAndHandle } = require('../socialauthentication/socialAuthData');
-const { isPostJobPresent, getMessageIdsCountForPostJob, deleteMessageIdFromPostJob, getPostJobById, deletePostJobByJobSetId, updatePostJob, deleteTweetInputFromPostJob } = require('./jobsData');
+const { isPostJobPresent, getMessageIdsCountForPostJob, deleteMessageIdFromPostJob, getPostJobById, deletePostJobByJobSetId, updatePostJob, deleteTweetInputFromPostJob, deleteRedditPostFromPostJob } = require('./jobsData');
 const { tweetOnBehalfOfUser } = require('../socialauthentication/twitterService');
 const { postToSubredditOnBehalfOfUser, postTextToSubreddit } = require('../socialauthentication/redditService');
 const { rescheduleHourScheduledRedditPosts, rescheduleHourScheduledRedditAiPosts, rescheduleSetScheduledRedditUserPosts, rescheduleSetScheduledRedditAiPosts, rescheduleRandomAiRedditJobs, rescheduleHourScheduledTwitterPosts, rescheduleHourScheduledTwitterAiPosts, rescheduleRandomAiTwitterJobs, rescheduleSetScheduledTwitterAiPosts, rescheduleSetScheduledTwitterUserPosts } = require('./postJobService');
@@ -77,30 +77,37 @@ const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 const postToReddit = async (creds, job) => {
   if (creds.redditTokens?.access_token && creds.redditTokens?.refresh_token) {
-  
+    console.log('got tokens')
+    console.log(job)
     if (job?.aiPrompt) {
+      console.log('got an ai prompt')
       const redditTitle = await createRedditTitle(job);
+      console.log(redditTitle)
       const redditBody = await createRedditPostBody(job);
-
+      console.log('posting to reddit')
       // post to each subreddit in the array
-      job.subreddits.array.forEach( async (subreddit) =>  {
-        await postTextToSubreddit(`r/${subreddit}`, creds.redditTokens.access_token, redditTitle, redditBody); 
-        await delay(2000);
+      job.subreddits.forEach( async (subreddit) =>  {
+        await postTextToSubreddit(`${subreddit}`, creds.redditTokens.access_token, redditTitle, redditBody); 
+        // await delay(2000);
+        console.log('done waiting')
       });
     }
 
     if (job?.title && job?.postBody) {
       // post to each subreddit in the array
-      job.subreddits.array.forEach( async (subreddit) =>  {
+      job.subreddits.forEach( async (subreddit) =>  {
         await postTextToSubreddit(`r/${subreddit}`, creds.redditTokens.access_token, job?.title, job?.postBody); 
         await delay(2000);
       });
     }
-
+    console.log('umm')
 
     // delete message id from db
     await updateMessages(job);
-  
+
+    // delete redditpost from db
+    await deleteRedditPost(job)
+
     await rescheduleRedditPostJob(job);
   }
 };
@@ -117,8 +124,23 @@ const updateMessages = async (job) => {
 };
 
 const deleteTweetInput = async (job) => {
+  console.log('in delete tweet input')
+  console.log(job)
+
   try {
     await deleteTweetInputFromPostJob(job.jobSetId, job.tweet);
+  } catch (e) {
+    console.log(e)
+  }
+  
+};
+
+const deleteRedditPost = async (job) => {
+  console.log('in delete reddit post')
+  console.log(job)
+
+  try {
+    await deleteRedditPostFromPostJob(job.jobSetId, job.redditPost);
   } catch (e) {
     console.log(e)
   }
@@ -145,11 +167,18 @@ const createTweetText = async (job) => {
 
 const createRedditTitle = async (job) => {
   let title;
-  do {
-    title = await makeGptCall(job.aiPrompt.contentType, job.aiPrompt.style);
-    title = title.replaceAll('"', '');
-  } while (title.length > 100);
-  return title;
+  console.log('in create title')
+  const titlePromptString = job.aiPrompt.style + '. you are creating a title for a reddit post, it must be under 100 characters, clever and always short and concise'
+  try {
+    do {
+      title = await makeGptCall(job.aiPrompt.contentType, titlePromptString);
+      title = title.replaceAll('"', '');
+    } while (title.length > 100);
+    return title;
+  } catch (e) {
+    console.log(e)
+  }
+  
 };
 
 const createRedditPostBody = async (job) => {
@@ -291,19 +320,25 @@ const rescheduleRedditPostJob = async (job) => {
       if (activeJob.scheduleinterval === 'set') {
         //   const {jobs, dbJobObject, activeJobObject} = await rescheduleSetInterval(activeJob);
         console.log('inside reschedule set time jobs... jobs below');
-        //   console.log(jobs);
-
-        if (activeJob.posttype === 'ai') {
-          const { jobs, activeJobObject } = await rescheduleSetScheduledRedditAiPosts(activeJob);
-          await queueAndUpdateJobs(jobs, activeJobObject);
+          console.log(activeJob);
+          console.log('active job ^^')
+        
+        // if it is set and we have 0 reddit posts left, we need to delete the job
+        if (activeJob.redditposts && activeJob.redditposts?.length > 0) {
+          console.log('we still have jobs')
+          if (activeJob.posttype === 'ai') {
+            const { jobs, activeJobObject } = await rescheduleSetScheduledRedditAiPosts(activeJob);
+            await queueAndUpdateJobs(jobs, activeJobObject);
+          } else {
+            const { jobs, activeJobObject } = await rescheduleSetScheduledRedditUserPosts(activeJob);
+            await queueAndUpdateJobs(jobs, activeJobObject);
+          }
         } else {
-          const { jobs, activeJobObject } = await rescheduleSetScheduledRedditUserPosts(activeJob);
-          await queueAndUpdateJobs(jobs, activeJobObject);
+          // no jobs left, delete job
+          console.log('gonna delete job')
+          await deletePostJobByJobSetId(activeJob.job_set_id)
         }
-
-        //   await addJobsToQueue(jobs)
-  
-        //   await updateActiveJob(activeJobObject);
+      
       } else if (activeJob.scheduleinterval === 'hour'){
         console.log('inside reschedule hourly jobs... jobs below');
                  
@@ -317,9 +352,6 @@ const rescheduleRedditPostJob = async (job) => {
           const { jobs, activeJobObject } = await rescheduleHourScheduledRedditPosts(activeJob);
           await queueAndUpdateJobs(jobs, activeJobObject);
         }
-
-        //   await addJobsToQueue()
-        //   await updateActiveJob(activeJobObject);
       }
     }
   } else {

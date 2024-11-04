@@ -51,7 +51,7 @@ const createPostJobObject = (obj, jobs) => {
     tweetInputs: obj?.tweetInputs || obj?.tweetinputs || [], // Array of tweet inputs (if applicable)
     aiPrompt: obj?.aiPrompt || obj?.aiprompt || null, // AI prompt object (if applicable)
     redditPosts: obj?.redditPosts || obj?.redditposts || [], // Array of Reddit posts (if applicable)
-    numberOfPosts: obj?.numberOfPosts || obj?.tweetInputs.length || obj?.tweetinputs, // Total number of posts to be created
+    numberOfPosts: obj?.numberOfPosts || obj?.tweetInputs?.length || obj?.tweetinputs || null, // Total number of posts to be created
     handle: obj?.handle || jobs?.handle
   };
   
@@ -335,7 +335,8 @@ const rescheduleSetScheduledTwitterAiPosts = async (request) => {
         scheduledTime: scheduledTime, // The exact scheduled time in milliseconds
         jobType: 'postJob',
         handle: request.handle,
-        website: request.selectedwebsite
+        website: request.selectedwebsite,
+        tweet: tweetInput
       };
       console.log(`AI Job Created: ${JSON.stringify(job)}`);
       jobs.push(job); // Add the job to the array
@@ -344,7 +345,7 @@ const rescheduleSetScheduledTwitterAiPosts = async (request) => {
       console.log(`AI Job not created, scheduled time (${new Date(scheduledTime).toISOString()}) is outside the allowed window`);
     }
   }
-  
+    let newMessageIds = []
   // If no jobs were scheduled within the 48-hour window, create a bridge job
   if (!scheduledJobFound) {
     console.log('No jobs found within the 48-hour window, creating a bridge job');
@@ -360,7 +361,7 @@ const rescheduleSetScheduledTwitterAiPosts = async (request) => {
       handle: request.handle,
       website: request.selectedwebsite
     };
-  
+    newMessageIds.push(message_id)
     console.log(`Bridge Job Created: ${JSON.stringify(bridgeJob)}`);
     jobs.push(bridgeJob); // Add the bridge job to the array
   }
@@ -369,6 +370,7 @@ const rescheduleSetScheduledTwitterAiPosts = async (request) => {
   // Active job object for DB insertion
   const activeJobObject = {
     jobSetId,
+    message_ids: newMessageIds,
     username: request.username,
     postsScheduled: jobs.length,
     postsCreated: request.postscreated + nonBridgeJobs.length, // Update the posts created count
@@ -463,12 +465,13 @@ const handleHourScheduledAiPost = (request) => {
         message_id: uuidv4(), // Unique ID for each job
         jobSetId: jobSetId, // Same ID for all jobs in this set
         userId: request.username || 'defaultUserId', // Use provided username or default
-        content: `Scheduled hourly AI post for ${request.selectedWebsite}`, // Default content for the AI post
+        content: `postJob`, // Default content for the AI post
         scheduledTime: nextScheduledTime, // The exact scheduled time in milliseconds
         aiPrompt: request.aiPrompt, // Use the AI prompt from the request
         jobType: 'postJob',
         handle: request.handle,
-        website: request.selectedWebsite
+        website: request.selectedWebsite,
+        tweet: tweetInput
       };
       console.log(`AI Job Created: ${JSON.stringify(job)}`);
       jobs.push(job); // Add the job to the array
@@ -720,7 +723,8 @@ const handleSetScheduledTwitterAiPosts = (request) => {
           scheduledTime: scheduledTime, // The exact scheduled time in milliseconds
           jobType: 'postJob',
           handle: request.handle,
-          website: request.selectedWebsite
+          website: request.selectedWebsite,
+          tweet: tweetInput
         };
         console.log(`AI Job Created: ${JSON.stringify(job)}`);
         jobs.push(job); // Add the job to the array
@@ -1339,7 +1343,7 @@ const handleSetScheduledHourlyAiPostsReddit = (request) => {
         aiPrompt: request.aiPrompt, // Use the AI prompt from the request
         jobType: request.jobType,
         handle: request.handle,
-        website: request.selectedWebsite
+        website: request.selectedWebsite,
       };
       console.log(`AI Job Created: ${JSON.stringify(job)}`);
       jobs.push(job); // Add the job to the array
@@ -1424,151 +1428,213 @@ const rescheduleHourScheduledRedditAiPosts = async (request) => {
   console.log(`Jobs Rescheduled: ${JSON.stringify(jobs)}`);
   return { jobs, activeJobObject }; // Return the array of jobs and the active job object
 };
-  
 
 const handleSetScheduledAiPostsReddit = (request) => {
-  console.log('Handling Reddit AI posts');
-  console.log(request);
-
-  const jobs = [];
-  const maxDurationInMilliseconds = 48 * 60 * 60 * 1000; // 48 hours in milliseconds
-  const jobSetId = uuidv4(); // Unique ID for this job set
-
-  const now = Date.now(); // Current time in milliseconds
-  const maxDate = now + maxDurationInMilliseconds; // Max scheduling time: current time + 48 hours
-
-  console.log(`Current Time (now): ${new Date(now).toISOString()}`);
-  console.log(`Max Scheduling Time (maxDate): ${new Date(maxDate).toISOString()}`);
-
-  // Get the interval from the request (in hours) and convert it to milliseconds
-  const hourInterval = request.hourInterval || 1; // Default to 1 hour if not provided
-  const intervalInMilliseconds = hourInterval * 60 * 60 * 1000; // Convert hours to milliseconds
-
-  let nextScheduledTime = now; // Start scheduling from the current time
-
-  // Loop through the number of posts to schedule jobs
-  for (let i = 0; i < request.selectedSubreddits.length; i++) {
-    const subreddit = request.selectedSubreddits[i];
-
-    console.log(`Processing AI post for subreddit: ${subreddit.name}`);
-
-    // Check if the next scheduled time is within the allowed 48-hour window
-    if (nextScheduledTime <= maxDate && nextScheduledTime >= now) {
-      const job = {
-        message_id: uuidv4(), // Unique ID for each job
+    console.log('Handling Reddit AI posts');
+    console.log(request);
+  
+    const jobs = [];
+    const maxDurationInMilliseconds = 48 * 60 * 60 * 1000; // 48 hours in milliseconds
+    const bridgeJobInterval = 24 * 60 * 60 * 1000; // 24 hours for bridge job
+    const jobSetId = uuidv4(); // Unique ID for this job set
+  
+    const now = new Date(); // Current time as a Date object in local time
+    const nowTimestamp = now.getTime(); // Current time in milliseconds
+    const maxDate = nowTimestamp + maxDurationInMilliseconds; // Max scheduling time: current time + 48 hours
+  
+    console.log(`Current Time (Local): ${now.toString()}`);
+    console.log(`Current Time (UTC): ${now.toISOString()}`);
+    console.log(`Max Scheduling Time (Local): ${new Date(maxDate).toString()}`);
+    console.log(`Max Scheduling Time (UTC): ${new Date(maxDate).toISOString()}`);
+  
+    let scheduledJobFound = false;
+  
+    // Iterate over each post in redditPosts
+    for (const redditPost of request.redditPosts) {
+      console.log(`Processing AI Input for Reddit Post: ${JSON.stringify(redditPost)}`);
+  
+      // Parse the date and time from the redditPost
+      const postDateStr = redditPost.date; // Format: 'YYYY-MM-DD'
+      const postTime = redditPost.time; // Format: { hour: '1', minute: '00', ampm: 'AM' }
+  
+      let hour = parseInt(postTime.hour, 10);
+      const minute = parseInt(postTime.minute, 10);
+      const ampm = postTime.ampm.toLowerCase();
+  
+      // Adjust hour based on AM/PM
+      if (ampm === 'am' && hour === 12) {
+        hour = 0; // Handle midnight
+      } else if (ampm === 'pm' && hour !== 12) {
+        hour += 12; // Handle PM times except for noon
+      }
+  
+      // Parse the date string
+      const [year, month, day] = postDateStr.split('-').map(Number);
+  
+      // Create a Date object in local time
+      const postDate = new Date(year, month - 1, day, hour, minute, 0);
+      const scheduledTime = postDate.getTime(); // Local time in milliseconds since epoch
+  
+      console.log(`Scheduled Time (Local): ${postDate.toString()}`);
+      console.log(`Scheduled Time (UTC): ${postDate.toISOString()}`);
+  
+      // Ensure the job is within the 48-hour window
+      if (scheduledTime <= maxDate && scheduledTime >= nowTimestamp) {
+        const job = {
+          message_id: uuidv4(), // Unique ID for each job
+          jobSetId: jobSetId, // Same ID for all jobs in this set
+          userId: request.username || 'defaultUserId', // Use provided username or default
+          content: `postJob`, // Content for the post
+          aiPrompt: request.aiPrompt || 'Generated AI prompt', // Placeholder or provided AI prompt
+          scheduledTime: scheduledTime, // The exact scheduled time in milliseconds
+          jobType: 'postJob',
+          handle: request.handle,
+          website: request.selectedWebsite,
+          subreddits: request.selectedSubreddits.map(subreddit => subreddit.name),
+          redditPost: redditPost // Include the redditPost object if needed
+        };
+        console.log(`AI Job Created: ${JSON.stringify(job)}`);
+        jobs.push(job); // Add the job to the array
+        scheduledJobFound = true;
+      } else {
+        console.log(`AI Job not created, scheduled time (${postDate.toISOString()}) is outside the allowed window`);
+      }
+    }
+  
+    // If no jobs were scheduled within the 48-hour window, create a bridge job
+    if (!scheduledJobFound) {
+      console.log('No AI jobs found within the 48-hour window, creating a bridge job');
+  
+      const bridgeJobDate = new Date(nowTimestamp + bridgeJobInterval); // 24 hours from now
+      const bridgeJob = {
+        message_id: uuidv4(), // Unique ID for the bridge job
         jobSetId: jobSetId, // Same ID for all jobs in this set
         userId: request.username || 'defaultUserId', // Use provided username or default
-        content: `AI-generated Reddit post for ${request.selectedWebsite}`, // Content for the post
-        subreddits: request.selectedSubreddits.map(subreddit => subreddit.name), // Add all selected subreddits to the job
-        scheduledTime: nextScheduledTime, // The exact scheduled time in milliseconds
-        aiPrompt: request.aiPrompt || 'Generated AI prompt', // Placeholder or provided AI prompt
-        jobType: request.jobType,
+        content: 'Bridge job to ensure continuity', // Content for the bridge job
+        aiPrompt: 'Bridge AI post', // Placeholder AI prompt for the bridge job
+        scheduledTime: bridgeJobDate.getTime(), // Scheduled 24 hours from now
+        jobType: 'bridgeJob', // Indicate it's a bridge job
         handle: request.handle,
         website: request.selectedWebsite
       };
-      console.log(`AI Job Created: ${JSON.stringify(job)}`);
-      jobs.push(job); // Add the job to the array
-    } else {
-      console.log(`AI Job not created, scheduled time (${new Date(nextScheduledTime).toISOString()}) is outside the allowed window`);
-      break; // Exit if the next scheduled time is outside the 48-hour window
+  
+      console.log(`Bridge Job Created: ${JSON.stringify(bridgeJob)}`);
+      jobs.push(bridgeJob); // Add the bridge job to the array
     }
-
-    // Increment the next scheduled time by the hour interval
-    nextScheduledTime += intervalInMilliseconds;
-  }
-
-  console.log(`AI Jobs Created: ${JSON.stringify(jobs)}`);
-  return jobs; // Return the array of job objects
-};
+  
+    console.log(`AI Jobs Created: ${JSON.stringify(jobs)}`);
+    return jobs; // Return the array of job objects
+  };
 
 const rescheduleSetScheduledRedditAiPosts = async (request) => {
-  console.log('Handling Reddit AI posts reschedule');
-  console.log(request);
+    console.log('Handling Reddit AI posts reschedule');
+    console.log(request);
   
-  const jobs = [];
-  const maxDurationInMilliseconds = 48 * 60 * 60 * 1000; // 48 hours in milliseconds
-  const bridgeJobInterval = 24 * 60 * 60 * 1000; // 24 hours for bridge job
-  const jobSetId = uuidv4(); // Unique ID for this job set
+    const jobs = [];
+    const maxDurationInMilliseconds = 48 * 60 * 60 * 1000; // 48 hours in milliseconds
+    const bridgeJobInterval = 24 * 60 * 60 * 1000; // 24 hours for bridge job
+    const jobSetId = uuidv4(); // Unique ID for this job set
   
-  const now = Date.now(); // Current time in milliseconds
-  const maxDate = now + maxDurationInMilliseconds; // Max scheduling time: current time + 48 hours
+    const now = Date.now(); // Current time in milliseconds
+    const maxDate = now + maxDurationInMilliseconds; // Max scheduling time: current time + 48 hours
   
-  console.log(`Current Time (now): ${new Date(now).toISOString()}`);
-  console.log(`Max Scheduling Time (maxDate): ${new Date(maxDate).toISOString()}`);
+    console.log(`Current Time (now): ${new Date(now).toISOString()}`);
+    console.log(`Max Scheduling Time (maxDate): ${new Date(maxDate).toISOString()}`);
   
-  // Get the interval from the request (in hours) and convert it to milliseconds
-  const hourInterval = request.hourInterval || 1; // Default to 1 hour if not provided
-  const intervalInMilliseconds = hourInterval * 60 * 60 * 1000; // Convert hours to milliseconds
+    // Get the interval from the request (in hours) and convert it to milliseconds
+    const hourInterval = request.hourInterval || 1; // Default to 1 hour if not provided
+    const intervalInMilliseconds = hourInterval * 60 * 60 * 1000; // Convert hours to milliseconds
   
-  let nextScheduledTime = now; // Start scheduling from the current time
-  let scheduledJobFound = false;
+    let nextScheduledTime = now; // Start scheduling from the current time
+    let scheduledJobFound = false;
+        console.log(request.redditPosts)
+    
+    // Iterate through the redditPosts to create jobs
+    for (const redditPost in request.redditPosts) {
+      console.log(`Processing AI post for redditPost: ${JSON.stringify(redditPost)}`);
   
-  // Iterate through the subreddits to create jobs
-  for (let i = 0; i < request.selectedSubreddits.length; i++) {
-    const subreddit = request.selectedSubreddits[i];
+      // Parse the date and time from the redditPost
+      const postDateStr = redditPost.date; // Format: 'YYYY-MM-DD'
+      const postTime = redditPost.time; // Format: { hour: '1', minute: '00', ampm: 'AM' }
   
-    console.log(`Processing AI post for subreddit: ${subreddit.name}`);
+      let hour = parseInt(postTime.hour, 10);
+      const minute = parseInt(postTime.minute, 10);
+      const ampm = postTime.ampm.toLowerCase();
   
-    // Check if the next scheduled time is within the allowed 48-hour window
-    if (nextScheduledTime <= maxDate && nextScheduledTime >= now) {
-      const job = {
-        message_id: uuidv4(), // Unique ID for each job
-        jobSetId: jobSetId, // Same ID for all jobs in this set
-        userId: request.username || 'defaultUserId', // Use provided username or default
-        content: `AI-generated Reddit post for subreddit ${subreddit.name}`, // Content for the post
-        subreddit: subreddit.name, // Subreddit name for this job
-        aiPrompt: request.aiPrompt || 'Generated AI prompt', // Placeholder or provided AI prompt
-        scheduledTime: nextScheduledTime, // The exact scheduled time in milliseconds
-        jobType: request.jobType,
-        handle: request.handle,
-        website: request.selectedWebsite
-      };
-      console.log(`AI Job Created: ${JSON.stringify(job)}`);
-      jobs.push(job); // Add the job to the array
-      scheduledJobFound = true;
-    } else {
-      console.log(`AI Job not created, scheduled time (${new Date(nextScheduledTime).toISOString()}) is outside the allowed window`);
-      break; // Exit if the next scheduled time is outside the 48-hour window
+      // Adjust hour based on AM/PM
+      if (ampm === 'am' && hour === 12) {
+        hour = 0; // Handle midnight
+      } else if (ampm === 'pm' && hour !== 12) {
+        hour += 12; // Handle PM times except for noon
+      }
+  
+      // Set local date and time for the post
+      const [year, month, day] = postDateStr.split('-').map(Number);
+      const scheduledTime = new Date(year, month - 1, day, hour, minute, 0).getTime(); // Local time in milliseconds
+  
+      // Check if the next scheduled time is within the allowed 48-hour window
+      if (scheduledTime <= maxDate && scheduledTime >= now) {
+        const job = {
+          message_id: uuidv4(), // Unique ID for each job
+          jobSetId: jobSetId, // Same ID for all jobs in this set
+          userId: request.username || 'defaultUserId', // Use provided username or default
+          content: `postJob`, // Content for the post
+          subreddit: redditPost.subreddit || 'defaultSubreddit', // Subreddit from redditPost or default
+          aiPrompt: request.aiPrompt || 'Generated AI prompt', // Placeholder or provided AI prompt
+          scheduledTime: scheduledTime, // The exact scheduled time in milliseconds
+          jobType: request.jobType,
+          handle: request.handle,
+          website: request.selectedWebsite || request.selectedwebsite,
+          subreddits: request.selectedSubreddits.map(subreddit => subreddit.name),
+          redditPosts: request.redditPosts || request.redditposts
+        };
+        console.log(`AI Job Created: ${JSON.stringify(job)}`);
+        jobs.push(job); // Add the job to the array
+        scheduledJobFound = true;
+      } else {
+        console.log(`AI Job not created, scheduled time (${new Date(scheduledTime).toISOString()}) is outside the allowed window`);
+        break; // Exit if the next scheduled time is outside the 48-hour window
+      }
+  
+      // Increment the next scheduled time by the hour interval
+      nextScheduledTime += intervalInMilliseconds;
     }
   
-    // Increment the next scheduled time by the hour interval
-    nextScheduledTime += intervalInMilliseconds;
-  }
+    // If no jobs were scheduled within the 48-hour window, create a bridge job
+    if (!scheduledJobFound) {
+      console.log('No jobs found within the 48-hour window, creating a bridge job');
   
-  // If no jobs were scheduled within the 48-hour window, create a bridge job
-  if (!scheduledJobFound) {
-    console.log('No jobs found within the 48-hour window, creating a bridge job');
+      const bridgeJob = {
+        message_id: uuidv4(), // Unique ID for the bridge job
+        jobSetId: jobSetId, // Same ID for all jobs in this set
+        userId: request.username || 'defaultUserId', // Use provided username or default
+        content: 'Bridge job to ensure continuity for Reddit posts', // Content for the bridge job
+        aiPrompt: 'Bridge AI prompt', // Placeholder AI prompt for the bridge job
+        scheduledTime: now + bridgeJobInterval, // Scheduled 24 hours from now
+        jobType: 'postJob', // Indicate it's a bridge job
+        handle: request.handle,
+        website: request.selectedWebsite || request.selectedwebsite,
+      };
   
-    const bridgeJob = {
-      message_id: uuidv4(), // Unique ID for each job
-      jobSetId: jobSetId, // Same ID for all jobs in this set
-      userId: request.username || 'defaultUserId', // Use provided username or default
-      content: 'Bridge job to ensure continuity for Reddit posts', // Content for the bridge job
-      aiPrompt: 'Bridge AI prompt', // Placeholder AI prompt for the bridge job
-      scheduledTime: now + bridgeJobInterval, // Scheduled 24 hours from now
-      jobType: 'postJob', // Indicate it's a bridge job
-      handle: request.handle,
-      website: request.selectedWebsite
+      console.log(`Bridge Job Created: ${JSON.stringify(bridgeJob)}`);
+      jobs.push(bridgeJob); // Add the bridge job to the array
+    }
+  
+    // Active job object for DB insertion
+    const activeJobObject = {
+      jobSetId,
+      username: request.username,
+      postsScheduled: jobs.length,
+      postsCreated: request.postsCreated + jobs.length, // Update the posts created count
+      scheduledPosts: jobs,
+      jobType: request.jobType,
+      handle: request.handle
     };
   
-    console.log(`Bridge Job Created: ${JSON.stringify(bridgeJob)}`);
-    jobs.push(bridgeJob); // Add the bridge job to the array
-  }
-  
-  // Active job object for DB insertion
-  const activeJobObject = {
-    jobSetId,
-    username,
-    postsScheduled: jobs.length,
-    postsCreated: postsCreated + jobs.length, // Update the posts created count
-    scheduledPosts: jobs,
-    jobType,
-    handle: request.handle
+    console.log(`Active Job Object Created: ${JSON.stringify(activeJobObject)}`);
+    return { jobs, activeJobObject }; // Return the jobs and the active job object
   };
   
-  console.log(`Active Job Object Created: ${JSON.stringify(activeJobObject)}`);
-  return { jobs, activeJobObject }; // Return the jobs and the active job object
-};
   
 
 const handleAiRandomRedditPosts = (request) => {

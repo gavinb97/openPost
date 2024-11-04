@@ -768,7 +768,7 @@ const insertPostJob = async (postJob) => {
     tweetInputs,             
     aiPrompt,                
     redditPosts,             
-    parseInt(numberOfPosts, 10),
+    parseInt(numberOfPosts, 10) || 999,
     numberOfMessages, // posts created is the number of messages created.
     handle
   ];
@@ -959,6 +959,67 @@ const deleteTweetInputFromPostJob = async (job_set_id, tweetInputToDelete) => {
     console.log('Tweet input deleted successfully from post job.');
   } catch (err) {
     console.error('Error deleting tweet input from post job', err);
+    throw err;
+  }
+};
+
+const deleteRedditPostFromPostJob = async (job_set_id, redditPostToDelete) => {
+  console.log('Attempting to delete reddit post from post job...');
+  console.log('Reddit post to delete:', redditPostToDelete);
+  console.log('Job set ID:', job_set_id);
+
+  const selectQuery = `
+    SELECT redditposts
+    FROM postjobs
+    WHERE job_set_id = $1;
+  `;
+
+  const updateQuery = `
+    UPDATE postjobs
+    SET redditposts = $1
+    WHERE job_set_id = $2;
+  `;
+
+  try {
+    const client = await pool.connect();
+
+    // Retrieve the current redditPosts for the post job
+    const res = await client.query(selectQuery, [job_set_id]);
+    if (res.rows.length === 0) {
+      client.release();
+      throw new Error(`Post job with job_set_id ${job_set_id} not found.`);
+    }
+
+    let { redditposts } = res.rows[0];
+
+    // If redditPosts is not an array, return an error
+    if (!Array.isArray(redditposts)) {
+      throw new Error('redditposts is not an array');
+    }
+
+    console.log('Original redditPosts:', redditposts);
+
+    // Filter out the reddit post based on a deep comparison of each field
+    const updatedRedditPosts = redditposts.filter(post => {
+      return !(
+        post.id === redditPostToDelete.id &&
+        post.date === redditPostToDelete.date &&
+        post.text === redditPostToDelete.text &&
+        post.time.ampm === redditPostToDelete.time.ampm &&
+        post.time.hour === redditPostToDelete.time.hour &&
+        post.time.minute === redditPostToDelete.time.minute
+      );
+    });
+
+    console.log('Updated redditPosts:', updatedRedditPosts);
+
+    // Update the post job with the new redditPosts array
+    await client.query(updateQuery, [updatedRedditPosts, job_set_id]);
+
+    client.release();
+    console.log('Reddit post deleted successfully from post job.');
+  } catch (err) {
+    console.error('Error deleting reddit post from post job', err);
     throw err;
   }
 };
@@ -1206,5 +1267,6 @@ module.exports = {
   updatePostJob,
   getActivePostJobsByUserId,
   deleteActivePostJobByJobSetId,
-  deleteTweetInputFromPostJob
+  deleteTweetInputFromPostJob,
+  deleteRedditPostFromPostJob
 };
