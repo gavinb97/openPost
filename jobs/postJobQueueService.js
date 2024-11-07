@@ -101,12 +101,15 @@ const postToReddit = async (creds, job) => {
       });
     }
     console.log('umm')
-
+  
     // delete message id from db
     await updateMessages(job);
 
-    // delete redditpost from db
-    await deleteRedditPost(job)
+    // only delete if its not set schedule
+    if (job?.redditPost) {
+      // delete the post
+      await deleteRedditPost(job)
+    }
 
     await rescheduleRedditPostJob(job);
   }
@@ -342,8 +345,6 @@ const rescheduleRedditPostJob = async (job) => {
       } else if (activeJob.scheduleinterval === 'hour'){
         console.log('inside reschedule hourly jobs... jobs below');
                  
-        const {jobs, dbJobObject, activeJobObject} = await rescheduleHourInterval(activeJob);
-        console.log(jobs);
 
         if (activeJob.posttype === 'ai') {
           const { jobs, activeJobObject } = await rescheduleHourScheduledRedditAiPosts(activeJob);

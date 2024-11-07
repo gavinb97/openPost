@@ -453,7 +453,7 @@ const handleHourScheduledAiPost = (request) => {
   const hourInterval = request.hourInterval || 1; // Default to 1 hour if not provided
   const intervalInMilliseconds = hourInterval * 60 * 60 * 1000; // Convert hours to milliseconds
 
-  let nextScheduledTime = now; // Start scheduling from the current time
+  let nextScheduledTime = now + 15 * 1000; // Start scheduling from the current time
 
   // Loop through the number of posts and schedule them at intervals
   for (let i = 0; i < request.numberOfPosts; i++) {
@@ -506,7 +506,7 @@ const handleHourScheduledTwitterPosts = (request) => {
   const hourInterval = request.hourInterval || 1; // Default to 1 hour if not provided
   const intervalInMilliseconds = hourInterval * 60 * 60 * 1000; // Convert hours to milliseconds
 
-  let nextScheduledTime = now; // Start scheduling from the current time
+  let nextScheduledTime = now + 15 * 1000; // Start scheduling from the current time
 
   // Loop through tweetInputs and schedule them at intervals
   for (let i = 0; i < request.tweetInputs.length; i++) {
@@ -557,7 +557,7 @@ const rescheduleHourScheduledTwitterPosts = async (request) => {
   const hourInterval = request.hourInterval || 1; // Default to 1 hour if not provided
   const intervalInMilliseconds = hourInterval * 60 * 60 * 1000; // Convert hours to milliseconds
   
-  let nextScheduledTime = now; // Start scheduling from the current time
+  let nextScheduledTime = now + 15 * 1000; // Start scheduling from the current time
   
   // Loop through tweetInputs and schedule them at intervals
   for (let i = 0; i < request.tweetInputs.length; i++) {
@@ -621,7 +621,7 @@ const rescheduleHourScheduledTwitterAiPosts = async (request) => {
   
   // Get the interval from the request (in hours) and convert it to milliseconds
   const intervalInMilliseconds = (hourInterval || 1) * 60 * 60 * 1000; // Default to 1 hour if not provided
-  let nextScheduledTime = now; // Start scheduling from the current time
+  let nextScheduledTime = now + 15 * 1000; // Start scheduling from the current time
   
   // Calculate the remaining number of posts we need to schedule
   for (let i = postsCreated; i < numberOfPosts && i - postsCreated < remainingPosts; i++) {
@@ -1213,7 +1213,7 @@ const handleHourScheduledRedditPosts = (request) => {
   const hourInterval = request.hourInterval || 1; // Default to 1 hour if not provided
   const intervalInMilliseconds = hourInterval * 60 * 60 * 1000; // Convert hours to milliseconds
 
-  let nextScheduledTime = now; // Start scheduling from the current time
+  let nextScheduledTime = now + 15 * 1000; // Start scheduling from the current time
 
   // Loop through redditPosts and schedule them at intervals
   for (let i = 0; i < request.redditPosts.length; i++) {
@@ -1266,7 +1266,7 @@ const rescheduleHourScheduledRedditPosts = async (request) => {
   const hourInterval = request.hourInterval || 1; // Default to 1 hour if not provided
   const intervalInMilliseconds = hourInterval * 60 * 60 * 1000; // Convert hours to milliseconds
   
-  let nextScheduledTime = now; // Start scheduling from the current time
+  let nextScheduledTime = now + 15 * 1000; // Start scheduling from the current time
   
   // Loop through redditPosts and schedule them at intervals
   for (let i = 0; i < request.redditPosts.length; i++) {
@@ -1325,7 +1325,7 @@ const handleSetScheduledHourlyAiPostsReddit = (request) => {
   const hourInterval = request.hourInterval || 1; // Default to 1 hour if not provided
   const intervalInMilliseconds = hourInterval * 60 * 60 * 1000; // Convert hours to milliseconds
 
-  let nextScheduledTime = now; // Start scheduling from the current time
+  let nextScheduledTime = now + 15 * 1000; // Start scheduling from the current time
 
   // Loop through the number of posts to schedule jobs
   for (let i = 0; i < request.numberOfPosts; i++) {
@@ -1337,13 +1337,13 @@ const handleSetScheduledHourlyAiPostsReddit = (request) => {
         message_id: uuidv4(), // Unique ID for each job
         jobSetId: jobSetId, // Same ID for all jobs in this set
         userId: request.username || 'defaultUserId', // Use provided username or default
-        content: `Scheduled hourly AI post for ${request.selectedWebsite}`, // Default content for the AI post
+        content: `postJob`, // Default content for the AI post
         subreddits: request.selectedSubreddits.map(subreddit => subreddit.name), // Add all selected subreddits to the job
         scheduledTime: nextScheduledTime, // The exact scheduled time in milliseconds
         aiPrompt: request.aiPrompt, // Use the AI prompt from the request
         jobType: request.jobType,
         handle: request.handle,
-        website: request.selectedWebsite,
+        website: request.selectedWebsite
       };
       console.log(`AI Job Created: ${JSON.stringify(job)}`);
       jobs.push(job); // Add the job to the array
@@ -1384,7 +1384,7 @@ const rescheduleHourScheduledRedditAiPosts = async (request) => {
   
   // Get the interval from the request (in hours) and convert it to milliseconds
   const intervalInMilliseconds = (hourInterval || 1) * 60 * 60 * 1000; // Default to 1 hour if not provided
-  let nextScheduledTime = now; // Start scheduling from the current time
+  let nextScheduledTime = now + 15 * 1000; // Start scheduling from the current time
   
   // Calculate the remaining number of posts we need to schedule
   for (let i = postsCreated; i < numberOfPosts && i - postsCreated < remainingPosts; i++) {
@@ -1396,7 +1396,7 @@ const rescheduleHourScheduledRedditAiPosts = async (request) => {
         message_id: uuidv4(), // Unique ID for each job
         jobSetId: jobSetId, // Same ID for all jobs in this set
         userId: username || 'defaultUserId', // Use provided username or default
-        content: `Scheduled hourly AI post for ${selectedWebsite}`, // Content for the post
+        content: `postJob`, // Content for the post
         subreddits: selectedSubreddits.map(subreddit => subreddit.name), // Add selected subreddits
         scheduledTime: nextScheduledTime, // The exact scheduled time in milliseconds
         aiPrompt: aiPrompt, // Use the AI prompt from the request
@@ -1545,7 +1545,7 @@ const rescheduleSetScheduledRedditAiPosts = async (request) => {
     const hourInterval = request.hourInterval || 1; // Default to 1 hour if not provided
     const intervalInMilliseconds = hourInterval * 60 * 60 * 1000; // Convert hours to milliseconds
   
-    let nextScheduledTime = now; // Start scheduling from the current time
+    let nextScheduledTime = now + 15 * 1000; // Start scheduling from the current time
     let scheduledJobFound = false;
         console.log(request.redditPosts)
     
