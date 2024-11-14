@@ -65,7 +65,11 @@ const postToTwitter = async (creds, job) => {
     await updateMessages(job);
         
     // remove tweetinput
-    await deleteTweetInput(job);
+    if (job.tweetInput) {
+      await deleteTweetInput(job);
+    }
+
+    // await deleteTweetInput(job);
 
     await rescheduleTwitterPostJob(job);
   } else {
@@ -245,10 +249,10 @@ const rescheduleTwitterPostJob = async (job) => {
             console.log('job deleted');
           } else {
             console.log('there are more posts to post');
-            const {jobs, newJobObject} = await rescheduleSetScheduledTwitterAiPosts(activeJob);
+            const {jobs, activeJobObject} = await rescheduleSetScheduledTwitterAiPosts(activeJob);
             console.log('jobs scheduled!');
 
-            await queueAndUpdateJobs(jobs, newJobObject);
+            await queueAndUpdateJobs(jobs, activeJobObject);
           }
         } else {
           console.log(activeJob);

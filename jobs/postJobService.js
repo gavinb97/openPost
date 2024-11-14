@@ -144,7 +144,7 @@ const handleAiRandomTwitterPosts = (request) => {
         message_id: uuidv4(), // Unique ID for each job
         jobSetId: jobSetId, // Same ID for all jobs in this set
         userId: request.username || 'defaultUserId', // Use provided username or default
-        content: `Random AI post for ${request.selectedWebsite}`, // Default content for AI post
+        content: `postJob`, // Default content for AI post
         scheduledTime: Date.now() + accumulatedDelay, // Scheduled time in milliseconds
         aiPrompt: request.aiPrompt, // The AI prompt for generating the content
         jobType: 'postJob',
@@ -197,8 +197,8 @@ const rescheduleRandomAiRedditJobs = async (activeJob) => {
           message_id: uuidv4(), // Unique ID for each job
           jobSetId: jobSetId, // Same ID for all jobs in this set
           userId: activeJob.userId, // Use the user ID from the active job
-          content: `Random AI post for subreddit: ${subreddit.name}`, // Default content for AI post
-          subreddit: subreddit.name, // Subreddit to post to
+          content: `postJob`, // Default content for AI post
+          subreddits: [subreddit.name], // Subreddit to post to
           scheduledTime: Date.now() + accumulatedDelay, // Scheduled time in milliseconds
           aiPrompt: activeJob.aiPrompt, // The AI prompt for generating the content
           jobType: 'postJob', // Job type from the active job
@@ -258,7 +258,7 @@ const rescheduleRandomAiTwitterJobs = async (activeJob) => {
         message_id: uuidv4(), // Unique ID for each job
         jobSetId: jobSetId, // Same ID for all jobs in this set
         userId: activeJob.userid, // Use the user ID from the active job
-        content: `Random AI post for ${activeJob.selectedwebsite}`, // Default content for AI post
+        content: `postJob`, // Default content for AI post
         scheduledTime: Date.now() + accumulatedDelay, // Scheduled time in milliseconds
         aiPrompt: activeJob.aiprompt, // The AI prompt for generating the content
         jobType: 'postJob', // Job type from the active job
@@ -330,7 +330,7 @@ const rescheduleSetScheduledTwitterAiPosts = async (request) => {
         message_id: uuidv4(), // Unique ID for each job
         jobSetId: jobSetId, // Same ID for all jobs in this set
         userId: request.username || 'defaultUserId', // Use provided username or default
-        content: `AI-generated post for ${request.selectedWebsite}`, // Content for the post
+        content: `postJob`, // Content for the post
         aiPrompt: request.aiPrompt || 'Generated AI prompt', // Placeholder or provided AI prompt
         scheduledTime: scheduledTime, // The exact scheduled time in milliseconds
         jobType: 'postJob',
@@ -361,7 +361,7 @@ const rescheduleSetScheduledTwitterAiPosts = async (request) => {
       handle: request.handle,
       website: request.selectedwebsite
     };
-    newMessageIds.push(message_id)
+    newMessageIds.push(bridgeJob.message_id)
     console.log(`Bridge Job Created: ${JSON.stringify(bridgeJob)}`);
     jobs.push(bridgeJob); // Add the bridge job to the array
   }
@@ -418,7 +418,7 @@ const handleUserRandomTwitterPosts = (request) => {
         message_id: uuidv4(), // Unique ID for each job
         jobSetId: jobSetId, // Same ID for all jobs in this set
         userId: request.username || 'defaultUserId', // Use provided username or default
-        content: `User post for ${request.selectedWebsite}`,
+        content: `postJob`,
         tweet: request.tweetInputs[i].text, // Use text from tweetInputs
         scheduledTime: Date.now() + accumulatedDelay, // Scheduled time in milliseconds
         jobType: 'postJob',
@@ -458,7 +458,7 @@ const handleHourScheduledAiPost = (request) => {
   // Loop through the number of posts and schedule them at intervals
   for (let i = 0; i < request.numberOfPosts; i++) {
     console.log(`Processing AI post ${i + 1}`);
-
+    const tweetInput = request.tweetInputs[i]
     // Check if the next scheduled time is within the allowed 48-hour window
     if (nextScheduledTime <= maxDate && nextScheduledTime >= now) {
       const job = {
@@ -519,7 +519,7 @@ const handleHourScheduledTwitterPosts = (request) => {
         message_id: uuidv4(), // Unique ID for each job
         jobSetId: jobSetId, // Same ID for all jobs in this set
         userId: request.username || 'defaultUserId', // Use provided username or default
-        content: `Scheduled hourly post for ${request.selectedWebsite}`, // Content for the post
+        content: `postJob`, // Content for the post
         tweet: tweetInput.text, // Use the text from tweetInputs
         scheduledTime: nextScheduledTime, // The exact scheduled time in milliseconds
         jobType: 'postJob',
@@ -570,7 +570,7 @@ const rescheduleHourScheduledTwitterPosts = async (request) => {
         message_id: uuidv4(), // Unique ID for each job
         jobSetId: jobSetId, // Same ID for all jobs in this set
         userId: request.username || 'defaultUserId', // Use provided username or default
-        content: `Rescheduled hourly post for ${request.selectedWebsite}`, // Content for the post
+        content: `postJob`, // Content for the post
         tweet: tweetInput.text, // Use the text from tweetInputs
         scheduledTime: nextScheduledTime, // The exact scheduled time in milliseconds
         jobType: 'postJob',
@@ -634,7 +634,7 @@ const rescheduleHourScheduledTwitterAiPosts = async (request) => {
         message_id: uuidv4(), // Unique ID for each job
         jobSetId: jobSetId, // Same ID for all jobs in this set
         userId: username || 'defaultUserId', // Use provided username or default
-        content: `Scheduled hourly post for ${selectedWebsite}`, // Content for the post
+        content: `postJob`, // Content for the post
         tweet: tweetInput.text, // Use the text from tweetInputs
         scheduledTime: nextScheduledTime, // The exact scheduled time in milliseconds
         jobType: 'postJob',
@@ -910,7 +910,7 @@ const rescheduleSetScheduledTwitterUserPosts = async (request, postsCreated, num
         message_id: uuidv4(), // Unique ID for each job
         jobSetId: jobSetId, // Same ID for all jobs in this set
         userId: request.username || 'defaultUserId', // Use provided username or default
-        content: `Scheduled user post for ${request.selectedWebsite}`, // Content for the post
+        content: `postJob`, // Content for the post
         tweet: tweetInput.text, // Use the text from tweetInputs
         scheduledTime: scheduledTime, // The exact scheduled time in milliseconds
         jobType: 'postJob',
@@ -1032,7 +1032,7 @@ const handleSetScheduledRedditPosts = (request) => {
 
   // Iterate through the redditPosts to create jobs
   for (let i = 0; i < request.redditPosts.length; i++) {
-    const redditPost = request.redditPosts[i];
+    const redditPost = request.redditPosts[i] || request.redditposts[i];
 
     // Parse the date and time from the redditPost
     const postDateStr = redditPost.date; // Example format: '2024-09-30'
@@ -1064,7 +1064,7 @@ const handleSetScheduledRedditPosts = (request) => {
         message_id: uuidv4(), // Unique ID for each job
         jobSetId: jobSetId, // Same ID for all jobs in this set
         userId: request.username || 'defaultUserId', // Use provided username or default
-        content: `Scheduled post for ${request.selectedWebsite}`, // Content for the post
+        content: `postJob`, // Content for the post
         title: redditPost.title, // Title of the Reddit post
         postBody: redditPost.body, // Body content of the Reddit post
         subreddits: redditPost.subreddits, // Array of subreddits
@@ -1109,7 +1109,7 @@ const rescheduleSetScheduledRedditUserPosts = async (request, postsCreated, numb
 
   // Iterate through the redditPosts to create jobs
   for (let i = 0; i < request.redditPosts.length && postsCreated < numberOfPosts; i++) {
-    const redditPost = request.redditPosts[i];
+    const redditPost = request.redditPosts[i] || request.redditposts[i];
 
     // Parse the date and time from the redditPost
     const postDateStr = redditPost.date; // Example format: '2024-09-30'
@@ -1141,7 +1141,7 @@ const rescheduleSetScheduledRedditUserPosts = async (request, postsCreated, numb
         message_id: uuidv4(), // Unique ID for each job
         jobSetId: jobSetId, // Same ID for all jobs in this set
         userId: request.username || 'defaultUserId', // Use provided username or default
-        content: `Scheduled user post for ${request.selectedWebsite}`, // Content for the post
+        content: `postJob`, // Content for the post
         title: redditPost.title, // Title of the Reddit post
         postBody: redditPost.body, // Body content of the Reddit post
         subreddits: redditPost.subreddits, // Array of subreddits
@@ -1217,7 +1217,7 @@ const handleHourScheduledRedditPosts = (request) => {
 
   // Loop through redditPosts and schedule them at intervals
   for (let i = 0; i < request.redditPosts.length; i++) {
-    const redditPost = request.redditPosts[i];
+    const redditPost = request.redditPosts[i] || request.redditposts[i];
     console.log(`Processing redditPost: ${JSON.stringify(redditPost)}`);
 
     // Check if the next scheduled time is within the allowed 48-hour window
@@ -1226,7 +1226,7 @@ const handleHourScheduledRedditPosts = (request) => {
         message_id: uuidv4(), // Unique ID for each job
         jobSetId: jobSetId, // Same ID for all jobs in this set
         userId: request.username || 'defaultUserId', // Use provided username or default
-        content: `Scheduled hourly post for ${request.selectedWebsite}`, // Content for the post
+        content: `postJob`, // Content for the post
         title: redditPost.title, // Title of the Reddit post
         postBody: redditPost.body, // Body content of the Reddit post
         subreddits: redditPost.subreddits, // Array of subreddits
@@ -1279,7 +1279,7 @@ const rescheduleHourScheduledRedditPosts = async (request) => {
         message_id: uuidv4(), // Unique ID for each job
         jobSetId: jobSetId, // Same ID for all jobs in this set
         userId: request.username || 'defaultUserId', // Use provided username or default
-        content: `Rescheduled hourly post for ${request.selectedWebsite}`, // Content for the post
+        content: `postJob`, // Content for the post
         title: redditPost.title, // Title of the Reddit post
         postBody: redditPost.body, // Body content of the Reddit post
         subreddits: redditPost.subreddits, // Array of subreddits
@@ -1579,7 +1579,7 @@ const rescheduleSetScheduledRedditAiPosts = async (request) => {
           jobSetId: jobSetId, // Same ID for all jobs in this set
           userId: request.username || 'defaultUserId', // Use provided username or default
           content: `postJob`, // Content for the post
-          subreddit: redditPost.subreddit || 'defaultSubreddit', // Subreddit from redditPost or default
+          subreddits: [redditPost.subreddit] || 'defaultSubreddit', // Subreddit from redditPost or default
           aiPrompt: request.aiPrompt || 'Generated AI prompt', // Placeholder or provided AI prompt
           scheduledTime: scheduledTime, // The exact scheduled time in milliseconds
           jobType: request.jobType,
@@ -1669,8 +1669,8 @@ const handleAiRandomRedditPosts = (request) => {
           message_id: uuidv4(), // Unique ID for each job
           jobSetId: jobSetId, // Same ID for all jobs in this set
           userId: request.username || 'defaultUserId', // Use provided username or default
-          content: `Random AI post for subreddit: ${subreddit.name}`, // Default content for AI post
-          subreddit: subreddit.name, // Subreddit to post to
+          content: `postJob`, // Default content for AI post
+          subreddits: subreddit.name, // Subreddit to post to
           scheduledTime: Date.now() + accumulatedDelay, // Scheduled time in milliseconds
           aiPrompt: request.aiPrompt, // The AI prompt for generating the content
           jobType: request.jobType,
@@ -1724,8 +1724,8 @@ const handleUserRandomRedditPosts = (request) => {
           message_id: uuidv4(), // Unique ID for each job
           jobSetId: jobSetId, // Same ID for all jobs in this set
           userId: request.username || 'defaultUserId', // Use provided username or default
-          content: `User post for subreddit: ${subreddit}`, // Default content for Reddit post
-          subreddit: subreddit, // Subreddit to post to
+          content: `postJob`, // Default content for Reddit post
+          subreddits: [subreddit], // Subreddit to post to
           title: request.redditPosts[i].title, // Title of the Reddit post
           body: request.redditPosts[i].body, // Body content of the Reddit post
           scheduledTime: Date.now() + accumulatedDelay, // Scheduled time in milliseconds

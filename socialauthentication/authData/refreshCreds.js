@@ -80,7 +80,7 @@ const refreshTokensForAllUsers = async () => {
 };
 
 // Schedule the job to run every 1.5 hours
-const job = new CronJob('0 */90 * * * *', () => {
+const job = new CronJob('0,30 * * * *', () => {
   console.log('Running token refresh job');
   refreshTokensForAllUsers();
 });

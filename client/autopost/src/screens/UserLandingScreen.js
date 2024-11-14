@@ -50,6 +50,7 @@ function UserLandingScreen () {
     };
     if (user) {
       getJobs().then((jobs) => {
+        console.log(jobs.length)
         setJobCount(jobs.length);
       });
     }
@@ -112,13 +113,18 @@ function UserLandingScreen () {
   };
 
   const handleShowPostJobModal = () => {
-    // if (user.pro === 'true') {
-    // setShowPostJobModal(true);
-    // } else {
-    //   setShowLimitModal(true);
-    // }
+    if (user.pro === 'true') {
+    setShowPostJobModal(true);
+    } else {
+      if (jobCount >= 5) {
+        setShowLimitModal(true);
+      } else {
+        setShowPostJobModal(true);
+      }
+      
+    }
 
-    setShowLimitModal(true);
+   
     
   };
 

@@ -232,9 +232,8 @@ const StartPostJobModal = ({ closeModal, selectedImages, twitterAccounts, reddit
     console.log(scheduleData);
     const job = await validateAndFormatPostJobData(scheduleData);
     await createScheduledJob(job, user.jwt);
-    console.log(job);
-    console.log('da job above');
-    // closeModal()
+    
+    closeModal()
   };
 
   const renderPostTypeSelect = () => {
@@ -554,7 +553,7 @@ const StartPostJobModal = ({ closeModal, selectedImages, twitterAccounts, reddit
   };
     
   const renderUserGeneratedReddit = () => {
-    if (selectedWebsite === 'reddit' && postType === 'User' && scheduleType === 'random') {
+    if (selectedWebsite === 'reddit' && postType === 'User' && (scheduleType === 'random'|| scheduleInterval === 'hour')) {
       return (
         <div>
           {redditPosts.map((post, index) => (
@@ -609,7 +608,7 @@ const StartPostJobModal = ({ closeModal, selectedImages, twitterAccounts, reddit
     
     
   const renderUserGeneratedRedditSetSchedule = () => {
-    if (selectedWebsite === 'reddit' && scheduleType === 'scheduled') {
+    if (selectedWebsite === 'reddit' && scheduleType === 'scheduled' && scheduleInterval === 'set' ) {
       return (
         <div>
           {redditPosts.map((post, index) => (

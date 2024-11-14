@@ -37,7 +37,7 @@ export const getJobsByUsername = async (user, userJwt) => {
     return response.data;
   } catch (error) {
     console.error('Error retrieving jobs:', error);
-    throw error; // Re-throw the error to propagate it further if needed
+    // throw error; // Re-throw the error to propagate it further if needed
   }
 };
 
@@ -57,7 +57,7 @@ export const getPostJobsByUsername = async (user, userJwt) => {
     return response.data;
   } catch (error) {
     console.error('Error retrieving jobs:', error);
-    throw error; // Re-throw the error to propagate it further if needed
+    // throw error; // Re-throw the error to propagate it further if needed
   }
 };
 
@@ -75,7 +75,7 @@ export const deleteJob = async (jobSetId, userJwt) => {
     return response.data;
   } catch (error) {
     console.error('Error deleting job:', error);
-    throw error; // Re-throw the error to propagate it further if needed
+    // throw error; // Re-throw the error to propagate it further if needed
   }
 };
 
@@ -166,11 +166,12 @@ export const validateAndFormatPostJobData = (request) => {
   }
 
   // Include selected subreddits and reddit posts if the website is Reddit and postType is not 'ai'
-  if (selectedWebsite.toLowerCase() === 'reddit' && postType === 'ai') {
+  if (selectedWebsite.toLowerCase() === 'reddit' && postType === 'ai' && scheduleInterval !== 'hour') {
     if (selectedSubreddits) {
       jobObject.selectedSubreddits = selectedSubreddits;
     }
-  } else if (selectedWebsite.toLowerCase() === 'reddit' && postType === 'User') {
+    jobObject.redditPosts = redditPosts;
+  } else if (selectedWebsite.toLowerCase() === 'reddit' && (postType === 'User' || postType == 'ai')) {
     jobObject.redditPosts = redditPosts;
   } else if (selectedWebsite.toLowerCase() === 'twitter') {
     jobObject.tweetInputs = tweetInputs;
@@ -179,6 +180,9 @@ export const validateAndFormatPostJobData = (request) => {
     //   jobObject.tweetInputs = clearTweetTexts(tweetInputs)
     // }
   }
+if (selectedWebsite === 'reddit' && scheduleType === 'scheduled') {
+  jobObject.selectedSubreddits = selectedSubreddits
+}
 
   // Handle postType
   if (postType === 'ai') {
@@ -188,7 +192,8 @@ export const validateAndFormatPostJobData = (request) => {
   if ((scheduleType === 'random' && postType === 'ai') || (scheduleType === 'scheduled' && postType === 'ai' && scheduleInterval === 'hour')) {
     jobObject.numberOfPosts = numberOfPosts;
   }
-
+  console.log('do i have selected subreddits?')
+  console.log(jobObject)
   return jobObject;
 };
 
@@ -273,12 +278,14 @@ export const validateAndFormatScheduleData = async (request) => {
     }
         
   }
-  console.log(jobObject);
 
   // Include selected subreddits if the website is Reddit
   if (selectedWebsite.toLowerCase() === 'reddit' && selectedSubreddits) {
     jobObject.selectedSubreddits = selectedSubreddits;
   }
+
+  // console.log(jobObject);
+
   return jobObject;
 
   
