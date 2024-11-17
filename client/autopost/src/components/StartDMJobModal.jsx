@@ -155,6 +155,7 @@ const StartDMJobModal = ({ closeModal, twitterAccounts, redditAccounts, youtubeA
 
     console.log(scheduleData);
     await createDMJob(scheduleData, user.jwt)
+    closeModal()
   };
 
   const renderTargetAudienceSelectReddit = () => {
