@@ -103,7 +103,7 @@ const handleRedditDM = async (job, creds) => {
 
     // send DM
     console.log('sending the dm')
-    await sendMessageToUser(creds.redditTokens.access_token, 'Helpful_Alarm2362', title, body)
+    await sendMessageToUser(creds.redditTokens.access_token, redditor, title, body)
 }
 
 const getRandomUsernameFromCommenters = (subredditsWithCommenters) => {
