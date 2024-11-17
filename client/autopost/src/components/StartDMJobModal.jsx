@@ -215,7 +215,7 @@ const StartDMJobModal = ({ closeModal, twitterAccounts, redditAccounts, youtubeA
         <label htmlFor="website">Website:</label>
         <select className='modalSelect' id="website" value={selectedWebsite} onChange={handleWebsiteChange}>
           <option>Select Website</option>
-          {twitterAccounts.length > 0 && <option value="twitter">Twitter</option>}
+          {/* {twitterAccounts.length > 0 && <option value="twitter">Twitter</option>} */}
           {redditAccounts.length > 0 && <option value="reddit">Reddit</option>}
           {/* {tiktokAccounts.length > 0 && <option value="tiktok">TikTok</option>}
           {youtubeAccounts.length > 0 && <option value="youtube">Youtube Shorts</option>} */}
