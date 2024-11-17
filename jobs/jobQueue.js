@@ -2,6 +2,7 @@ const amqp = require('amqplib');
 const { makePost, validateJob, reschedulePostJob } = require('./jobQueueService');
 const { makePostJobPost, reschedulePostJobs, validatePostJob } = require('./postJobQueueService');
 const { getMessageIdsCountForJob, deleteMessageIdFromJob } = require('./jobsData');
+const { executeDMJob } = require('./dmJobService')
 
 async function setupQueue () {
   const connection = await amqp.connect('amqp://localhost');
@@ -45,16 +46,33 @@ async function startWorker (channel) {
     console.log(`${job.website}`);
     console.log(`${job.scheduledTime}`);
     console.log(Date.now());
-    if (job.content !== 'Bridge job to ensure continuity') {
-      if (job.content !== 'mediaPost') {
-        console.log('executing job');
-        console.log(job);
-        await makePostJobPost(job);
-      } else {
-        await makePost(job);
-      }
-    } else {
+
+    // if (job.content !== 'Bridge job to ensure continuity') {
+    //   if (job.content !== 'mediaPost') {
+    //     console.log('executing job');
+    //     console.log(job);
+    //     await makePostJobPost(job);
+    //   } else if (job.content === 'dmJob') {
+    //     console.log('we have a dm job')
+    //   } else {
+    //     await makePost(job);
+    //   }
+    // } else {
+    //   await consumeBridgeJob(job)
+    // }
+
+    if (job.content === 'Bridge job to ensure continuity') {
+      console.log('consuming bridge job')
       await consumeBridgeJob(job)
+    } else if (job.content === 'postJob') {
+      console.log('executing post post job')
+      await makePostJobPost(job);
+    } else if (job.content === 'mediaPost') {
+      console.log('executing media post job')
+      await makePost(job);
+    } else if (job.content === 'dmJob') {
+      console.log('executing dm job')
+      await executeDMJob(job)
     }
     
     try {

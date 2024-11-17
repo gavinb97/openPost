@@ -229,13 +229,10 @@ const getSafeForWorkSubreddits = async (accessToken) => {
         }
       });
 
-      // Filter out subreddits that have the NSFW tag
-      const sfwSubreddits = response.data.data.children.filter(child => !child.data.over18);
-
       // Extract only the subreddit names
-      const nsfwSubredditNames = await extractSubbredditList({ children: sfwSubreddits });
+      const subredditNames = await extractSubbredditList({ children: response.data.data.children });
 
-      subredditArray.push(...nsfwSubredditNames);
+      subredditArray.push(...subredditNames);
 
       // Check if there are more subreddits to fetch
       if (response.data.data.after) {
@@ -251,6 +248,45 @@ const getSafeForWorkSubreddits = async (accessToken) => {
     throw error;
   }
 };
+
+
+// const getSafeForWorkSubreddits = async (accessToken) => {
+//   let after = ''; // Initialize the 'after' parameter for pagination
+//   const subredditArray = []; // Array to store subreddit names
+
+//   try {
+//     // Make requests until all subreddits are fetched
+//     while (true) {
+//       const getSubredditsUrl = `https://oauth.reddit.com/subreddits/mine/subscriber?limit=100&after=${after}`;
+//       const response = await axios.get(getSubredditsUrl, {
+//         headers: {
+//           'Authorization': `Bearer ${accessToken}`,
+//           'User-Agent': 'web:bodycalc:v1.0 (by /u/BugResponsible9056)'
+//         }
+//       });
+
+//       // Filter out subreddits that have the NSFW tag
+//       const sfwSubreddits = response.data.data.children.filter(child => !child.data.over18);
+
+//       // Extract only the subreddit names
+//       const nsfwSubredditNames = await extractSubbredditList({ children: sfwSubreddits });
+
+//       subredditArray.push(...nsfwSubredditNames);
+
+//       // Check if there are more subreddits to fetch
+//       if (response.data.data.after) {
+//         after = response.data.data.after; // Update the 'after' parameter for the next request
+//       } else {
+//         break; // Break the loop if there are no more subreddits
+//       }
+//     }
+
+//     return subredditArray;
+//   } catch (error) {
+//     console.error('Error fetching subreddits:', error);
+//     throw error;
+//   }
+// };
 
 
 const getUserName = async (accessToken) => {

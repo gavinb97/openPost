@@ -886,6 +886,33 @@
   background-color: #282c34;
 }
 
+.dmjob-modal-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  min-width: 50%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow-y: scroll;
+}
+
+.dmjobModal {
+  height: 60vh;
+  margin-top: 2rem;
+  background-color: white;
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 0 10px #00aff0;
+  z-index: 1000;
+  align-items: center;
+  margin: 1rem;
+  overflow-y: scroll;
+  width: 70vw;
+}
+
 /* CSS styles for SetScheduleModal */
 .SetScheduleModal-modal-container {
   position: fixed;

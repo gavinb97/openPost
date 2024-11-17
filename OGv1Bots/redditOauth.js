@@ -20,7 +20,7 @@ const redirect_uri = 'https://moral-kindly-fly.ngrok-free.app/redditcallback/';
 const scopeSring = 'identity submit subscribe privatemessages edit mysubreddits read save';
 const stateString = generateRandomString(69);
 const loginUrl = `https://www.reddit.com/api/v1/authorize?client_id=${process.env.REDDIT_APP_ID}&response_type=code&state=${stateString}&redirect_uri=${redirect_uri}&duration=permanent&scope=${scopeSring}`;
-console.log(loginUrl);
+// console.log(loginUrl);
 
 app.get('/redditcallback', async (req, res) => {
   console.log('hitting the callback ooh wee');
@@ -419,13 +419,16 @@ const extractPostIdsFromRedditPosts = async (subredditResponse) => {
 const getTopPostsOfSubreddit = async (subredditName, accessToken, limit) => {
   let idArray = [];
 
+  console.log(limit)
+  console.log('limit ^^')
+
   if (limit > 100) {
     let remainingLimit = limit;
     let after = null;
 
     while (remainingLimit > 0) {
       const chunkSize = Math.min(remainingLimit, 100);
-      const endpoint = `https://oauth.reddit.com/r/${subredditName}/top.json?limit=${chunkSize}${after ? `&after=${after}` : ''}`;
+      const endpoint = `https://oauth.reddit.com/${subredditName}/top.json?limit=${chunkSize}${after ? `&after=${after}` : ''}`;
 
       try {
         const response = await axios.get(endpoint, {
@@ -447,7 +450,7 @@ const getTopPostsOfSubreddit = async (subredditName, accessToken, limit) => {
       }
     }
   } else {
-    const endpoint = `https://oauth.reddit.com/r/${subredditName}/top.json?limit=${limit}`;
+    const endpoint = `https://oauth.reddit.com/${subredditName}/top.json?limit=${limit}`;
 
     try {
       const response = await axios.get(endpoint, {
@@ -465,8 +468,31 @@ const getTopPostsOfSubreddit = async (subredditName, accessToken, limit) => {
       throw error;
     }
   }
-
+  console.log(idArray)
+  console.log('id array ^^')
   return idArray;
+};
+
+const getPostAuthor = async (postId, accessToken) => {
+  console.log('in get post author')
+  const endpoint = `https://oauth.reddit.com/comments/${postId}.json`;
+  try {
+    const response = await axios.get(endpoint, {
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'User-Agent': 'web:bodycalc:v1.0 (by /u/BugResponsible9056)'
+      }
+    });
+
+    // Get the author of the post (first item in response)
+    const postAuthor = response.data[0]?.data?.children[0]?.data?.author;
+    console.log(postAuthor)
+    console.log('post author ^^^^^^')
+    return postAuthor;
+  } catch (error) {
+    console.error('Error fetching post author:', error);
+    throw error;
+  }
 };
 
 const getAuthorsOfComments = (commentsData) => {
@@ -524,7 +550,7 @@ const sendMessageToUser = async (accessToken, username, subject, message) => {
     return response.data;
   } catch (error) {
     console.error('Error sending message:', error);
-    throw error;
+    // throw error;
   }
 };
 
@@ -677,32 +703,88 @@ const getSubredditPosters = async (subredditName, accessToken, limit) => {
   return posterArray;
 };
 
-const getUsersAndWriteToFile = async (subreddit, tokens, numberOfPosts) => {
-  
-  let arrayOfPostIds;
-  try {
-    arrayOfPostIds = await getTopPostsOfSubreddit(subreddit , tokens.access_token, numberOfPosts);
-  } catch (e) {
-    console.log(e);
-    console.log('error getting top posts');
-  }
-  
-  const userArray = [];
-    
-  for (postId of arrayOfPostIds) {
-    const arrayOfUsers = await getUsersWhoCommentedOnPost(postId, tokens.access_token);
-    console.log(arrayOfUsers);
-    userArray.push(...arrayOfUsers);
-  }
-  console.log(arrayOfPostIds.length);
-  console.log(userArray.length);
-  const usersBySR = {
-    subredditName: subreddit,
-    arrayOfUsers: userArray
-  };
+const getRedditPostAuthors = async (subreddits, token, numberOfPosts) => {
+  const allUsersBySubreddit = [];
 
-  appendOrWriteToJsonFile('redditCommenters.json', usersBySR);
+  for (const subreddit of subreddits) {
+    let arrayOfPostIds;
+
+    try {
+      // Get top post IDs for the subreddit
+      arrayOfPostIds = await getTopPostsOfSubreddit(subreddit, token, numberOfPosts);
+    } catch (e) {
+      console.error(`Error getting top posts for subreddit ${subreddit}:`, e);
+      continue; // Skip to the next subreddit
+    }
+
+    const userArray = [];
+
+    for (const postId of arrayOfPostIds) {
+      try {
+        // Get authors of posts
+        const author = await getPostAuthor(postId, token);
+        // console.log(`Users for post ${postId}:`, arrayOfUsers);
+        userArray.push(author);
+      } catch (e) {
+        console.error(`Error fetching commenters for post ${postId} in subreddit ${subreddit}:`, e);
+      }
+    }
+
+    console.log(`Subreddit: ${subreddit}, Total Posts: ${arrayOfPostIds.length}, Total authors: ${userArray.length}`);
+
+    // Build the users object for the subreddit
+    const usersBySR = {
+      subredditName: subreddit,
+      activePosters: userArray, // Remove duplicates
+    };
+
+    allUsersBySubreddit.push(usersBySR);
+  }
+
+  return allUsersBySubreddit;
 };
+
+const getRedditCommenters = async (subreddits, token, numberOfPosts) => {
+  const allUsersBySubreddit = [];
+
+  for (const subreddit of subreddits) {
+    let arrayOfPostIds;
+
+    try {
+      // Get top post IDs for the subreddit
+      arrayOfPostIds = await getTopPostsOfSubreddit(subreddit, token, numberOfPosts);
+    } catch (e) {
+      console.error(`Error getting top posts for subreddit ${subreddit}:`, e);
+      continue; // Skip to the next subreddit
+    }
+
+    const userArray = [];
+
+    for (const postId of arrayOfPostIds) {
+      try {
+        // Get users who commented on each post
+        const arrayOfUsers = await getUsersWhoCommentedOnPost(postId, token);
+        // console.log(`Users for post ${postId}:`, arrayOfUsers);
+        userArray.push(...arrayOfUsers);
+      } catch (e) {
+        console.error(`Error fetching commenters for post ${postId} in subreddit ${subreddit}:`, e);
+      }
+    }
+
+    console.log(`Subreddit: ${subreddit}, Total Posts: ${arrayOfPostIds.length}, Total Commenters: ${userArray.length}`);
+
+    // Build the users object for the subreddit
+    const usersBySR = {
+      subredditName: subreddit,
+      activeCommenters: userArray, // Remove duplicates
+    };
+
+    allUsersBySubreddit.push(usersBySR);
+  }
+
+  return allUsersBySubreddit;
+};
+
 
 const getTopPostUsernamesAndWriteToFile = async (subreddit, tokens, numberOfPosts) => {
   let arrayOfPostIds;
@@ -882,8 +964,15 @@ const getPosts = async () => {
 
   // await getUsersAndWriteToFile('Entrepreneur', tokens, 2)
   // await getTopPostUsernamesAndWriteToFile('Entrepreneur', tokens, 15)
-
-  await sendMessageToUser(tokens.access_token, 'Helpful_Alarm2362', 'hey bruv', 'lets go grab some foob');
+  // await getRedditCommenters()
+  // await sendMessageToUser(tokens.access_token, 'Helpful_Alarm2362', 'hey bruv', 'lets go grab some foob');
 };
 
-getPosts();
+// getPosts();
+
+
+module.exports = {
+  getRedditCommenters,
+  sendMessageToUser,
+  getRedditPostAuthors
+}

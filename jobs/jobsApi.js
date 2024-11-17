@@ -8,9 +8,33 @@ const { authenticateToken } = require('../socialauthentication/authService');
 const router = express.Router();
 router.use(bodyParser.json());
 router.use(cors());
-
+const { createDMJobs } = require('./dmJobService')
 let channelPromise = setupQueue();
 channelPromise.then(startWorker);
+
+router.post('/dmjob', async (req, res) => {
+  
+  
+  try {
+    // const jobs = req.body.job
+    const jobs = await createDMJobs(req.body.job)
+    // const jobs = await formatRequest(req.body.job);
+    console.log(jobs);
+
+    const channel = await channelPromise;
+    for (const job of jobs) {
+      await enqueuePostJob(channel, job);
+      console.log('Job enqueued:', job);
+    }
+     
+    
+
+    res.status(201).json({ message: 'Job received and enqueued' });
+  } catch (error) {
+    console.error('Error receiving job:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
 
 router.post('/jobs', async (req, res) => {
   

@@ -1244,6 +1244,78 @@ const getActivePostJobsByUserId = async (userId) => {
   }
 };
 
+const getUserBySubreddit = async (subreddits) => {
+  const query = `
+    SELECT *
+    FROM subreddits
+    WHERE subredditName = ANY($1::varchar[]);
+  `;
+
+  try {
+    const client = await pool.connect();
+    const res = await client.query(query, [subreddits]);
+    client.release();
+    // console.log(res.rows)
+    // console.log('in getuserbysubreddit')
+    return res.rows;
+  } catch (err) {
+    console.error('Error retrieving subreddits', err);
+    throw err;
+  }
+};
+
+const upsertSubreddits = async (subreddits) => {
+  const query = `
+    INSERT INTO subreddits (subredditName, activePosters, activeCommenters, lastUpdate)
+    VALUES ($1, $2, $3, $4)
+    ON CONFLICT (subredditName)
+    DO UPDATE SET
+      activePosters = COALESCE(EXCLUDED.activePosters, subreddits.activePosters),
+      activeCommenters = COALESCE(EXCLUDED.activeCommenters, subreddits.activeCommenters),
+      lastUpdate = EXCLUDED.lastUpdate
+    RETURNING *;
+  `;
+
+  const formatDate = () => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  try {
+    const client = await pool.connect();
+    const results = [];
+
+    for (const subreddit of subreddits) {
+      const { subredditName, activePosters, activeCommenters } = subreddit;
+
+      // Ensure null values for activePosters or activeCommenters are replaced by existing values
+      const updatedActivePosters = activePosters !== null ? activePosters : undefined;
+      const updatedActiveCommenters = activeCommenters !== null ? activeCommenters : undefined;
+
+      // Execute the query, passing in the subreddit data
+      const res = await client.query(query, [
+        subredditName,
+        updatedActivePosters,
+        updatedActiveCommenters,
+        formatDate(),
+      ]);
+
+      results.push(res.rows[0]);
+    }
+
+    client.release();
+    return results; // Return all upserted rows
+  } catch (err) {
+    console.error('Error upserting subreddits', err);
+    throw err; // Re-throw the error to handle it further up the stack if needed
+  }
+};
+
+
+
 
 
 module.exports = {
@@ -1268,5 +1340,7 @@ module.exports = {
   getActivePostJobsByUserId,
   deleteActivePostJobByJobSetId,
   deleteTweetInputFromPostJob,
-  deleteRedditPostFromPostJob
+  deleteRedditPostFromPostJob,
+  getUserBySubreddit,
+  upsertSubreddits
 };

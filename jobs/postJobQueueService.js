@@ -90,19 +90,29 @@ const postToReddit = async (creds, job) => {
       const redditBody = await createRedditPostBody(job);
       console.log('posting to reddit')
       // post to each subreddit in the array
-      job.subreddits.forEach( async (subreddit) =>  {
+      try {
+        job.subreddits.forEach( async (subreddit) =>  {
         await postTextToSubreddit(`${subreddit}`, creds.redditTokens.access_token, redditTitle, redditBody); 
         // await delay(2000);
         console.log('done waiting')
       });
+      } catch (e) {
+        console.log('error posting to reddit')
+      }
+      
     }
 
     if (job?.title && job?.postBody) {
       // post to each subreddit in the array
-      job.subreddits.forEach( async (subreddit) =>  {
+      try {
+        job.subreddits.forEach( async (subreddit) =>  {
         await postTextToSubreddit(`r/${subreddit}`, creds.redditTokens.access_token, job?.title, job?.postBody); 
         await delay(2000);
       });
+      } catch (e) {
+        console.log('error posting to reddit, title and body')
+      }
+      
     }
     console.log('umm')
   
@@ -191,9 +201,13 @@ const createRedditTitle = async (job) => {
 const createRedditPostBody = async (job) => {
 
   let body;
-     
-  body = await makeGptCall(job.aiPrompt.contentType, job.aiPrompt.style);
-  body = body.replaceAll('"', '');
+     try {
+    body = await makeGptCall(job.aiPrompt.contentType, job.aiPrompt.style);
+    body = body.replaceAll('"', '');
+     } catch (e) {
+      console.log('error creating post reddit body')
+     }
+
   
   return body;
 };
