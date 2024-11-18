@@ -13,7 +13,7 @@ const createDMJobs = async (request) => {
     const numberOfDMs = request.numberOfDms; // Number of jobs to create
 
     const initialDelay = 10 * 1000; // 10 seconds in milliseconds
-    const intervalDelay = 45 * 1000; // 45 seconds in milliseconds
+    const intervalDelay = 61 * 1000; // 45 seconds in milliseconds
 
     let accumulatedDelay = initialDelay; // Start with the initial delay
     const jobs = [];
