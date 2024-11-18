@@ -1,7 +1,7 @@
 const { v4: uuidv4 } = require('uuid'); 
 const { getCredsByUser, getCredsByUsernameAndHandle } = require('../socialauthentication/socialAuthData');
 const { getUserBySubreddit, upsertSubreddits } = require('./jobsData')
-const { getRedditCommenters, sendMessageToUser, getRedditNewestPostAuthors, getRedditNewestPostAuthors } = require('../OGv1Bots/redditOauth')
+const { getRedditCommenters, sendMessageToUser, getRedditNewestPostAuthors } = require('../OGv1Bots/redditOauth')
 const { makeGptCall } = require('./gptService');
 
 
