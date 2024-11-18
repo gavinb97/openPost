@@ -115,33 +115,38 @@ const handleRedditDM = async (job, creds) => {
 }
 
 const getRandomUsernameFromCommenters = (subredditsWithCommenters) => {
-    let allCommenters = [];
-    let allPosters = [];
+    let allUsers = [];
   
     for (const subreddit of subredditsWithCommenters) {
-        // Combine commenters from different formats
+        // Add activeCommenters if they exist and are an array
         if (Array.isArray(subreddit.activeCommenters)) {
-            allCommenters = allCommenters.concat(subreddit.activeCommenters);
+            allUsers = allUsers.concat(subreddit.activeCommenters);
         }
-        if (Array.isArray(subreddit.activePosters) || Array.isArray(subreddit.activeposters)) {
-            // Combine posters from both potential key names
-            allPosters = allPosters.concat(subreddit.activePosters || subreddit.activeposters);
+        // Add activePosters if they exist and are an array
+        if (Array.isArray(subreddit.activePosters)) {
+            allUsers = allUsers.concat(subreddit.activePosters);
+        }
+        // Handle possible alternative key (typo or case issue)
+        if (Array.isArray(subreddit.activeposters)) {
+            allUsers = allUsers.concat(subreddit.activeposters);
+        }
+
+        if (Array.isArray(subreddit.activecommenters)) {
+            allUsers = allUsers.concat(subreddit.activecommenters);
         }
     }
 
-    // Combine all commenters and posters
-    const allUsers = [...allCommenters, ...allPosters];
-  
-    // Handle empty data
+    // Handle empty user pool
     if (allUsers.length === 0) {
         console.error('No commenters or posters found in the provided data.');
         return null;
     }
-  
-    // Select a random username from the combined pool
+
+    // Select a random user
     const randomIndex = Math.floor(Math.random() * allUsers.length);
     return allUsers[randomIndex];
 };
+
 
 
   const getRedditUserToDm = async (subredditList, creds, job) => {
@@ -152,6 +157,8 @@ const getRandomUsernameFromCommenters = (subredditsWithCommenters) => {
       if (subredditors[0]?.activecommenters && subredditors[0]?.activecommenters.length > 0) {
         // If there are active commenters in the db, select one randomly
         // console.log(subredditors)
+        console.log(subredditors)
+        console.log('subredditors ^^')
         const randomCommenter = getRandomUsernameFromCommenters(subredditors);
         console.log('Random commenter from db:', randomCommenter);
         return randomCommenter;
@@ -178,6 +185,8 @@ const getRandomUsernameFromCommenters = (subredditsWithCommenters) => {
     //   console.log('subredditors ^^')
       if (subredditors[0]?.activeposters && subredditors[0]?.activeposters.length > 0) {
         // If there are active posters in the db, select one randomly
+        console.log(subredditors)
+        console.log('authors subredditors')
         const randomAuthor = getRandomUsernameFromCommenters(subredditors);
         console.log('Random author from db:', randomAuthor);
         return randomAuthor;
