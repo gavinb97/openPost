@@ -1270,8 +1270,8 @@ const upsertSubreddits = async (subreddits) => {
     VALUES ($1, $2, $3, $4)
     ON CONFLICT (subredditName)
     DO UPDATE SET
-      activePosters = COALESCE(EXCLUDED.activePosters, subreddits.activePosters),
-      activeCommenters = COALESCE(EXCLUDED.activeCommenters, subreddits.activeCommenters),
+      activePosters = ARRAY(SELECT DISTINCT UNNEST(COALESCE(subreddits.activePosters, '{}') || EXCLUDED.activePosters)),
+      activeCommenters = ARRAY(SELECT DISTINCT UNNEST(COALESCE(subreddits.activeCommenters, '{}') || EXCLUDED.activeCommenters)),
       lastUpdate = EXCLUDED.lastUpdate
     RETURNING *;
   `;
@@ -1289,17 +1289,13 @@ const upsertSubreddits = async (subreddits) => {
     const results = [];
 
     for (const subreddit of subreddits) {
-      const { subredditName, activePosters, activeCommenters } = subreddit;
-
-      // Ensure null values for activePosters or activeCommenters are replaced by existing values
-      const updatedActivePosters = activePosters !== null ? activePosters : undefined;
-      const updatedActiveCommenters = activeCommenters !== null ? activeCommenters : undefined;
+      const { subredditName, activePosters = [], activeCommenters = [] } = subreddit;
 
       // Execute the query, passing in the subreddit data
       const res = await client.query(query, [
         subredditName,
-        updatedActivePosters,
-        updatedActiveCommenters,
+        activePosters, // New active posters (array)
+        activeCommenters, // New active commenters (array)
         formatDate(),
       ]);
 
@@ -1313,6 +1309,7 @@ const upsertSubreddits = async (subreddits) => {
     throw err; // Re-throw the error to handle it further up the stack if needed
   }
 };
+
 
 
 

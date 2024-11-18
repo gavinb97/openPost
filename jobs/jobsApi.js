@@ -8,9 +8,24 @@ const { authenticateToken } = require('../socialauthentication/authService');
 const router = express.Router();
 router.use(bodyParser.json());
 router.use(cors());
-const { createDMJobs } = require('./dmJobService')
+const { createDMJobs, scrapeAuthorsOfSubreddit } = require('./dmJobService')
 let channelPromise = setupQueue();
 channelPromise.then(startWorker);
+
+
+router.post('/scrapeauthorsofsubreddit', async (req, res) => {
+  
+  try {
+    const authors = await scrapeAuthorsOfSubreddit(req.body.subreddits, req.body.token, req.body.numberOfPosts)
+    console.log(authors);
+  
+
+    res.status(201).json({ message: 'scraped and inserted authors' });
+  } catch (error) {
+    console.error('Error receiving job:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
 
 router.post('/dmjob', async (req, res) => {
   

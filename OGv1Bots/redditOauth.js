@@ -416,6 +416,63 @@ const extractPostIdsFromRedditPosts = async (subredditResponse) => {
   return subredditResponse.map(child => child.data.id);
 };
 
+const getNewestPostsOfSubreddit = async (subredditName, accessToken, limit) => {
+  let idArray = [];
+
+  if (limit > 100) {
+    let remainingLimit = limit;
+    let after = null;
+
+    while (remainingLimit > 0) {
+      const chunkSize = Math.min(remainingLimit, 100);
+      const endpoint = `https://oauth.reddit.com/${subredditName}/new.json?limit=${chunkSize}${after ? `&after=${after}` : ''}`;
+
+      try {
+        const response = await axios.get(endpoint, {
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+            'User-Agent': 'web:OnlyPostsAi:v1.0 (by /u/onlypostsai)'
+          }
+        });
+
+        // Extract post IDs from the response
+        const chunkIds = await extractPostIdsFromRedditPosts(response.data.data.children);
+        idArray = idArray.concat(chunkIds);
+
+        // Update the 'after' parameter for pagination
+        after = response.data.data.after;
+        remainingLimit -= chunkSize;
+
+        // Stop if there's no more data to fetch
+        if (!after) break;
+      } catch (error) {
+        console.error('Error fetching newest posts of subreddit:', error);
+        throw error;
+      }
+    }
+  } else {
+    const endpoint = `https://oauth.reddit.com/${subredditName}/new.json?limit=${limit}`;
+
+    try {
+      const response = await axios.get(endpoint, {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'User-Agent': 'web:OnlyPostsAi:v1.0 (by /u/onlypostsai)'
+        }
+      });
+
+      // Extract post IDs from the response
+      idArray = await extractPostIdsFromRedditPosts(response.data.data.children);
+    } catch (error) {
+      console.error('Error fetching newest posts of subreddit:', error);
+      throw error;
+    }
+  }
+
+  return idArray;
+};
+
+
 const getTopPostsOfSubreddit = async (subredditName, accessToken, limit) => {
   let idArray = [];
 
@@ -707,6 +764,47 @@ const getSubredditPosters = async (subredditName, accessToken, limit) => {
   return posterArray;
 };
 
+const getRedditNewestPostAuthors = async (subreddits, token, numberOfPosts) => {
+  const allUsersBySubreddit = [];
+
+  for (const subreddit of subreddits) {
+    let arrayOfPostIds;
+
+    try {
+      // Get newest post IDs for the subreddit
+      arrayOfPostIds = await getNewestPostsOfSubreddit(subreddit, token, numberOfPosts);
+    } catch (e) {
+      console.error(`Error getting newest posts for subreddit ${subreddit}:`, e);
+      continue; // Skip to the next subreddit
+    }
+
+    const userArray = [];
+
+    for (const postId of arrayOfPostIds) {
+      try {
+        // Get author of the post
+        const author = await getPostAuthor(postId, token);
+        userArray.push(author);
+      } catch (e) {
+        console.error(`Error fetching author for post ${postId} in subreddit ${subreddit}:`, e);
+      }
+    }
+
+    console.log(`Subreddit: ${subreddit}, Total Posts: ${arrayOfPostIds.length}, Total Authors: ${userArray.length}`);
+
+    // Build the users object for the subreddit
+    const usersBySR = {
+      subredditName: subreddit,
+      activePosters: [...new Set(userArray)], // Remove duplicates
+    };
+
+    allUsersBySubreddit.push(usersBySR);
+  }
+
+  return allUsersBySubreddit;
+};
+
+
 const getRedditPostAuthors = async (subreddits, token, numberOfPosts) => {
   const allUsersBySubreddit = [];
 
@@ -978,5 +1076,7 @@ const getPosts = async () => {
 module.exports = {
   getRedditCommenters,
   sendMessageToUser,
-  getRedditPostAuthors
+  getRedditPostAuthors,
+  getNewestPostsOfSubreddit,
+  getRedditNewestPostAuthors
 }

@@ -1,8 +1,16 @@
 const { v4: uuidv4 } = require('uuid'); 
 const { getCredsByUser, getCredsByUsernameAndHandle } = require('../socialauthentication/socialAuthData');
 const { getUserBySubreddit, upsertSubreddits } = require('./jobsData')
-const { getRedditCommenters, sendMessageToUser, getRedditPostAuthors } = require('../OGv1Bots/redditOauth')
+const { getRedditCommenters, sendMessageToUser, getRedditNewestPostAuthors, getRedditNewestPostAuthors } = require('../OGv1Bots/redditOauth')
 const { makeGptCall } = require('./gptService');
+
+
+const scrapeAuthorsOfSubreddit = async (subreddits, token, numberOfPosts) => {
+    const authors = await getRedditNewestPostAuthors(subreddits, token, numberOfPosts)
+    await upsertSubreddits(authors)
+    return authors
+}
+
 
 const createDMJobs = async (request) => {
     console.log(request);
@@ -78,7 +86,7 @@ const handleRedditDM = async (job, creds) => {
     // get the accounts to DM
     let subredditList = []
     for (const subreddit of job.subreddits) {
-        console.log(subreddit.name)
+        // console.log(subreddit.name)
         subredditList.push(subreddit.name)
     }
 
@@ -176,7 +184,7 @@ const getRandomUsernameFromCommenters = (subredditsWithCommenters) => {
       }
   
       console.log('We need to scrape subreddits for authors');
-      const authors = await getRedditPostAuthors(subredditList, creds?.redditTokens.access_token, job.dmCount || 100);
+      const authors = await getRedditNewestPostAuthors(subredditList, creds?.redditTokens.access_token, job.dmCount || 100);
       console.log(authors);
       console.log('Authors ^^');
   
@@ -253,5 +261,6 @@ const createRedditTitle = async (job) => {
 
 module.exports = {
     createDMJobs,
-    executeDMJob
+    executeDMJob,
+    scrapeAuthorsOfSubreddit
 }
