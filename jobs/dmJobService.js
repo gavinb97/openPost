@@ -1,7 +1,7 @@
 const { v4: uuidv4 } = require('uuid'); 
 const { getCredsByUser, getCredsByUsernameAndHandle } = require('../socialauthentication/socialAuthData');
 const { getUserBySubreddit, upsertSubreddits } = require('./jobsData')
-const { getRedditCommenters, sendMessageToUser, getRedditNewestPostAuthors } = require('../OGv1Bots/redditOauth')
+const { getRedditCommenters, sendMessageToUser, getRedditPostAuthors, getRedditNewestPostAuthors } = require('../OGv1Bots/redditOauth')
 const { makeGptCall } = require('./gptService');
 
 
@@ -184,7 +184,7 @@ const getRandomUsernameFromCommenters = (subredditsWithCommenters) => {
       }
   
       console.log('We need to scrape subreddits for authors');
-      const authors = await getRedditNewestPostAuthors(subredditList, creds?.redditTokens.access_token, job.dmCount || 100);
+      const authors = await getRedditPostAuthors(subredditList, creds?.redditTokens.access_token, job.dmCount || 100);
       console.log(authors);
       console.log('Authors ^^');
   
