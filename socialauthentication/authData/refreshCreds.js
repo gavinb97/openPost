@@ -12,22 +12,33 @@ const { refreshYoutubeAccessToken } = require('../youtubeService.js');
 
 const { getCredsByUser, getUserNames } = require('../socialAuthData');
 
+// Helper function to log messages to a file
+const logToFile = (message) => {
+  const logFilePath = path.join(__dirname, 'refreshTokens.log');
+  const timestamp = new Date().toISOString();
+  const logMessage = `[${timestamp}] ${message}\n`;
+  fs.appendFileSync(logFilePath, logMessage, 'utf8');
+};
+
 const refreshToken = async (refreshToken, platform, user) => {
   try {
     let newTokens;
 
     switch (platform) {
-    case 'youtubeTokens':
-      newTokens = await refreshYoutubeAccessToken(refreshToken, user);
-      break;
-    case 'redditTokens':
-      newTokens = await getRedditRefreshToken(refreshToken, user);
-      break;
-    case 'tiktokTokens':
-      newTokens = await refreshTikTokAccessToken(refreshToken, user);
-      break;
-    default:
-      throw new Error(`Unknown platform: ${platform}`);
+      case 'youtubeTokens':
+        newTokens = await refreshYoutubeAccessToken(refreshToken, user);
+        break;
+      case 'redditTokens':
+        newTokens = await getRedditRefreshToken(refreshToken, user);
+        break;
+      case 'tiktokTokens':
+        newTokens = await refreshTikTokAccessToken(refreshToken, user);
+        break;
+      case 'twitterTokens':
+        logToFile('Twitter tokens do not need refreshing.');
+        return null;
+      default:
+        throw new Error(`Unknown platform: ${platform}`);
     }
 
     if (newTokens && newTokens.access_token) {
@@ -39,7 +50,7 @@ const refreshToken = async (refreshToken, platform, user) => {
       throw new Error(`Failed to refresh token for platform: ${platform}`);
     }
   } catch (error) {
-    console.error(`Error refreshing token for platform ${platform}:`, error);
+    logToFile(`Error refreshing token for platform ${platform}: ${error.message}`);
     return null;
   }
 };
@@ -47,22 +58,35 @@ const refreshToken = async (refreshToken, platform, user) => {
 const refreshAllTokensForUser = async (username) => {
   try {
     const userCreds = await getCredsByUser(username);
-    
-    const platforms = ['redditTokens', 'tiktokTokens', 'youtubeTokens'];
+    logToFile(`Refreshing tokens for user: ${username}`);
+    const platforms = ['redditTokens', 'tiktokTokens', 'youtubeTokens', 'twitterTokens'];
     const refreshResults = {};
 
-    for (const platform of platforms) {
-      const tokens = userCreds[platform];
-      if (tokens && tokens.refresh_token) {
-        console.log(`Refreshing ${platform} tokens for user ${username}`);
-        const newTokens = await refreshToken(tokens.refresh_token, platform, username);
-        refreshResults[platform] = newTokens;
+    for (const creds of userCreds) {
+      for (const platform of platforms) {
+        const tokens = creds[platform];
+        if (tokens && tokens.refresh_token) {
+          const handle = creds.handle || 'No handle';
+          logToFile(`Attempting to refresh ${platform} tokens for handle: ${handle}`);
+          try {
+            const newTokens = await refreshToken(tokens.refresh_token, platform, creds.user);
+            if (newTokens) {
+              if (!refreshResults[handle]) {
+                refreshResults[handle] = {};
+              }
+              refreshResults[handle][platform] = newTokens;
+              logToFile(`Successfully refreshed ${platform} tokens for handle: ${handle}`);
+            }
+          } catch (error) {
+            logToFile(`Failed to refresh ${platform} tokens for handle: ${handle} - ${error.message}`);
+          }
+        }
       }
     }
 
     return refreshResults;
   } catch (error) {
-    console.error(`Error refreshing tokens for user ${username}:`, error);
+    logToFile(`Error refreshing tokens for user ${username}: ${error.message}`);
     return null;
   }
 };
@@ -71,17 +95,18 @@ const refreshTokensForAllUsers = async () => {
   try {
     const usernames = await getUserNames();
     for (const username of usernames) {
-      console.log(`Refreshing tokens for user: ${username}`);
-      await refreshAllTokensForUser(username);
+      logToFile(`Starting token refresh for user: ${username}`);
+      const results = await refreshAllTokensForUser(username);
+      logToFile(`Finished token refresh for user: ${username}, results: ${JSON.stringify(results, null, 2)}`);
     }
   } catch (error) {
-    console.error('Error refreshing tokens for all users:', error);
+    logToFile(`Error refreshing tokens for all users: ${error.message}`);
   }
 };
 
 // Schedule the job to run every 1.5 hours
 const job = new CronJob('0,30 * * * *', () => {
-  console.log('Running token refresh job');
+  logToFile('Running token refresh job.');
   refreshTokensForAllUsers();
 });
 
@@ -90,5 +115,5 @@ job.start();
 
 // Initial call to refresh tokens
 refreshTokensForAllUsers()
-  .then(results => console.log('Initial token refresh results:', results))
-  .catch(error => console.error('Initial error:', error));
+  .then(() => logToFile('Initial token refresh completed.'))
+  .catch(error => logToFile(`Initial error: ${error.message}`));
