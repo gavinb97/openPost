@@ -283,7 +283,12 @@ const rescheduleTwitterPostJob = async (job) => {
             const {jobs, activeJobObject} = await rescheduleSetScheduledTwitterUserPosts(activeJob, activeJob.postscreated, activeJob.numberofposts);
             console.log('jobs scheduled?');
             console.log(activeJobObject)
-            await queueAndUpdateJobs(jobs, activeJobObject);
+
+            if (activeJobObject) {
+              await queueAndUpdateJobs(jobs, activeJobObject);
+            }
+            // if its null, delete it?
+            
 
           }
         }
