@@ -50,20 +50,24 @@ const automaticallyPost = async () => {
 
   // Schedule the job to run after the random interval
   setTimeout(async () => {
-    if (isFolderNotEmpty('resources/videosWithSubtitles/')) {
-      await postVideo();
-      await automaticallyPost();
-    } else {
+    // if (isFolderNotEmpty('../resources/videosWithSubtitles/')) {
+    //   await postVideo();
+    //   await automaticallyPost();
+    // } else {
       console.log('No more files to process...');
       console.log('creating Batch of videos');
-      await createVideos(10, 'TwoHotTakes');
-      await createVideos(10, 'TrueOffMyChest');
-      await createVideos(10, 'relationship_advice');
-      await createVideos(10, 'AITAH');
-      await createVideos(10, 'unpopularopinion');
-      await postVideo();
+      // await createVideos(3, 'stories');
+      // await createVideos(4, 'cheating_stories');
+      // await createVideos(4, 'LifeProTips');
+      await createVideos(4, 'AmItheAsshole');
+      await createVideos(4, 'BenignExistence');
+      await createVideos(4, 'cheating_stories');
+      await createVideos(3, 'relationship_advice');
+      // await createVideos(4, 'AITAH');
+      // await createVideos(4, 'unpopularopinion');
+      // await postVideo();
       await automaticallyPost();
-    }
+    // }
         
   }, 5 * 1000); 
 };
@@ -107,7 +111,7 @@ const postToTikTok = async (videoPath) => {
 };
 
 const postVideo = async () => {
-  const path = getRandomMp4PathInDirectory('resources/videosWithSubtitles/');
+  const path = getRandomMp4PathInDirectory('../resources/videosWithSubtitles/');
   // create and upload tweet
   // await createAndTweet(path)
 
@@ -115,7 +119,7 @@ const postVideo = async () => {
   // await postToYoutube(path)
 
   // post video to tiktok
-  await postToTikTok(path);
+  // await postToTikTok(path);
     
 };
 
@@ -156,8 +160,8 @@ const createAndTweet = async (videoPath) => {
 };
 
 const job = async () => {
-  console.log('posting random video on demand');
-  const path = getRandomMp4PathInDirectory('resources\\videosWithSubtitles/');
+  // console.log('posting random video on demand');
+  // const path = getRandomMp4PathInDirectory('./resources/videosWithSubtitles/');
   // await createAndTweet(path)
 
   console.log('Starting auto post job...');

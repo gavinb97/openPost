@@ -118,12 +118,12 @@ const seeIfFileExists = async (filePath) => {
 };
 
 const deleteTempFiles = async () => {
-  await deleteFilesInDirectory('srtFiles');
+  await deleteFilesInDirectory('./resources/srtFiles');
   // await deleteFilesInDirectory('audioSubtitles')
-  await deleteFilesInDirectory('finalVideos');
-  await deleteFilesInDirectory('tempAudio');
-  await deleteFilesInDirectory('tempVideos');
-  await deleteFilesInDirectory('mixedAudio');
+  await deleteFilesInDirectory('./resources/finalVideos');
+  await deleteFilesInDirectory('./resources/tempAudio');
+  await deleteFilesInDirectory('./resources/tempVideos');
+  await deleteFilesInDirectory('./resources/mixedAudio');
 };
 
 

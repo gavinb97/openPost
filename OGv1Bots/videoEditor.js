@@ -37,7 +37,7 @@ const stackVideos = async () => {
 // TODO update aspect ratio
 const cutVideoToUnder60s = async (videoPath) => {
   const videoName = getMP3FileName(videoPath);
-  const outputPath = `shorts/${videoName}.mp4`;
+  const outputPath = `../resources/shorts/${videoName}.mp4`;
   console.log(outputPath);
   ffmpeg(videoPath)
     .setStartTime('00:00:00')
@@ -70,7 +70,7 @@ const getVideoDuration = async (videoPath) => {
 };
 
 const selectRandomVideo = () => {
-  const videosFolder = path.join(__dirname, 'videos'); 
+  const videosFolder = path.join(__dirname, '../resources/videos'); 
 
   // Read the contents of the folder
   const videoFiles = fs.readdirSync(videosFolder);
@@ -90,6 +90,65 @@ const selectRandomVideo = () => {
   const relativePath = path.relative(__dirname, fullPath).replace(/\\/g, '/');
   return relativePath;
 };
+
+const reencodeVideo = (inputPath, outputPath) => {
+  return new Promise((resolve, reject) => {
+    ffmpeg(inputPath)
+      .outputOptions('-movflags', '+faststart')  // Move moov atom to the start of the file
+      .output(outputPath)
+      .on('end', function () {
+        console.log('Re-encoding completed and moov atom fixed');
+        resolve(outputPath);
+      })
+      .on('error', function (err) {
+        console.error('Error during re-encoding:', err);
+        reject(err);
+      })
+      .run();
+  });
+};
+
+// Function to cut the video with a random start time
+const cutVideoWithRandomStart = async (videoPath) => {
+  // Get video name
+  const videoName = getMP3FileName(videoPath);
+  
+  // Generate random start time between 30 and 90 seconds
+  const randomStartTime = Math.floor(Math.random() * (90 - 30 + 1)) + 30;
+  console.log(`Random start time: ${randomStartTime} seconds`);
+
+  // Define the output path for the trimmed video
+  const outputPath = `../resources/offsetStartVideos/${videoName}.mp4`;
+  console.log(`Output path: ${outputPath}`);
+
+  // Ensure the output directory exists
+  const outputDir = path.dirname(outputPath);
+  if (!fs.existsSync(outputDir)) {
+    fs.mkdirSync(outputDir, { recursive: true });
+  }
+
+  // Re-encode the video to ensure moov atom is placed correctly
+  // const reencodedPath = `../resources/offsetStartVideos/reencoded_${videoName}.mp4`;
+  // await reencodeVideo(videoPath, reencodedPath);
+
+  // Run ffmpeg to trim the video with the random start time and same duration
+  ffmpeg(videoPath)
+    .setStartTime(randomStartTime)  // Set random start time
+    // .outputOptions('-vf', 'scale=ih*9/16:ih')  // Optional scaling filter
+    .output(outputPath)
+    .on('end', function () {
+      console.log('Video trimmed with random start time');
+    })
+    .on('error', err => {
+      console.error('FFmpeg error:', err);  // Log detailed error information
+    })
+    .run();
+
+  // Return the output path after the video is cut
+  return outputPath;
+};
+
+
 
 const getCombinedVideoPaths = async (relativePathAudio) => {
   const audioPath = relativePathAudio;
@@ -117,52 +176,167 @@ const getCombinedVideoPaths = async (relativePathAudio) => {
 
 
 const combineVideosForTempVideo = async (audioPath) => {
-  const audioPathForVideo = audioPath;
+  const path = require('path');
+  const fs = require('fs');
+  const concat = require('ffmpeg-concat'); // Ensure this package is installed
+
+  // Resolve the absolute path for the audio file
+  const audioPathForVideo = path.resolve(audioPath);
+
+  // Get the list of video paths
   const videoPaths = await getCombinedVideoPaths(audioPathForVideo);
-   
+
+  // Extract the audio name to construct the output path
   const audioName = getMP3FileName(audioPathForVideo);
-  const outputPath = `tempVideos/${audioName}.mp4`;
-  console.log(outputPath);
-  console.log('putting the temp video with audio here ^^');
+
+  // Resolve the absolute output path
+  const outputDir = path.resolve(
+    '../resources/tempVideos'
+  );
+  const outputPath = path.join(outputDir, `${audioName}.mp4`);
+
+  console.log('Resolved Output Path:', outputPath);
+
+  // Ensure the output directory exists
+  if (!fs.existsSync(outputDir)) {
+    fs.mkdirSync(outputDir, { recursive: true });
+  }
+
+  // Check if all video paths exist
+  for (const videoPath of videoPaths) {
+    const resolvedVideoPath = path.resolve(videoPath);
+    if (!fs.existsSync(resolvedVideoPath)) {
+      console.error(`Video path does not exist: ${resolvedVideoPath}`);
+      return;
+    }
+  }
+
+  // Ensure the audio file exists
+  if (!fs.existsSync(audioPathForVideo)) {
+    console.error(`Audio path does not exist: ${audioPathForVideo}`);
+    return;
+  }
+
   try {
     await concat({
       output: outputPath,
-      videos: videoPaths,
-      audio: audioPathForVideo,
-      frameFormat: 'png'
+      videos: videoPaths.map((video) => path.resolve(video)), // Resolve video paths
+      audio: audioPathForVideo, // Absolute path for audio
+      frameFormat: 'png', // Adjust if needed
     });
+    console.log('Temp video complete:', outputPath);
   } catch (error) {
-    console.log('damn');
-    console.log(error);
+    console.error('Error while combining videos:', error.message);
+    console.log('Details:', error.cmd);
   }
-    
-  console.log('temp video complete');
+
   return outputPath;
 };
+// original
 
+// const cutVideoToFinalLength = async (relativePath, relativePathAudio) => {
+//   // Resolve file paths
+//   const videoPath = path.resolve(relativePath);
+//   const audioPath = path.resolve(relativePathAudio);
+//   const finalVideoName = getMP3FileName(audioPath) + '.mp4';
+//   const audioDuration = getAudioDuration(audioPath);
+//   const finalDuration = audioDuration + 3;
+//   const finalVideoPath = `../resources/finalVideos/${finalVideoName}`;
 
+//   // Replace slashes for Windows compatibility
+//   const formattedVideoPath = replaceForwardSlash(videoPath);
+//   const formattedFinalVideoPath = replaceForwardSlash(finalVideoPath);
+
+//   // Construct the ffmpeg command
+//   const ffmpegCommand = `ffmpeg -i ${formattedVideoPath} -t ${finalDuration} -y ${formattedFinalVideoPath}`;
+//   console.log('Running command:', ffmpegCommand);
+//   // Execute the ffmpeg command
+//   return new Promise((resolve, reject) => {
+//     exec(ffmpegCommand, (error, stdout, stderr) => {
+//       if (error) {
+//         return reject(error);
+//       }
+//       if (stderr) {
+//         console.error(`ffmpeg stderr: ${stderr}`);
+//       }
+//       resolve(finalVideoPath);
+//     });
+//   });
+// };
+
+// has 16:9 aspect ratio
 const cutVideoToFinalLength = async (relativePath, relativePathAudio) => {
-  console.log('cutting video to final length...');
-  const videoPath = relativePath;
-  const audioPath = relativePathAudio;
+  // Resolve file paths
+  const videoPath = path.resolve(relativePath);
+  const audioPath = path.resolve(relativePathAudio);
   const finalVideoName = getMP3FileName(audioPath) + '.mp4';
   const audioDuration = getAudioDuration(audioPath);
   const finalDuration = audioDuration + 3;
-  const finalVideoPath = `finalVideos/${finalVideoName}`;
-    
-  ffmpeg(videoPath)
-    .setDuration(finalDuration)
-    .output(finalVideoPath)
-    .on('end', function (err) {
-      if(!err) { console.log('conversion Done'); }
-    })
-    .on('error', err => console.log('error: ', err))
-    .run();
+  const finalVideoPath = `../resources/finalVideos/${finalVideoName}`;
 
+  // Replace slashes for Windows compatibility
+  const formattedVideoPath = replaceForwardSlash(videoPath);
+  const formattedFinalVideoPath = replaceForwardSlash(finalVideoPath);
 
-  console.log('final video complete');
-  return finalVideoPath;
+  // Video filter for 16:9 TikTok aspect ratio
+  const videoFilter = `"scale=w=1080:h=1920:force_original_aspect_ratio=decrease,pad=1080:1920:(ow-iw)/2:(oh-ih)/2"`;
+
+  // Construct the ffmpeg command
+  const ffmpegCommand = `ffmpeg -i ${formattedVideoPath} -vf ${videoFilter} -t ${finalDuration} -y ${formattedFinalVideoPath}`;
+  
+  // Execute the ffmpeg command
+  return new Promise((resolve, reject) => {
+    exec(ffmpegCommand, (error, stdout, stderr) => {
+      if (error) {
+        return reject(error);
+      }
+      if (stderr) {
+        console.error(`ffmpeg stderr: ${stderr}`);
+      }
+      resolve(finalVideoPath);
+    });
+  });
 };
+
+
+// 1.5x speed throws off subtitles
+// const cutVideoToFinalLength = async (relativePath, relativePathAudio) => {
+//   console.log('cutting video to final length...');
+
+//   // Resolve file paths
+//   const videoPath = path.resolve(relativePath);
+//   const audioPath = path.resolve(relativePathAudio);
+//   const finalVideoName = getMP3FileName(audioPath) + '.mp4';
+//   const audioDuration = getAudioDuration(audioPath);
+//   const finalDuration = (audioDuration + 3) / 1.5; // Adjust final duration for 1.5x speed
+//   const finalVideoPath = `../resources/finalVideos/${finalVideoName}`;
+
+//   // Replace slashes for Windows compatibility
+//   const formattedVideoPath = replaceForwardSlash(videoPath);
+//   const formattedFinalVideoPath = replaceForwardSlash(finalVideoPath);
+
+//   // Construct the ffmpeg command
+//   const ffmpegCommand = `ffmpeg -i ${formattedVideoPath} -filter:v "setpts=PTS/1.5" -filter:a "atempo=1.5" -t ${finalDuration} -y ${formattedFinalVideoPath}`;
+//   console.log('Running command:', ffmpegCommand);
+
+//   // Execute the ffmpeg command
+//   return new Promise((resolve, reject) => {
+//     exec(ffmpegCommand, (error, stdout, stderr) => {
+//       if (error) {
+//         console.error(`Error: ${error.message}`);
+//         return reject(error);
+//       }
+//       if (stderr) {
+//         console.error(`ffmpeg stderr: ${stderr}`);
+//       }
+//       console.log('Video trimmed to final length and playback speed adjusted.');
+//       resolve(finalVideoPath);
+//     });
+//   });
+// };
+
+
+
 
 // delete extra long videos, use max of 3 minutes
 const isAudioTooLong = async (audioPath) => {
@@ -178,15 +352,17 @@ const replaceForwardSlash = (inputString) => {
   return inputString.replace(/\//g, '\\\\');
 };
 
+// working no adjustments
 const mixAudio = async (music, voice, outputFileName) => {
-  output = `mixedAudio\\${outputFileName}.mp3`;
-    
+  const output = `..\\resources\\mixedAudio\\${outputFileName}.mp3`;
+
+  // Ensure paths are correct and formatted well
   const formatVoice = replaceForwardSlash(voice);
   console.log('format voice: ' + formatVoice);
-   
-  // total length will be length of first input with 2 second dropout transition
-  const ffmpegCommand = `ffmpeg -i ${formatVoice} -i ${music} -filter_complex "[1:a]volume=0.40[a1];[0:a][a1]amix=inputs=2:duration=first:dropout_transition=1" ${output}`;
-   
+
+  // Adjust the ffmpeg command for better mixing
+  const ffmpegCommand = `ffmpeg -i ${formatVoice} -i ${music} -filter_complex "[1:a]volume=0.50[a1];[0:a][a1]amix=inputs=2:duration=longest:dropout_transition=1" ${output}`;
+
   // Execute the ffmpeg command
   exec(ffmpegCommand, (error, stdout, stderr) => {
     if (error) {
@@ -198,22 +374,85 @@ const mixAudio = async (music, voice, outputFileName) => {
       return;
     }
     console.log('Audio Mixed...');
-    return output;
   });
 
   return output;
 };
 
 
+// loop and pitch adjustment
+// const mixAudio = async (music, voice, outputFileName) => {
+//   const output = `..\\resources\\mixedAudio\\${outputFileName}.mp3`;
+
+//   // Resolve paths and format the voice input for Windows compatibility
+//   const formatVoice = replaceForwardSlash(voice);
+//   const formatMusic = replaceForwardSlash(music);
+//   console.log('Format voice: ' + formatVoice);
+//   console.log('Format music: ' + formatMusic);
+
+//   // Construct FFmpeg command with pitch adjustment and background music looping
+//   const ffmpegCommand = `
+//     ffmpeg -i ${formatVoice} -i ${formatMusic} -filter_complex 
+//     "[1:a]aloop=loop=-1:size=44100,asetrate=48000*1.05,aresample=48000,volume=0.40[bg]; 
+//      [0:a][bg]amix=inputs=2:duration=first:dropout_transition=1" -y ${output}
+//   `.replace(/\s+/g, ' ').trim(); // Remove extra spaces/newlines for cleaner command
+
+//   // Execute the FFmpeg command
+//   return new Promise((resolve, reject) => {
+//     exec(ffmpegCommand, (error, stdout, stderr) => {
+//       if (error) {
+//         console.error(`Error: ${error.message}`);
+//         return reject(error);
+//       }
+//       if (stderr) {
+//         console.error(`FFmpeg stderr: ${stderr}`);
+//       }
+//       console.log('Audio Mixed with Pitch Adjustment...');
+//       resolve(output);
+//     });
+//   });
+// };
+
+
+
+// this will loop music
+// const mixAudio = async (music, voice, outputFileName) => {
+//   const output = `..\\resources\\mixedAudio\\${outputFileName}.mp3`;
+
+//   // Resolve paths and format the voice input for Windows compatibility
+//   const formatVoice = replaceForwardSlash(voice);
+//   const formatMusic = replaceForwardSlash(music);
+//   console.log('Format voice: ' + formatVoice);
+//   console.log('Format music: ' + formatMusic);
+
+//   // Construct FFmpeg command
+//   const ffmpegCommand = `ffmpeg -i ${formatVoice} -i ${formatMusic} -filter_complex "[1:a]aloop=loop=-1:size=44100[a1];[a1]volume=0.40[bg];[0:a][bg]amix=inputs=2:duration=first:dropout_transition=1" -y ${output}`;
+  
+//   // Execute the FFmpeg command
+//   return new Promise((resolve, reject) => {
+//     exec(ffmpegCommand, (error, stdout, stderr) => {
+//       if (error) {
+//         console.error(`Error: ${error.message}`);
+//         return reject(error);
+//       }
+//       if (stderr) {
+//         console.error(`FFmpeg stderr: ${stderr}`);
+//       }
+//       console.log('Audio Mixed...');
+//       resolve(output);
+//     });
+//   });
+// };
+
 
 const addSubtitles = async (videoFilePath) => {
   const videoName = getMP3FileName(videoFilePath);
-  const inputVideoFilePath = `finalVideos/${videoName}.mp4`;
+  const inputVideoFilePath = `../resources/finalVideos/${videoName}.mp4`;
   console.log('input: ' + inputVideoFilePath);
   // const srtFileName = getMP3FileName(subtitleFilePath)
-  const outputOptions = `-vf subtitles=./srtFiles/${videoName}.srt`;
+  const outputOptions = `-vf subtitles=../resources/srtFiles/${videoName}.srt`;
   console.log(outputOptions);
-  const outputFileName = `videosWithSubtitles/${videoName}.mp4`;
+  const outputFileName = `../resources/videosWithSubtitles/${videoName}.mp4`;
   console.log(outputFileName);
   ffmpeg(inputVideoFilePath)
     .outputOptions(
@@ -270,10 +509,31 @@ const listenForWord = (word, callback) => {
   };
 };
 
+const getRandomBackgroundMusic = (folderPath) => {
+  return new Promise((resolve, reject) => {
+    fs.readdir(folderPath, (err, files) => {
+      if (err) {
+        return reject(`Error reading directory: ${err.message}`);
+      }
+
+      // Filter only MP3 files
+      const mp3Files = files.filter(file => file.endsWith('.mp3'));
+      if (mp3Files.length === 0) {
+        return reject('No MP3 files found in the folder.');
+      }
+
+      // Select a random file
+      const randomFile = mp3Files[Math.floor(Math.random() * mp3Files.length)];
+      resolve(path.join(folderPath, randomFile));
+    });
+  });
+};
+
 
 const createVideoForEachAudioFile = async () => {
-  const audioFolder = path.join(__dirname, 'tempAudio'); 
-
+  const audioFolder = path.join(__dirname, '../resources/tempAudio'); 
+  console.log(audioFolder)
+  console.log(audioFolder)
   // Read the contents of the folder
   const audioFiles = fs.readdirSync(audioFolder);
 
@@ -293,23 +553,29 @@ const createVideoForEachAudioFile = async () => {
     const tooLong = isAudioTooLong(relativePath);
 
     // TODO here I want to create the mixed audio
+    const backgroundMusicFolder = '../resources/backgroundMusic';
     const audioFileName = getFileName(relativePath);
-    const pathToBackgroundMusic = 'backgroundMusic\\snowflake.mp3';
+
+    const pathToBackgroundMusic = await getRandomBackgroundMusic(backgroundMusicFolder);
+    console.log('path to background music ###########################################')
+    console.log(pathToBackgroundMusic)
     const mixedAudioPath = await mixAudio(pathToBackgroundMusic , relativePath, audioFileName);
         
     console.log('gonna wait before making video');
-    await sleep(60000);
+    await sleep(12000);
         
     console.log('Creating video...');
     // create video for each file
     // relative path is audio path
     const videoOutputPath =  await combineVideosForTempVideo(mixedAudioPath);
-        
+    console.log('done')
     const finalVideoPath = await cutVideoToFinalLength(videoOutputPath, mixedAudioPath);
+    console.log(finalVideoPath)
+    console.log('final video path ^^')
     let fileExists = false;
+    console.log('Waiting for final file to be finished...');
     do {
-      console.log('Waiting for file to be finished...');
-      fileExists = await seeIfFileExists(videoOutputPath);
+      fileExists = await seeIfFileExists(finalVideoPath);
       if (fileExists) {
         console.log('file exists!');
       }

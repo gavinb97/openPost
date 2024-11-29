@@ -5,7 +5,7 @@ const createGPTClient = require('./gptClient');
 const OpenAI = require('openai');
 const {removeSpecialCharacters, removeSpaces} = require('../utils');
 
-const speechFile = path.resolve('tempAudio/');
+const speechFile = path.resolve('../resources/tempAudio/');
 const fileSuffix = '.mp3';
 
 const openai = new OpenAI({
@@ -19,8 +19,8 @@ const validateTextlength = (textInput) => {
 
 
 const getSpeech = async (textInput) => {
-   
-  const input = textInput;
+   console.log('making gpt call for speech')
+  const input = textInput;  
   if (validateTextlength(input)){
     const mp3 = await openai.audio.speech.create({
       model: 'tts-1',
