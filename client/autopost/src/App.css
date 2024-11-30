@@ -668,7 +668,6 @@
   display: flex;
   padding-top: 3rem;
   padding-bottom: 3rem;
-
 }
 
 .small-feature-darkblue {
@@ -685,9 +684,10 @@
   width: 85vw;
   display: flex;
   flex-direction: column;
-  justify-content: left;
+  /* justify-content: left; */
   vertical-align: middle;
-  text-align: left;
+  align-items: center;
+  /* text-align: left; */
 
   h1 {
     margin-left: 3vw;
@@ -699,11 +699,12 @@
   p {
     margin-left: 3vw;
     color: white;
-    font-size: 1rem;
+    font-size: 1.75rem;
     margin-right: 3vw;
   }
   padding-bottom: 2vh;
 }
+
 
 .big-feature-darkblue {
   background-color: #0091ea;
@@ -764,7 +765,7 @@
   }
 
   p {
-    font-size: 1rem;
+    font-size: 1.75rem;
     padding-left: 2vw;
     padding-right: 2vw;
   }
