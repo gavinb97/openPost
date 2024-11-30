@@ -1,8 +1,10 @@
 const { v4: uuidv4 } = require('uuid'); 
 const { getCredsByUser, getCredsByUsernameAndHandle } = require('../socialauthentication/socialAuthData');
-const { getUserBySubreddit, upsertSubreddits } = require('./jobsData')
+const { getUserBySubreddit, upsertSubreddits, insertDMJob, isDMJobPresent, deleteMessageIdFromDMJob, getMessageIdsCountForDMJob, deleteDMJobByJobSetId, updateDMJobByJobSetId } = require('./jobsData')
 const { getRedditCommenters, sendMessageToUser, getRedditPostAuthors, getRedditNewestPostAuthors } = require('../OGv1Bots/redditOauth')
 const { makeGptCall } = require('./gptService');
+const axios = require('axios');
+
 
 
 const scrapeAuthorsOfSubreddit = async (subreddits, token, numberOfPosts) => {
@@ -18,14 +20,15 @@ const createDMJobs = async (request) => {
     console.log(request.numberOfDms)
     console.log('dms count ^^')
     const jobSetId = uuidv4(); // Unique ID for the job set
-    const numberOfDMs = request.numberOfDms; // Number of jobs to create
+    const numberOfDMs = request.numberOfDms === 'forever' ? 150 : request.numberOfDms // Number of jobs to create
 
+    // const dmCount = request.numberOfDms === 'forever' ? 150 : request.numberOfDms
     const initialDelay = 10 * 1000; // 10 seconds in milliseconds
     const intervalDelay = 61 * 1000; // 45 seconds in milliseconds
 
     let accumulatedDelay = initialDelay; // Start with the initial delay
     const jobs = [];
-
+    const messageIds = []
     for (let i = 0; i < numberOfDMs; i++) {
         const job = {
             message_id: uuidv4(),
@@ -52,22 +55,38 @@ const createDMJobs = async (request) => {
         }
 
         jobs.push(job); // Add the job to the jobs array
-
+        messageIds.push(job.message_id)
         accumulatedDelay += intervalDelay; // Increase the delay for the next job
     }
 
     const dbJobObject = {
-
+        job_set_id: jobSetId,
+        message_ids: messageIds,
+        userid: request.username,
+        jobType: 'dmJob',
+        handle: request.selectedAccount,
+        selectedWebsite: request.selectedWebsite,
+        selectedSubreddits: request.subreddits,
+        aiPrompt: request.aiPrompt || null,
+        userDM: request.userDM || null,
+        dmCount: request.numberOfDms
     }
 
-    return jobs; // Return the array of job objects
+    // insert into the db
+    await insertDMJob(dbJobObject)
+
+    return jobs ; // Return the array of job objects
 };
 
 const executeDMJob = async (job) => {
     console.log('wee woo')
 
     // validate that post is still active
+    const isActive = await isDMJobPresent(job.jobSetId)
 
+    if (!isActive) {
+        return null
+    }
     // need to get credentials
     const creds = await getCredsByUsernameAndHandle(job.userId, job.handle);
     // console.log(creds)
@@ -77,7 +96,66 @@ const executeDMJob = async (job) => {
     } else {
         await handleTwitterDM(job, creds)
     }
+
+    // consume the message id and update the db
+    await deleteMessageIdFromDMJob(job.jobSetId, job.message_id)
+
+    // get the message id count, if its zero then delete
+    const dmsRemaining = await getMessageIdsCountForDMJob(job.jobSetId)
+
+    if (dmsRemaining === 0) {
+        if (job.dmCount === 'forever') {
+            // reschedule the jobs
+           const { jobs, messageIds } = await rescheduleDMJobs(job)
+
+           // enqueue jobs
+            await sendRescheduleJobs(jobs)
+
+           // update db
+           await updateDMJobByJobSetId(job.jobSetId, messageIds)
+        }
+        // delete the job from db
+        await deleteDMJobByJobSetId(job.jobSetId)
+    } 
+   
 }
+
+const rescheduleDMJobs = async (job) => {
+    const numberOfDMs = 150; // Always reschedule with 150 jobs
+    const initialDelay = 10 * 1000; // 10 seconds in milliseconds
+    const intervalDelay = 61 * 1000; // 61 seconds in milliseconds
+  
+    let accumulatedDelay = initialDelay; // Start with the initial delay
+    const jobs = [];
+    const messageIds = [];
+  
+    for (let i = 0; i < numberOfDMs; i++) {
+      const newJob = {
+        ...job, // Copy the existing job properties
+        message_id: uuidv4(), // Generate a new unique message_id
+        scheduledTime: Date.now() + accumulatedDelay, // Schedule time for the new job
+      };
+  
+      jobs.push(newJob); // Add the new job to the array
+      messageIds.push(newJob.message_id); // Track the new message ID
+      accumulatedDelay += intervalDelay; // Increase the delay for the next job
+    }
+  
+    return { jobs, messageIds }; // Return the new jobs and their message IDs
+  };
+
+  const sendRescheduleJobs = async (jobs) => {
+    try {
+      const response = await axios.post('/rescheduledm', { jobs });
+  
+      console.log('Jobs successfully rescheduled:', response.data.message);
+      return response.data;
+    } catch (error) {
+      console.error('Error rescheduling jobs:', error.response?.data || error.message);
+      throw error;
+    }
+  };
+  
 
 const handleRedditDM = async (job, creds) => {
 

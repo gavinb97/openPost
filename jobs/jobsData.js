@@ -1310,8 +1310,229 @@ const upsertSubreddits = async (subreddits) => {
   }
 };
 
+const insertDMJob = async (dmJob) => {
+  console.log('Inserting DM job');
+  console.log(dmJob);
+
+  const {
+    job_set_id,
+    message_ids,
+    userid,
+    jobType,
+    handle,
+    selectedWebsite,
+    selectedSubreddits,
+    aiPrompt,
+    userDM,
+    dmCount
+  } = dmJob;
+
+  // Convert message_ids array to PostgreSQL array literal
+  const messageIdsLiteral = message_ids && message_ids.length
+    ? `{${message_ids.map(id => `'${id}'`).join(',')}}`
+    : null; // Handle empty array
+
+  const query = `
+    INSERT INTO dmjobs (
+      job_set_id,
+      message_ids,
+      userid,
+      jobType,
+      handle,
+      selectedWebsite,
+      selectedSubreddits,
+      aiPrompt,
+      userDM,
+      dmCount
+    ) VALUES (
+      $1, $2, $3, $4, $5, $6, $7::TEXT[], $8::JSONB, $9::JSONB, $10
+    ) RETURNING id;
+  `;
+
+  const values = [
+    job_set_id,
+    messageIdsLiteral,
+    userid,
+    jobType,
+    handle,
+    selectedWebsite,
+    selectedSubreddits || null, // Handle null or empty subreddits
+    aiPrompt || null,          // Handle null or empty AI prompt
+    userDM || null,            // Handle null or empty user DM
+    dmCount
+  ];
+
+  try {
+    const client = await pool.connect();
+    const res = await client.query(query, values);
+    client.release();
+
+    return res.rows[0]; // Return the inserted DM job object
+  } catch (err) {
+    console.error('Error inserting DM job', err);
+    throw err;
+  }
+};
+
+const isDMJobPresent = async (jobSetId) => {
+  const query = `
+        SELECT EXISTS (
+            SELECT 1
+            FROM dmjobs
+            WHERE job_set_id = $1
+        );
+    `;
+
+  const values = [jobSetId];
+
+  try {
+    const client = await pool.connect();
+    const res = await client.query(query, values);
+    client.release();
+
+    // Return true if the DM job ID exists, otherwise false
+    return res.rows[0].exists;
+  } catch (err) {
+    console.error('Error checking if DM job is present', err);
+    throw err;
+  }
+};
 
 
+const deleteMessageIdFromDMJob = async (job_set_id, message_id) => {
+  console.log('Attempting to delete message ID from DM job...');
+  console.log('Message ID to delete:', message_id);
+  console.log('Job set ID:', job_set_id);
+
+  const selectQuery = `
+    SELECT message_ids
+    FROM dmjobs
+    WHERE job_set_id = $1;
+  `;
+
+  const updateQuery = `
+    UPDATE dmjobs
+    SET message_ids = $1
+    WHERE job_set_id = $2;
+  `;
+
+  try {
+    const client = await pool.connect();
+
+    // Retrieve the current message_ids for the DM job
+    const res = await client.query(selectQuery, [job_set_id]);
+    if (res.rows.length === 0) {
+      client.release();
+      throw new Error(`DM job with job_set_id ${job_set_id} not found.`);
+    }
+
+    let { message_ids } = res.rows[0];
+
+    // If message_ids are stored as a string, parse it into an array
+    if (typeof message_ids === 'string') {
+      message_ids = JSON.parse(message_ids);
+    }
+
+    console.log('Original message IDs:', message_ids);
+
+    // Remove surrounding quotes from message_id
+    const formattedMessageId = message_id.replace(/^['"]|['"]$/g, '');
+
+    // Filter out the message_id from the array
+    const updatedMessageIds = message_ids.filter(id => id.replace(/^['"]|['"]$/g, '') !== formattedMessageId);
+    console.log('Updated message IDs:', updatedMessageIds);
+
+    // Update the DM job with the new message_ids array
+    await client.query(updateQuery, [updatedMessageIds, job_set_id]);
+
+    client.release();
+    console.log('Message ID deleted successfully from DM job.');
+  } catch (err) {
+    console.error('Error deleting message_id from DM job', err);
+    throw err;
+  }
+};
+
+const getMessageIdsCountForDMJob = async (job_set_id) => {
+  const query = `
+        SELECT message_ids
+        FROM dmjobs
+        WHERE job_set_id = $1;
+    `;
+
+  try {
+    const client = await pool.connect();
+    const res = await client.query(query, [job_set_id]);
+    client.release();
+
+    if (res.rows.length === 0) {
+      throw new Error(`DM job with job_set_id ${job_set_id} not found.`);
+    }
+
+    const { message_ids } = res.rows[0];
+
+    // If message_ids is null or empty, return 0
+    if (!message_ids || message_ids.length === 0) {
+      return 0;
+    }
+
+    // If message_ids is a string, parse it into an array
+    const parsedMessageIds = typeof message_ids === 'string' ? JSON.parse(message_ids) : message_ids;
+
+    return parsedMessageIds.length;
+  } catch (err) {
+    console.error('Error getting message_ids count for DM job', err);
+    throw err;
+  }
+};
+
+const deleteDMJobByJobSetId = async (jobSetId) => {
+  const query = `
+        DELETE FROM dmjobs
+        WHERE job_set_id = $1
+        RETURNING *;
+    `;
+
+  try {
+    const client = await pool.connect();
+    const res = await client.query(query, [jobSetId]);
+    client.release();
+
+    if (res.rows.length === 0) {
+      throw new Error(`DM job with job_set_id ${jobSetId} not found.`);
+    }
+
+    return res.rows[0]; // Return the deleted DM job
+  } catch (err) {
+    console.error('Error deleting DM job', err);
+    throw err;
+  }
+};
+
+const updateDMJobByJobSetId = async (jobSetId, newMessageIds) => {
+  const query = `
+    UPDATE dmjobs
+    SET message_ids = $1
+    WHERE job_set_id = $2
+    RETURNING *;
+  `;
+
+  try {
+    const client = await pool.connect();
+    const res = await client.query(query, [newMessageIds, jobSetId]);
+    client.release();
+
+    if (res.rows.length === 0) {
+      throw new Error(`DM job with job_set_id ${jobSetId} not found.`);
+    }
+
+    console.log('DM job updated successfully:', res.rows[0]);
+    return res.rows[0]; // Return the updated job
+  } catch (err) {
+    console.error('Error updating DM job by job_set_id', err);
+    throw err;
+  }
+};
 
 
 
@@ -1339,5 +1560,11 @@ module.exports = {
   deleteTweetInputFromPostJob,
   deleteRedditPostFromPostJob,
   getUserBySubreddit,
-  upsertSubreddits
+  upsertSubreddits,
+  insertDMJob,
+  isDMJobPresent,
+  deleteMessageIdFromDMJob,
+  getMessageIdsCountForDMJob,
+  deleteDMJobByJobSetId,
+  updateDMJobByJobSetId
 };

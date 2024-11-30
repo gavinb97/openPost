@@ -27,6 +27,22 @@ router.post('/scrapeauthorsofsubreddit', async (req, res) => {
   }
 });
 
+router.post('/rescheduledm', async(req, res) => {
+  try {
+    const jobs = req.body.jobs
+
+    const channel = await channelPromise;
+    for (const job of jobs) {
+      await enqueuePostJob(channel, job);
+      console.log('Job enqueued:', job);
+    }
+     
+    res.status(201).json({ message: 'Job rescheduled' });
+  } catch (e) {
+    console.log(e)
+  }
+})
+
 router.post('/dmjob', async (req, res) => {
   
   

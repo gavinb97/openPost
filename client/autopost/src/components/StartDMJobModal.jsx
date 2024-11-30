@@ -181,6 +181,10 @@ const StartDMJobModal = ({ closeModal, twitterAccounts, redditAccounts, youtubeA
       );
     }
   
+    options.push(
+      <option key="forever" value="forever">Forever</option>
+    );
+  
     return (
       <div className="input-group">
         <label htmlFor="postTypeSelect">Number of DMs:</label>
@@ -194,7 +198,8 @@ const StartDMJobModal = ({ closeModal, twitterAccounts, redditAccounts, youtubeA
         </select>
       </div>
     );
-  }
+  };
+  
   
 
   const renderPostTypeSelect = () => {
