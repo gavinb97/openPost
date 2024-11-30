@@ -38,6 +38,7 @@ const JobDetailsModal = ({ closeModal, jobDetails}) => {
           <p>Type of post: {jobDetails.posttype || jobDetails.type_of_caption || 'DM Job'}</p>
           {jobDetails.jobtype === 'dmJob' && 
   <>
+    <p>Number of DMS: {jobDetails.dmcount}</p>
     <p>Targetting users from:</p>
     <ul>
       {jobDetails.selectedsubreddits.map((subredditString, index) => {
