@@ -86,6 +86,11 @@ function HomeScreen () {
         <h1>Get started Automating your socials</h1>
         <button onClick={() => navigate('/registration')}>Register Now</button>
       </div>
+    <div className='tos-priv-homescreen'>
+      <a href='https://only-posts.com/privacyTos'>Terms of Service</a>
+      <a href='https://only-posts.com/privacyTos'>Privacy Policy</a>
+    </div>
+      
             
     </div>
   );
