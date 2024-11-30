@@ -53,8 +53,6 @@ function Jobs () {
   
     // Concatenate active jobs from jobs, postJobs, and dmJobs
     const allJobs = jobs.activeJobs.concat(postJobs.activeJobs, dmJobs.activeDMJobs);
-    console.log('all jobs')
-    console.log(allJobs)
 
     setJobs(allJobs);
     return jobs;
