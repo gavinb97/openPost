@@ -910,7 +910,7 @@
   align-items: center;
   margin: 1rem;
   overflow-y: scroll;
-  width: 70vw;
+  min-width: 90vw;
 }
 
 /* CSS styles for SetScheduleModal */
@@ -919,7 +919,7 @@
   top: 0;
   left: 0;
   width: 100%;
-  min-width: 50%;
+  min-width: 70%;
   height: 100%;
   display: flex;
   justify-content: center;
@@ -953,11 +953,12 @@
   align-items: center;
   margin: 1rem;
   overflow-y: scroll;
+  min-width: 90vw;
 }
 
 .postJobModal {
   height: 60vh;
-  width: 50vw;
+  min-width: 90vw;
   margin-top: 2rem;
   background-color: white;
   padding: 1rem;
