@@ -6,6 +6,12 @@ const JobDetailsModal = ({ closeModal, jobDetails}) => {
 
     console.log(jobDetails);
 
+    if (jobDetails.jobtype === 'dmJob') {
+      return (
+        <p>DM Job</p>
+      )
+    }
+
     if (jobDetails?.tweetinputs?.length >= 1 || jobDetails?.redditposts?.length >= 1) {
       return (
         <p>Text Post Job</p>
@@ -28,8 +34,25 @@ const JobDetailsModal = ({ closeModal, jobDetails}) => {
           {renderTypeOfJob()}
           <p>Website: {jobDetails.selectedwebsite || jobDetails.selected_website}</p>
           <p>Account: {jobDetails.handle}</p>
-          <p>Type of schedule: {jobDetails.scheduleinterval || jobDetails.schedule_interval}</p>
-          <p>Type of post: {jobDetails.posttype || jobDetails.type_of_caption}</p>
+          <p>Type of schedule: {jobDetails.scheduleinterval || jobDetails.schedule_interval || 'Every Minute'}</p>
+          <p>Type of post: {jobDetails.posttype || jobDetails.type_of_caption || 'DM Job'}</p>
+          {jobDetails.jobtype === 'dmJob' && 
+  <>
+    <p>Targetting users from:</p>
+    <ul>
+      {jobDetails.selectedsubreddits.map((subredditString, index) => {
+        try {
+          const subreddit = JSON.parse(subredditString); // Parse the string into an object
+          return <li key={index}>{subreddit.name}</li>; // Render the name
+        } catch (error) {
+          console.error('Error parsing subreddit:', error);
+          return null; // In case the parsing fails
+        }
+      })}
+    </ul>
+  </>
+}
+
           <div className='updateImageModalButtons' >
             <button onClick={closeModal}>Close</button>
           </div>

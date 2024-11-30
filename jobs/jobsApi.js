@@ -3,7 +3,7 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const { setupQueue, enqueuePostJob, startWorker, getExistingQueue } = require('./jobQueue');
 const { formatRequest } = require('./jobService');
-const { getActivePostJobsByUserId, getActiveJobsByUserId, deleteActiveJobByJobSetId, deleteActivePostJobByJobSetId } = require('./jobsData');
+const { getActivePostJobsByUserId, getActiveJobsByUserId, deleteActiveJobByJobSetId, deleteActivePostJobByJobSetId, getDMJobsByUserId, deleteDMJobByJobSetId } = require('./jobsData');
 const { authenticateToken } = require('../socialauthentication/authService');
 const router = express.Router();
 router.use(bodyParser.json());
@@ -120,6 +120,23 @@ router.post('/getpostjobs', authenticateToken, async (req, res) => {
   }
 });
 
+router.post('/getdmjobs', authenticateToken, async (req, res) => {
+  const { username } = req.body;
+
+  if (!username) {
+    return res.status(400).json({ error: 'Username is required' });
+  }
+
+  try {
+    const activeDMJobs = await getDMJobsByUserId(username);
+    res.status(200).json({ activeDMJobs });
+  } catch (error) {
+    console.error('Error retrieving DM jobs:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+
 router.delete('/deletejob', authenticateToken, async (req, res) => {
   const { jobSetId } = req.body;
 
@@ -128,9 +145,10 @@ router.delete('/deletejob', authenticateToken, async (req, res) => {
   }
 
   try {
+    // try to delete from all 3 tables for now
     const deletedJob = await deleteActiveJobByJobSetId(jobSetId);
     await deleteActivePostJobByJobSetId(jobSetId);
-   
+    await deleteDMJobByJobSetId(jobSetId)
 
     res.status(200).json({ message: 'Job deleted successfully', job: deletedJob });
   } catch (error) {

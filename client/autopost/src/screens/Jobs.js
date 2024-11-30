@@ -4,6 +4,8 @@ import Navbar from '../components/Navbar';
 import { useAuth } from '../service/authContext';
 import JobsTable from '../components/JobsTable';
 import {getJobsByUsername, deleteJob, getPostJobsByUsername} from '../service/jobService';
+import { getDMJobsByUsername } from '../service/dmJobService'
+
 import JobsBoxes from '../components/JobsBoxes';
 import JobPromptModal from '../components/JobPromptModal';
 import JobDetailsModal from '../components/JobDetailsModal';
@@ -47,7 +49,13 @@ function Jobs () {
   const getJobs = async () => {
     const jobs = await getJobsByUsername(user.username, user.jwt);
     const postJobs = await getPostJobsByUsername(user.username, user.jwt);
-    const allJobs = jobs.activeJobs.concat(postJobs.activeJobs);
+    const dmJobs = await getDMJobsByUsername(user.username, user.jwt);
+  
+    // Concatenate active jobs from jobs, postJobs, and dmJobs
+    const allJobs = jobs.activeJobs.concat(postJobs.activeJobs, dmJobs.activeDMJobs);
+    console.log('all jobs')
+    console.log(allJobs)
+
     setJobs(allJobs);
     return jobs;
   };

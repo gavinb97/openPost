@@ -542,8 +542,8 @@ const deleteMessageIdFromJob = async (job_set_id, message_id) => {
 
     // Remove the message_id from the array
     const updatedMessageIds = message_ids.filter(id => id !== formattedMessageId);
-    console.log(updatedMessageIds);
-    console.log('updated message ids from rows ^^^');
+    // console.log(updatedMessageIds);
+    // console.log('updated message ids from rows ^^^');
 
     // Update the job with the new message_ids array
     await client.query(updateQuery, [updatedMessageIds, job_set_id]);
@@ -1067,7 +1067,7 @@ const deleteMessageIdFromPostJob = async (job_set_id, message_id) => {
 
     // Filter out the message_id from the array
     const updatedMessageIds = message_ids.filter(id => id.replace(/^['"]|['"]$/g, '') !== formattedMessageId);
-    console.log('Updated message IDs:', updatedMessageIds);
+    // console.log('Updated message IDs:', updatedMessageIds);
 
     // Handle empty array case for PostgreSQL
     // const finalMessageIds = updatedMessageIds.length > 0 ? updatedMessageIds : null;
@@ -1440,7 +1440,7 @@ const deleteMessageIdFromDMJob = async (job_set_id, message_id) => {
 
     // Filter out the message_id from the array
     const updatedMessageIds = message_ids.filter(id => id.replace(/^['"]|['"]$/g, '') !== formattedMessageId);
-    console.log('Updated message IDs:', updatedMessageIds);
+    // console.log('Updated message IDs:', updatedMessageIds);
 
     // Update the DM job with the new message_ids array
     await client.query(updateQuery, [updatedMessageIds, job_set_id]);
@@ -1534,6 +1534,62 @@ const updateDMJobByJobSetId = async (jobSetId, newMessageIds) => {
   }
 };
 
+const getDMJobById = async (jobSetId) => {
+  const query = `
+        SELECT 
+            job_set_id,
+            message_ids,
+            user_id,
+            content,
+            scheduled_time,
+            username,
+            selected_website,
+            handle,
+            created_at,
+            updated_at,
+            dm_count
+        FROM dmjobs
+        WHERE job_set_id = $1;
+    `;
+
+  const values = [jobSetId];
+
+  try {
+    const client = await pool.connect();
+    const res = await client.query(query, values);
+    client.release();
+
+    if (res.rows.length === 0) {
+      throw new Error(`No DM job found with job_set_id: ${jobSetId}`);
+    }
+
+    return res.rows[0];
+  } catch (err) {
+    console.error('Error retrieving DM job by ID', err);
+    throw err;
+  }
+};
+
+const getDMJobsByUserId = async (userId) => {
+  const query = `
+        SELECT *
+        FROM dmjobs
+        WHERE userid = $1;
+    `;
+
+  try {
+    const client = await pool.connect();
+    const res = await client.query(query, [userId]);
+    client.release();
+
+    return res.rows;
+  } catch (err) {
+    console.error('Error retrieving DM jobs by user ID', err);
+    throw err;
+  }
+};
+
+
 
 
 module.exports = {
@@ -1566,5 +1622,6 @@ module.exports = {
   deleteMessageIdFromDMJob,
   getMessageIdsCountForDMJob,
   deleteDMJobByJobSetId,
-  updateDMJobByJobSetId
+  updateDMJobByJobSetId,
+  getDMJobsByUserId
 };
