@@ -109,10 +109,10 @@ const executeDMJob = async (job) => {
            const { jobs, messageIds } = await rescheduleDMJobs(job)
 
            // enqueue jobs
-            await sendRescheduleJobs(jobs)
+            // await sendRescheduleJobs(jobs)
 
            // update db
-           await updateDMJobByJobSetId(job.jobSetId, messageIds)
+          //  await updateDMJobByJobSetId(job.jobSetId, messageIds)
         }
         // delete the job from db
         await deleteDMJobByJobSetId(job.jobSetId)
