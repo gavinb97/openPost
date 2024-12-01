@@ -35,10 +35,6 @@ const scrapeAuthorsOfSubreddit = async (subreddits, token, numberOfPosts) => {
 
 
 const createDMJobs = async (request) => {
-    console.log(request);
-    console.log('dis da job');
-    console.log(request.numberOfDms)
-    console.log('dms count ^^')
     const jobSetId = uuidv4(); // Unique ID for the job set
     const numberOfDMs = request.numberOfDms === 'forever' ? 150 : request.numberOfDms // Number of jobs to create
 
@@ -99,7 +95,7 @@ const createDMJobs = async (request) => {
 };
 
 const executeDMJob = async (job) => {
-    console.log('wee woo')
+    console.log('Executing dm job :' + job.jobSetId)
 
     // validate that post is still active
     const isActive = await isDMJobPresent(job.jobSetId)
@@ -109,8 +105,6 @@ const executeDMJob = async (job) => {
     }
     // need to get credentials
     const creds = await getCredsByUsernameAndHandle(job.userId, job.handle);
-    // console.log(creds)
-    // console.log('creds above ^^')
     if (job.website === 'reddit') {
         await handleRedditDM(job, creds)
     } else {
@@ -132,7 +126,6 @@ const executeDMJob = async (job) => {
            const channel = await getExistingQueue();
            for (const job of jobs) {
             await enqueuePostJob(channel, job);
-            console.log('Job enqueued:', job);
           }
            // update db
            await updateDMJobByJobSetId(job.jobSetId, messageIds)
@@ -167,35 +160,17 @@ const rescheduleDMJobs = async (job) => {
   
     return { jobs, messageIds }; // Return the new jobs and their message IDs
   };
-
-  const sendRescheduleJobs = async (jobs) => {
-    try {
-      const response = await axios.post('https://only-posts.com/api/rescheduledm', { jobs: jobs });
-  
-      console.log('Jobs successfully rescheduled:', response.data.message);
-      return response.data;
-    } catch (error) {
-      console.error('Error rescheduling jobs:', error.response?.data || error.message);
-      throw error;
-    }
-  };
   
 
 const handleRedditDM = async (job, creds) => {
-
-    // console.log(job)
-    // console.log('this is the job')
     // get the accounts to DM
     let subredditList = []
     for (const subreddit of job.subreddits) {
-        // console.log(subreddit.name)
         subredditList.push(subreddit.name)
     }
 
     // get user from these subreddits, then select a random user
     const redditor = await getRedditUserToDm(subredditList, creds, job)
-    console.log('got the redditor')
-    console.log(redditor)
     // prepare DM
 
     let title
@@ -212,7 +187,7 @@ const handleRedditDM = async (job, creds) => {
 
 
     // send DM
-    console.log('sending the dm')
+    console.log(`Sending DM to ${redditor}`)
     await sendMessageToUser(creds.redditTokens.access_token, redditor, title, body)
 }
 
@@ -258,9 +233,7 @@ const getRandomUsernameFromCommenters = (subredditsWithCommenters) => {
       const subredditors = await getUserBySubreddit(subredditList);
       if (subredditors[0]?.activecommenters && subredditors[0]?.activecommenters.length > 0) {
         // If there are active commenters in the db, select one randomly
-        // console.log(subredditors)
-        console.log(subredditors)
-        console.log('subredditors ^^')
+      
         const randomCommenter = getRandomUsernameFromCommenters(subredditors);
         console.log('Random commenter from db:', randomCommenter);
         return randomCommenter;
@@ -268,9 +241,7 @@ const getRandomUsernameFromCommenters = (subredditsWithCommenters) => {
   
       console.log('We need to scrape subreddits for commenters');
       const commenters = await getRedditCommenters(subredditList, creds?.redditTokens.access_token, job.dmCount || 100);
-    //   console.log(commenters);
-      console.log('Commenters ^^');
-  
+
       // Write to db
       await upsertSubreddits(commenters);
   
@@ -283,21 +254,17 @@ const getRandomUsernameFromCommenters = (subredditsWithCommenters) => {
     // Case where target is 'authors'
     if (job.target === 'authors') {
       const subredditors = await getUserBySubreddit(subredditList);
-    //   console.log(subredditors)
-    //   console.log('subredditors ^^')
+
       if (subredditors[0]?.activeposters && subredditors[0]?.activeposters.length > 0) {
         // If there are active posters in the db, select one randomly
-        console.log(subredditors)
-        console.log('authors subredditors')
         const randomAuthor = getRandomUsernameFromCommenters(subredditors);
         console.log('Random author from db:', randomAuthor);
         return randomAuthor;
       }
   
-      console.log('We need to scrape subreddits for authors');
+      
       const authors = await getRedditPostAuthors(subredditList, creds?.redditTokens.access_token, job.dmCount || 100);
-      console.log(authors);
-      console.log('Authors ^^');
+     
   
       // Write to db
       await upsertSubreddits(authors);
@@ -341,7 +308,7 @@ const handleTwitterDM = async (job, creds) => {
 
 const createRedditTitle = async (job) => {
     let title;
-    console.log('in create title')
+    console.log('Creating title for reddit post')
     const titlePromptString = job.aiPrompt.style + '. you are creating a title for a reddit post, it must be under 100 characters, clever and always short and concise'
     try {
       do {
@@ -356,7 +323,7 @@ const createRedditTitle = async (job) => {
   };
 
   const createRedditPostBody = async (job) => {
-
+    console.log('Creating Reddit Post Body')
     let body;
        try {
       body = await makeGptCall(job.aiPrompt.contentType, job.aiPrompt.style);
