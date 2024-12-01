@@ -4,7 +4,27 @@ const { getUserBySubreddit, upsertSubreddits, insertDMJob, isDMJobPresent, delet
 const { getRedditCommenters, sendMessageToUser, getRedditPostAuthors, getRedditNewestPostAuthors } = require('../OGv1Bots/redditOauth')
 const { makeGptCall } = require('./gptService');
 const axios = require('axios');
+const amqp = require('amqplib');
 
+const getExistingQueue = async () => {
+    const connection = await amqp.connect('amqp://localhost');
+    const channel = await connection.createChannel();
+    
+    // Ensure the exchange and queue are declared as expected
+    await channel.assertExchange('delayed-exchange', 'x-delayed-message', { durable: true, arguments: { 'x-delayed-type': 'direct' } });
+    await channel.assertQueue('postJobs', { durable: true });
+    await channel.bindQueue('postJobs', 'delayed-exchange', '');
+    
+    return channel;
+  };
+    
+   
+  async function enqueuePostJob (channel, job) {
+    // Convert job to JSON and enqueue it
+    const message = Buffer.from(JSON.stringify(job));
+    const headers = { 'x-delay': job.scheduledTime - Date.now() };
+    await channel.publish('delayed-exchange', '', message, { headers });
+  }
 
 
 const scrapeAuthorsOfSubreddit = async (subreddits, token, numberOfPosts) => {
@@ -109,10 +129,14 @@ const executeDMJob = async (job) => {
            const { jobs, messageIds } = await rescheduleDMJobs(job)
 
            // enqueue jobs
-            // await sendRescheduleJobs(jobs)
-
+           const channel = await getExistingQueue();
+           for (const job of jobs) {
+            await enqueuePostJob(channel, job);
+            console.log('Job enqueued:', job);
+          }
            // update db
-          //  await updateDMJobByJobSetId(job.jobSetId, messageIds)
+           await updateDMJobByJobSetId(job.jobSetId, messageIds)
+           return null
         }
         // delete the job from db
         await deleteDMJobByJobSetId(job.jobSetId)

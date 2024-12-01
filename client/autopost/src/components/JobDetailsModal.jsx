@@ -4,7 +4,7 @@ const JobDetailsModal = ({ closeModal, jobDetails}) => {
 
   const renderTypeOfJob = () => {
 
-    console.log(jobDetails);
+    // console.log(jobDetails);
 
     if (jobDetails.jobtype === 'dmJob') {
       return (
