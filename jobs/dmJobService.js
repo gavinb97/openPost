@@ -146,7 +146,7 @@ const rescheduleDMJobs = async (job) => {
 
   const sendRescheduleJobs = async (jobs) => {
     try {
-      const response = await axios.post('/rescheduledm', { jobs });
+      const response = await axios.post('https://only-posts.com/api/rescheduledm', { jobs });
   
       console.log('Jobs successfully rescheduled:', response.data.message);
       return response.data;
