@@ -30,7 +30,8 @@ router.post('/scrapeauthorsofsubreddit', async (req, res) => {
 router.post('/rescheduledm', async(req, res) => {
   try {
     const jobs = req.body.jobs
-
+    console.log(`in the endpoint, here are the jobs`)
+    console.log(jobs)
     const channel = await channelPromise;
     for (const job of jobs) {
       await enqueuePostJob(channel, job);
