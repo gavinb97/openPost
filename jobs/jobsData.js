@@ -1060,7 +1060,7 @@ const deleteMessageIdFromPostJob = async (job_set_id, message_id) => {
       message_ids = JSON.parse(message_ids);
     }
 
-    console.log('Original message IDs:', message_ids);
+    // console.log('Original message IDs:', message_ids);
 
     // Remove surrounding quotes from message_id
     const formattedMessageId = message_id.replace(/^['"]|['"]$/g, '');
@@ -1433,7 +1433,7 @@ const deleteMessageIdFromDMJob = async (job_set_id, message_id) => {
       message_ids = JSON.parse(message_ids);
     }
 
-    console.log('Original message IDs:', message_ids);
+    // console.log('Original message IDs:', message_ids);
 
     // Remove surrounding quotes from message_id
     const formattedMessageId = message_id.replace(/^['"]|['"]$/g, '');
