@@ -191,7 +191,7 @@ const handleRedditDM = async (job, creds) => {
     try {
         await sendMessageToUser(creds?.redditTokens?.access_token, redditor, title, body)
     } catch (e) {
-      console.log(e)
+      console.log(e?.response)
       console.log('Error sending DM to reddit user')
     }
     
