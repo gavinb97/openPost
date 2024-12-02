@@ -188,7 +188,13 @@ const handleRedditDM = async (job, creds) => {
 
     // send DM
     console.log(`Sending DM to ${redditor}`)
-    await sendMessageToUser(creds.redditTokens.access_token, redditor, title, body)
+    try {
+        await sendMessageToUser(creds?.redditTokens?.access_token, redditor, title, body)
+    } catch (e) {
+      console.log(e)
+      console.log('Error sending DM to reddit user')
+    }
+    
 }
 
 const getRandomUsernameFromCommenters = (subredditsWithCommenters) => {
