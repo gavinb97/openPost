@@ -6,6 +6,7 @@ const createGPTClient = require('./gptClient');
 const {readTextFile} = require('./createSubtitles');
 const {createClientAndUpload} = require('./google');
 const {uploadToTikTok} = require('./tiktokauth');
+const path = require('path');
 
 const createGPT = async () => {
   return await createGPTClient();
@@ -50,24 +51,27 @@ const automaticallyPost = async () => {
 
   // Schedule the job to run after the random interval
   setTimeout(async () => {
-    // if (isFolderNotEmpty('../resources/videosWithSubtitles/')) {
-    //   await postVideo();
-    //   await automaticallyPost();
-    // } else {
+    if (isFolderNotEmpty('../resources/videosWithSubtitles/')) {
+      console.log('attempting to post a random video')
+      await postVideo();
+      await automaticallyPost();
+    } else {
       console.log('No more files to process...');
       console.log('creating Batch of videos');
       // await createVideos(3, 'stories');
-      // await createVideos(4, 'cheating_stories');
       // await createVideos(4, 'LifeProTips');
-      await createVideos(4, 'AmItheAsshole');
-      await createVideos(4, 'BenignExistence');
-      await createVideos(4, 'cheating_stories');
-      await createVideos(3, 'relationship_advice');
+      // await createVideos(4, 'AmItheAsshole');
+      // await createVideos(4, 'BenignExistence');
+      // await createVideos(4, 'cheating_stories');
+      // await createVideos(3, 'relationship_advice');
       // await createVideos(4, 'AITAH');
       // await createVideos(4, 'unpopularopinion');
-      // await postVideo();
+      // await createVideos(5, 'confession');
+      // await createVideos(10, 'pettyrevenge');
+      // await createVideos(10, 'tifu');
+      await postVideo();
       await automaticallyPost();
-    // }
+    }
         
   }, 5 * 1000); 
 };
@@ -79,12 +83,12 @@ const createVideos = async (numberOfVideos, subredditName) => {
 
 const postToYoutube = async (videoPath) => {
   const fileName = getFileName(videoPath);
-  const fileData = await readTextFile(`resources/audioSubtitles/${fileName}.txt`);
+  const fileData = await readTextFile(`../resources/audioSubtitles/${fileName}.txt`);
 
-  const videoTitleRaw = await makeGptCall(`Based on this transcript: [${fileData}], Give me a title. Make it short, under 200 characters and do NOT use emoji`,'You are GPT model specialized in generating viral video titles. You like to craft short, attention-grabbing titles that capture the essence of Gen Z or Millennial culture. The title should be response to a transcript that I will provide. Focus on making them spicy, witty, and share-worthy. You understand internet slang and contemporary language usage. You like to generate titles that can potentially go viral and drive engagement. Never use emojis.');
+  const videoTitleRaw = await makeGptCall(`Based on this transcript: [${fileData}], Give me a title. Make it short, under 100 characters and do NOT use emoji`,'You are GPT model specialized in generating viral video titles. You like to craft short, attention-grabbing titles that capture the essence of Gen Z or Millennial culture. The title should be response to a transcript that I will provide. Focus on making them spicy, witty, and share-worthy. You understand internet slang and contemporary language usage. You like to generate titles that can potentially go viral and drive engagement. Never use emojis.');
   const videoTitle = removeSpecialCharacters(removeQuotes(videoTitleRaw));
 
-  const videoDescriptionRaw = await makeGptCall(`Based on this transcript: [${fileData}], Give me a description for youtube. DO NOT use emojis`,'You are GPT model specialized in generating viral video descriptions. You like to craft short, attention-grabbing descriptions that capture the essence of Gen Z or Millennial culture. The description should be response to a transcript that I will provide. Focus on making them spicy, witty, and share-worthy. You understand internet slang and contemporary language usage. You like to generate descriptions that can potentially go viral and drive engagement. Never use emojis.');
+  const videoDescriptionRaw = await makeGptCall(`Based on this transcript: [${fileData}], Give me a description for youtube. DO NOT use emojis`,'You are GPT model specialized in generating viral video descriptions. You like to craft short, attention-grabbing descriptions that capture the essence of Gen Z or Millennial culture. The description should be response to a transcript that I will provide. Focus on making them spicy, witty, and share-worthy. You understand internet slang and contemporary language usage. You like to generate descriptions that can potentially go viral and drive engagement. Never use emojis. Never use emojis');
   const videoDescription = removeQuotes(videoDescriptionRaw);
 
   console.log('title: ' + videoTitle);
@@ -111,24 +115,30 @@ const postToTikTok = async (videoPath) => {
 };
 
 const postVideo = async () => {
-  const path = getRandomMp4PathInDirectory('../resources/videosWithSubtitles/');
+  console.log('Attempting to post a random video')
+  const directory = path.join(__dirname, '../resources/videosWithSubtitles/');
+  const videoPath = getRandomMp4PathInDirectory(directory);
+  // const path = getRandomMp4PathInDirectory('../resources/videosWithSubtitles/');
+  console.log(`Video selected: ${videoPath}`)
+
   // create and upload tweet
-  // await createAndTweet(path)
+  // await createAndTweet(videoPath)
 
   // post video to youtube
-  // await postToYoutube(path)
-
+  await postToYoutube(videoPath)
+  console.log('done posting')
   // post video to tiktok
   // await postToTikTok(path);
-    
+  
 };
 
 
 
 const createAndTweet = async (videoPath) => {
+  console.log('in create and tweet')
   const fileName = getFileName(videoPath);
 
-  const fileData = await readTextFile(`resources/audioSubtitles/${fileName}.txt`);
+  const fileData = await readTextFile(`../resources/audioSubtitles/${fileName}.txt`);
   if (fileData) {
     let tweetText = '';
     do {

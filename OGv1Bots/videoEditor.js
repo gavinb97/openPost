@@ -361,7 +361,7 @@ const mixAudio = async (music, voice, outputFileName) => {
   console.log('format voice: ' + formatVoice);
 
   // Adjust the ffmpeg command for better mixing
-  const ffmpegCommand = `ffmpeg -i ${formatVoice} -i ${music} -filter_complex "[1:a]volume=0.50[a1];[0:a][a1]amix=inputs=2:duration=longest:dropout_transition=1" ${output}`;
+  const ffmpegCommand = `ffmpeg -i ${formatVoice} -i ${music} -filter_complex "[1:a]volume=0.40[a1];[0:a][a1]amix=inputs=2:duration=longest:dropout_transition=1" ${output}`;
 
   // Execute the ffmpeg command
   exec(ffmpegCommand, (error, stdout, stderr) => {
@@ -449,15 +449,18 @@ const addSubtitles = async (videoFilePath) => {
   const videoName = getMP3FileName(videoFilePath);
   const inputVideoFilePath = `../resources/finalVideos/${videoName}.mp4`;
   console.log('input: ' + inputVideoFilePath);
-  // const srtFileName = getMP3FileName(subtitleFilePath)
-  const outputOptions = `-vf subtitles=../resources/srtFiles/${videoName}.srt`;
-  console.log(outputOptions);
+
   const outputFileName = `../resources/videosWithSubtitles/${videoName}.mp4`;
   console.log(outputFileName);
+
+  // Add force_style to center the subtitles
+  const subtitleFilePath = `../resources/srtFiles/${videoName}.srt`;
+  const subtitleFilter = `-vf subtitles=${subtitleFilePath}:force_style='Alignment=2'`;
+
+  console.log(subtitleFilter);
+
   ffmpeg(inputVideoFilePath)
-    .outputOptions(
-      outputOptions
-    )
+    .outputOptions(subtitleFilter)
     .on('error', function (err) {
       console.log(err);
     })
@@ -468,6 +471,7 @@ const addSubtitles = async (videoFilePath) => {
 
   return outputFileName;
 };
+
 
 
 const sleep = async  (ms) => {

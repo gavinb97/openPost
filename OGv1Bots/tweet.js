@@ -56,7 +56,7 @@ const uploadAndTweet = async (mediaPath, tweetText) => {
   do {
     console.log('uploading...');
   } while (!mediaID);
-
+  console.log('got mediaID')
   await sendTweetWithVideo(tweetText, mediaID);
 };
 

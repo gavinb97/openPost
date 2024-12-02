@@ -96,10 +96,11 @@ const createClientAndUpload = async (filePath, videoTitle, videoDescription) => 
     process.env.YOUTUBE_REDIRECT
   );
 
-  const tokens = readTokensFromFile('keys.txt');
+  // const tokens = readTokensFromFile('keys.txt');
 
   oauthClient.setCredentials({
-    refresh_token: tokens.refresh_token
+    // refresh_token: tokens.refresh_token
+    refresh_token: process.env.YOUTUBE_REFRESH_TOKEN
   });
 
   try {

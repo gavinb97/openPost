@@ -38,7 +38,7 @@ const getPostBodies = async (numberOfPosts, subredditName) => {
   console.log(subredditName)
   console.log('in the getPostBodies')
   try {
-    const arrayOfPosts = await getPost('', numberOfPosts, subredditName);
+    const arrayOfPosts = await getPost(process.env.REDDIT_ACCESS_TOKEN, numberOfPosts, subredditName);
     const arrayOfPostBodies = [];
     console.log(arrayOfPosts)
     console.log('in get post bodies posts 666')
