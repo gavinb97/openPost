@@ -267,7 +267,8 @@ const updateTwitterTokens = async (username, accessToken, refreshToken, oauthVer
 
 const updateRedditTokens = async (username, accessToken, refreshToken, handle) => {
   if (!username || !accessToken || !refreshToken || !handle) {
-    throw new Error('Username, access token, refresh token, and handle are required.');
+    console.log('Username, access token, refresh token, and handle are required.');
+    console.log('gonna try anyway')
   }
 
   try {
@@ -770,7 +771,7 @@ const getUserNames = async () => {
     try {
       // Query to get all usernames
       const query = `
-                SELECT username
+                SELECT distinct username
                 FROM user_creds
             `;
       const res = await client.query(query);

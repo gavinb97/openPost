@@ -20,7 +20,7 @@ const logToFile = (message) => {
   fs.appendFileSync(logFilePath, logMessage, 'utf8');
 };
 
-const refreshToken = async (refreshToken, platform, user) => {
+const refreshToken = async (refreshToken, platform, user, handle) => {
   try {
     let newTokens;
 
@@ -29,11 +29,11 @@ const refreshToken = async (refreshToken, platform, user) => {
         newTokens = await refreshYoutubeAccessToken(refreshToken, user);
         break;
       case 'redditTokens':
-        newTokens = await getRedditRefreshToken(refreshToken, user);
+        newTokens = await getRedditRefreshToken(refreshToken, user, handle);
         break;
-      case 'tiktokTokens':
-        newTokens = await refreshTikTokAccessToken(refreshToken, user);
-        break;
+      // case 'tiktokTokens':
+      //   newTokens = await refreshTikTokAccessToken(refreshToken, user);
+      //   break;
       case 'twitterTokens':
         logToFile('Twitter tokens do not need refreshing.');
         return null;
@@ -57,29 +57,40 @@ const refreshToken = async (refreshToken, platform, user) => {
 
 const refreshAllTokensForUser = async (username) => {
   try {
-    const userCreds = await getCredsByUser(username);
+    const userCreds = await getCredsByUser(username); // Fetch user credentials
     logToFile(`Refreshing tokens for user: ${username}`);
+
     const platforms = ['redditTokens', 'tiktokTokens', 'youtubeTokens', 'twitterTokens'];
     const refreshResults = {};
 
     for (const creds of userCreds) {
+      const { handle, user } = creds;
+
       for (const platform of platforms) {
-        const tokens = creds[platform];
-        if (tokens && tokens.refresh_token) {
-          const handle = creds.handle || 'No handle';
-          logToFile(`Attempting to refresh ${platform} tokens for handle: ${handle}`);
-          try {
-            const newTokens = await refreshToken(tokens.refresh_token, platform, creds.user);
-            if (newTokens) {
-              if (!refreshResults[handle]) {
-                refreshResults[handle] = {};
-              }
-              refreshResults[handle][platform] = newTokens;
-              logToFile(`Successfully refreshed ${platform} tokens for handle: ${handle}`);
+        const tokens = creds[platform]; // Get tokens for the current platform
+      
+        // Skip null or invalid tokens
+        if (!tokens || !tokens.refresh_token) {
+          logToFile(`Skipping ${platform} for handle: ${handle} (no refresh token)`);
+          continue;
+        }
+  
+        logToFile(`Attempting to refresh ${platform} tokens for handle: ${handle}`);
+        try {
+          // Refresh the token
+          const newTokens = await refreshToken(tokens.refresh_token, platform, user, handle);
+          if (newTokens) {
+            // Save refreshed tokens
+            if (!refreshResults[handle]) {
+              refreshResults[handle] = {};
             }
-          } catch (error) {
-            logToFile(`Failed to refresh ${platform} tokens for handle: ${handle} - ${error.message}`);
+            refreshResults[handle][platform] = newTokens;
+
+            // Log success
+            logToFile(`Successfully refreshed ${platform} tokens for handle: ${handle}`);
           }
+        } catch (error) {
+          logToFile(`Failed to refresh ${platform} tokens for handle: ${handle} - ${error.message}`);
         }
       }
     }
@@ -91,13 +102,17 @@ const refreshAllTokensForUser = async (username) => {
   }
 };
 
+
 const refreshTokensForAllUsers = async () => {
   try {
     const usernames = await getUserNames();
     for (const username of usernames) {
-      logToFile(`Starting token refresh for user: ${username}`);
-      const results = await refreshAllTokensForUser(username);
-      logToFile(`Finished token refresh for user: ${username}, results: ${JSON.stringify(results, null, 2)}`);
+      if (username === 'localtest') {
+        logToFile(`Starting token refresh for user: ${username}`);
+        const results = await refreshAllTokensForUser(username);
+        logToFile(`Finished token refresh for user: ${username}, results: ${JSON.stringify(results, null, 2)}`);
+      } 
+      
     }
   } catch (error) {
     logToFile(`Error refreshing tokens for all users: ${error.message}`);
@@ -108,6 +123,7 @@ const refreshTokensForAllUsers = async () => {
 const job = new CronJob('0,30 * * * *', () => {
   logToFile('Running token refresh job.');
   refreshTokensForAllUsers();
+  console.log('Job Complete, will refresh again in 1.5 hours')
 });
 
 // Start the cron job
@@ -115,5 +131,8 @@ job.start();
 
 // Initial call to refresh tokens
 refreshTokensForAllUsers()
-  .then(() => logToFile('Initial token refresh completed.'))
+  .then(() => {
+    logToFile('Initial token refresh completed.')
+    console.log('Initial refresh complete')
+  })
   .catch(error => logToFile(`Initial error: ${error.message}`));

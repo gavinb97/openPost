@@ -95,7 +95,11 @@ const revokeRedditAccessToken = async (username, accessToken, handle) => {
   }
 };
 
-const getRedditRefreshToken = async (refresh_Token, user) => {
+const getRedditRefreshToken = async (refresh_Token, user, handle) => {
+  if (!refresh_Token) {
+    console.log('No refresh token for reddit...')
+    return null
+  }
   try {
     const authHeader = `Basic ${btoa(`${process.env.REDDIT_APP_ID}:${process.env.REDDIT_SECRET}`)}`;
         
@@ -111,10 +115,11 @@ const getRedditRefreshToken = async (refresh_Token, user) => {
         
     const access_token = response.data.access_token;
     const refresh_token = response.data.refresh_token || refresh_token;
-    await updateRedditTokens(user, access_token, refresh_token);
+    await updateRedditTokens(user, access_token, refresh_token, handle);
     return { access_token, refresh_token };
   } catch (e) {
     console.log('error refreshing reddit token');
+    console.log(e)
     throw e; // Re-throwing the error for handling in the caller
   }
 };
