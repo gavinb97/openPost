@@ -166,9 +166,10 @@ const deleteRedditPost = async (job) => {
 
 const createTweetText = async (job) => {
   let tweetText;
+  const systemPrompt = job.aiPrompt.contentType + ' You make tweets, please only return 280 or fewer characters. Please keep it under 270 if possible. Do your best to do this.'
   try {
     do {
-      tweetText = await makeGptCall(job.aiPrompt.contentType, job.aiPrompt.style);
+      tweetText = await makeGptCall(systemPrompt, job.aiPrompt.style);
       tweetText = tweetText.replaceAll('"', '');
     } while (tweetText.length > 280);
   } catch (e) {
