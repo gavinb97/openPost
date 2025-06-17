@@ -472,6 +472,63 @@ const getNewestPostsOfSubreddit = async (subredditName, accessToken, limit) => {
   return idArray;
 };
 
+const getTopPostsOfSubredditPoolParty = async (subredditName, accessToken, limit) => {
+  let idArray = [];
+
+  console.log(limit)
+  console.log('limit ^^')
+
+  if (limit > 100) {
+    let remainingLimit = limit;
+    let after = null;
+
+    while (remainingLimit > 0) {
+      const chunkSize = Math.min(remainingLimit, 100);
+      const endpoint = `https://oauth.reddit.com/${subredditName}/top.json?limit=${chunkSize}${after ? `&after=${after}` : ''}`;
+
+      try {
+        const response = await axios.get(endpoint, {
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+            'User-Agent': 'web:OnlyPostsAi:v1.0 (by /u/onlypostsai)'
+          }
+        });
+
+        const chunkIds = await extractPostIdsFromRedditPosts(response.data.data.children);
+        idArray = idArray.concat(chunkIds);
+
+        // Update the 'after' parameter for pagination
+        after = response.data.data.after;
+        remainingLimit -= chunkSize;
+      } catch (error) {
+        console.error('Error fetching top post of subreddit:', error);
+        throw error;
+      }
+    }
+  } else {
+    const endpoint = `https://oauth.reddit.com/${subredditName}/top.json?limit=${limit}`;
+
+    try {
+      const response = await axios.get(endpoint, {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'User-Agent': 'web:OnlyPostsAi:v1.0 (by /u/onlypostsai)'
+        }
+      });
+      // console.log(response.data.data.children[0].data)
+      idArray = await extractPostIdsFromRedditPosts(response.data.data.children);
+        
+      // return idArray; 
+    } catch (error) {
+      console.error('Error fetching top post of subreddit:', error);
+      throw error;
+    }
+  }
+  console.log(idArray)
+  console.log('id array ^^')
+  return idArray;
+};
+
 
 const getTopPostsOfSubreddit = async (subredditName, accessToken, limit) => {
   let idArray = [];
@@ -559,6 +616,25 @@ const getAuthorsOfComments = (commentsData) => {
 
 // returns array of strings with all the users
 const getUsersWhoCommentedOnPost = async (postId, accessToken) => {
+  const endpoint = `https://oauth.reddit.com/comments/${postId}.json`;
+  try {
+    const response = await axios.get(endpoint, {
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'User-Agent': 'web:bodycalc:v1.0 (by /u/BugResponsible9056)'
+      }
+    });
+       
+    const arrayOfAuthors = getAuthorsOfComments(response.data[1].data.children);
+    const cleanArrayOfAuthors = arrayOfAuthors.filter(item => item !== undefined);
+    return cleanArrayOfAuthors;
+  } catch (error) {
+    console.error('Error fetching comments of post:', error);
+    throw error;
+  }
+};
+
+const getUsersWhoCommentedOnPostPoolParty = async (postId, accessToken) => {
   const endpoint = `https://oauth.reddit.com/comments/${postId}.json`;
   try {
     const response = await axios.get(endpoint, {
@@ -887,6 +963,51 @@ const getRedditCommenters = async (subreddits, token, numberOfPosts) => {
   return allUsersBySubreddit;
 };
 
+const pause = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const getRedditCommentersPoolParty = async (subreddits, token, numberOfPosts) => {
+  const allUsersBySubreddit = [];
+
+  for (const subreddit of subreddits) {
+    let arrayOfPostIds;
+
+    try {
+      // Get top post IDs for the subreddit
+      console.log(`Getting top posts for ${subreddit}`)
+      arrayOfPostIds = await getTopPostsOfSubredditPoolParty(subreddit, token, numberOfPosts);
+    } catch (e) {
+      console.error(`Error getting top posts for subreddit ${subreddit}:`, e);
+      continue; // Skip to the next subreddit
+    }
+
+    const userArray = [];
+
+    for (const postId of arrayOfPostIds) {
+      console.log(`getting users from ${subreddit} post: ${postId}`)
+      try {
+        // Get users who commented on each post
+        const arrayOfUsers = await getUsersWhoCommentedOnPostPoolParty(postId, token);
+        // console.log(`Users for post ${postId}:`, arrayOfUsers);
+        userArray.push(...arrayOfUsers);
+      } catch (e) {
+        console.error(`Error fetching commenters for post ${postId} in subreddit ${subreddit}:`, e);
+      }
+      console.log(`got commenters for PostId: ${postId}`)
+      console.log('pausing for 10 seconds to not be sus')
+      await sleep(10000)
+    }
+
+    console.log(`Subreddit: ${subreddit}, Total Posts: ${arrayOfPostIds.length}, Total Commenters: ${userArray.length}`);
+
+   
+    allUsersBySubreddit.push(userArray);
+  }
+
+
+  // returns array of users
+  return allUsersBySubreddit;
+};
+
 
 const getTopPostUsernamesAndWriteToFile = async (subreddit, tokens, numberOfPosts) => {
   let arrayOfPostIds;
@@ -1078,5 +1199,6 @@ module.exports = {
   sendMessageToUser,
   getRedditPostAuthors,
   getNewestPostsOfSubreddit,
-  getRedditNewestPostAuthors
+  getRedditNewestPostAuthors,
+  getRedditCommentersPoolParty
 }

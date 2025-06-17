@@ -699,6 +699,52 @@ const getCredsByUser = async (username) => {
   }
 };
 
+const getCredsByUsernameAndHandlePoolParty = async (username, handle) => {
+  if (!username || !handle) {
+    throw new Error('Username and handle are required.');
+  }
+
+  try {
+    // Connect to the pool
+    const client = await pool.connect();
+
+    try {
+      // Query to get the credentials by username and handle
+      const query = `
+                SELECT
+                    reddit_access_token,
+                    reddit_refresh_token,
+                    handle
+                FROM user_creds
+                WHERE username = $1 AND handle = $2
+            `;
+      const res = await client.query(query, [username, handle]);
+
+      if (res.rows.length === 0) {
+        console.log('No credentials found for the given username and handle.');
+        return null;
+      }
+
+      // Return the first (and only) row
+      const userCreds = res.rows[0];
+      return {
+        user: username,
+        handle: userCreds.handle,
+        redditTokens: {
+          access_token: userCreds.reddit_access_token,
+          refresh_token: userCreds.reddit_refresh_token
+        }
+      };
+    } finally {
+      // Release the client back to the pool
+      client.release();
+    }
+  } catch (error) {
+    console.error('Error getting user credentials from user_creds table:', error);
+    // throw error;
+  }
+};
+
 const getCredsByUsernameAndHandle = async (username, handle) => {
   if (!username || !handle) {
     throw new Error('Username and handle are required.');
@@ -943,7 +989,7 @@ const insertIntoContactForm = async (contactFormData) => {
 
 
 module.exports = { 
-  registerUserDB, authenticateUserDB, getCredsByUser, updateTwitterCodeVerifier,
+  getCredsByUsernameAndHandlePoolParty, registerUserDB, authenticateUserDB, getCredsByUser, updateTwitterCodeVerifier,
   updateTwitterTokens, revokeTwitterTokens, getTwitterCodeVerifierByUsername, updateRedditTokens, revokeRedditTokens,
   updateTikTokTokens, revokeTikTokTokens, updateYouTubeTokens, revokeYouTubeTokens, getUserNames, getCredsByUsernameAndHandle,
   getUserEmailByUsername, updateProStatus, deactivateProStatus, getUpdatedDetails, insertIntoContactForm

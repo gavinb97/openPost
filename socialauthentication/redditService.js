@@ -881,7 +881,8 @@ module.exports = {
   getSubredditsWithNSFWTag,
   getSafeForWorkSubreddits,
   postToSubredditOnBehalfOfUser,
-  postTextToSubreddit
+  postTextToSubreddit,
+  getSubredditPosters
 };
 
 
