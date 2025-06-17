@@ -88,6 +88,7 @@ const createMediaFolders = async (username, basePath) => {
   }
 };
 
+
 const authenticateUser = async (username, password) => {
   if (!username || !password) {
     throw new Error('Both username and password are required.');
