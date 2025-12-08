@@ -517,6 +517,7 @@ const extractPostIdsFromRedditPosts = async (subredditResponse) => {
   return subredditResponse.map(child => child.data.id);
 };
 
+
 const getTopPostsOfSubreddit = async (subredditName, accessToken, limit) => {
   let idArray = [];
 
