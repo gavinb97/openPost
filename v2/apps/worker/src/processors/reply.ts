@@ -18,11 +18,119 @@ async function getTokens(accountId: string) {
   return { account, token };
 }
 
+// ============================================================
+// Twitter: search for a relevant tweet to reply to
+// Uses v2 recent search with user-context OAuth 1.0a
+// ============================================================
+
+async function findTweetToReply(
+  token: OAuthToken,
+  account: PlatformAccount,
+  keywords: string[],
+  hashtags: string[],
+): Promise<{ id: string; text: string; author_id: string } | null> {
+  const OAuth = (await import('oauth-1.0a')).default;
+  const oauth = new OAuth({
+    consumer: { key: config.twitter.appKey, secret: config.twitter.appSecret },
+    signature_method: 'HMAC-SHA1',
+    hash_function(bs: string, k: string) { return crypto.createHmac('sha1', k).update(bs).digest('base64'); },
+  });
+
+  // Build search query from agent keywords/hashtags
+  const terms = [
+    ...hashtags.slice(0, 3).map((h) => h.startsWith('#') ? h : `#${h}`),
+    ...keywords.slice(0, 3),
+  ].filter(Boolean);
+
+  if (!terms.length) return null;
+
+  // Exclude replies, retweets, own account
+  const queryStr = `(${terms.join(' OR ')}) -is:reply -is:retweet lang:en`;
+  const searchUrl = `https://api.twitter.com/2/tweets/search/recent?query=${encodeURIComponent(queryStr)}&tweet.fields=id,text,author_id&expansions=author_id&max_results=10`;
+
+  const tok = { key: token.access_token, secret: token.token_secret! };
+  const header = oauth.toHeader(oauth.authorize({ url: searchUrl, method: 'GET' }, tok));
+
+  try {
+    const resp = await fetch(searchUrl, { headers: { ...header } });
+    const data = await resp.json() as any;
+
+    if (!resp.ok) {
+      console.warn(`[Reply] Twitter search failed (${resp.status}): ${JSON.stringify(data)}`);
+      return null;
+    }
+
+    const tweets: any[] = data?.data || [];
+    // Filter out our own tweets
+    const eligible = tweets.filter((t) => t.author_id !== account.platform_user_id);
+
+    if (!eligible.length) return null;
+    return eligible[0];
+  } catch (err: any) {
+    console.warn(`[Reply] Twitter search error: ${err.message}`);
+    return null;
+  }
+}
+
+// ============================================================
+// Reddit: find a relevant post in target subreddit to reply to
+// ============================================================
+
+async function findRedditPostToReply(
+  token: OAuthToken,
+  subreddit: string,
+  keywords: string[],
+): Promise<{ id: string; fullname: string; title: string; selftext: string } | null> {
+  try {
+    // Search the subreddit for recent posts matching agent keywords
+    const query = keywords.slice(0, 4).join(' ');
+    const url = query
+      ? `https://oauth.reddit.com/r/${subreddit}/search?q=${encodeURIComponent(query)}&restrict_sr=1&sort=new&t=week&limit=10`
+      : `https://oauth.reddit.com/r/${subreddit}/hot?limit=10`;
+
+    const resp = await fetch(url, {
+      headers: {
+        Authorization: `Bearer ${token.access_token}`,
+        'User-Agent': config.reddit.userAgent,
+      },
+    });
+    const data = await resp.json() as any;
+
+    if (!resp.ok) {
+      console.warn(`[Reply] Reddit search failed (${resp.status}): ${JSON.stringify(data)}`);
+      return null;
+    }
+
+    const posts: any[] = data?.data?.children ?? [];
+    const eligible = posts.filter((p: any) => {
+      const d = p.data;
+      // Skip stickied/pinned, locked, or self-promotion
+      return !d.stickied && !d.locked && d.author !== '[deleted]' && d.score > 0;
+    });
+
+    if (!eligible.length) return null;
+    const post = eligible[0].data;
+    return {
+      id: post.id,
+      fullname: post.name, // e.g. "t3_abc123" — needed for Reddit comment thing_id
+      title: post.title,
+      selftext: post.selftext || '',
+    };
+  } catch (err: any) {
+    console.warn(`[Reply] Reddit search error: ${err.message}`);
+    return null;
+  }
+}
+
+// ============================================================
+// PROCESSOR
+// ============================================================
+
 export function startReplyProcessor() {
   const worker = new Worker<ReplyJobPayload>(
     QUEUES.REPLY,
     async (job: BullJob<ReplyJobPayload>) => {
-      const { agent_id, platform_account_id, action_id, platform, target_post_id, target_user } = job.data;
+      const { agent_id, platform_account_id, action_id, platform } = job.data;
       console.log(`[Reply] Processing action ${action_id} for ${platform}`);
 
       try {
@@ -30,38 +138,89 @@ export function startReplyProcessor() {
         if (!agent) throw new Error(`Agent ${agent_id} not found`);
         const { account, token } = await getTokens(platform_account_id);
 
-        // Check if content is already set (pre-generated and approved via review queue)
-        const existingAction = await queryOne<any>('SELECT content_text FROM agent_actions WHERE id = $1', [action_id]);
+        // Load action record — need content_text, target_post_id, target_user from DB
+        // (target_post_id may have been found and stored in a previous run or review step)
+        const existingAction = await queryOne<any>(
+          'SELECT content_text, target_post_id, target_user FROM agent_actions WHERE id = $1',
+          [action_id],
+        );
+
         const preApprovedText = (job.data as any).override_content || existingAction?.content_text;
+        // Prefer DB value — review approve jobData may not carry target_post_id
+        let targetPostId: string | null = existingAction?.target_post_id || (job.data as any).target_post_id || null;
+        const targetUser: string | null = existingAction?.target_user || (job.data as any).target_user || null;
+
+        // ── For Twitter: find a tweet to reply to if we don't have one yet ──
+        if (platform === 'twitter' && !targetPostId) {
+          const keywords = [...(agent.topic_keywords ?? [])];
+          const hashtags = [...(agent.hashtag_targets ?? [])];
+          const found = await findTweetToReply(token, account, keywords, hashtags);
+          if (found) {
+            targetPostId = found.id;
+            await query(`UPDATE agent_actions SET target_post_id = $1 WHERE id = $2`, [targetPostId, action_id]);
+            console.log(`[Reply] Found target tweet ${targetPostId}: "${found.text.substring(0, 80)}..."`);
+          } else {
+            console.log(`[Reply] No target tweet found — will post as standalone tweet`);
+          }
+        }
+
+        // ── For Reddit: find a post in the target subreddit if we don't have one yet ──
+        let redditPostContent: string | null = null;
+        if (platform === 'reddit' && !targetPostId) {
+          const subreddit = existingAction?.target_subreddit || (job.data as any).target_subreddit;
+          if (subreddit) {
+            const found = await findRedditPostToReply(token, subreddit, agent.topic_keywords ?? []);
+            if (found) {
+              targetPostId = found.fullname; // Reddit thing_id (e.g. "t3_abc123")
+              redditPostContent = `${found.title}\n\n${found.selftext}`.trim();
+              await query(
+                `UPDATE agent_actions SET target_post_id = $1 WHERE id = $2`,
+                [targetPostId, action_id],
+              );
+              console.log(`[Reply] Found Reddit post ${targetPostId}: "${found.title.substring(0, 80)}"`);
+            } else {
+              console.log(`[Reply] No Reddit post found in r/${subreddit} — skipping`);
+              await query(
+                `UPDATE agent_actions SET status = 'failed', error_message = 'No suitable Reddit post found to reply to', executed_at = now() WHERE id = $1`,
+                [action_id],
+              );
+              return;
+            }
+          }
+        }
 
         let replyText: string;
+        let originalContent = 'An interesting social media post';
 
         if (preApprovedText) {
           replyText = preApprovedText;
           console.log(`[Reply] Action ${action_id} using pre-approved content`);
         } else {
           // Get conversation context
-          const conversation = target_user
+          const conversation = targetUser
             ? await queryOne<AgentConversation>(
                 'SELECT * FROM agent_conversations WHERE agent_id = $1 AND platform = $2 AND target_user = $3',
-                [agent_id, platform, target_user],
+                [agent_id, platform, targetUser],
               )
             : null;
 
-          // For Reddit: scrape the target post/comment to get context
-          let originalContent = 'An interesting social media post';
-          if (platform === 'reddit' && job.data.target_post_id) {
-            try {
-              const resp = await fetch(`https://oauth.reddit.com/api/info?id=${target_post_id}`, {
-                headers: {
-                  Authorization: `Bearer ${token.access_token}`,
-                  'User-Agent': config.reddit.userAgent,
-                },
-              });
-              const data = await resp.json() as any;
-              const post = data?.data?.children?.[0]?.data;
-              if (post) originalContent = `${post.title}\n\n${post.selftext || ''}`.trim();
-            } catch { /* use default */ }
+          // For Reddit: use already-fetched content or re-fetch if we had a pre-existing target_post_id
+          if (platform === 'reddit' && targetPostId) {
+            if (redditPostContent) {
+              originalContent = redditPostContent;
+            } else {
+              try {
+                const resp = await fetch(`https://oauth.reddit.com/api/info?id=${targetPostId}`, {
+                  headers: {
+                    Authorization: `Bearer ${token.access_token}`,
+                    'User-Agent': config.reddit.userAgent,
+                  },
+                });
+                const data = await resp.json() as any;
+                const post = data?.data?.children?.[0]?.data;
+                if (post) originalContent = `${post.title}\n\n${post.selftext || ''}`.trim();
+              } catch { /* use default */ }
+            }
           }
 
           const generated = await generateReplyContent(agent, platform as Platform, originalContent, conversation);
@@ -78,7 +237,7 @@ export function startReplyProcessor() {
           replyText = generated.text;
         }
 
-        // Post reply
+        // ── Post reply ──
         let resultId = '';
         let resultUrl = '';
 
@@ -93,10 +252,12 @@ export function startReplyProcessor() {
             const url = 'https://api.twitter.com/2/tweets';
             const tok = { key: token.access_token, secret: token.token_secret! };
             const header = oauth.toHeader(oauth.authorize({ url, method: 'POST' }, tok));
+            const tweetBody: Record<string, any> = { text: replyText };
+            if (targetPostId) tweetBody.reply = { in_reply_to_tweet_id: targetPostId };
             const resp = await fetch(url, {
               method: 'POST',
               headers: { ...header, 'Content-Type': 'application/json' },
-              body: JSON.stringify({ text: replyText, reply: { in_reply_to_tweet_id: target_post_id } }),
+              body: JSON.stringify(tweetBody),
             });
             const data = await resp.json() as any;
             if (!resp.ok) throw new Error(`Twitter reply failed: ${JSON.stringify(data)}`);
@@ -113,7 +274,7 @@ export function startReplyProcessor() {
                 'User-Agent': config.reddit.userAgent,
                 'Content-Type': 'application/x-www-form-urlencoded',
               },
-              body: new URLSearchParams({ api_type: 'json', thing_id: target_post_id || '', text: replyText }),
+              body: new URLSearchParams({ api_type: 'json', thing_id: targetPostId || '', text: replyText }),
             });
             const data = await resp.json() as any;
             resultId = data?.json?.data?.things?.[0]?.data?.id || '';
@@ -125,7 +286,7 @@ export function startReplyProcessor() {
               method: 'POST',
               headers: { Authorization: `Bearer ${token.access_token}`, 'Content-Type': 'application/json' },
               body: JSON.stringify({
-                snippet: { videoId: target_post_id, topLevelComment: { snippet: { textOriginal: replyText } } },
+                snippet: { videoId: targetPostId, topLevelComment: { snippet: { textOriginal: replyText } } },
               }),
             });
             const data = await resp.json() as any;
@@ -144,15 +305,13 @@ export function startReplyProcessor() {
           [replyText, resultId, resultUrl, action_id],
         );
 
-        // Update stats
         await query('UPDATE agents SET replies_sent = replies_sent + 1, last_active_at = now() WHERE id = $1', [agent_id]);
 
-        // Update conversation memory
-        if (target_user) {
-          await updateConversationMemory(agent_id, platform as Platform, platform_account_id, target_user, 'agent', replyText);
+        if (targetUser) {
+          await updateConversationMemory(agent_id, platform as Platform, platform_account_id, targetUser, 'agent', replyText);
         }
 
-        console.log(`[Reply] Published reply on ${platform}: ${resultId}`);
+        console.log(`[Reply] Published reply on ${platform}: ${resultId}${targetPostId ? ` (reply to ${targetPostId})` : ''}`);
 
       } catch (err: any) {
         console.error(`[Reply] Failed action ${action_id}:`, err.message);
