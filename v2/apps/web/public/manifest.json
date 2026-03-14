@@ -1,0 +1,8 @@
+{
+  "name": "OnlyPosts",
+  "short_name": "OnlyPosts",
+  "icons": [],
+  "theme_color": "#7c3aed",
+  "background_color": "#09090b",
+  "display": "standalone"
+}
