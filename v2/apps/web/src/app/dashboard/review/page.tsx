@@ -146,11 +146,24 @@ export default function ReviewPage() {
                     <span className="text-xs text-muted-foreground font-mono">{formatRelative(action.created_at)}</span>
                   </div>
 
-                  {/* Reply context */}
-                  {(action.action_type === 'reply' || action.action_type === 'comment') && action.target_post_id && (
+                  {/* Target tweet/post context — for reply, retweet, like */}
+                  {action.target_post_id && (
                     <div className="rounded-lg bg-white/[0.02] border border-white/[0.04] px-3 py-2">
                       <p className="text-xs text-muted-foreground">
-                        Replying to post: <span className="font-mono text-foreground/60">{action.target_post_id}</span>
+                        {action.action_type === 'retweet' ? 'Retweeting: ' :
+                         action.action_type === 'like' ? 'Liking: ' : 'Replying to: '}
+                        {action.platform === 'twitter' ? (
+                          <a
+                            href={`https://twitter.com/i/status/${action.target_post_id}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="font-mono text-primary/70 hover:text-primary underline underline-offset-2"
+                          >
+                            {action.target_post_id}
+                          </a>
+                        ) : (
+                          <span className="font-mono text-foreground/60">{action.target_post_id}</span>
+                        )}
                         {action.target_user && (
                           <> · by <span className="font-mono text-foreground/60">@{action.target_user}</span></>
                         )}
@@ -161,21 +174,23 @@ export default function ReviewPage() {
                     </div>
                   )}
 
-                  {/* Content — editable */}
-                  <div className="rounded-xl bg-white/[0.03] border border-white/[0.06] p-4">
-                    {action.content_text ? (
-                      <Textarea
-                        value={editing[action.id] ?? action.content_text}
-                        onChange={(e) => setEditing({ ...editing, [action.id]: e.target.value })}
-                        rows={3}
-                        className="bg-transparent border-none p-0 focus-visible:ring-0 resize-none text-sm leading-relaxed"
-                      />
-                    ) : (
-                      <p className="text-xs text-muted-foreground italic">
-                        Content will be generated when approved and dispatched to the worker.
-                      </p>
-                    )}
-                  </div>
+                  {/* Content — editable (not shown for engage actions like retweet/like) */}
+                  {action.action_type !== 'retweet' && action.action_type !== 'like' && action.action_type !== 'follow' && (
+                    <div className="rounded-xl bg-white/[0.03] border border-white/[0.06] p-4">
+                      {action.content_text ? (
+                        <Textarea
+                          value={editing[action.id] ?? action.content_text}
+                          onChange={(e) => setEditing({ ...editing, [action.id]: e.target.value })}
+                          rows={3}
+                          className="bg-transparent border-none p-0 focus-visible:ring-0 resize-none text-sm leading-relaxed"
+                        />
+                      ) : (
+                        <p className="text-xs text-muted-foreground italic">
+                          Content will be generated when approved and dispatched to the worker.
+                        </p>
+                      )}
+                    </div>
+                  )}
 
                   {action.guardrail_score != null && (
                     <div className="flex items-center gap-2">

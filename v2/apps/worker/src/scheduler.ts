@@ -349,7 +349,7 @@ async function schedulerTick() {
          WHERE agent_id = $1 AND status IN ('queued','processing','review')`,
         [agent.id],
       );
-      if (parseInt(count) > 2) {
+      if (parseInt(count) > 20) {
         // Push next_action_at forward so we don't keep re-checking
         const bump = getNextFireTime(agent);
         await query('UPDATE agents SET next_action_at = $1 WHERE id = $2', [bump.toISOString(), agent.id]);
