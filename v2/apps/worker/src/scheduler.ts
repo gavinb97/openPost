@@ -343,11 +343,11 @@ async function schedulerTick() {
 
   for (const agent of agents) {
     try {
-      // Guard: skip if there are already > 2 pending future jobs
+      // Guard: skip if there are already pending/review jobs (review counts — action is awaiting human approval)
       const [{ count }] = await query<{ count: string }>(
         `SELECT COUNT(*) as count FROM agent_actions
-         WHERE agent_id = $1 AND status IN ('queued','processing') AND scheduled_at > $2`,
-        [agent.id, now.toISOString()],
+         WHERE agent_id = $1 AND status IN ('queued','processing','review')`,
+        [agent.id],
       );
       if (parseInt(count) > 2) {
         // Push next_action_at forward so we don't keep re-checking
