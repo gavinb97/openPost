@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { agentApi } from '@/lib/api';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -14,6 +15,7 @@ import { toast } from 'sonner';
 export default function AgentsPage() {
   const [agents, setAgents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   const load = async () => {
     try {
@@ -79,8 +81,9 @@ export default function AgentsPage() {
           {agents.map((agent, i) => (
             <div
               key={agent.id}
-              className="group relative rounded-2xl border border-white/[0.06] bg-white/[0.02] backdrop-blur-sm p-6 hover:bg-white/[0.04] hover:border-white/[0.1] transition-all duration-300 gradient-border-animated"
+              className="group relative rounded-2xl border border-white/[0.06] bg-white/[0.02] backdrop-blur-sm p-6 hover:bg-white/[0.04] hover:border-white/[0.1] transition-all duration-300 gradient-border-animated cursor-pointer"
               style={{ animationDelay: `${i * 0.05}s` }}
+              onClick={() => router.push(`/dashboard/agents/${agent.id}`)}
             >
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3">
@@ -105,13 +108,13 @@ export default function AgentsPage() {
                     </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
                   <Switch
                     checked={agent.enabled}
                     onCheckedChange={() => toggleAgent(agent.id)}
                   />
                   <button
-                    onClick={() => deleteAgent(agent.id, agent.name)}
+                    onClick={(e) => { e.stopPropagation(); deleteAgent(agent.id, agent.name); }}
                     className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-red-400 p-1 rounded-lg hover:bg-red-400/10"
                     title="Delete agent"
                   >
