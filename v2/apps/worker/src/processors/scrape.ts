@@ -3,9 +3,9 @@
 // ============================================================
 
 import { Worker, type Job as BullJob } from 'bullmq';
-import { redis } from './queues';
-import { query, queryOne } from './db';
-import { config } from './config';
+import { redis } from '../queues';
+import { query, queryOne } from '../db';
+import { config } from '../config';
 import { QUEUES } from '@onlyposts/shared';
 import type { OAuthToken, PlatformAccount, ScrapeJobPayload } from '@onlyposts/shared';
 

@@ -4,9 +4,9 @@
 
 import { Worker, type Job as BullJob } from 'bullmq';
 import crypto from 'crypto';
-import { redis } from './queues';
-import { query, queryOne } from './db';
-import { config } from './config';
+import { redis } from '../queues';
+import { query, queryOne } from '../db';
+import { config } from '../config';
 import { QUEUES } from '@onlyposts/shared';
 import type { Agent, OAuthToken, PlatformAccount, EngageJobPayload } from '@onlyposts/shared';
 

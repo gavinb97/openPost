@@ -4,10 +4,10 @@
 
 import { Worker, type Job as BullJob } from 'bullmq';
 import crypto from 'crypto';
-import { redis } from './queues';
-import { query, queryOne } from './db';
-import { generateDMContent, updateConversationMemory } from './ai';
-import { config } from './config';
+import { redis } from '../queues';
+import { query, queryOne } from '../db';
+import { generateDMContent, updateConversationMemory } from '../ai';
+import { config } from '../config';
 import { QUEUES } from '@onlyposts/shared';
 import type { Agent, OAuthToken, PlatformAccount, DMJobPayload, Platform, AgentConversation } from '@onlyposts/shared';
 

@@ -3,16 +3,16 @@
 // ============================================================
 
 import { Worker, type Job as BullJob } from 'bullmq';
-import { redis } from './queues';
-import { query, queryOne } from './db';
-import { generatePostContent } from './ai';
-import { updateConversationMemory } from './ai';
+import { redis } from '../queues';
+import { query, queryOne } from '../db';
+import { generatePostContent } from '../ai';
+import { updateConversationMemory } from '../ai';
 import { QUEUES } from '@onlyposts/shared';
 import type { Agent, OAuthToken, PlatformAccount, PostJobPayload, Platform } from '@onlyposts/shared';
 
 // Platform service imports (shared logic with API)
 import crypto from 'crypto';
-import { config } from './config';
+import { config } from '../config';
 
 // ============================================================
 // Inline platform helpers (to avoid circular deps with API)
