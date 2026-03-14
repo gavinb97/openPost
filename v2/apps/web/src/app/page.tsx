@@ -204,8 +204,8 @@ export default function HomePage() {
         <div className="max-w-6xl mx-auto flex items-center justify-between text-sm text-muted-foreground">
           <p>© 2026 OnlyPosts. All rights reserved.</p>
           <div className="flex gap-6">
-            <a href="#" className="hover:text-foreground transition-colors">Privacy</a>
-            <a href="#" className="hover:text-foreground transition-colors">Terms</a>
+            <Link href="/privacy" className="hover:text-foreground transition-colors">Privacy</Link>
+            <Link href="/terms" className="hover:text-foreground transition-colors">Terms</Link>
           </div>
         </div>
       </footer>
