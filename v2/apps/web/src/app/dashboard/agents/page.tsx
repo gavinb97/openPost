@@ -38,6 +38,17 @@ export default function AgentsPage() {
     }
   };
 
+  const deleteAgent = async (id: string, name: string) => {
+    if (!confirm(`Delete agent "${name}"? This cannot be undone.`)) return;
+    try {
+      await agentApi.delete(id);
+      setAgents((prev) => prev.filter((a) => a.id !== id));
+      toast.success('Agent deleted');
+    } catch {
+      toast.error('Failed to delete agent');
+    }
+  };
+
   if (loading) return <div className="flex justify-center py-20"><Spinner size="lg" /></div>;
 
   return (
@@ -94,10 +105,19 @@ export default function AgentsPage() {
                     </div>
                   </div>
                 </div>
-                <Switch
-                  checked={agent.enabled}
-                  onCheckedChange={() => toggleAgent(agent.id)}
-                />
+                <div className="flex items-center gap-2">
+                  <Switch
+                    checked={agent.enabled}
+                    onCheckedChange={() => toggleAgent(agent.id)}
+                  />
+                  <button
+                    onClick={() => deleteAgent(agent.id, agent.name)}
+                    className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-red-400 p-1 rounded-lg hover:bg-red-400/10"
+                    title="Delete agent"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+                  </button>
+                </div>
               </div>
 
               {agent.personality && (
