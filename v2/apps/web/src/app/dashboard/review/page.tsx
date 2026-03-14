@@ -32,26 +32,26 @@ export default function ReviewPage() {
 
   useEffect(() => { load(); }, [page]);
 
-  const review = async (id: string, decision: 'approved' | 'rejected') => {
+  const review = async (id: string, action: 'approve' | 'reject') => {
     try {
       const editedContent = editing[id];
-      await reviewApi.review(id, { decision, edited_content: editedContent });
+      await reviewApi.review(id, { action, edited_content: editedContent });
       setActions((prev) => prev.filter((a) => a.id !== id));
       setTotal((t) => t - 1);
-      toast.success(`Action ${decision}`);
+      toast.success(`Action ${action}d`);
     } catch {
       toast.error('Failed to review action');
     }
   };
 
-  const bulkReview = async (decision: 'approved' | 'rejected') => {
+  const bulkReview = async (action: 'approve' | 'reject') => {
     if (selected.size === 0) return;
     try {
-      await reviewApi.bulkReview({ action_ids: Array.from(selected), decision });
+      await reviewApi.bulkReview({ action_ids: Array.from(selected), action });
       setActions((prev) => prev.filter((a) => !selected.has(a.id)));
       setTotal((t) => t - selected.size);
       setSelected(new Set());
-      toast.success(`${selected.size} actions ${decision}`);
+      toast.success(`${selected.size} actions ${action}d`);
     } catch {
       toast.error('Failed to bulk review');
     }
@@ -91,10 +91,10 @@ export default function ReviewPage() {
             </Button>
             {selected.size > 0 && (
               <>
-                <Button size="sm" onClick={() => bulkReview('approved')}>
+                <Button size="sm" onClick={() => bulkReview('approve')}>
                   ✓ Approve ({selected.size})
                 </Button>
-                <Button variant="destructive" size="sm" onClick={() => bulkReview('rejected')}>
+                <Button variant="destructive" size="sm" onClick={() => bulkReview('reject')}>
                   ✗ Reject ({selected.size})
                 </Button>
               </>
@@ -174,10 +174,10 @@ export default function ReviewPage() {
 
                   {/* Actions */}
                   <div className="flex gap-2 pt-1">
-                    <Button size="sm" onClick={() => review(action.id, 'approved')}>
+                    <Button size="sm" onClick={() => review(action.id, 'approve')}>
                       ✓ Approve
                     </Button>
-                    <Button variant="destructive" size="sm" onClick={() => review(action.id, 'rejected')}>
+                    <Button variant="destructive" size="sm" onClick={() => review(action.id, 'reject')}>
                       ✗ Reject
                     </Button>
                   </div>
