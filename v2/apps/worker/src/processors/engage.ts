@@ -26,8 +26,10 @@ async function findTweetForEngagement(
   token: OAuthToken,
   account: PlatformAccount,
   agent: Agent,
+  usedTweetIds: Set<string>,
 ): Promise<{ id: string; text: string } | null> {
   const keywords = [...(agent.topic_keywords ?? []), ...(agent.hashtag_targets ?? [])].slice(0, 5);
+  const isEligible = (t: any) => t.author_id !== account.platform_user_id && !usedTweetIds.has(t.id);
 
   // Strategy 1: recent search (Basic tier+)
   if (keywords.length > 0) {
@@ -38,7 +40,7 @@ async function findTweetForEngagement(
       const resp = await fetch(searchUrl, { headers: header });
       const data = await resp.json() as any;
       if (resp.ok) {
-        const eligible = (data?.data ?? []).filter((t: any) => t.author_id !== account.platform_user_id);
+        const eligible = (data?.data ?? []).filter(isEligible);
         if (eligible.length > 0) {
           console.log(`[Engage] Found tweet via search for ${account.handle}`);
           return eligible[0];
@@ -60,7 +62,7 @@ async function findTweetForEngagement(
       console.warn(`[Engage] Home timeline error (${resp.status}): ${JSON.stringify(data)}`);
       return null;
     }
-    let eligible: any[] = (data?.data ?? []).filter((t: any) => t.author_id !== account.platform_user_id);
+    let eligible: any[] = (data?.data ?? []).filter(isEligible);
     // Prefer keyword-relevant tweets
     if (keywords.length > 0) {
       const filtered = eligible.filter((t: any) =>
@@ -104,7 +106,13 @@ export function startEngageProcessor() {
         if (platform === 'twitter' && (action_type === 'retweet' || action_type === 'like') && !effectiveTargetPostId) {
           const agent = await queryOne<Agent>('SELECT * FROM agents WHERE id = $1', [agent_id]);
           if (agent) {
-            const found = await findTweetForEngagement(token, account, agent);
+            const usedRows = await query<{ target_post_id: string }>(
+              `SELECT target_post_id FROM agent_actions
+               WHERE agent_id = $1 AND action_type = $2 AND target_post_id IS NOT NULL`,
+              [agent_id, action_type],
+            );
+            const usedTweetIds = new Set(usedRows.map((r) => r.target_post_id));
+            const found = await findTweetForEngagement(token, account, agent, usedTweetIds);
             if (found) {
               effectiveTargetPostId = found.id;
               // Persist target and, if review mode, hold for human approval

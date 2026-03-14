@@ -46,18 +46,20 @@ async function findTweetToReply(
   account: PlatformAccount,
   keywords: string[],
   hashtags: string[],
+  usedTweetIds: Set<string>,
 ): Promise<{ id: string; text: string; author_id: string } | null> {
   const terms = [
     ...hashtags.slice(0, 3).map((h) => h.startsWith('#') ? h : `#${h}`),
     ...keywords.slice(0, 3),
   ].filter(Boolean);
 
-  console.log(`[Reply] Searching for tweets to reply to. Terms: ${terms.join(', ') || '(none)'}`);
+  console.log(`[Reply] Searching for tweets to reply to. Terms: ${terms.join(', ') || '(none)'}, excluding ${usedTweetIds.size} already-used tweet(s)`);
 
-  // Only reply to tweets open to everyone — filters out restricted reply settings
+  // Only reply to tweets open to everyone and not already targeted
   const isReplyable = (t: any) =>
     t.author_id !== account.platform_user_id &&
-    (!t.reply_settings || t.reply_settings === 'everyone');
+    (!t.reply_settings || t.reply_settings === 'everyone') &&
+    !usedTweetIds.has(t.id);
 
   // ── Strategy 1: recent search (requires Basic tier) ──
   if (terms.length > 0) {
@@ -209,7 +211,14 @@ export function startReplyProcessor() {
         if (platform === 'twitter' && !targetPostId) {
           const keywords = [...(agent.topic_keywords ?? [])];
           const hashtags = [...(agent.hashtag_targets ?? [])];
-          const found = await findTweetToReply(token, account, keywords, hashtags);
+          const usedRows = await query<{ target_post_id: string }>(
+            `SELECT target_post_id FROM agent_actions
+             WHERE agent_id = $1 AND action_type IN ('reply','comment')
+             AND target_post_id IS NOT NULL`,
+            [agent_id],
+          );
+          const usedTweetIds = new Set(usedRows.map((r) => r.target_post_id));
+          const found = await findTweetToReply(token, account, keywords, hashtags, usedTweetIds);
           if (found) {
             targetPostId = found.id;
             await query(`UPDATE agent_actions SET target_post_id = $1 WHERE id = $2`, [targetPostId, action_id]);
