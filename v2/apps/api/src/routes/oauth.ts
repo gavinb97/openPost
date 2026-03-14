@@ -127,11 +127,12 @@ oauthRouter.get('/twitter/start', requireAuth, asyncHandler(async (req, res) => 
   });
 
   const text = await response.text();
+  console.error(`[Twitter OAuth] request_token response (${response.status}):`, text);
   const params = new URLSearchParams(text);
   const oauthToken = params.get('oauth_token');
   const oauthTokenSecret = params.get('oauth_token_secret');
 
-  if (!oauthToken) throw new AppError(502, 'Failed to get Twitter request token');
+  if (!oauthToken) throw new AppError(502, `Failed to get Twitter request token: ${text}`);
 
   // Save state
   await saveOAuthState(req.user!.userId, 'twitter', oauthToken, {
