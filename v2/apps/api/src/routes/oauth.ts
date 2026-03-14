@@ -18,8 +18,9 @@ export const oauthRouter = Router();
 
 /** List all connected platform accounts for the current user */
 oauthRouter.get('/accounts', requireAuth, asyncHandler(async (req, res) => {
-  const accounts = await query<PlatformAccount>(
-    'SELECT * FROM platform_accounts WHERE user_id = $1 ORDER BY created_at DESC',
+  const accounts = await query<PlatformAccount & { platform_username: string | null }>(
+    `SELECT *, handle AS platform_username, display_name AS platform_display_name
+     FROM platform_accounts WHERE user_id = $1 ORDER BY created_at DESC`,
     [req.user!.userId],
   );
   res.json({ ok: true, data: { accounts } });
@@ -183,8 +184,27 @@ oauthRouter.get('/twitter/callback', asyncHandler(async (req, res) => {
   const params = new URLSearchParams(text);
   const accessToken = params.get('oauth_token')!;
   const accessSecret = params.get('oauth_token_secret')!;
-  const twitterUserId = params.get('user_id')!;
-  const screenName = params.get('screen_name')!;
+  let twitterUserId = params.get('user_id') || '';
+  let screenName = params.get('screen_name') || '';
+
+  // If screen_name wasn't in the token response, fetch profile
+  if (!screenName) {
+    const OAuth2 = (await import('oauth-1.0a')).default;
+    const lib2 = new OAuth2({
+      consumer: { key: config.twitter.appKey, secret: config.twitter.appSecret },
+      signature_method: 'HMAC-SHA1',
+      hash_function(bs: string, k: string) { return crypto.createHmac('sha1', k).update(bs).digest('base64'); },
+    });
+    const verifyReq = { url: 'https://api.twitter.com/1.1/account/verify_credentials.json', method: 'GET' };
+    const userToken = { key: accessToken, secret: accessSecret };
+    const verifyHeaders = lib2.toHeader(lib2.authorize(verifyReq, userToken));
+    const profileResp = await fetch(verifyReq.url, { headers: { ...verifyHeaders } });
+    if (profileResp.ok) {
+      const profile = await profileResp.json() as { screen_name?: string; id_str?: string };
+      screenName = profile.screen_name || '';
+      if (!twitterUserId && profile.id_str) twitterUserId = profile.id_str;
+    }
+  }
 
   await upsertPlatformAccount(
     state.user_id, 'twitter', twitterUserId,
@@ -478,6 +498,15 @@ oauthRouter.post('/refresh/:accountId', requireAuth, asyncHandler(async (req, re
       if (!resp.ok) {
         const text = await resp.text();
         throw new AppError(502, `Twitter token no longer valid: ${text}`);
+      }
+      const profile = await resp.json() as { screen_name?: string; name?: string; profile_image_url_https?: string };
+      // Update handle/display_name if they were missing or stale
+      if (profile.screen_name) {
+        await query(
+          `UPDATE platform_accounts SET handle = $1, display_name = $2, avatar_url = COALESCE($3, avatar_url), updated_at = now()
+           WHERE id = $4`,
+          [`@${profile.screen_name}`, profile.name || profile.screen_name, profile.profile_image_url_https || null, account.id],
+        );
       }
       // Token is still good — nothing to refresh for OAuth 1.0a
       newToken = { access_token: token.access_token, still_valid: true };
