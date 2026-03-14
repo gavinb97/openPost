@@ -7,6 +7,9 @@ COPY packages/shared/package.json ./packages/shared/
 COPY apps/web/package.json ./apps/web/
 RUN npm install --workspace=apps/web --workspace=packages/shared
 
+# Copy root tsconfig (extended by all sub-projects)
+COPY tsconfig.base.json ./
+
 # Copy source
 COPY packages/shared/ ./packages/shared/
 COPY apps/web/ ./apps/web/

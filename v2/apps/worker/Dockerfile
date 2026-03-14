@@ -7,6 +7,9 @@ COPY packages/shared/package.json ./packages/shared/
 COPY apps/worker/package.json ./apps/worker/
 RUN npm install --workspace=apps/worker --workspace=packages/shared
 
+# Copy root tsconfig (extended by all sub-projects)
+COPY tsconfig.base.json ./
+
 # Copy source
 COPY packages/shared/ ./packages/shared/
 COPY apps/worker/ ./apps/worker/

@@ -7,6 +7,9 @@ COPY packages/shared/package.json ./packages/shared/
 COPY apps/api/package.json ./apps/api/
 RUN npm install --workspace=apps/api --workspace=packages/shared
 
+# Copy root tsconfig (extended by all sub-projects)
+COPY tsconfig.base.json ./
+
 # Copy source
 COPY packages/shared/ ./packages/shared/
 COPY apps/api/ ./apps/api/
