@@ -94,8 +94,12 @@ export function startEngageProcessor() {
       try {
         const { account, token } = await getTokens(platform_account_id);
 
-        // For retweet/like: find a target tweet if we don't have one yet
-        let effectiveTargetPostId: string | null = target_post_id ?? null;
+        // Read target_post_id from DB — review approval doesn't carry it in job.data
+        const existingAction = await queryOne<any>(
+          'SELECT target_post_id FROM agent_actions WHERE id = $1',
+          [action_id],
+        );
+        let effectiveTargetPostId: string | null = existingAction?.target_post_id || target_post_id || null;
 
         if (platform === 'twitter' && (action_type === 'retweet' || action_type === 'like') && !effectiveTargetPostId) {
           const agent = await queryOne<Agent>('SELECT * FROM agents WHERE id = $1', [agent_id]);
