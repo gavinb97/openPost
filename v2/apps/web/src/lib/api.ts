@@ -101,8 +101,8 @@ export const jobApi = {
 
 export const mediaApi = {
   getUploadUrl: (data: { filename: string; content_type: string; category?: string }) =>
-    api.post<{ upload_url: string; key: string; media_id: string }>('/media/upload-url', data),
-  register: (data: { media_id: string; original_filename: string; content_type: string; file_size: number; category?: string }) =>
+    api.post<{ upload_url: string; key: string; s3_key: string; media_id: string }>('/media/upload-url', data),
+  register: (data: { s3_key: string; original_name: string; mime_type: string; size_bytes: number; width?: number; height?: number; duration_seconds?: number; description?: string; categories?: string[]; nsfw?: boolean }) =>
     api.post<{ media: any }>('/media/register', data),
   list: (params?: { page?: number; category?: string }) => {
     const qs = new URLSearchParams(params as any).toString();
