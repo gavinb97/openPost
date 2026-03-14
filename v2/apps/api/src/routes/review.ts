@@ -53,10 +53,11 @@ reviewRouter.get('/', asyncHandler(async (req, res) => {
 reviewRouter.post('/:id', asyncHandler(async (req, res) => {
   const data = ReviewActionSchema.parse(req.body);
 
-  // Verify ownership
+  // Verify ownership — JOIN platform_accounts to get platform for job dispatch
   const action = await queryOne<any>(
-    `SELECT aa.* FROM agent_actions aa
+    `SELECT aa.*, pa.platform FROM agent_actions aa
      JOIN agents a ON a.id = aa.agent_id
+     LEFT JOIN platform_accounts pa ON pa.id = aa.platform_account_id
      WHERE aa.id = $1 AND a.user_id = $2 AND aa.status = 'review'`,
     [req.params.id, req.user!.userId],
   );
@@ -82,6 +83,7 @@ reviewRouter.post('/:id', asyncHandler(async (req, res) => {
         platform_account_id: action.platform_account_id,
         action_id: action.id,
         platform: action.platform,
+        action_type: action.action_type,
         ...(data.edited_content ? { override_content: data.edited_content } : {}),
       };
       await q.add(`approved:${action.id}`, jobData, { attempts: 3, backoff: { type: 'exponential', delay: 30_000 } });
@@ -112,8 +114,15 @@ reviewRouter.post('/bulk', asyncHandler(async (req, res) => {
     [newStatus, req.user!.userId, data.action_ids, req.user!.userId],
   );
 
-  // If approving, dispatch BullMQ jobs for each action
-  if (data.action === 'approve') {
+  // If approving, dispatch BullMQ jobs — fetch platform per account
+  if (data.action === 'approve' && result.length > 0) {
+    const accountIds = [...new Set(result.map((r: any) => r.platform_account_id).filter(Boolean))];
+    const accounts = accountIds.length
+      ? await query<any>(`SELECT id, platform FROM platform_accounts WHERE id = ANY($1::uuid[])`, [accountIds])
+      : [];
+    const platformMap: Record<string, string> = {};
+    for (const a of accounts) platformMap[a.id] = a.platform;
+
     await Promise.allSettled(
       result.map((row: any) => {
         const q = queueForAction(row.action_type);
@@ -122,6 +131,8 @@ reviewRouter.post('/bulk', asyncHandler(async (req, res) => {
           agent_id: row.agent_id,
           platform_account_id: row.platform_account_id,
           action_id: row.id,
+          platform: platformMap[row.platform_account_id],
+          action_type: row.action_type,
         }, { attempts: 3, backoff: { type: 'exponential', delay: 30_000 } });
       }),
     );

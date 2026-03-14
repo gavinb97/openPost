@@ -30,41 +30,52 @@ export function startReplyProcessor() {
         if (!agent) throw new Error(`Agent ${agent_id} not found`);
         const { account, token } = await getTokens(platform_account_id);
 
-        // Get conversation context
-        const conversation = target_user
-          ? await queryOne<AgentConversation>(
-              'SELECT * FROM agent_conversations WHERE agent_id = $1 AND platform = $2 AND target_user = $3',
-              [agent_id, platform, target_user],
-            )
-          : null;
+        // Check if content is already set (pre-generated and approved via review queue)
+        const existingAction = await queryOne<any>('SELECT content_text FROM agent_actions WHERE id = $1', [action_id]);
+        const preApprovedText = (job.data as any).override_content || existingAction?.content_text;
 
-        // For Reddit: scrape the target post/comment to get context
-        let originalContent = 'An interesting social media post';
-        if (platform === 'reddit' && job.data.target_post_id) {
-          // Fetch post content
-          try {
-            const resp = await fetch(`https://oauth.reddit.com/api/info?id=${target_post_id}`, {
-              headers: {
-                Authorization: `Bearer ${token.access_token}`,
-                'User-Agent': config.reddit.userAgent,
-              },
-            });
-            const data = await resp.json() as any;
-            const post = data?.data?.children?.[0]?.data;
-            if (post) originalContent = `${post.title}\n\n${post.selftext || ''}`.trim();
-          } catch { /* use default */ }
-        }
+        let replyText: string;
 
-        // Generate reply
-        const generated = await generateReplyContent(agent, platform as Platform, originalContent, conversation);
+        if (preApprovedText) {
+          replyText = preApprovedText;
+          console.log(`[Reply] Action ${action_id} using pre-approved content`);
+        } else {
+          // Get conversation context
+          const conversation = target_user
+            ? await queryOne<AgentConversation>(
+                'SELECT * FROM agent_conversations WHERE agent_id = $1 AND platform = $2 AND target_user = $3',
+                [agent_id, platform, target_user],
+              )
+            : null;
 
-        if (generated.needsReview) {
-          await query(
-            `UPDATE agent_actions SET status = 'review', content_text = $1,
-             guardrail_score = $2, guardrail_notes = $3 WHERE id = $4`,
-            [generated.text, generated.guardrailScore, generated.flaggedTerms.join(', '), action_id],
-          );
-          return;
+          // For Reddit: scrape the target post/comment to get context
+          let originalContent = 'An interesting social media post';
+          if (platform === 'reddit' && job.data.target_post_id) {
+            try {
+              const resp = await fetch(`https://oauth.reddit.com/api/info?id=${target_post_id}`, {
+                headers: {
+                  Authorization: `Bearer ${token.access_token}`,
+                  'User-Agent': config.reddit.userAgent,
+                },
+              });
+              const data = await resp.json() as any;
+              const post = data?.data?.children?.[0]?.data;
+              if (post) originalContent = `${post.title}\n\n${post.selftext || ''}`.trim();
+            } catch { /* use default */ }
+          }
+
+          const generated = await generateReplyContent(agent, platform as Platform, originalContent, conversation);
+
+          if (generated.needsReview || agent.approval_mode === 'review') {
+            await query(
+              `UPDATE agent_actions SET status = 'review', content_text = $1,
+               guardrail_score = $2, guardrail_notes = $3 WHERE id = $4`,
+              [generated.text, generated.guardrailScore, generated.flaggedTerms.join(', '), action_id],
+            );
+            console.log(`[Reply] Action ${action_id} sent to review (score: ${generated.guardrailScore})`);
+            return;
+          }
+          replyText = generated.text;
         }
 
         // Post reply
@@ -85,7 +96,7 @@ export function startReplyProcessor() {
             const resp = await fetch(url, {
               method: 'POST',
               headers: { ...header, 'Content-Type': 'application/json' },
-              body: JSON.stringify({ text: generated.text, reply: { in_reply_to_tweet_id: target_post_id } }),
+              body: JSON.stringify({ text: replyText, reply: { in_reply_to_tweet_id: target_post_id } }),
             });
             const data = await resp.json() as any;
             if (!resp.ok) throw new Error(`Twitter reply failed: ${JSON.stringify(data)}`);
@@ -102,7 +113,7 @@ export function startReplyProcessor() {
                 'User-Agent': config.reddit.userAgent,
                 'Content-Type': 'application/x-www-form-urlencoded',
               },
-              body: new URLSearchParams({ api_type: 'json', thing_id: target_post_id || '', text: generated.text }),
+              body: new URLSearchParams({ api_type: 'json', thing_id: target_post_id || '', text: replyText }),
             });
             const data = await resp.json() as any;
             resultId = data?.json?.data?.things?.[0]?.data?.id || '';
@@ -114,7 +125,7 @@ export function startReplyProcessor() {
               method: 'POST',
               headers: { Authorization: `Bearer ${token.access_token}`, 'Content-Type': 'application/json' },
               body: JSON.stringify({
-                snippet: { videoId: target_post_id, topLevelComment: { snippet: { textOriginal: generated.text } } },
+                snippet: { videoId: target_post_id, topLevelComment: { snippet: { textOriginal: replyText } } },
               }),
             });
             const data = await resp.json() as any;
@@ -129,9 +140,8 @@ export function startReplyProcessor() {
         // Update action
         await query(
           `UPDATE agent_actions SET status = 'published', content_text = $1,
-           platform_post_id = $2, platform_url = $3, executed_at = now(),
-           guardrail_score = $4 WHERE id = $5`,
-          [generated.text, resultId, resultUrl, generated.guardrailScore, action_id],
+           platform_post_id = $2, platform_url = $3, executed_at = now() WHERE id = $4`,
+          [replyText, resultId, resultUrl, action_id],
         );
 
         // Update stats
@@ -139,7 +149,7 @@ export function startReplyProcessor() {
 
         // Update conversation memory
         if (target_user) {
-          await updateConversationMemory(agent_id, platform as Platform, platform_account_id, target_user, 'agent', generated.text);
+          await updateConversationMemory(agent_id, platform as Platform, platform_account_id, target_user, 'agent', replyText);
         }
 
         console.log(`[Reply] Published reply on ${platform}: ${resultId}`);

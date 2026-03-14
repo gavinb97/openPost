@@ -82,18 +82,31 @@ export function startPostProcessor() {
         if (!agent) throw new Error(`Agent ${agent_id} not found`);
         const { account, token } = await getTokens(platform_account_id);
 
-        // Generate content
-        const generated = await generatePostContent(agent, platform as Platform);
+        // Check if content is already set (pre-generated and approved via review queue)
+        const existingAction = await queryOne<any>('SELECT content_text FROM agent_actions WHERE id = $1', [action_id]);
+        const preApprovedText = (job.data as any).override_content || existingAction?.content_text;
 
-        // Check if needs review
-        if (generated.needsReview) {
-          await query(
-            `UPDATE agent_actions SET status = 'review', content_text = $1,
-             guardrail_score = $2, guardrail_notes = $3 WHERE id = $4`,
-            [generated.text, generated.guardrailScore, generated.flaggedTerms.join(', '), action_id],
-          );
-          console.log(`[Post] Action ${action_id} sent to review (score: ${generated.guardrailScore})`);
-          return;
+        let postText: string;
+
+        if (preApprovedText) {
+          // Use pre-approved/edited content directly — no regeneration needed
+          postText = preApprovedText;
+          console.log(`[Post] Action ${action_id} using pre-approved content`);
+        } else {
+          // Generate content
+          const generated = await generatePostContent(agent, platform as Platform);
+
+          // Check if needs review (guardrail flag OR agent requires approval)
+          if (generated.needsReview || agent.approval_mode === 'review') {
+            await query(
+              `UPDATE agent_actions SET status = 'review', content_text = $1,
+               guardrail_score = $2, guardrail_notes = $3 WHERE id = $4`,
+              [generated.text, generated.guardrailScore, generated.flaggedTerms.join(', '), action_id],
+            );
+            console.log(`[Post] Action ${action_id} sent to review (score: ${generated.guardrailScore})`);
+            return;
+          }
+          postText = generated.text;
         }
 
         // Post to platform
@@ -101,16 +114,16 @@ export function startPostProcessor() {
 
         switch (platform) {
           case 'twitter':
-            result = await postToTwitter(token, generated.text);
+            result = await postToTwitter(token, postText);
             break;
 
           case 'reddit': {
             // Pick a subreddit
             const subreddit = agent.subreddit_targets[Math.floor(Math.random() * agent.subreddit_targets.length)] || 'test';
             // Split: first line = title, rest = body
-            const lines = generated.text.split('\n');
+            const lines = postText.split('\n');
             const title = lines[0].substring(0, 100);
-            const body = lines.slice(1).join('\n') || generated.text;
+            const body = lines.slice(1).join('\n') || postText;
             result = await postToReddit(token, subreddit, title, body);
             break;
           }
@@ -122,9 +135,8 @@ export function startPostProcessor() {
         // Update action as published
         await query(
           `UPDATE agent_actions SET status = 'published', content_text = $1,
-           platform_post_id = $2, platform_url = $3, executed_at = now(),
-           guardrail_score = $4 WHERE id = $5`,
-          [generated.text, result.id, result.url, generated.guardrailScore, action_id],
+           platform_post_id = $2, platform_url = $3, executed_at = now() WHERE id = $4`,
+          [postText, result.id, result.url, action_id],
         );
 
         // Update agent stats

@@ -137,19 +137,44 @@ export default function ReviewPage() {
                   <div className="flex items-center gap-2 flex-wrap">
                     <Badge variant="outline">{action.action_type}</Badge>
                     <span className="text-sm text-muted-foreground">
-                      {platformIcon(action.platform)} {action.agent_name}
+                      {platformIcon(action.platform)} {action.platform}
                     </span>
+                    <span className="text-sm font-medium">{action.agent_name}</span>
+                    {action.account_handle && (
+                      <span className="text-sm text-muted-foreground font-mono">@{action.account_handle}</span>
+                    )}
                     <span className="text-xs text-muted-foreground font-mono">{formatRelative(action.created_at)}</span>
                   </div>
 
-                  {/* Content */}
+                  {/* Reply context */}
+                  {(action.action_type === 'reply' || action.action_type === 'comment') && action.target_post_id && (
+                    <div className="rounded-lg bg-white/[0.02] border border-white/[0.04] px-3 py-2">
+                      <p className="text-xs text-muted-foreground">
+                        Replying to post: <span className="font-mono text-foreground/60">{action.target_post_id}</span>
+                        {action.target_user && (
+                          <> · by <span className="font-mono text-foreground/60">@{action.target_user}</span></>
+                        )}
+                        {action.target_subreddit && (
+                          <> in <span className="font-mono text-foreground/60">r/{action.target_subreddit}</span></>
+                        )}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Content — editable */}
                   <div className="rounded-xl bg-white/[0.03] border border-white/[0.06] p-4">
-                    <Textarea
-                      value={editing[action.id] ?? action.content ?? ''}
-                      onChange={(e) => setEditing({ ...editing, [action.id]: e.target.value })}
-                      rows={3}
-                      className="bg-transparent border-none p-0 focus-visible:ring-0 resize-none text-sm leading-relaxed"
-                    />
+                    {action.content_text ? (
+                      <Textarea
+                        value={editing[action.id] ?? action.content_text}
+                        onChange={(e) => setEditing({ ...editing, [action.id]: e.target.value })}
+                        rows={3}
+                        className="bg-transparent border-none p-0 focus-visible:ring-0 resize-none text-sm leading-relaxed"
+                      />
+                    ) : (
+                      <p className="text-xs text-muted-foreground italic">
+                        Content will be generated when approved and dispatched to the worker.
+                      </p>
+                    )}
                   </div>
 
                   {action.guardrail_score != null && (
@@ -166,8 +191,8 @@ export default function ReviewPage() {
                       <span className="text-xs text-muted-foreground font-mono">
                         {(action.guardrail_score * 100).toFixed(0)}%
                       </span>
-                      {action.guardrail_flags?.length > 0 && (
-                        <span className="text-xs text-red-400">· {action.guardrail_flags.join(', ')}</span>
+                      {action.guardrail_notes && (
+                        <span className="text-xs text-red-400">· {action.guardrail_notes}</span>
                       )}
                     </div>
                   )}

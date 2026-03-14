@@ -98,34 +98,45 @@ export function startResearchProcessor() {
         // Get platform account + tokens for posting
         const { account, token } = await getTokens(platform_account_id);
 
-        // Get a Reddit token for Reddit search (may be same account or another)
-        const redditToken = await findRedditToken(agent.user_id);
+        // Check if content is already set (pre-generated and approved via review queue)
+        const existingAction = await queryOne<any>('SELECT content_text FROM agent_actions WHERE id = $1', [action_id]);
+        const preApprovedText = (job.data as any).override_content || existingAction?.content_text;
 
-        // --- Phase 1: Gather research ---
-        const researchResults = await gatherResearch(agent, redditToken);
+        let postText: string;
 
-        if (researchResults.length === 0) {
-          console.warn(`[Research] No research results for agent "${agent.name}" — skipping`);
-          await query(
-            `UPDATE agent_actions SET status = 'failed', error_message = 'No research results found',
-             executed_at = now() WHERE id = $1`,
-            [action_id],
-          );
-          return;
-        }
+        if (preApprovedText) {
+          postText = preApprovedText;
+          console.log(`[Research] Action ${action_id} using pre-approved content`);
+        } else {
+          // Get a Reddit token for Reddit search (may be same account or another)
+          const redditToken = await findRedditToken(agent.user_id);
 
-        // --- Phase 2: Generate content from research ---
-        const generated = await generateResearchedContent(agent, platform as Platform, researchResults);
+          // --- Phase 1: Gather research ---
+          const researchResults = await gatherResearch(agent, redditToken);
 
-        // Check if needs review
-        if (generated.needsReview) {
-          await query(
-            `UPDATE agent_actions SET status = 'review', content_text = $1,
-             guardrail_score = $2, guardrail_notes = $3 WHERE id = $4`,
-            [generated.text, generated.guardrailScore, generated.flaggedTerms.join(', '), action_id],
-          );
-          console.log(`[Research] Action ${action_id} sent to review (score: ${generated.guardrailScore})`);
-          return;
+          if (researchResults.length === 0) {
+            console.warn(`[Research] No research results for agent "${agent.name}" — skipping`);
+            await query(
+              `UPDATE agent_actions SET status = 'failed', error_message = 'No research results found',
+               executed_at = now() WHERE id = $1`,
+              [action_id],
+            );
+            return;
+          }
+
+          // --- Phase 2: Generate content from research ---
+          const generated = await generateResearchedContent(agent, platform as Platform, researchResults);
+
+          if (generated.needsReview || agent.approval_mode === 'review') {
+            await query(
+              `UPDATE agent_actions SET status = 'review', content_text = $1,
+               guardrail_score = $2, guardrail_notes = $3 WHERE id = $4`,
+              [generated.text, generated.guardrailScore, generated.flaggedTerms.join(', '), action_id],
+            );
+            console.log(`[Research] Action ${action_id} sent to review (score: ${generated.guardrailScore})`);
+            return;
+          }
+          postText = generated.text;
         }
 
         // --- Phase 3: Post to platform ---
@@ -133,14 +144,14 @@ export function startResearchProcessor() {
 
         switch (platform) {
           case 'twitter':
-            result = await postToTwitter(token, generated.text);
+            result = await postToTwitter(token, postText);
             break;
 
           case 'reddit': {
             const subreddit = agent.subreddit_targets[Math.floor(Math.random() * agent.subreddit_targets.length)] || 'test';
-            const lines = generated.text.split('\n');
+            const lines = postText.split('\n');
             const title = lines[0].substring(0, 100);
-            const body = lines.slice(1).join('\n') || generated.text;
+            const body = lines.slice(1).join('\n') || postText;
             result = await postToReddit(token, subreddit, title, body);
             break;
           }
@@ -152,9 +163,8 @@ export function startResearchProcessor() {
         // Update action as published
         await query(
           `UPDATE agent_actions SET status = 'published', content_text = $1,
-           platform_post_id = $2, platform_url = $3, executed_at = now(),
-           guardrail_score = $4 WHERE id = $5`,
-          [generated.text, result.id, result.url, generated.guardrailScore, action_id],
+           platform_post_id = $2, platform_url = $3, executed_at = now() WHERE id = $4`,
+          [postText, result.id, result.url, action_id],
         );
 
         // Update agent stats

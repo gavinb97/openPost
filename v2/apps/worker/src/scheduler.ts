@@ -288,20 +288,13 @@ async function scheduleAction(
 
   const delayMs = Math.max(0, fireAt.getTime() - Date.now());
 
-  // Determine initial status based on agent's approval_mode
-  // 'post' actions go to review queue when approval_mode is 'review'
-  // Secondary actions (like, follow, retweet) always auto-queue regardless of mode
-  const secondaryActions = new Set(['like', 'follow', 'retweet', 'subscribe', 'scrape']);
-  const needsReview = agent.approval_mode === 'review' && !secondaryActions.has(actionType);
-  const initialStatus = needsReview ? 'review' : 'queued';
-
   const [action] = await query<any>(
     `INSERT INTO agent_actions (
       agent_id, platform_account_id, action_type, status,
       target_post_id, target_user, target_subreddit, scheduled_at
     ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *`,
     [
-      agent.id, account.id, actionType, initialStatus,
+      agent.id, account.id, actionType, 'queued',
       extra.target_post_id ?? null,
       extra.target_user ?? null,
       extra.target_subreddit ?? null,
@@ -309,14 +302,9 @@ async function scheduleAction(
     ],
   );
 
-  // Don't enqueue jobs that need human review — they'll be queued when approved
-  if (needsReview) {
-    console.log(`[Scheduler] Review-mode: action ${action.id} (${actionType}) awaiting approval`);
-    return;
-  }
-
   const opts = { delay: delayMs, attempts: 3, backoff: { type: 'exponential' as const, delay: 30_000 } };
-  const jobData = { agent_id: agent.id, platform_account_id: account.id, action_id: action.id, platform: account.platform, ...extra };
+  // action_type is included so engage/dm processors can read it from job.data
+  const jobData = { agent_id: agent.id, platform_account_id: account.id, action_id: action.id, platform: account.platform, action_type: actionType, ...extra };
 
   switch (actionType) {
     case 'post':          await postQueue.add(`post:${action.id}`, jobData, opts); break;
