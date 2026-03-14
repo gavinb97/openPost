@@ -458,6 +458,32 @@ oauthRouter.post('/refresh/:accountId', requireAuth, asyncHandler(async (req, re
   let newToken: any;
 
   switch (account.platform) {
+    case 'twitter': {
+      // OAuth 1.0a tokens don't expire — verify the token is still valid
+      const OAuth = (await import('oauth-1.0a')).default;
+      const oauthLib = new OAuth({
+        consumer: { key: config.twitter.appKey, secret: config.twitter.appSecret },
+        signature_method: 'HMAC-SHA1',
+        hash_function(baseString: string, key: string) {
+          return crypto.createHmac('sha1', key).update(baseString).digest('base64');
+        },
+      });
+      const verifyRequest = {
+        url: 'https://api.twitter.com/1.1/account/verify_credentials.json',
+        method: 'GET',
+      };
+      const oauthToken = { key: token.access_token, secret: token.token_secret! };
+      const authHeader = oauthLib.toHeader(oauthLib.authorize(verifyRequest, oauthToken));
+      const resp = await fetch(verifyRequest.url, { headers: { ...authHeader } });
+      if (!resp.ok) {
+        const text = await resp.text();
+        throw new AppError(502, `Twitter token no longer valid: ${text}`);
+      }
+      // Token is still good — nothing to refresh for OAuth 1.0a
+      newToken = { access_token: token.access_token, still_valid: true };
+      break;
+    }
+
     case 'reddit': {
       const credentials = Buffer.from(`${config.reddit.appId}:${config.reddit.secret}`).toString('base64');
       const resp = await fetch('https://www.reddit.com/api/v1/access_token', {
