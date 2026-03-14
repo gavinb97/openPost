@@ -345,9 +345,13 @@ oauthRouter.get('/youtube/callback', asyncHandler(async (req, res) => {
   const channelData = await channelResponse.json() as any;
   const channel = channelData.items?.[0];
 
+  const rawHandle = channel?.snippet?.customUrl || channel?.snippet?.title || null;
+  // YouTube customUrl already includes @ — strip it so the frontend can add its own
+  const handle = rawHandle?.replace(/^@/, '') || null;
+
   await upsertPlatformAccount(
     state.user_id, 'youtube', channel?.id || 'unknown',
-    channel?.snippet?.customUrl || channel?.snippet?.title || null,
+    handle,
     channel?.snippet?.title || null,
     channel?.snippet?.thumbnails?.default?.url || null,
     { channelId: channel?.id, subscriberCount: channel?.statistics?.subscriberCount },
