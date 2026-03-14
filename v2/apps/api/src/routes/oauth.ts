@@ -208,7 +208,7 @@ oauthRouter.get('/twitter/callback', asyncHandler(async (req, res) => {
 
   await upsertPlatformAccount(
     state.user_id, 'twitter', twitterUserId,
-    `@${screenName}`, screenName, null, { screen_name: screenName },
+    screenName, screenName, null, { screen_name: screenName },
     { access_token: accessToken, token_secret: accessSecret, raw_response: Object.fromEntries(params) },
   );
 
@@ -505,7 +505,7 @@ oauthRouter.post('/refresh/:accountId', requireAuth, asyncHandler(async (req, re
         await query(
           `UPDATE platform_accounts SET handle = $1, display_name = $2, avatar_url = COALESCE($3, avatar_url), updated_at = now()
            WHERE id = $4`,
-          [`@${profile.screen_name}`, profile.name || profile.screen_name, profile.profile_image_url_https || null, account.id],
+          [profile.screen_name, profile.name || profile.screen_name, profile.profile_image_url_https || null, account.id],
         );
       }
       // Token is still good — nothing to refresh for OAuth 1.0a
