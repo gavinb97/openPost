@@ -38,7 +38,7 @@ async function makeOAuthHeader(
     hash_function(bs: string, k: string) { return crypto.createHmac('sha1', k).update(bs).digest('base64'); },
   });
   const tok = { key: token.access_token, secret: token.token_secret! };
-  return oauth.toHeader(oauth.authorize({ url, method }, tok)) as Record<string, string>;
+  return oauth.toHeader(oauth.authorize({ url, method }, tok)) as unknown as Record<string, string>;
 }
 
 async function findTweetToReply(
@@ -54,10 +54,15 @@ async function findTweetToReply(
 
   console.log(`[Reply] Searching for tweets to reply to. Terms: ${terms.join(', ') || '(none)'}`);
 
+  // Only reply to tweets open to everyone — filters out restricted reply settings
+  const isReplyable = (t: any) =>
+    t.author_id !== account.platform_user_id &&
+    (!t.reply_settings || t.reply_settings === 'everyone');
+
   // ── Strategy 1: recent search (requires Basic tier) ──
   if (terms.length > 0) {
     const queryStr = `(${terms.join(' OR ')}) -is:reply -is:retweet lang:en`;
-    const searchUrl = `https://api.twitter.com/2/tweets/search/recent?query=${encodeURIComponent(queryStr)}&tweet.fields=id,text,author_id&max_results=10`;
+    const searchUrl = `https://api.twitter.com/2/tweets/search/recent?query=${encodeURIComponent(queryStr)}&tweet.fields=id,text,author_id,reply_settings&max_results=10`;
     try {
       const header = await makeOAuthHeader(token, 'GET', searchUrl);
       const resp = await fetch(searchUrl, { headers: header });
@@ -69,12 +74,12 @@ async function findTweetToReply(
         console.warn(`[Reply] Twitter search failed (${resp.status}): ${JSON.stringify(data)}`);
       } else {
         const tweets: any[] = data?.data || [];
-        const eligible = tweets.filter((t) => t.author_id !== account.platform_user_id);
+        const eligible = tweets.filter(isReplyable);
         if (eligible.length > 0) {
-          console.log(`[Reply] Found ${eligible.length} candidate tweet(s) via search`);
+          console.log(`[Reply] Found ${eligible.length} replyable tweet(s) via search`);
           return eligible[0];
         }
-        console.log(`[Reply] Search returned ${tweets.length} tweet(s) but none eligible`);
+        console.log(`[Reply] Search returned ${tweets.length} tweet(s) but none replyable (reply_settings filtered)`);
       }
     } catch (err: any) {
       console.warn(`[Reply] Twitter search error: ${err.message}`);
@@ -88,7 +93,7 @@ async function findTweetToReply(
     return null;
   }
   try {
-    const timelineUrl = `https://api.twitter.com/2/users/${account.platform_user_id}/timelines/reverse_chronological?tweet.fields=id,text,author_id&max_results=10&exclude=retweets,replies`;
+    const timelineUrl = `https://api.twitter.com/2/users/${account.platform_user_id}/timelines/reverse_chronological?tweet.fields=id,text,author_id,reply_settings&max_results=20&exclude=retweets,replies`;
     const header = await makeOAuthHeader(token, 'GET', timelineUrl);
     const resp = await fetch(timelineUrl, { headers: header });
     const data = await resp.json() as any;
@@ -99,8 +104,9 @@ async function findTweetToReply(
     }
 
     const tweets: any[] = data?.data || [];
-    // Filter keyword-relevant tweets if we have terms, otherwise take any
-    let eligible = tweets.filter((t) => t.author_id !== account.platform_user_id);
+    let eligible = tweets.filter(isReplyable);
+
+    // Prefer keyword-relevant tweets if we have terms
     if (terms.length > 0) {
       const keywordFiltered = eligible.filter((t) =>
         terms.some((term) => t.text.toLowerCase().includes(term.replace('#', '').toLowerCase())),
@@ -109,11 +115,11 @@ async function findTweetToReply(
     }
 
     if (eligible.length > 0) {
-      console.log(`[Reply] Found ${eligible.length} candidate tweet(s) via home timeline`);
+      console.log(`[Reply] Found ${eligible.length} replyable tweet(s) via home timeline`);
       return eligible[0];
     }
 
-    console.log(`[Reply] Home timeline returned ${tweets.length} tweet(s) but none eligible`);
+    console.log(`[Reply] Home timeline: ${tweets.length} tweet(s), none replyable (all restricted)`);
     return null;
   } catch (err: any) {
     console.warn(`[Reply] Twitter home timeline error: ${err.message}`);
