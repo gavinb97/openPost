@@ -100,9 +100,19 @@ export const jobApi = {
 };
 
 export const mediaApi = {
-  getUploadUrl: (data: { filename: string; content_type: string; category?: string }) =>
+  getUploadUrl: (data: { filename: string; mime_type: string; size_bytes: number; folder_id?: string }) =>
     api.post<{ upload_url: string; key: string; s3_key: string; media_id: string }>('/media/upload-url', data),
-  register: (data: { s3_key: string; original_name: string; mime_type: string; size_bytes: number; width?: number; height?: number; duration_seconds?: number; description?: string; categories?: string[]; nsfw?: boolean }) =>
+  createFolder: (data: { name: string; label?: string }) =>
+    api.post<{ folder: any }>('/media/folders', data),
+  listFolders: () => api.get<{ folders: any[] }>('/media/folders'),
+  updateFolder: (id: string, data: { name?: string; label?: string }) =>
+    api.put<{ folder: any }>(`/media/folders/${id}`, data),
+  deleteFolder: (id: string) => api.delete(`/media/folders/${id}`),
+  renameFile: (id: string, name: string) =>
+    api.put<{ media: any }>(`/media/${id}`, { original_name: name }),
+  moveFile: (id: string, folder_id: string | null) =>
+    api.put<{ media: any }>(`/media/${id}`, { folder_id }),
+  register: (data: { s3_key: string; original_name: string; mime_type: string; size_bytes: number; width?: number; height?: number; duration_seconds?: number; description?: string; categories?: string[]; nsfw?: boolean; folder_id?: string }) =>
     api.post<{ media: any }>('/media/register', data),
   list: (params?: { page?: number; category?: string }) => {
     const qs = new URLSearchParams(params as any).toString();

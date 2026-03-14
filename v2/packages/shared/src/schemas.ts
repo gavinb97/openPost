@@ -125,6 +125,7 @@ export const PresignUploadSchema = z.object({
   filename: z.string().min(1),
   mime_type: z.string().min(1),
   size_bytes: z.number().int().positive(),
+  folder_id: z.string().uuid().optional(),
 });
 
 export const RegisterMediaSchema = z.object({
@@ -138,4 +139,5 @@ export const RegisterMediaSchema = z.object({
   description: z.string().optional(),
   categories: z.array(z.string()).optional(),
   nsfw: z.boolean().optional(),
+  folder_id: z.string().uuid().optional(),
 });

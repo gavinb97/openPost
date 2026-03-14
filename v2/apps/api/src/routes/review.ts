@@ -7,6 +7,7 @@ import { query, queryOne } from '../db';
 import { requireAuth } from '../middleware/auth';
 import { asyncHandler, AppError } from '../middleware/errorHandler';
 import { ReviewActionSchema, BulkReviewSchema } from '@onlyposts/shared';
+import { queueForAction } from '../queues';
 
 export const reviewRouter = Router();
 reviewRouter.use(requireAuth);
@@ -73,6 +74,18 @@ reviewRouter.post('/:id', asyncHandler(async (req, res) => {
         [req.user!.userId, req.params.id],
       );
     }
+    // Dispatch to BullMQ now that the action is approved
+    const q = queueForAction(action.action_type);
+    if (q) {
+      const jobData = {
+        agent_id: action.agent_id,
+        platform_account_id: action.platform_account_id,
+        action_id: action.id,
+        platform: action.platform,
+        ...(data.edited_content ? { override_content: data.edited_content } : {}),
+      };
+      await q.add(`approved:${action.id}`, jobData, { attempts: 3, backoff: { type: 'exponential', delay: 30_000 } });
+    }
   } else {
     await query(
       `UPDATE agent_actions SET status = 'rejected', reviewed_at = now(), reviewed_by = $1
@@ -90,14 +103,29 @@ reviewRouter.post('/bulk', asyncHandler(async (req, res) => {
   const data = BulkReviewSchema.parse(req.body);
   const newStatus = data.action === 'approve' ? 'queued' : 'rejected';
 
-  const result = await query(
+  const result = await query<any>(
     `UPDATE agent_actions SET status = $1, reviewed_at = now(), reviewed_by = $2
      WHERE id = ANY($3::uuid[])
      AND agent_id IN (SELECT id FROM agents WHERE user_id = $4)
      AND status = 'review'
-     RETURNING id`,
+     RETURNING id, action_type, agent_id, platform_account_id`,
     [newStatus, req.user!.userId, data.action_ids, req.user!.userId],
   );
+
+  // If approving, dispatch BullMQ jobs for each action
+  if (data.action === 'approve') {
+    await Promise.allSettled(
+      result.map((row: any) => {
+        const q = queueForAction(row.action_type);
+        if (!q) return Promise.resolve();
+        return q.add(`approved:${row.id}`, {
+          agent_id: row.agent_id,
+          platform_account_id: row.platform_account_id,
+          action_id: row.id,
+        }, { attempts: 3, backoff: { type: 'exponential', delay: 30_000 } });
+      }),
+    );
+  }
 
   res.json({ ok: true, message: `${result.length} actions ${data.action}d` });
 }));

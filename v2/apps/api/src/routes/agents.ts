@@ -45,14 +45,14 @@ agentsRouter.post('/', asyncHandler(async (req, res) => {
       auto_post, auto_reply, auto_dm, auto_like, auto_follow, auto_retweet, auto_comment,
       auto_web_research, web_research_config,
       platform_account_ids, subreddit_targets, hashtag_targets, topic_keywords,
-      dm_template, dm_max_per_day, media_pool_ids, remaining_media
+      dm_template, dm_max_per_day, media_pool_ids, remaining_media, media_folder_id
     ) VALUES (
       $1, $2, $3, $4, $5,
       $6, $7, $8,
       $9, $10, $11, $12, $13, $14, $15,
       $16, $17,
       $18, $19, $20, $21,
-      $22, $23, $24, $24
+      $22, $23, $24, $24, $25
     ) RETURNING *`,
     [
       req.user!.userId,
@@ -79,6 +79,7 @@ agentsRouter.post('/', asyncHandler(async (req, res) => {
       data.dm_template || null,
       data.dm_max_per_day || 50,
       data.media_pool_ids || [],
+      (data as any).media_folder_id || null,
     ],
   );
 
@@ -151,6 +152,10 @@ agentsRouter.put('/:id', asyncHandler(async (req, res) => {
     values.push(data.media_pool_ids);
     setClauses.push(`remaining_media = $${idx++}`);
     values.push(data.media_pool_ids); // reset remaining
+  }
+  if ((data as any).media_folder_id !== undefined) {
+    setClauses.push(`media_folder_id = $${idx++}`);
+    values.push((data as any).media_folder_id || null);
   }
 
   if (setClauses.length === 0) throw new AppError(400, 'Nothing to update');
