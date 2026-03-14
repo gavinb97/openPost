@@ -19,9 +19,27 @@ async function getTokens(accountId: string) {
 }
 
 // ============================================================
-// Twitter: search for a relevant tweet to reply to
-// Uses v2 recent search with user-context OAuth 1.0a
+// Twitter: find a tweet to reply to
+//
+// Strategy (in order):
+//   1. Recent search (v2) — requires Basic tier ($100/mo), skipped on 403
+//   2. Home timeline   (v2) — free tier, replies to tweets from followed accounts
 // ============================================================
+
+async function makeOAuthHeader(
+  token: OAuthToken,
+  method: string,
+  url: string,
+): Promise<Record<string, string>> {
+  const OAuth = (await import('oauth-1.0a')).default;
+  const oauth = new OAuth({
+    consumer: { key: config.twitter.appKey, secret: config.twitter.appSecret },
+    signature_method: 'HMAC-SHA1',
+    hash_function(bs: string, k: string) { return crypto.createHmac('sha1', k).update(bs).digest('base64'); },
+  });
+  const tok = { key: token.access_token, secret: token.token_secret! };
+  return oauth.toHeader(oauth.authorize({ url, method }, tok)) as Record<string, string>;
+}
 
 async function findTweetToReply(
   token: OAuthToken,
@@ -29,45 +47,76 @@ async function findTweetToReply(
   keywords: string[],
   hashtags: string[],
 ): Promise<{ id: string; text: string; author_id: string } | null> {
-  const OAuth = (await import('oauth-1.0a')).default;
-  const oauth = new OAuth({
-    consumer: { key: config.twitter.appKey, secret: config.twitter.appSecret },
-    signature_method: 'HMAC-SHA1',
-    hash_function(bs: string, k: string) { return crypto.createHmac('sha1', k).update(bs).digest('base64'); },
-  });
-
-  // Build search query from agent keywords/hashtags
   const terms = [
     ...hashtags.slice(0, 3).map((h) => h.startsWith('#') ? h : `#${h}`),
     ...keywords.slice(0, 3),
   ].filter(Boolean);
 
-  if (!terms.length) return null;
+  console.log(`[Reply] Searching for tweets to reply to. Terms: ${terms.join(', ') || '(none)'}`);
 
-  // Exclude replies, retweets, own account
-  const queryStr = `(${terms.join(' OR ')}) -is:reply -is:retweet lang:en`;
-  const searchUrl = `https://api.twitter.com/2/tweets/search/recent?query=${encodeURIComponent(queryStr)}&tweet.fields=id,text,author_id&expansions=author_id&max_results=10`;
+  // ── Strategy 1: recent search (requires Basic tier) ──
+  if (terms.length > 0) {
+    const queryStr = `(${terms.join(' OR ')}) -is:reply -is:retweet lang:en`;
+    const searchUrl = `https://api.twitter.com/2/tweets/search/recent?query=${encodeURIComponent(queryStr)}&tweet.fields=id,text,author_id&max_results=10`;
+    try {
+      const header = await makeOAuthHeader(token, 'GET', searchUrl);
+      const resp = await fetch(searchUrl, { headers: header });
+      const data = await resp.json() as any;
 
-  const tok = { key: token.access_token, secret: token.token_secret! };
-  const header = oauth.toHeader(oauth.authorize({ url: searchUrl, method: 'GET' }, tok));
+      if (resp.status === 403 || resp.status === 401) {
+        console.log(`[Reply] Search API not available (${resp.status}) — falling back to home timeline`);
+      } else if (!resp.ok) {
+        console.warn(`[Reply] Twitter search failed (${resp.status}): ${JSON.stringify(data)}`);
+      } else {
+        const tweets: any[] = data?.data || [];
+        const eligible = tweets.filter((t) => t.author_id !== account.platform_user_id);
+        if (eligible.length > 0) {
+          console.log(`[Reply] Found ${eligible.length} candidate tweet(s) via search`);
+          return eligible[0];
+        }
+        console.log(`[Reply] Search returned ${tweets.length} tweet(s) but none eligible`);
+      }
+    } catch (err: any) {
+      console.warn(`[Reply] Twitter search error: ${err.message}`);
+    }
+  }
 
+  // ── Strategy 2: home timeline (free tier) ──
+  // Replies to recent tweets from accounts the agent follows.
+  if (!account.platform_user_id) {
+    console.warn(`[Reply] No platform_user_id on account — cannot fetch home timeline`);
+    return null;
+  }
   try {
-    const resp = await fetch(searchUrl, { headers: { ...header } });
+    const timelineUrl = `https://api.twitter.com/2/users/${account.platform_user_id}/timelines/reverse_chronological?tweet.fields=id,text,author_id&max_results=10&exclude=retweets,replies`;
+    const header = await makeOAuthHeader(token, 'GET', timelineUrl);
+    const resp = await fetch(timelineUrl, { headers: header });
     const data = await resp.json() as any;
 
     if (!resp.ok) {
-      console.warn(`[Reply] Twitter search failed (${resp.status}): ${JSON.stringify(data)}`);
+      console.warn(`[Reply] Twitter home timeline failed (${resp.status}): ${JSON.stringify(data)}`);
       return null;
     }
 
     const tweets: any[] = data?.data || [];
-    // Filter out our own tweets
-    const eligible = tweets.filter((t) => t.author_id !== account.platform_user_id);
+    // Filter keyword-relevant tweets if we have terms, otherwise take any
+    let eligible = tweets.filter((t) => t.author_id !== account.platform_user_id);
+    if (terms.length > 0) {
+      const keywordFiltered = eligible.filter((t) =>
+        terms.some((term) => t.text.toLowerCase().includes(term.replace('#', '').toLowerCase())),
+      );
+      if (keywordFiltered.length > 0) eligible = keywordFiltered;
+    }
 
-    if (!eligible.length) return null;
-    return eligible[0];
+    if (eligible.length > 0) {
+      console.log(`[Reply] Found ${eligible.length} candidate tweet(s) via home timeline`);
+      return eligible[0];
+    }
+
+    console.log(`[Reply] Home timeline returned ${tweets.length} tweet(s) but none eligible`);
+    return null;
   } catch (err: any) {
-    console.warn(`[Reply] Twitter search error: ${err.message}`);
+    console.warn(`[Reply] Twitter home timeline error: ${err.message}`);
     return null;
   }
 }
@@ -141,7 +190,7 @@ export function startReplyProcessor() {
         // Load action record — need content_text, target_post_id, target_user from DB
         // (target_post_id may have been found and stored in a previous run or review step)
         const existingAction = await queryOne<any>(
-          'SELECT content_text, target_post_id, target_user FROM agent_actions WHERE id = $1',
+          'SELECT content_text, target_post_id, target_user, target_subreddit FROM agent_actions WHERE id = $1',
           [action_id],
         );
 
@@ -160,7 +209,12 @@ export function startReplyProcessor() {
             await query(`UPDATE agent_actions SET target_post_id = $1 WHERE id = $2`, [targetPostId, action_id]);
             console.log(`[Reply] Found target tweet ${targetPostId}: "${found.text.substring(0, 80)}..."`);
           } else {
-            console.log(`[Reply] No target tweet found — will post as standalone tweet`);
+            console.warn(`[Reply] No tweet found to reply to — skipping action`);
+            await query(
+              `UPDATE agent_actions SET status = 'failed', error_message = 'No suitable tweet found to reply to (search + home timeline both empty)', executed_at = now() WHERE id = $1`,
+              [action_id],
+            );
+            return;
           }
         }
 
