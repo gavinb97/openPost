@@ -47,7 +47,7 @@ export default function AgentDetailPage() {
   const toggleAgent = async () => {
     const { agent: updated } = await agentApi.toggle(id);
     setAgent(updated);
-    toast.success(`Agent ${updated.is_enabled ? 'enabled' : 'disabled'}`);
+    toast.success(`Agent ${updated.enabled ? 'enabled' : 'disabled'}`);
   };
 
   const deleteAgent = async () => {
@@ -77,8 +77,8 @@ export default function AgentDetailPage() {
         </div>
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">{agent.is_enabled ? 'Active' : 'Paused'}</span>
-            <Switch checked={agent.is_enabled} onCheckedChange={toggleAgent} />
+            <span className="text-sm text-muted-foreground">{agent.enabled ? 'Active' : 'Paused'}</span>
+            <Switch checked={agent.enabled} onCheckedChange={toggleAgent} />
           </div>
           <Button variant="outline" onClick={() => router.push(`/dashboard/agents/${id}/edit`)}>
             Edit

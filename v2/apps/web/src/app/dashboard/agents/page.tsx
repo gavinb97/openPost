@@ -32,7 +32,7 @@ export default function AgentsPage() {
     try {
       const { agent } = await agentApi.toggle(id);
       setAgents((prev) => prev.map((a) => (a.id === id ? agent : a)));
-      toast.success(`Agent ${agent.is_enabled ? 'enabled' : 'disabled'}`);
+      toast.success(`Agent ${agent.enabled ? 'enabled' : 'disabled'}`);
     } catch {
       toast.error('Failed to toggle agent');
     }
@@ -74,7 +74,7 @@ export default function AgentsPage() {
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3">
                   <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-lg ${
-                    agent.is_enabled
+                    agent.enabled
                       ? 'bg-gradient-to-br from-primary/30 to-neon-pink/20 border border-primary/20'
                       : 'bg-white/[0.04] border border-white/[0.06]'
                   }`}>
@@ -95,7 +95,7 @@ export default function AgentsPage() {
                   </div>
                 </div>
                 <Switch
-                  checked={agent.is_enabled}
+                  checked={agent.enabled}
                   onCheckedChange={() => toggleAgent(agent.id)}
                 />
               </div>
