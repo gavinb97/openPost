@@ -57,8 +57,13 @@ export function rateLimit(opts: RateLimitOpts) {
 
       next();
     } catch (err) {
-      // If Redis is down, let the request through (fail open)
       console.error('[RateLimit] Redis error:', err);
+      // Fail closed for sensitive auth routes — fail open for everything else
+      const isSensitive = req.path.includes('/login') || req.path.includes('/register') || req.path.includes('/password');
+      if (isSensitive) {
+        res.status(503).json({ ok: false, error: 'Service temporarily unavailable. Please try again shortly.' });
+        return;
+      }
       next();
     }
   };

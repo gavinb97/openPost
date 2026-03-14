@@ -17,8 +17,7 @@ ALTER TABLE media_files ADD COLUMN IF NOT EXISTS folder_id UUID REFERENCES media
 ALTER TABLE media_files ADD COLUMN IF NOT EXISTS original_name VARCHAR(500);
 ALTER TABLE media_files ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT now();
 
--- Backfill original_name from original_filename if that column exists
-UPDATE media_files SET original_name = original_filename WHERE original_name IS NULL;
+-- No backfill needed (original_filename column does not exist in this schema)
 
 -- Indexes
 CREATE INDEX IF NOT EXISTS idx_media_folders_user ON media_folders(user_id);

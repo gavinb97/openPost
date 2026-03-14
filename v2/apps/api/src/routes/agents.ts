@@ -115,8 +115,17 @@ agentsRouter.put('/:id', asyncHandler(async (req, res) => {
     dm_max_per_day: data.dm_max_per_day,
   };
 
+  // Explicit whitelist prevents any future refactor from accidentally allowing
+  // arbitrary column names into the query (defense-in-depth)
+  const ALLOWED_AGENT_COLUMNS = new Set([
+    'name', 'description', 'personality_prompt', 'model',
+    'schedule_type', 'approval_mode', 'auto_post', 'auto_reply',
+    'auto_dm', 'auto_like', 'auto_follow', 'auto_retweet', 'auto_comment',
+    'auto_web_research', 'dm_template', 'dm_max_per_day',
+  ]);
+
   for (const [key, val] of Object.entries(fields)) {
-    if (val !== undefined) {
+    if (val !== undefined && ALLOWED_AGENT_COLUMNS.has(key)) {
       setClauses.push(`${key} = $${idx++}`);
       values.push(val);
     }

@@ -10,6 +10,17 @@ import { query, queryOne } from '../db';
 import { requireAuth } from '../middleware/auth';
 import { asyncHandler, AppError } from '../middleware/errorHandler';
 import { RegisterSchema, LoginSchema } from '@onlyposts/shared';
+import { z } from 'zod';
+
+const UpdateProfileSchema = z.object({
+  username: z.string().min(3).max(30).regex(/^[a-zA-Z0-9_-]+$/).optional(),
+  email: z.string().email().max(255).optional(),
+});
+
+const ChangePasswordSchema = z.object({
+  current_password: z.string().min(1),
+  new_password: z.string().min(8).max(128),
+});
 import type { User, AuthPayload, LoginResponse } from '@onlyposts/shared';
 
 export const authRouter = Router();
@@ -24,7 +35,7 @@ authRouter.post('/register', asyncHandler(async (req, res) => {
     'SELECT id FROM users WHERE email = $1 OR username = $2',
     [data.email, data.username],
   );
-  if (existing) throw new AppError(409, 'Email or username already taken');
+  if (existing) throw new AppError(409, 'An account with that email or username already exists');
 
   // Hash password
   const hash = await bcrypt.hash(data.password, 12);
@@ -92,7 +103,7 @@ authRouter.get('/me', requireAuth, asyncHandler(async (req, res) => {
 // ---------- Update Profile ----------
 
 authRouter.put('/me', requireAuth, asyncHandler(async (req, res) => {
-  const { username, email } = req.body;
+  const { username, email } = UpdateProfileSchema.parse(req.body);
 
   const updates: string[] = [];
   const values: any[] = [];
@@ -122,9 +133,7 @@ authRouter.put('/me', requireAuth, asyncHandler(async (req, res) => {
 // ---------- Change Password ----------
 
 authRouter.put('/password', requireAuth, asyncHandler(async (req, res) => {
-  const { current_password, new_password } = req.body;
-  if (!current_password || !new_password) throw new AppError(400, 'Current and new password required');
-  if (new_password.length < 8) throw new AppError(400, 'Password must be at least 8 characters');
+  const { current_password, new_password } = ChangePasswordSchema.parse(req.body);
 
   const user = await queryOne<User>('SELECT password FROM users WHERE id = $1', [req.user!.userId]);
   if (!user) throw new AppError(404, 'User not found');

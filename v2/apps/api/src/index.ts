@@ -27,24 +27,64 @@ const app = express();
 
 // ---------- Global Middleware ----------
 
-app.use(helmet());
-app.use(cors({
-  origin: [
-    config.frontendUrl,
-    'https://only-posts.com',
-    'https://www.only-posts.com',
-    'https://api.only-posts.com',
-    'http://localhost:3000',
-    'http://localhost:3333',
-  ],
-  credentials: true,
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", 'data:', 'https:'],
+      connectSrc: ["'self'"],
+      frameSrc: ["'none'"],
+      objectSrc: ["'none'"],
+    },
+  },
+  hsts: { maxAge: 31_536_000, includeSubDomains: true, preload: true },
+  frameguard: { action: 'deny' },
+  referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
+  crossOriginEmbedderPolicy: false, // allow S3 presigned URLs in browser
 }));
+
+// Environment-aware CORS: never allow localhost in production
+const allowedOrigins = config.env === 'production'
+  ? [
+      'https://only-posts.com',
+      'https://www.only-posts.com',
+      'https://api.only-posts.com',
+      config.frontendUrl,
+    ].filter(Boolean)
+  : [
+      'http://localhost:3000',
+      'http://localhost:3333',
+      config.frontendUrl,
+    ].filter(Boolean);
+
+app.use(cors({
+  origin: (origin, callback) => {
+    // Allow requests with no origin (mobile apps, curl, server-to-server)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+    callback(new Error(`CORS: origin ${origin} not allowed`));
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
+
 app.use(morgan(config.env === 'production' ? 'combined' : 'dev'));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// Global API rate limit: 200 requests per minute per user
+// Global API rate limit: 200 requests per minute per IP/user
 app.use('/api', rateLimit({ windowMs: 60_000, max: 200, keyPrefix: 'rl:api' }));
+
+// Stricter rate limits for auth endpoints (applied before routes mount)
+// 10 login attempts per 15 minutes per IP
+app.use('/api/v2/auth/login', rateLimit({ windowMs: 15 * 60_000, max: 10, keyPrefix: 'rl:login' }));
+// 5 registrations per hour per IP
+app.use('/api/v2/auth/register', rateLimit({ windowMs: 60 * 60_000, max: 5, keyPrefix: 'rl:register' }));
+// 5 password changes per hour
+app.use('/api/v2/auth/password', rateLimit({ windowMs: 60 * 60_000, max: 5, keyPrefix: 'rl:password' }));
 
 // ---------- Health Check ----------
 

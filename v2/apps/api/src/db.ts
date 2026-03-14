@@ -11,7 +11,7 @@ export const pool = new Pool({
   idleTimeoutMillis: 30_000,
   connectionTimeoutMillis: 5_000,
   ssl: config.env === 'production' || config.postgres.url.includes('rds.amazonaws.com')
-    ? { rejectUnauthorized: false }
+    ? { rejectUnauthorized: true }
     : undefined,
 });
 
