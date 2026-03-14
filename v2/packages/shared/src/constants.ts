@@ -15,14 +15,14 @@ export const ALL_PLATFORMS: Platform[] = [...ACTIVE_PLATFORMS, ...COMING_SOON_PL
 
 /** Queue names for BullMQ */
 export const QUEUES = {
-  POST: 'agent:post',
-  REPLY: 'agent:reply',
-  DM: 'agent:dm',
-  ENGAGE: 'agent:engage',
-  SCRAPE: 'agent:scrape',
-  RESEARCH: 'agent:research',
+  POST: 'agent-post',
+  REPLY: 'agent-reply',
+  DM: 'agent-dm',
+  ENGAGE: 'agent-engage',
+  SCRAPE: 'agent-scrape',
+  RESEARCH: 'agent-research',
   SCHEDULER: 'scheduler',
-  TOKEN_REFRESH: 'token:refresh',
+  TOKEN_REFRESH: 'token-refresh',
 } as const;
 
 /** Platform-specific rate limits (requests per window) */
