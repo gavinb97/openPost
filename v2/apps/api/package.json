@@ -7,7 +7,7 @@
     "dev": "tsx watch src/index.ts",
     "start": "node dist/index.js",
     "migrate": "tsx src/migrate.ts"
-  },
+  }, 
   "dependencies": {
     "@onlyposts/shared": "*",
     "express": "^4.19.0",
