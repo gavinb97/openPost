@@ -9,7 +9,7 @@ const jobsApi = require('./../openPost/jobs/jobsApi');
 const socialAuthApi = require('./socialauthentication/socialAuthApi'); 
 
 const app = express(); 
-
+ 
 const corsOptions = {
   origin: ['https://only-posts.com', 'https://onlypostsai.com', 'http://localhost:3000' ],
   optionsSuccessStatus: 200,
