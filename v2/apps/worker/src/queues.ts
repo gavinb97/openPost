@@ -23,7 +23,7 @@ export const schedulerQueue = new Queue(QUEUES.SCHEDULER, defaultOpts);
 export const tokenRefreshQueue = new Queue(QUEUES.TOKEN_REFRESH, defaultOpts);
 
 // Queue events for logging
-export function attachQueueEvents(queue: Queue, name: string) {
+export function attachQueueEvents(name: string) {
   const events = new QueueEvents(name, defaultOpts);
   events.on('completed', ({ jobId }) => {
     console.log(`[${name}] Job ${jobId} completed`);
