@@ -1,0 +1,63 @@
+name: Deploy OnlyPosts Website
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'v2/apps/web/**'
+      - 'v2/packages/shared/**'
+      - '.github/workflows/deploy-op-website.yml'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Log in to Docker Hub
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+      - name: Build and push image
+        run: |
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/onlyposts-website:latest -f ./v2/apps/web/Dockerfile ./v2
+          docker push ${{ secrets.DOCKER_USERNAME }}/onlyposts-website:latest
+
+      - name: Create Docker network
+        run: docker network create haypi-network 2>/dev/null || true
+
+      - name: Stop old container
+        run: |
+          docker stop onlyposts-website 2>/dev/null || true
+          docker rm onlyposts-website 2>/dev/null || true
+
+      - name: Pull latest image
+        run: docker pull ${{ secrets.DOCKER_USERNAME }}/onlyposts-website:latest
+
+      - name: Deploy website container
+        run: |
+          docker run -d \
+            --name onlyposts-website \
+            --network haypi-network \
+            --restart unless-stopped \
+            -p 3333:3333 \
+            -e NODE_ENV=production \
+            -e PORT=3333 \
+            -e NEXT_TELEMETRY_DISABLED=1 \
+            -e NEXT_PUBLIC_API_URL=https://api.only-posts.com/api/v2 \
+            ${{ secrets.DOCKER_USERNAME }}/onlyposts-website:latest
+
+      - name: Verify deployment
+        run: |
+          echo "⏳ Waiting for website..."
+          sleep 5
+          echo "Website:" && curl -sf http://localhost:3333 | head -c 200 || echo "⚠️ Website not ready yet"
+          echo ""
+          echo "Running containers:"
+          docker ps --filter "name=onlyposts" --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+
+      - name: Cleanup old images
+        run: docker image prune -f

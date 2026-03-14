@@ -1,0 +1,58 @@
+name: Deploy OnlyPosts Worker
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'v2/apps/worker/**'
+      - 'v2/packages/shared/**'
+      - '.github/workflows/deploy-op-worker.yml'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Log in to Docker Hub
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+      - name: Build and push image
+        run: |
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/onlyposts-worker:latest -f ./v2/apps/worker/Dockerfile ./v2
+          docker push ${{ secrets.DOCKER_USERNAME }}/onlyposts-worker:latest
+
+      - name: Create Docker network
+        run: docker network create haypi-network 2>/dev/null || true
+
+      - name: Stop old container
+        run: |
+          docker stop onlyposts-worker 2>/dev/null || true
+          docker rm onlyposts-worker 2>/dev/null || true
+
+      - name: Pull latest image
+        run: docker pull ${{ secrets.DOCKER_USERNAME }}/onlyposts-worker:latest
+
+      - name: Deploy worker container
+        run: |
+          docker run -d \
+            --name onlyposts-worker \
+            --network haypi-network \
+            --restart unless-stopped \
+            --env-file ~/onlyposts/.env \
+            -e REDIS_URL=redis://walletvote-redis:6379 \
+            ${{ secrets.DOCKER_USERNAME }}/onlyposts-worker:latest
+
+      - name: Verify deployment
+        run: |
+          echo "⏳ Waiting for worker..."
+          sleep 3
+          echo "Running containers:"
+          docker ps --filter "name=onlyposts" --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+
+      - name: Cleanup old images
+        run: docker image prune -f

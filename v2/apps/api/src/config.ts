@@ -21,7 +21,7 @@ function optional(key: string, fallback: string): string {
 export const config = {
   env: optional('NODE_ENV', 'development'),
   port: parseInt(optional('PORT', '5055'), 10),
-  frontendUrl: optional('FRONTEND_URL', 'http://localhost:3000'),
+  frontendUrl: optional('FRONTEND_URL', 'https://only-posts.com'),
 
   // Database
   postgres: {

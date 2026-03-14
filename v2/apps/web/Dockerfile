@@ -21,10 +21,12 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
+ENV PORT=3333
+ENV HOSTNAME=0.0.0.0
 
 COPY --from=base /app/apps/web/.next/standalone ./
 COPY --from=base /app/apps/web/.next/static ./apps/web/.next/static
 COPY --from=base /app/apps/web/public ./apps/web/public
 
-EXPOSE 3000
+EXPOSE 3333
 CMD ["node", "apps/web/server.js"]

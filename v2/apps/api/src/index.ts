@@ -29,7 +29,14 @@ const app = express();
 
 app.use(helmet());
 app.use(cors({
-  origin: [config.frontendUrl, 'https://only-posts.com', 'http://localhost:3000'],
+  origin: [
+    config.frontendUrl,
+    'https://only-posts.com',
+    'https://www.only-posts.com',
+    'https://api.only-posts.com',
+    'http://localhost:3000',
+    'http://localhost:3333',
+  ],
   credentials: true,
 }));
 app.use(morgan(config.env === 'production' ? 'combined' : 'dev'));
