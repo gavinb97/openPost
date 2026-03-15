@@ -22,8 +22,13 @@ async function getTokens(accountId: string) {
 // Twitter: find a tweet to reply to
 //
 // Strategy (in order):
-//   1. Recent search (v2) — requires Basic tier ($100/mo), skipped on 403
-//   2. Home timeline   (v2) — free tier, replies to tweets from followed accounts
+//   1. Mentions        (v2) — free tier, always replyable (author engaged with us)
+//   2. Recent search   (v2) — requires Basic tier ($100/mo), skipped on 403
+//   3. Home timeline   (v2) — free tier, filtered to reply_settings=everyone
+//
+// Note: replying to arbitrary tweets fails with 403 if the account has not been
+// mentioned or previously engaged by the author. Mentions are the only guaranteed
+// replyable source on the free tier.
 // ============================================================
 
 async function makeOAuthHeader(
@@ -55,13 +60,40 @@ async function findTweetToReply(
 
   console.log(`[Reply] Searching for tweets to reply to. Terms: ${terms.join(', ') || '(none)'}, excluding ${usedTweetIds.size} already-used tweet(s)`);
 
-  // Only reply to tweets open to everyone and not already targeted
-  const isReplyable = (t: any) =>
-    t.author_id !== account.platform_user_id &&
-    (!t.reply_settings || t.reply_settings === 'everyone') &&
-    !usedTweetIds.has(t.id);
+  // Only reply to tweets not already targeted and not from self
+  const isEligible = (t: any) =>
+    t.author_id !== account.platform_user_id && !usedTweetIds.has(t.id);
 
-  // ── Strategy 1: recent search (requires Basic tier) ──
+  // Only reply to tweets open to everyone (for non-mention sources)
+  const isReplyable = (t: any) =>
+    isEligible(t) && (!t.reply_settings || t.reply_settings === 'everyone');
+
+  // ── Strategy 1: mentions (free tier, always replyable) ──
+  // Tweets that mention the agent can always be replied to.
+  if (account.platform_user_id) {
+    try {
+      const mentionsUrl = `https://api.twitter.com/2/users/${account.platform_user_id}/mentions?tweet.fields=id,text,author_id&max_results=10&expansions=author_id`;
+      const header = await makeOAuthHeader(token, 'GET', mentionsUrl);
+      const resp = await fetch(mentionsUrl, { headers: header });
+      const data = await resp.json() as any;
+
+      if (resp.ok) {
+        const mentions: any[] = data?.data || [];
+        const eligible = mentions.filter(isEligible);
+        if (eligible.length > 0) {
+          console.log(`[Reply] Found ${eligible.length} mention(s) to reply to`);
+          return eligible[0];
+        }
+        console.log(`[Reply] No new mentions found (${mentions.length} total, all already used)`);
+      } else if (resp.status !== 403 && resp.status !== 401) {
+        console.warn(`[Reply] Mentions API error (${resp.status}): ${JSON.stringify(data)}`);
+      }
+    } catch (err: any) {
+      console.warn(`[Reply] Mentions fetch error: ${err.message}`);
+    }
+  }
+
+  // ── Strategy 2: recent search (Basic tier+, skipped on 403) ──
   if (terms.length > 0) {
     const queryStr = `(${terms.join(' OR ')}) -is:reply -is:retweet lang:en`;
     const searchUrl = `https://api.twitter.com/2/tweets/search/recent?query=${encodeURIComponent(queryStr)}&tweet.fields=id,text,author_id,reply_settings&max_results=10`;
@@ -88,8 +120,8 @@ async function findTweetToReply(
     }
   }
 
-  // ── Strategy 2: home timeline (free tier) ──
-  // Replies to recent tweets from accounts the agent follows.
+  // ── Strategy 3: home timeline (free tier, reply_settings=everyone only) ──
+  // Only picks tweets that explicitly allow everyone to reply.
   if (!account.platform_user_id) {
     console.warn(`[Reply] No platform_user_id on account — cannot fetch home timeline`);
     return null;
