@@ -135,7 +135,9 @@ export default function ReviewPage() {
                 <div className="flex-1 space-y-3">
                   {/* Header */}
                   <div className="flex items-center gap-2 flex-wrap">
-                    <Badge variant="outline">{action.action_type}</Badge>
+                    <Badge variant="outline">
+                      {action.action_type === 'reply' && action.platform === 'twitter' ? 'quote tweet' : action.action_type}
+                    </Badge>
                     <span className="text-sm text-muted-foreground">
                       {platformIcon(action.platform)} {action.platform}
                     </span>
@@ -151,7 +153,9 @@ export default function ReviewPage() {
                     <div className="rounded-lg bg-white/[0.02] border border-white/[0.04] px-3 py-2">
                       <p className="text-xs text-muted-foreground">
                         {action.action_type === 'retweet' ? 'Retweeting: ' :
-                         action.action_type === 'like' ? 'Liking: ' : 'Replying to: '}
+                         action.action_type === 'like' ? 'Liking: ' :
+                         (action.action_type === 'reply' && action.platform === 'twitter') ? 'Quote tweeting: ' :
+                         'Replying to: '}
                         {action.platform === 'twitter' ? (
                           <a
                             href={`https://twitter.com/i/status/${action.target_post_id}`}

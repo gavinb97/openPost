@@ -346,53 +346,19 @@ export function startReplyProcessor() {
           case 'twitter': {
             const tweetUrl = 'https://api.twitter.com/2/tweets';
 
-            const attemptTweetReply = async (tweetId: string | null) => {
-              const h = await makeOAuthHeader(token, 'POST', tweetUrl);
-              const body: Record<string, any> = { text: replyText };
-              if (tweetId) body.reply = { in_reply_to_tweet_id: tweetId };
-              const r = await fetch(tweetUrl, {
-                method: 'POST',
-                headers: { ...h, 'Content-Type': 'application/json' },
-                body: JSON.stringify(body),
-              });
-              return { r, d: await r.json() as any };
-            };
-
-            let { r: resp, d: data } = await attemptTweetReply(targetPostId);
-
-            // Recovery: stale target tweet blocked by engagement rules — find a mention and retry once
-            if (!resp.ok && resp.status === 403 && data?.detail?.includes?.('not been mentioned')) {
-              console.warn(`[Reply] Tweet ${targetPostId} blocked by engagement rules — searching for a mention to reply to`);
-              await query(`UPDATE agent_actions SET target_post_id = NULL WHERE id = $1`, [action_id]);
-
-              const usedRows = await query<{ target_post_id: string }>(
-                `SELECT target_post_id FROM agent_actions
-                 WHERE agent_id = $1 AND action_type IN ('reply','comment')
-                 AND target_post_id IS NOT NULL AND id != $2`,
-                [agent_id, action_id],
-              );
-              const mention = await findTweetToReply(
-                token, account,
-                [...(agent.topic_keywords ?? [])],
-                [...(agent.hashtag_targets ?? [])],
-                new Set(usedRows.map((r) => r.target_post_id)),
-              );
-
-              if (!mention) {
-                // No mention available — permanently fail, don't let BullMQ retry
-                await query(
-                  `UPDATE agent_actions SET status = 'failed', error_message = 'Target tweet blocked (engagement rules) and no mentions available to reply to', executed_at = now() WHERE id = $1`,
-                  [action_id],
-                );
-                return;
-              }
-
-              targetPostId = mention.id;
-              await query(`UPDATE agent_actions SET target_post_id = $1 WHERE id = $2`, [mention.id, action_id]);
-              ({ r: resp, d: data } = await attemptTweetReply(mention.id));
-            }
-
-            if (!resp.ok) throw new Error(`Twitter reply failed: ${JSON.stringify(data)}`);
+            const h = await makeOAuthHeader(token, 'POST', tweetUrl);
+            const tweetBody: Record<string, any> = { text: replyText };
+            // Use quote_tweet_id instead of reply — avoids the "not engaged with author" 403
+            // that Twitter enforces on the API even for tweets publicly open to replies.
+            // Quote tweets are always allowed and more visible (appear in followers' feeds).
+            if (targetPostId) tweetBody.quote_tweet_id = targetPostId;
+            const resp = await fetch(tweetUrl, {
+              method: 'POST',
+              headers: { ...h, 'Content-Type': 'application/json' },
+              body: JSON.stringify(tweetBody),
+            });
+            const data = await resp.json() as any;
+            if (!resp.ok) throw new Error(`Twitter post failed: ${JSON.stringify(data)}`);
             resultId = data.data.id;
             resultUrl = `https://twitter.com/i/status/${resultId}`;
             break;
