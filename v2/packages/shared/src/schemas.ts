@@ -60,7 +60,9 @@ export const CreateAgentSchema = z.object({
     frequency_pct: z.number().int().min(1).max(100).optional(),
     include_body_text: z.boolean().optional(),
     caption_source: z.enum(['ai_generated', 'file_description', 'none']).optional(),
+    caption_prefix_mode: z.enum(['static', 'hashtags', 'ai']).optional(),
     caption_prefix: z.string().max(500).optional(),
+    caption_hashtags: z.array(z.string().max(100)).max(30).optional(),
   }).optional(),
 });
 

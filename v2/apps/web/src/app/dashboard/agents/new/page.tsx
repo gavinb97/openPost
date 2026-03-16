@@ -125,6 +125,16 @@ export default function NewAgentPage() {
     hashtag_targets: [] as string[],
     subreddit_targets: [] as string[],
     media_folder_id: '' as string,
+    media_settings: {
+      order: 'random' as 'random' | 'sequential',
+      frequency: 'always' as 'always' | 'sometimes' | 'never',
+      frequency_pct: 50,
+      include_body_text: true,
+      caption_source: 'ai_generated' as 'ai_generated' | 'file_description' | 'none',
+      caption_prefix_mode: 'static' as 'static' | 'hashtags' | 'ai',
+      caption_prefix: '',
+      caption_hashtags: [] as string[],
+    },
   });
 
   const [timeInput, setTimeInput] = useState('');
@@ -140,6 +150,9 @@ export default function NewAgentPage() {
 
   const setSC = (patch: Record<string, any>) =>
     setForm({ ...form, schedule_config: { ...form.schedule_config, ...patch } });
+
+  const setMS = (patch: Record<string, any>) =>
+    setForm({ ...form, media_settings: { ...form.media_settings, ...patch } });
 
   const toggleDay = (day: number) => {
     const days: number[] = form.schedule_config.days ?? [];
@@ -463,6 +476,137 @@ export default function NewAgentPage() {
                     </div>
                   </label>
                 ))}
+              </div>
+            )}
+
+            {/* Media settings — shown when a folder is selected */}
+            {form.media_folder_id && (
+              <div className="space-y-4 pt-4 border-t border-white/[0.06]">
+
+                {/* Order */}
+                <div>
+                  <Label>Post Order</Label>
+                  <p className="text-xs text-muted-foreground mb-2 mt-0.5">How to cycle through files in the folder</p>
+                  <div className="grid grid-cols-2 gap-2">
+                    {[
+                      { value: 'random',     label: 'Random',     desc: 'Pick a random file each time' },
+                      { value: 'sequential', label: 'Sequential', desc: 'Cycle through files in order' },
+                    ].map(({ value, label, desc }) => (
+                      <label key={value} className={cn(
+                        'flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors',
+                        form.media_settings.order === value ? 'border-primary/40 bg-primary/5' : 'border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.04]',
+                      )}>
+                        <input type="radio" name="media_order" className="accent-primary"
+                          checked={form.media_settings.order === value} onChange={() => setMS({ order: value })} />
+                        <div><p className="text-sm font-medium">{label}</p><p className="text-[11px] text-muted-foreground">{desc}</p></div>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Frequency */}
+                <div>
+                  <Label>Media Frequency</Label>
+                  <p className="text-xs text-muted-foreground mb-2 mt-0.5">How often to attach media to posts</p>
+                  <div className="space-y-2">
+                    {[
+                      { value: 'always',    label: 'Always',    desc: 'Every post includes a media file' },
+                      { value: 'sometimes', label: 'Sometimes', desc: 'Attach media to a percentage of posts' },
+                      { value: 'never',     label: 'Never',     desc: 'Disable media without removing the folder' },
+                    ].map(({ value, label, desc }) => (
+                      <label key={value} className={cn(
+                        'flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors',
+                        form.media_settings.frequency === value ? 'border-primary/40 bg-primary/5' : 'border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.04]',
+                      )}>
+                        <input type="radio" name="media_frequency" className="accent-primary"
+                          checked={form.media_settings.frequency === value} onChange={() => setMS({ frequency: value })} />
+                        <div><p className="text-sm font-medium">{label}</p><p className="text-[11px] text-muted-foreground">{desc}</p></div>
+                      </label>
+                    ))}
+                  </div>
+                  {form.media_settings.frequency === 'sometimes' && (
+                    <div className="mt-3 flex items-center gap-3">
+                      <Input type="number" min={1} max={100} className="w-24"
+                        value={form.media_settings.frequency_pct}
+                        onChange={(e) => setMS({ frequency_pct: Math.min(100, Math.max(1, Number(e.target.value))) })} />
+                      <span className="text-sm text-muted-foreground">% chance per post</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Caption source */}
+                <div>
+                  <Label>Caption / Post Text Source</Label>
+                  <p className="text-xs text-muted-foreground mb-2 mt-0.5">Where the text accompanying your media comes from</p>
+                  <div className="space-y-2">
+                    {[
+                      { value: 'ai_generated',     label: 'AI Generated',     desc: 'Agent writes a fresh caption every time' },
+                      { value: 'file_description', label: 'File Description', desc: 'Uses the description saved on the media file' },
+                      { value: 'none',             label: 'No Caption',       desc: 'Post media with no text (turn off body text below)' },
+                    ].map(({ value, label, desc }) => (
+                      <label key={value} className={cn(
+                        'flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors',
+                        form.media_settings.caption_source === value ? 'border-primary/40 bg-primary/5' : 'border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.04]',
+                      )}>
+                        <input type="radio" name="caption_source" className="accent-primary"
+                          checked={form.media_settings.caption_source === value} onChange={() => setMS({ caption_source: value })} />
+                        <div><p className="text-sm font-medium">{label}</p><p className="text-[11px] text-muted-foreground">{desc}</p></div>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Caption prefix */}
+                <div>
+                  <Label>Caption Prefix</Label>
+                  <p className="text-xs text-muted-foreground mb-2 mt-0.5">Text added before every media post</p>
+                  <div className="space-y-2 mb-3">
+                    {[
+                      { value: 'static',   label: 'Static Text',  desc: 'Same fixed text on every post' },
+                      { value: 'hashtags', label: 'Hashtag List', desc: 'Pick your hashtags — formatted automatically' },
+                      { value: 'ai',       label: 'AI Generated', desc: 'Agent writes a unique punchy opener each time' },
+                    ].map(({ value, label, desc }) => (
+                      <label key={value} className={cn(
+                        'flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors',
+                        form.media_settings.caption_prefix_mode === value ? 'border-primary/40 bg-primary/5' : 'border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.04]',
+                      )}>
+                        <input type="radio" name="caption_prefix_mode" className="accent-primary"
+                          checked={form.media_settings.caption_prefix_mode === value}
+                          onChange={() => setMS({ caption_prefix_mode: value })} />
+                        <div><p className="text-sm font-medium">{label}</p><p className="text-[11px] text-muted-foreground">{desc}</p></div>
+                      </label>
+                    ))}
+                  </div>
+                  {form.media_settings.caption_prefix_mode === 'static' && (
+                    <Textarea value={form.media_settings.caption_prefix}
+                      onChange={(e) => setMS({ caption_prefix: e.target.value })}
+                      placeholder="e.g. Check this out! 🔥" rows={2} />
+                  )}
+                  {form.media_settings.caption_prefix_mode === 'hashtags' && (
+                    <TagInput
+                      tags={form.media_settings.caption_hashtags}
+                      onAdd={(t) => setMS({ caption_hashtags: [...form.media_settings.caption_hashtags, t.replace(/^#/, '')] })}
+                      onRemove={(i) => setMS({ caption_hashtags: form.media_settings.caption_hashtags.filter((_: string, j: number) => j !== i) })}
+                      placeholder="Add a hashtag (with or without #)"
+                      colorClass="bg-violet-500/10 text-violet-400 border-violet-500/20"
+                    />
+                  )}
+                  {form.media_settings.caption_prefix_mode === 'ai' && (
+                    <p className="text-xs text-muted-foreground p-3 rounded-lg bg-white/[0.02] border border-white/[0.06]">
+                      The agent will use its personality prompt to write a fresh, unique opener before each post — no two will be alike.
+                    </p>
+                  )}
+                </div>
+
+                {/* Include body text */}
+                <div className="flex items-center justify-between py-1">
+                  <div>
+                    <Label>Always Include Body Text</Label>
+                    <p className="text-xs text-muted-foreground">Add AI-generated text alongside the media. Disable for media-only posts.</p>
+                  </div>
+                  <Switch checked={form.media_settings.include_body_text} onCheckedChange={(v) => setMS({ include_body_text: v })} />
+                </div>
+
               </div>
             )}
           </CardContent>

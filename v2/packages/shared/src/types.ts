@@ -107,8 +107,17 @@ export interface MediaSettings {
   include_body_text: boolean;
   /** Where the post text/caption comes from when media is attached */
   caption_source: 'ai_generated' | 'file_description' | 'none';
-  /** Static text prepended to every post that includes media */
+  /**
+   * How to generate the prefix text prepended before every media post:
+   * - 'static'    → use caption_prefix as-is
+   * - 'hashtags'  → format caption_hashtags into "#tag1 #tag2 ..." string
+   * - 'ai'        → agent generates a unique punchy opener each time
+   */
+  caption_prefix_mode: 'static' | 'hashtags' | 'ai';
+  /** Used when caption_prefix_mode='static' */
   caption_prefix: string;
+  /** Used when caption_prefix_mode='hashtags' — list of tags without # */
+  caption_hashtags: string[];
 }
 
 // ---------- Agent ----------

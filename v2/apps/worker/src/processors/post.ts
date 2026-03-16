@@ -245,16 +245,65 @@ async function resolveTwitterMedia(
 }
 
 // ============================================================
+// Resolve caption prefix based on prefix mode
+// ============================================================
+
+async function resolveCaptionPrefix(
+  ms: MediaSettings,
+  agent: Agent,
+  platform: Platform,
+): Promise<string> {
+  const mode = ms.caption_prefix_mode ?? 'static';
+
+  if (mode === 'hashtags') {
+    const tags = (ms.caption_hashtags ?? []).map((t) => (t.startsWith('#') ? t : `#${t}`));
+    return tags.join(' ');
+  }
+
+  if (mode === 'ai') {
+    try {
+      const OpenAI = (await import('openai')).default;
+      const openai = new OpenAI({ apiKey: config.openai.apiKey });
+      const resp = await openai.chat.completions.create({
+        model: agent.model ?? 'gpt-4o-mini',
+        messages: [
+          {
+            role: 'system',
+            content: agent.personality_prompt
+              ? `${agent.personality_prompt}\n\nYou are writing a short, punchy opening hook for a social media post.`
+              : 'You are writing a short, punchy opening hook for a social media post.',
+          },
+          {
+            role: 'user',
+            content: `Write a short, engaging opener/hook to prepend to a ${platform} post. It should be 1–2 sentences, energetic, and fit naturally before the main caption. No hashtags. No quotes around it.`,
+          },
+        ],
+        max_tokens: 80,
+        temperature: 0.9,
+      });
+      return (resp.choices[0]?.message?.content ?? '').trim();
+    } catch (err: any) {
+      console.warn('[Post] AI prefix generation failed, skipping:', err.message);
+      return '';
+    }
+  }
+
+  // 'static' — use literal prefix text
+  return (ms.caption_prefix ?? '').trim();
+}
+
+// ============================================================
 // Build post text based on media_settings
 // ============================================================
 
-function buildPostText(
+async function buildPostText(
   generated: string,
   mediaSettings: MediaSettings,
+  agent: Agent,
+  platform: Platform,
   fileDescription?: string | null,
-): string {
+): Promise<string> {
   const cs = mediaSettings.caption_source ?? 'ai_generated';
-  const prefix = (mediaSettings.caption_prefix ?? '').trim();
 
   let text: string;
   if (cs === 'none') {
@@ -265,6 +314,7 @@ function buildPostText(
     text = generated;
   }
 
+  const prefix = await resolveCaptionPrefix(mediaSettings, agent, platform);
   if (prefix) text = prefix + (text ? '\n\n' + text : '');
   return text;
 }
@@ -322,9 +372,11 @@ export function startPostProcessor() {
             fileDesc = f?.description ?? null;
           }
 
-          postText = buildPostText(
+          postText = await buildPostText(
             generated.text,
             ms,
+            agent,
+            platform as Platform,
             fileDesc,
           );
         }

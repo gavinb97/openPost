@@ -133,7 +133,9 @@ export default function EditAgentPage() {
             frequency_pct: a.media_settings?.frequency_pct ?? 50,
             include_body_text: a.media_settings?.include_body_text ?? true,
             caption_source: a.media_settings?.caption_source ?? 'ai_generated',
+            caption_prefix_mode: a.media_settings?.caption_prefix_mode ?? 'static',
             caption_prefix: a.media_settings?.caption_prefix ?? '',
+            caption_hashtags: a.media_settings?.caption_hashtags ?? [],
           },
           approval_mode: a.approval_mode ?? 'auto_with_guardrails',
           schedule_type: a.schedule_type ?? 'random',
@@ -496,9 +498,43 @@ export default function EditAgentPage() {
                 {/* Caption prefix */}
                 <div>
                   <Label>Caption Prefix</Label>
-                  <p className="text-xs text-muted-foreground mb-1 mt-0.5">Static text prepended to every media post (CTAs, hashtags, etc.)</p>
-                  <Textarea value={form.media_settings.caption_prefix} onChange={(e) => setMS({ caption_prefix: e.target.value })}
-                    placeholder="e.g. Check this out! 🔥  #shorts #viral" rows={2} />
+                  <p className="text-xs text-muted-foreground mb-2 mt-0.5">Text added before every media post</p>
+                  <div className="space-y-2 mb-3">
+                    {[
+                      { value: 'static',   label: 'Static Text',  desc: 'Same fixed text on every post' },
+                      { value: 'hashtags', label: 'Hashtag List', desc: 'Pick your hashtags — formatted automatically' },
+                      { value: 'ai',       label: 'AI Generated', desc: 'Agent writes a unique punchy opener each time' },
+                    ].map(({ value, label, desc }) => (
+                      <label key={value} className={cn(
+                        'flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors',
+                        form.media_settings.caption_prefix_mode === value ? 'border-primary/40 bg-primary/5' : 'border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.04]',
+                      )}>
+                        <input type="radio" name="caption_prefix_mode" className="accent-primary"
+                          checked={form.media_settings.caption_prefix_mode === value}
+                          onChange={() => setMS({ caption_prefix_mode: value })} />
+                        <div><p className="text-sm font-medium">{label}</p><p className="text-[11px] text-muted-foreground">{desc}</p></div>
+                      </label>
+                    ))}
+                  </div>
+                  {form.media_settings.caption_prefix_mode === 'static' && (
+                    <Textarea value={form.media_settings.caption_prefix}
+                      onChange={(e) => setMS({ caption_prefix: e.target.value })}
+                      placeholder="e.g. Check this out! 🔥" rows={2} />
+                  )}
+                  {form.media_settings.caption_prefix_mode === 'hashtags' && (
+                    <TagInput
+                      tags={form.media_settings.caption_hashtags}
+                      onAdd={(t) => setMS({ caption_hashtags: [...form.media_settings.caption_hashtags, t.replace(/^#/, '')] })}
+                      onRemove={(i) => setMS({ caption_hashtags: form.media_settings.caption_hashtags.filter((_: string, j: number) => j !== i) })}
+                      placeholder="Add a hashtag (with or without #)"
+                      colorClass="bg-violet-500/10 text-violet-400 border-violet-500/20"
+                    />
+                  )}
+                  {form.media_settings.caption_prefix_mode === 'ai' && (
+                    <p className="text-xs text-muted-foreground p-3 rounded-lg bg-white/[0.02] border border-white/[0.06]">
+                      The agent will use its personality prompt to write a fresh, unique opener before each post — no two will be alike.
+                    </p>
+                  )}
                 </div>
 
                 {/* Include body text toggle */}
