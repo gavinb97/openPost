@@ -162,9 +162,13 @@ agentsRouter.put('/:id', asyncHandler(async (req, res) => {
     setClauses.push(`remaining_media = $${idx++}`);
     values.push(data.media_pool_ids); // reset remaining
   }
-  if ((data as any).media_folder_id !== undefined) {
+  if (data.media_folder_id !== undefined) {
     setClauses.push(`media_folder_id = $${idx++}`);
-    values.push((data as any).media_folder_id || null);
+    values.push(data.media_folder_id || null);
+  }
+  if (data.media_settings !== undefined) {
+    setClauses.push(`media_settings = media_settings || $${idx++}::jsonb`);
+    values.push(JSON.stringify(data.media_settings));
   }
 
   if (setClauses.length === 0) throw new AppError(400, 'Nothing to update');

@@ -252,15 +252,61 @@ async function pickAccount(agent: Agent): Promise<PlatformAccount | null> {
 }
 
 async function pickMedia(agent: Agent): Promise<string | null> {
-  // If a folder is assigned, pick a random file from it each time
-  if ((agent as any).media_folder_id) {
-    const files = await query<{ id: string }>(
-      'SELECT id FROM media_files WHERE folder_id = $1 ORDER BY random() LIMIT 1',
-      [(agent as any).media_folder_id],
-    );
-    return files[0]?.id ?? null;
+  const ms = (agent as any).media_settings ?? {};
+  const folderId: string | null = (agent as any).media_folder_id ?? null;
+
+  // Frequency gate — 'never' or failed roll → no media
+  const freq: string = ms.frequency ?? 'always';
+  if (freq === 'never') return null;
+  if (freq === 'sometimes') {
+    const pct: number = ms.frequency_pct ?? 50;
+    if (Math.random() * 100 > pct) return null;
   }
 
+  if (folderId) {
+    const order: string = ms.order ?? 'random';
+    if (order === 'sequential') {
+      // Get the next file after the last one (by created_at), wrapping around
+      const lastId: string | null = (agent as any).media_last_file_id ?? null;
+      let nextFile: { id: string } | null = null;
+
+      if (lastId) {
+        // Find files created after the last one
+        const rows = await query<{ id: string }>(
+          `SELECT mf.id FROM media_files mf
+           WHERE mf.folder_id = $1
+             AND mf.created_at > (SELECT created_at FROM media_files WHERE id = $2)
+           ORDER BY mf.created_at ASC LIMIT 1`,
+          [folderId, lastId],
+        );
+        nextFile = rows[0] ?? null;
+      }
+
+      // If no "next" file (end of list or first run), wrap to the oldest
+      if (!nextFile) {
+        const rows = await query<{ id: string }>(
+          'SELECT id FROM media_files WHERE folder_id = $1 ORDER BY created_at ASC LIMIT 1',
+          [folderId],
+        );
+        nextFile = rows[0] ?? null;
+      }
+
+      if (nextFile) {
+        await query('UPDATE agents SET media_last_file_id = $1 WHERE id = $2', [nextFile.id, agent.id]);
+        return nextFile.id;
+      }
+      return null;
+    } else {
+      // Random pick from folder
+      const files = await query<{ id: string }>(
+        'SELECT id FROM media_files WHERE folder_id = $1 ORDER BY random() LIMIT 1',
+        [folderId],
+      );
+      return files[0]?.id ?? null;
+    }
+  }
+
+  // Legacy pool model
   if (!agent.remaining_media?.length && !agent.media_pool_ids?.length) return null;
   let remaining = [...(agent.remaining_media ?? [])];
   if (!remaining.length) remaining = [...(agent.media_pool_ids ?? [])];
@@ -438,8 +484,6 @@ async function schedulerTick() {
     }
   }
 }
-
-function addMs(d: Date, ms: number): Date { return new Date(d.getTime() + ms); }
 
 // ============================================================
 // START

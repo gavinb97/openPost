@@ -6,16 +6,22 @@ import { Worker, type Job as BullJob } from 'bullmq';
 import { redis } from '../queues';
 import { query, queryOne } from '../db';
 import { generatePostContent } from '../ai';
-import { updateConversationMemory } from '../ai';
 import { QUEUES } from '@onlyposts/shared';
-import type { Agent, OAuthToken, PlatformAccount, PostJobPayload, Platform } from '@onlyposts/shared';
+import type { Agent, OAuthToken, PlatformAccount, PostJobPayload, Platform, MediaFile, MediaSettings } from '@onlyposts/shared';
 
-// Platform service imports (shared logic with API)
 import crypto from 'crypto';
 import { config } from '../config';
+import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
+import { Readable } from 'stream';
+
+const s3 = new S3Client({
+  region: config.s3.region,
+  credentials: { accessKeyId: config.s3.accessKey, secretAccessKey: config.s3.secretKey },
+  requestChecksumCalculation: 'WHEN_REQUIRED',
+});
 
 // ============================================================
-// Inline platform helpers (to avoid circular deps with API)
+// Inline platform helpers
 // ============================================================
 
 async function getTokens(accountId: string): Promise<{ account: PlatformAccount; token: OAuthToken }> {
@@ -25,7 +31,150 @@ async function getTokens(accountId: string): Promise<{ account: PlatformAccount;
   return { account, token };
 }
 
-async function postToTwitter(token: OAuthToken, text: string): Promise<{ id: string; url: string }> {
+// ============================================================
+// S3 download helper
+// ============================================================
+
+async function downloadFromS3(bucket: string, key: string): Promise<Buffer> {
+  const cmd = new GetObjectCommand({ Bucket: bucket, Key: key });
+  const res = await s3.send(cmd);
+  if (!res.Body) throw new Error('Empty S3 response body');
+  const chunks: Buffer[] = [];
+  for await (const chunk of res.Body as Readable) {
+    chunks.push(Buffer.from(chunk));
+  }
+  return Buffer.concat(chunks);
+}
+
+// ============================================================
+// Twitter helpers (OAuth 1.0a)
+// ============================================================
+
+async function twitterOAuthHeader(
+  token: OAuthToken,
+  url: string,
+  method: string,
+  extraParams: Record<string, string> = {},
+): Promise<Record<string, string>> {
+  const OAuth = (await import('oauth-1.0a')).default;
+  const oauth = new OAuth({
+    consumer: { key: config.twitter.appKey, secret: config.twitter.appSecret },
+    signature_method: 'HMAC-SHA1',
+    hash_function(bs: string, k: string) { return crypto.createHmac('sha1', k).update(bs).digest('base64'); },
+  });
+  const tok = { key: token.access_token, secret: token.token_secret! };
+  return oauth.toHeader(oauth.authorize({ url, method, data: extraParams }, tok));
+}
+
+/** Upload media buffer to Twitter and return media_id_string */
+async function uploadToTwitter(
+  token: OAuthToken,
+  buffer: Buffer,
+  mimeType: string,
+  totalBytes: number,
+): Promise<string> {
+  // Determine media_category for Twitter
+  const isVideo = mimeType.startsWith('video/');
+  const isGif = mimeType === 'image/gif';
+  const mediaCategory = isVideo ? 'tweet_video' : isGif ? 'tweet_gif' : 'tweet_image';
+  const uploadUrl = 'https://upload.twitter.com/1.1/media/upload.json';
+
+  // ── INIT ──
+  const initForm = new URLSearchParams({
+    command: 'INIT',
+    total_bytes: String(totalBytes),
+    media_type: mimeType,
+    media_category: mediaCategory,
+  });
+  const initHeader = await twitterOAuthHeader(token, uploadUrl, 'POST');
+  const initRes = await fetch(uploadUrl, {
+    method: 'POST',
+    headers: { ...initHeader, 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: initForm.toString(),
+  });
+  const initData = await initRes.json() as any;
+  if (!initRes.ok) throw new Error(`Twitter media INIT failed: ${JSON.stringify(initData)}`);
+  const mediaId: string = initData.media_id_string;
+
+  // ── APPEND (5 MB chunks) ──
+  const CHUNK_SIZE = 5 * 1024 * 1024;
+  let segmentIndex = 0;
+  for (let offset = 0; offset < buffer.length; offset += CHUNK_SIZE) {
+    const chunk = buffer.subarray(offset, offset + CHUNK_SIZE);
+
+    // Build multipart body manually
+    const boundary = `----TwitterUpload${crypto.randomBytes(8).toString('hex')}`;
+    const header = Buffer.from(
+      `--${boundary}\r\nContent-Disposition: form-data; name="command"\r\n\r\nAPPEND\r\n` +
+      `--${boundary}\r\nContent-Disposition: form-data; name="media_id"\r\n\r\n${mediaId}\r\n` +
+      `--${boundary}\r\nContent-Disposition: form-data; name="segment_index"\r\n\r\n${segmentIndex}\r\n` +
+      `--${boundary}\r\nContent-Disposition: form-data; name="media"; filename="media"\r\nContent-Type: application/octet-stream\r\n\r\n`,
+    );
+    const footer = Buffer.from(`\r\n--${boundary}--\r\n`);
+    const body = Buffer.concat([header, chunk, footer]);
+
+    const appendHeader = await twitterOAuthHeader(token, uploadUrl, 'POST');
+    const appendRes = await fetch(uploadUrl, {
+      method: 'POST',
+      headers: { ...appendHeader, 'Content-Type': `multipart/form-data; boundary=${boundary}` },
+      body,
+    });
+    if (!appendRes.ok) {
+      const txt = await appendRes.text();
+      throw new Error(`Twitter media APPEND failed (segment ${segmentIndex}): ${txt}`);
+    }
+    segmentIndex++;
+  }
+
+  // ── FINALIZE ──
+  const finalizeForm = new URLSearchParams({ command: 'FINALIZE', media_id: mediaId });
+  const finalizeHeader = await twitterOAuthHeader(token, uploadUrl, 'POST');
+  const finalizeRes = await fetch(uploadUrl, {
+    method: 'POST',
+    headers: { ...finalizeHeader, 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: finalizeForm.toString(),
+  });
+  const finalizeData = await finalizeRes.json() as any;
+  if (!finalizeRes.ok) throw new Error(`Twitter media FINALIZE failed: ${JSON.stringify(finalizeData)}`);
+
+  // ── POLL for video processing ──
+  if (finalizeData.processing_info) {
+    await pollTwitterMediaProcessing(token, mediaId, uploadUrl);
+  }
+
+  return mediaId;
+}
+
+async function pollTwitterMediaProcessing(
+  token: OAuthToken,
+  mediaId: string,
+  uploadUrl: string,
+  maxWaitMs = 120_000,
+): Promise<void> {
+  const deadline = Date.now() + maxWaitMs;
+  while (Date.now() < deadline) {
+    const statusHeader = await twitterOAuthHeader(token, uploadUrl, 'GET');
+    const statusRes = await fetch(
+      `${uploadUrl}?command=STATUS&media_id=${mediaId}`,
+      { headers: statusHeader },
+    );
+    const statusData = await statusRes.json() as any;
+    const state: string = statusData.processing_info?.state ?? 'succeeded';
+
+    if (state === 'succeeded') return;
+    if (state === 'failed') throw new Error(`Twitter media processing failed: ${JSON.stringify(statusData.processing_info?.error)}`);
+
+    const waitMs = (statusData.processing_info?.check_after_secs ?? 5) * 1000;
+    await new Promise((r) => setTimeout(r, waitMs));
+  }
+  throw new Error('Twitter media processing timed out');
+}
+
+async function postToTwitter(
+  token: OAuthToken,
+  text: string,
+  mediaId?: string,
+): Promise<{ id: string; url: string }> {
   const OAuth = (await import('oauth-1.0a')).default;
   const oauth = new OAuth({
     consumer: { key: config.twitter.appKey, secret: config.twitter.appSecret },
@@ -37,17 +186,25 @@ async function postToTwitter(token: OAuthToken, text: string): Promise<{ id: str
   const tok = { key: token.access_token, secret: token.token_secret! };
   const header = oauth.toHeader(oauth.authorize({ url, method: 'POST' }, tok));
 
+  const body: Record<string, any> = { text };
+  if (mediaId) body.media = { media_ids: [mediaId] };
+
   const resp = await fetch(url, {
     method: 'POST',
     headers: { ...header, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ text }),
+    body: JSON.stringify(body),
   });
   const data = await resp.json() as any;
   if (!resp.ok) throw new Error(`Twitter post failed: ${JSON.stringify(data)}`);
   return { id: data.data.id, url: `https://twitter.com/i/status/${data.data.id}` };
 }
 
-async function postToReddit(token: OAuthToken, subreddit: string, title: string, text: string): Promise<{ id: string; url: string }> {
+async function postToReddit(
+  token: OAuthToken,
+  subreddit: string,
+  title: string,
+  text: string,
+): Promise<{ id: string; url: string }> {
   const resp = await fetch('https://oauth.reddit.com/api/submit', {
     method: 'POST',
     headers: {
@@ -55,14 +212,61 @@ async function postToReddit(token: OAuthToken, subreddit: string, title: string,
       'User-Agent': config.reddit.userAgent,
       'Content-Type': 'application/x-www-form-urlencoded',
     },
-    body: new URLSearchParams({
-      api_type: 'json', kind: 'self', sr: subreddit, title, text,
-    }),
+    body: new URLSearchParams({ api_type: 'json', kind: 'self', sr: subreddit, title, text }),
   });
   const data = await resp.json() as any;
   const postData = data?.json?.data;
   if (!postData?.id) throw new Error(`Reddit post failed: ${JSON.stringify(data?.json?.errors)}`);
   return { id: postData.id, url: postData.url || `https://reddit.com${postData.permalink}` };
+}
+
+// ============================================================
+// Media resolution — fetch file record, download, upload to platform
+// ============================================================
+
+async function resolveTwitterMedia(
+  token: OAuthToken,
+  mediaFileId: string,
+): Promise<string | null> {
+  const file = await queryOne<MediaFile>(
+    'SELECT * FROM media_files WHERE id = $1',
+    [mediaFileId],
+  );
+  if (!file) {
+    console.warn(`[Post] media_file_id ${mediaFileId} not found in DB`);
+    return null;
+  }
+
+  console.log(`[Post] Downloading media from S3: ${file.s3_key}`);
+  const buffer = await downloadFromS3(file.s3_bucket, file.s3_key);
+  const mimeType = file.mime_type ?? 'application/octet-stream';
+  console.log(`[Post] Uploading ${buffer.length} bytes (${mimeType}) to Twitter media API`);
+  return uploadToTwitter(token, buffer, mimeType, buffer.length);
+}
+
+// ============================================================
+// Build post text based on media_settings
+// ============================================================
+
+function buildPostText(
+  generated: string,
+  mediaSettings: MediaSettings,
+  fileDescription?: string | null,
+): string {
+  const cs = mediaSettings.caption_source ?? 'ai_generated';
+  const prefix = (mediaSettings.caption_prefix ?? '').trim();
+
+  let text: string;
+  if (cs === 'none') {
+    text = '';
+  } else if (cs === 'file_description' && fileDescription) {
+    text = fileDescription;
+  } else {
+    text = generated;
+  }
+
+  if (prefix) text = prefix + (text ? '\n\n' + text : '');
+  return text;
 }
 
 // ============================================================
@@ -77,50 +281,78 @@ export function startPostProcessor() {
       console.log(`[Post] Processing action ${action_id} for ${platform}`);
 
       try {
-        // Get agent and account
         const agent = await queryOne<Agent>('SELECT * FROM agents WHERE id = $1', [agent_id]);
         if (!agent) throw new Error(`Agent ${agent_id} not found`);
-        const { account, token } = await getTokens(platform_account_id);
+        const { token } = await getTokens(platform_account_id);
 
-        // Check if content is already set (pre-generated and approved via review queue)
-        const existingAction = await queryOne<any>('SELECT content_text FROM agent_actions WHERE id = $1', [action_id]);
+        const existingAction = await queryOne<any>(
+          'SELECT content_text, media_file_id FROM agent_actions WHERE id = $1',
+          [action_id],
+        );
         const preApprovedText = (job.data as any).override_content || existingAction?.content_text;
+        const mediaFileId: string | null = (job.data as any).media_file_id ?? existingAction?.media_file_id ?? null;
+
+        const ms: MediaSettings = (agent as any).media_settings ?? {
+          order: 'random', frequency: 'always', frequency_pct: 100,
+          include_body_text: true, caption_source: 'ai_generated', caption_prefix: '',
+        };
 
         let postText: string;
 
         if (preApprovedText) {
-          // Use pre-approved/edited content directly — no regeneration needed
           postText = preApprovedText;
           console.log(`[Post] Action ${action_id} using pre-approved content`);
         } else {
-          // Generate content
           const generated = await generatePostContent(agent, platform as Platform);
 
-          // Check if needs review (guardrail flag OR agent requires approval)
           if (generated.needsReview || agent.approval_mode === 'review') {
             await query(
               `UPDATE agent_actions SET status = 'review', content_text = $1,
-               guardrail_score = $2, guardrail_notes = $3 WHERE id = $4`,
-              [generated.text, generated.guardrailScore, generated.flaggedTerms.join(', '), action_id],
+               guardrail_score = $2, guardrail_notes = $3, media_file_id = $4 WHERE id = $5`,
+              [generated.text, generated.guardrailScore, generated.flaggedTerms.join(', '), mediaFileId, action_id],
             );
             console.log(`[Post] Action ${action_id} sent to review (score: ${generated.guardrailScore})`);
             return;
           }
-          postText = generated.text;
+
+          // Resolve file description for caption_source='file_description'
+          let fileDesc: string | null = null;
+          if (mediaFileId && ms.caption_source === 'file_description') {
+            const f = await queryOne<MediaFile>('SELECT description FROM media_files WHERE id = $1', [mediaFileId]);
+            fileDesc = f?.description ?? null;
+          }
+
+          postText = buildPostText(
+            generated.text,
+            ms,
+            fileDesc,
+          );
         }
 
         // Post to platform
         let result: { id: string; url: string };
 
         switch (platform) {
-          case 'twitter':
-            result = await postToTwitter(token, postText);
+          case 'twitter': {
+            let twitterMediaId: string | undefined;
+
+            if (mediaFileId) {
+              try {
+                twitterMediaId = await resolveTwitterMedia(token, mediaFileId) ?? undefined;
+              } catch (mediaErr: any) {
+                console.error(`[Post] Media upload failed, posting text-only: ${mediaErr.message}`);
+              }
+            }
+
+            // If caption_source='none' and no body text, need at least an empty string
+            // Twitter requires text unless media_id is present; send empty string if media-only
+            const finalText = ms.include_body_text ? postText : (twitterMediaId ? '' : postText);
+            result = await postToTwitter(token, finalText || postText, twitterMediaId);
             break;
+          }
 
           case 'reddit': {
-            // Pick a subreddit
             const subreddit = agent.subreddit_targets[Math.floor(Math.random() * agent.subreddit_targets.length)] || 'test';
-            // Split: first line = title, rest = body
             const lines = postText.split('\n');
             const title = lines[0].substring(0, 100);
             const body = lines.slice(1).join('\n') || postText;
@@ -132,38 +364,33 @@ export function startPostProcessor() {
             throw new Error(`Posting to ${platform} not yet implemented`);
         }
 
-        // Update action as published
         await query(
           `UPDATE agent_actions SET status = 'published', content_text = $1,
-           platform_post_id = $2, platform_url = $3, executed_at = now() WHERE id = $4`,
-          [postText, result.id, result.url, action_id],
+           platform_post_id = $2, platform_url = $3, media_file_id = $4, executed_at = now() WHERE id = $5`,
+          [postText, result.id, result.url, mediaFileId, action_id],
         );
 
-        // Update agent stats
         await query(
           `UPDATE agents SET posts_made = posts_made + 1, last_active_at = now() WHERE id = $1`,
           [agent_id],
         );
 
-        console.log(`[Post] Published to ${platform}: ${result.url}`);
+        console.log(`[Post] Published to ${platform}: ${result.url}${mediaFileId ? ' (with media)' : ''}`);
 
       } catch (err: any) {
         console.error(`[Post] Failed action ${action_id}:`, err.message);
-
-        // Update action as failed
         await query(
           `UPDATE agent_actions SET status = 'failed', error_message = $1,
            retry_count = retry_count + 1, executed_at = now() WHERE id = $2`,
           [err.message, action_id],
         );
-
-        throw err; // Let BullMQ handle retry
+        throw err;
       }
     },
     {
       connection: redis,
       concurrency: 3,
-      limiter: { max: 5, duration: 60_000 }, // max 5 posts per minute
+      limiter: { max: 5, duration: 60_000 },
     },
   );
 

@@ -6,7 +6,14 @@
 
 export type Platform = 'twitter' | 'reddit' | 'youtube' | 'tiktok' | 'facebook' | 'instagram';
 
-export type ScheduleType = 'random' | 'interval' | 'cron' | 'set_times';
+export type ScheduleType =
+  | 'random'
+  | 'interval'
+  | 'cron'
+  | 'set_times'
+  | 'peak_hours'
+  | 'burst'
+  | 'business_hours';
 
 export type ApprovalMode = 'auto' | 'review' | 'auto_with_guardrails';
 
@@ -87,6 +94,23 @@ export interface MediaFile {
   url?: string;
 }
 
+// ---------- Media Settings ----------
+
+export interface MediaSettings {
+  /** How to cycle through folder media */
+  order: 'random' | 'sequential';
+  /** How often to attach media to posts */
+  frequency: 'always' | 'sometimes' | 'never';
+  /** When frequency='sometimes', percent chance (1–100) to attach media */
+  frequency_pct: number;
+  /** Whether to also include AI-generated body text alongside the media */
+  include_body_text: boolean;
+  /** Where the post text/caption comes from when media is attached */
+  caption_source: 'ai_generated' | 'file_description' | 'none';
+  /** Static text prepended to every post that includes media */
+  caption_prefix: string;
+}
+
 // ---------- Agent ----------
 
 export interface Agent {
@@ -117,6 +141,9 @@ export interface Agent {
   dm_max_per_day: number;
   media_pool_ids: string[];
   remaining_media: string[];
+  media_folder_id: string | null;
+  media_settings: MediaSettings;
+  media_last_file_id: string | null;
   posts_made: number;
   replies_sent: number;
   dms_sent: number;

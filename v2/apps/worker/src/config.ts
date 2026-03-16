@@ -26,7 +26,7 @@ export const config = {
   s3: {
     accessKey: required('S3_ACCESS_KEY'),
     secretKey: required('S3_ACCESS_SECRET'),
-    bucket: optional('S3_BUCKET', 'onlyposts-media'),
+    bucket: optional('S3_BUCKET', 'poolpartys3'),
     region: optional('S3_REGION', 'us-east-2'),
   },
   twitter: {

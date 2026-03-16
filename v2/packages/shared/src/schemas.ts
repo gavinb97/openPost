@@ -24,7 +24,7 @@ export const CreateAgentSchema = z.object({
   description: z.string().max(500).optional(),
   personality_prompt: z.string().max(2000).optional(),
   model: z.enum(['gpt-4o', 'gpt-4o-mini', 'gpt-4-turbo']).optional(),
-  schedule_type: z.enum(['random', 'interval', 'cron', 'set_times']).optional(),
+  schedule_type: z.enum(['random', 'interval', 'cron', 'set_times', 'peak_hours', 'burst', 'business_hours']).optional(),
   schedule_config: z.record(z.unknown()).optional(),
   approval_mode: z.enum(['auto', 'review', 'auto_with_guardrails']).optional(),
   auto_post: z.boolean().optional(),
@@ -53,6 +53,15 @@ export const CreateAgentSchema = z.object({
   dm_template: z.string().max(5000).optional(),
   dm_max_per_day: z.number().int().min(1).max(500).optional(),
   media_pool_ids: z.array(z.string().uuid()).optional(),
+  media_folder_id: z.string().uuid().nullable().optional(),
+  media_settings: z.object({
+    order: z.enum(['random', 'sequential']).optional(),
+    frequency: z.enum(['always', 'sometimes', 'never']).optional(),
+    frequency_pct: z.number().int().min(1).max(100).optional(),
+    include_body_text: z.boolean().optional(),
+    caption_source: z.enum(['ai_generated', 'file_description', 'none']).optional(),
+    caption_prefix: z.string().max(500).optional(),
+  }).optional(),
 });
 
 export const UpdateAgentSchema = CreateAgentSchema.partial();
@@ -64,7 +73,7 @@ export const CreateJobSchema = z.object({
   platform: z.enum(['twitter', 'reddit', 'youtube', 'tiktok', 'facebook', 'instagram']),
   platform_account_id: z.string().uuid(),
   agent_id: z.string().uuid().optional(),
-  schedule_type: z.enum(['random', 'interval', 'cron', 'set_times']).optional(),
+  schedule_type: z.enum(['random', 'interval', 'cron', 'set_times', 'peak_hours', 'burst', 'business_hours']).optional(),
   schedule_config: z.record(z.unknown()).optional(),
   content_config: z.record(z.unknown()).optional(),
   media_config: z.record(z.unknown()).optional(),
