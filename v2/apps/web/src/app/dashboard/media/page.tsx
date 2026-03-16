@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { mediaApi } from '@/lib/api';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Spinner, EmptyState } from '@/components/ui/spinner';
@@ -10,6 +9,8 @@ import { formatRelative } from '@/lib/utils';
 import { toast } from 'sonner';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
+
+type FolderFilter = string | null | 'none'; // null=all, 'none'=unorganized, uuid=folder
 
 interface MediaFolder {
   id: string;
@@ -32,12 +33,13 @@ interface MediaItem {
 
 interface FolderSidebarProps {
   folders: MediaFolder[];
-  selectedFolder: string | null;
-  onSelect: (id: string | null) => void;
+  selectedFolder: FolderFilter;
+  onSelect: (id: FolderFilter) => void;
   onFolderCreated: (f: MediaFolder) => void;
   onFolderUpdated: (f: MediaFolder) => void;
   onFolderDeleted: (id: string) => void;
   totalFiles: number;
+  unorganizedCount: number;
 }
 
 function FolderSidebar({
@@ -48,6 +50,7 @@ function FolderSidebar({
   onFolderUpdated,
   onFolderDeleted,
   totalFiles,
+  unorganizedCount,
 }: FolderSidebarProps) {
   const [creating, setCreating] = useState(false);
   const [newName, setNewName] = useState('');
@@ -59,13 +62,8 @@ function FolderSidebar({
   const newNameRef = useRef<HTMLInputElement>(null);
   const editNameRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    if (creating) newNameRef.current?.focus();
-  }, [creating]);
-
-  useEffect(() => {
-    if (editingId) editNameRef.current?.focus();
-  }, [editingId]);
+  useEffect(() => { if (creating) newNameRef.current?.focus(); }, [creating]);
+  useEffect(() => { if (editingId) editNameRef.current?.focus(); }, [editingId]);
 
   const handleCreate = async () => {
     const name = newName.trim();
@@ -102,7 +100,7 @@ function FolderSidebar({
   };
 
   const handleDelete = async (id: string, name: string) => {
-    if (!confirm(`Delete folder "${name}"? Files will move to All Files.`)) return;
+    if (!confirm(`Delete folder "${name}"? Files will move to Unorganized.`)) return;
     try {
       await mediaApi.deleteFolder(id);
       onFolderDeleted(id);
@@ -119,17 +117,14 @@ function FolderSidebar({
     setEditLabel(f.label || '');
   };
 
+  const btnBase = 'flex items-center justify-between px-3 py-2 rounded-xl text-sm transition-colors w-full text-left';
+  const active = 'bg-white/[0.08] text-foreground font-medium';
+  const inactive = 'text-muted-foreground hover:bg-white/[0.04] hover:text-foreground';
+
   return (
     <div className="w-64 flex-shrink-0 flex flex-col gap-1">
       {/* All Files */}
-      <button
-        onClick={() => onSelect(null)}
-        className={`flex items-center justify-between px-3 py-2 rounded-xl text-sm transition-colors ${
-          selectedFolder === null
-            ? 'bg-white/[0.08] text-foreground font-medium'
-            : 'text-muted-foreground hover:bg-white/[0.04] hover:text-foreground'
-        }`}
-      >
+      <button onClick={() => onSelect(null)} className={`${btnBase} ${selectedFolder === null ? active : inactive}`}>
         <span className="flex items-center gap-2">
           <span>⊞</span>
           <span>All Files</span>
@@ -137,10 +132,19 @@ function FolderSidebar({
         <span className="text-xs font-mono text-muted-foreground">{totalFiles}</span>
       </button>
 
-      {/* Divider */}
-      {folders.length > 0 && (
-        <div className="border-t border-white/[0.06] my-1" />
+      {/* Unorganized */}
+      {unorganizedCount > 0 && (
+        <button onClick={() => onSelect('none')} className={`${btnBase} ${selectedFolder === 'none' ? active : inactive}`}>
+          <span className="flex items-center gap-2">
+            <span className="text-amber-400/80">◈</span>
+            <span>Unorganized</span>
+          </span>
+          <span className="text-xs font-mono text-amber-400/70">{unorganizedCount}</span>
+        </button>
       )}
+
+      {/* Divider */}
+      {folders.length > 0 && <div className="border-t border-white/[0.06] my-1" />}
 
       {/* Folder list */}
       {folders.map((f) =>
@@ -180,9 +184,7 @@ function FolderSidebar({
           <div
             key={f.id}
             className={`group flex items-center justify-between px-3 py-2 rounded-xl text-sm cursor-pointer transition-colors ${
-              selectedFolder === f.id
-                ? 'bg-white/[0.08] text-foreground font-medium'
-                : 'text-muted-foreground hover:bg-white/[0.04] hover:text-foreground'
+              selectedFolder === f.id ? active : inactive
             }`}
             onClick={() => onSelect(f.id)}
           >
@@ -272,20 +274,19 @@ interface MediaCardProps {
   item: MediaItem;
   folders: MediaFolder[];
   index: number;
+  showMoveFooter?: boolean;
   onDelete: (id: string) => void;
   onRenamed: (id: string, name: string) => void;
   onMoved: (id: string, folder_id: string | null) => void;
 }
 
-function MediaCard({ item, folders, index, onDelete, onRenamed, onMoved }: MediaCardProps) {
+function MediaCard({ item, folders, index, showMoveFooter, onDelete, onRenamed, onMoved }: MediaCardProps) {
   const [renaming, setRenaming] = useState(false);
   const [nameVal, setNameVal] = useState(item.original_name);
   const [moving, setMoving] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    if (renaming) inputRef.current?.focus();
-  }, [renaming]);
+  useEffect(() => { if (renaming) inputRef.current?.focus(); }, [renaming]);
 
   const saveRename = async () => {
     const name = nameVal.trim();
@@ -307,13 +308,14 @@ function MediaCard({ item, folders, index, onDelete, onRenamed, onMoved }: Media
     try {
       await mediaApi.moveFile(item.id, folder_id);
       onMoved(item.id, folder_id);
-      toast.success(folder_id ? 'Moved to folder' : 'Moved to All Files');
+      toast.success(folder_id ? 'Moved to folder' : 'Moved to Unorganized');
     } catch {
       toast.error('Failed to move file');
     }
   };
 
   const isImage = item.mime_type?.startsWith('image/');
+  const isVideo = item.mime_type?.startsWith('video/');
 
   return (
     <div
@@ -321,12 +323,22 @@ function MediaCard({ item, folders, index, onDelete, onRenamed, onMoved }: Media
       style={{ animationDelay: `${index * 0.03}s` }}
     >
       {/* Thumbnail */}
-      <div className="aspect-square bg-white/[0.02] relative">
+      <div className="aspect-square bg-black/20 relative overflow-hidden">
         {isImage ? (
           <img
             src={item.url}
             alt={item.original_name}
             className="w-full h-full object-cover"
+          />
+        ) : isVideo ? (
+          <video
+            src={item.url}
+            preload="metadata"
+            muted
+            playsInline
+            className="w-full h-full object-cover"
+            onMouseEnter={(e) => { (e.currentTarget as HTMLVideoElement).play().catch(() => {}); }}
+            onMouseLeave={(e) => { const v = e.currentTarget as HTMLVideoElement; v.pause(); v.currentTime = 0; }}
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-3xl text-muted-foreground">
@@ -334,39 +346,48 @@ function MediaCard({ item, folders, index, onDelete, onRenamed, onMoved }: Media
           </div>
         )}
 
+        {/* Video badge */}
+        {isVideo && (
+          <div className="absolute top-2 left-2 bg-black/60 rounded px-1.5 py-0.5 text-[9px] font-mono text-white/70 backdrop-blur-sm">
+            VIDEO
+          </div>
+        )}
+
         {/* Hover overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-end pb-3 gap-1.5 px-2">
-          {/* Move to folder */}
-          <div className="relative w-full">
-            {moving ? (
-              <div className="absolute bottom-full mb-1 left-0 right-0 bg-zinc-900 border border-white/[0.10] rounded-xl overflow-hidden z-10 shadow-xl">
-                <button
-                  onClick={() => handleMove(null)}
-                  className="w-full text-left px-3 py-1.5 text-xs hover:bg-white/[0.06] text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  All Files
-                </button>
-                {folders.map((f) => (
+          {/* Move to folder (hover) — only shown when NOT already showing footer move */}
+          {!showMoveFooter && (
+            <div className="relative w-full">
+              {moving ? (
+                <div className="absolute bottom-full mb-1 left-0 right-0 bg-zinc-900 border border-white/[0.10] rounded-xl overflow-hidden z-10 shadow-xl">
                   <button
-                    key={f.id}
-                    onClick={() => handleMove(f.id)}
-                    className="w-full text-left px-3 py-1.5 text-xs hover:bg-white/[0.06] text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5"
+                    onClick={() => handleMove(null)}
+                    className="w-full text-left px-3 py-1.5 text-xs hover:bg-white/[0.06] text-muted-foreground hover:text-foreground transition-colors"
                   >
-                    <span>▣</span>
-                    <span className="truncate">{f.name}</span>
+                    Remove from folder
                   </button>
-                ))}
-              </div>
-            ) : null}
-            <Button
-              size="sm"
-              variant="outline"
-              className="w-full h-6 text-[10px]"
-              onClick={() => setMoving((v) => !v)}
-            >
-              Move to folder
-            </Button>
-          </div>
+                  {folders.map((f) => (
+                    <button
+                      key={f.id}
+                      onClick={() => handleMove(f.id)}
+                      className="w-full text-left px-3 py-1.5 text-xs hover:bg-white/[0.06] text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5"
+                    >
+                      <span>▣</span>
+                      <span className="truncate">{f.name}</span>
+                    </button>
+                  ))}
+                </div>
+              ) : null}
+              <Button
+                size="sm"
+                variant="outline"
+                className="w-full h-6 text-[10px]"
+                onClick={() => setMoving((v) => !v)}
+              >
+                Move to folder
+              </Button>
+            </div>
+          )}
 
           <div className="flex gap-1.5 w-full">
             <Button
@@ -388,14 +409,13 @@ function MediaCard({ item, folders, index, onDelete, onRenamed, onMoved }: Media
           </div>
         </div>
 
-        {/* Close move dropdown on outside click */}
-        {moving && (
+        {moving && !showMoveFooter && (
           <div className="fixed inset-0 z-[9]" onClick={() => setMoving(false)} />
         )}
       </div>
 
       {/* Footer */}
-      <div className="p-3">
+      <div className="p-3 space-y-2">
         {renaming ? (
           <input
             ref={inputRef}
@@ -417,9 +437,39 @@ function MediaCard({ item, folders, index, onDelete, onRenamed, onMoved }: Media
             {item.original_name}
           </p>
         )}
-        <p className="text-[10px] text-muted-foreground font-mono mt-0.5">
+        <p className="text-[10px] text-muted-foreground font-mono">
           {formatRelative(item.created_at)}
         </p>
+
+        {/* Persistent move-to-folder row for unorganized view */}
+        {showMoveFooter && folders.length > 0 && (
+          <div className="relative pt-1 border-t border-white/[0.05]">
+            {moving ? (
+              <div className="absolute bottom-full mb-1 left-0 right-0 bg-zinc-900 border border-white/[0.10] rounded-xl overflow-hidden z-10 shadow-xl">
+                {folders.map((f) => (
+                  <button
+                    key={f.id}
+                    onClick={() => handleMove(f.id)}
+                    className="w-full text-left px-3 py-1.5 text-xs hover:bg-white/[0.06] text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5"
+                  >
+                    <span>▣</span>
+                    <span className="truncate">{f.name}</span>
+                  </button>
+                ))}
+              </div>
+            ) : null}
+            <button
+              onClick={() => setMoving((v) => !v)}
+              className="w-full flex items-center justify-between text-[10px] text-amber-400/70 hover:text-amber-400 transition-colors"
+            >
+              <span>Move to folder →</span>
+              <span>▾</span>
+            </button>
+            {moving && (
+              <div className="fixed inset-0 z-[9]" onClick={() => setMoving(false)} />
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -430,26 +480,37 @@ function MediaCard({ item, folders, index, onDelete, onRenamed, onMoved }: Media
 export default function MediaPage() {
   const [media, setMedia] = useState<MediaItem[]>([]);
   const [total, setTotal] = useState(0);
+  const [unorganizedCount, setUnorganizedCount] = useState(0);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
 
   const [folders, setFolders] = useState<MediaFolder[]>([]);
-  const [selectedFolder, setSelectedFolder] = useState<string | null>(null);
+  const [selectedFolder, setSelectedFolder] = useState<FolderFilter>(null);
 
   // Load folders on mount
   useEffect(() => {
     mediaApi.listFolders().then((res) => setFolders(res.folders)).catch(() => {});
   }, []);
 
+  // Keep unorganized count fresh whenever we're not viewing unorganized
+  const refreshUnorganizedCount = useCallback(async () => {
+    try {
+      const res = await mediaApi.list({ page: 1, limit: 1, folder_id: 'none' } as any);
+      setUnorganizedCount(res.total);
+    } catch {}
+  }, []);
+
+  useEffect(() => { refreshUnorganizedCount(); }, [refreshUnorganizedCount]);
+
   const load = useCallback(async (resetPage = false) => {
     const p = resetPage ? 1 : page;
     setLoading(true);
     try {
       const params: any = { page: p };
-      if (selectedFolder === null) {
-        // no filter — all files
-      } else {
+      if (selectedFolder === 'none') {
+        params.folder_id = 'none';
+      } else if (selectedFolder !== null) {
         params.folder_id = selectedFolder;
       }
       const res = await mediaApi.list(params);
@@ -465,8 +526,7 @@ export default function MediaPage() {
 
   useEffect(() => { load(); }, [load]);
 
-  // Reload from page 1 when folder selection changes
-  const handleSelectFolder = (id: string | null) => {
+  const handleSelectFolder = (id: FolderFilter) => {
     setSelectedFolder(id);
     setPage(1);
     setMedia([]);
@@ -483,7 +543,7 @@ export default function MediaPage() {
           filename: file.name,
           mime_type: file.type,
           size_bytes: file.size,
-          folder_id: selectedFolder ?? undefined,
+          folder_id: (selectedFolder && selectedFolder !== 'none') ? selectedFolder : undefined,
         });
         await fetch(uploadRes.upload_url, {
           method: 'PUT',
@@ -495,11 +555,12 @@ export default function MediaPage() {
           original_name: file.name,
           mime_type: file.type,
           size_bytes: file.size,
-          folder_id: selectedFolder ?? undefined,
+          folder_id: (selectedFolder && selectedFolder !== 'none') ? selectedFolder : undefined,
         });
       }
       toast.success(`Uploaded ${files.length} file(s)`);
       load(true);
+      refreshUnorganizedCount();
     } catch (err: any) {
       toast.error(err.message || 'Upload failed');
     } finally {
@@ -514,6 +575,7 @@ export default function MediaPage() {
       await mediaApi.delete(id);
       setMedia((prev) => prev.filter((m) => m.id !== id));
       setTotal((t) => t - 1);
+      if (selectedFolder === 'none') setUnorganizedCount((c) => c - 1);
       toast.success('Deleted');
     } catch {
       toast.error('Failed to delete');
@@ -525,16 +587,31 @@ export default function MediaPage() {
   };
 
   const handleMoved = (id: string, folder_id: string | null) => {
-    // If viewing a specific folder, remove the card when it moves away
     if (selectedFolder !== null) {
+      // Remove from current filtered view when file leaves it
       setMedia((prev) => prev.filter((m) => m.id !== id));
       setTotal((t) => t - 1);
+      if (selectedFolder === 'none') setUnorganizedCount((c) => c - 1);
     } else {
       setMedia((prev) => prev.map((m) => (m.id === id ? { ...m, folder_id } : m)));
     }
+    refreshUnorganizedCount();
   };
 
   const activeFolder = folders.find((f) => f.id === selectedFolder);
+  const isUnorganizedView = selectedFolder === 'none';
+
+  const headingText = isUnorganizedView
+    ? 'Unorganized'
+    : activeFolder
+    ? activeFolder.name
+    : 'Media Library';
+
+  const subText = isUnorganizedView
+    ? `${total} files without a folder — move them to keep things tidy`
+    : activeFolder
+    ? `${total} files in this folder`
+    : `${total} files · Upload images and videos for your agents`;
 
   return (
     <div className="flex gap-6 h-full">
@@ -545,9 +622,10 @@ export default function MediaPage() {
           selectedFolder={selectedFolder}
           onSelect={handleSelectFolder}
           totalFiles={total}
+          unorganizedCount={unorganizedCount}
           onFolderCreated={(f) => setFolders((prev) => [...prev, f])}
           onFolderUpdated={(f) => setFolders((prev) => prev.map((x) => (x.id === f.id ? f : x)))}
-          onFolderDeleted={(id) => setFolders((prev) => prev.filter((x) => x.id !== id))}
+          onFolderDeleted={(id) => { setFolders((prev) => prev.filter((x) => x.id !== id)); refreshUnorganizedCount(); }}
         />
       </div>
 
@@ -556,12 +634,12 @@ export default function MediaPage() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-display font-bold">
-              {activeFolder ? activeFolder.name : 'Media Library'}
+            <h1 className="text-3xl font-display font-bold flex items-center gap-2">
+              {isUnorganizedView && <span className="text-amber-400/80">◈</span>}
+              {headingText}
             </h1>
             <p className="text-muted-foreground mt-1">
-              <span className="font-mono text-foreground">{total}</span>{' '}
-              {selectedFolder !== null ? 'files in this folder' : 'files · Upload images and videos for your agents'}
+              {subText}
               {activeFolder?.label && (
                 <Badge variant="secondary" className="ml-2 text-xs">{activeFolder.label}</Badge>
               )}
@@ -591,21 +669,36 @@ export default function MediaPage() {
           </div>
         ) : media.length === 0 ? (
           <EmptyState
-            icon="▣"
-            title={selectedFolder !== null ? 'No files in this folder' : 'No media uploaded'}
+            icon={isUnorganizedView ? '◈' : '▣'}
+            title={
+              isUnorganizedView
+                ? 'All files are organized!'
+                : selectedFolder !== null
+                ? 'No files in this folder'
+                : 'No media uploaded'
+            }
             description={
-              selectedFolder !== null
+              isUnorganizedView
+                ? 'Every file is in a folder. Nice work.'
+                : selectedFolder !== null
                 ? 'Upload files or move existing files here.'
                 : 'Upload images and videos to use in your agent posts.'
             }
             action={
-              <Button variant="glow" asChild>
-                <label htmlFor="media-upload" className="cursor-pointer">Upload Media</label>
-              </Button>
+              !isUnorganizedView ? (
+                <Button variant="glow" asChild>
+                  <label htmlFor="media-upload" className="cursor-pointer">Upload Media</label>
+                </Button>
+              ) : undefined
             }
           />
         ) : (
           <>
+            {isUnorganizedView && (
+              <div className="rounded-xl border border-amber-400/20 bg-amber-400/[0.03] px-4 py-3 text-sm text-amber-300/80">
+                These files have no folder. Use the <span className="font-medium text-amber-300">Move to folder →</span> button on each card to organize them.
+              </div>
+            )}
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
               {media.map((item, i) => (
                 <MediaCard
@@ -613,6 +706,7 @@ export default function MediaPage() {
                   item={item}
                   folders={folders}
                   index={i}
+                  showMoveFooter={isUnorganizedView}
                   onDelete={handleDelete}
                   onRenamed={handleRenamed}
                   onMoved={handleMoved}
