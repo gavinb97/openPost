@@ -50,7 +50,7 @@ export const CreateAgentSchema = z.object({
   subreddit_targets: z.array(z.string()).optional(),
   hashtag_targets: z.array(z.string()).optional(),
   topic_keywords: z.array(z.string()).optional(),
-  dm_template: z.string().max(5000).optional(),
+  dm_template: z.string().max(5000).nullable().optional(),
   dm_max_per_day: z.number().int().min(1).max(500).optional(),
   media_pool_ids: z.array(z.string().uuid()).optional(),
   media_folder_id: z.string().uuid().nullable().optional(),
