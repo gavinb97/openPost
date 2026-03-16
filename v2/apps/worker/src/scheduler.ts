@@ -234,13 +234,6 @@ async function checkRateLimit(platform: Platform, accountId: string, actionType:
   return count < limit;
 }
 
-async function recordAction(platform: string, accountId: string, actionType: string): Promise<void> {
-  const key = `prl:${platform}:${accountId}:${actionType}`;
-  const now = Date.now();
-  await redis.zadd(key, now.toString(), `${now}:${Math.random()}`);
-  await redis.expire(key, 86_400);
-}
-
 // ============================================================
 // ACCOUNT + MEDIA PICKERS
 // ============================================================
@@ -366,7 +359,6 @@ async function scheduleAction(
     case 'research_post': await researchQueue.add(`research:${action.id}`, jobData, opts); break;
   }
 
-  await recordAction(account.platform, account.id, actionType);
   const fireStr = fireAt.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
   console.log(`[Scheduler] Queued ${actionType} for "${agent.name}" → @${account.handle} | fires ${fireStr} (+${Math.round(delayMs/1000)}s)`);
 }

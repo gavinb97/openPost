@@ -433,6 +433,12 @@ export function startPostProcessor() {
           [agent_id],
         );
 
+        // Record against rate limit only on actual publish (not at schedule time)
+        const rlKey = `prl:${platform}:${platform_account_id}:post`;
+        const rlNow = Date.now();
+        await redis.zadd(rlKey, rlNow.toString(), `${rlNow}:${Math.random()}`);
+        await redis.expire(rlKey, 86_400);
+
         console.log(`[Post] Published to ${platform}: ${result.url}${resolvedMediaId ? ' (with media)' : mediaFileId ? ' (media upload failed, text-only)' : ''}`);
 
       } catch (err: any) {
