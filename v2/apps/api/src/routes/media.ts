@@ -22,6 +22,7 @@ const s3 = new S3Client({
     accessKeyId: config.s3.accessKey,
     secretAccessKey: config.s3.secretKey,
   },
+  requestChecksumCalculation: 'WHEN_REQUIRED',
 });
 
 // ---------- Get presigned upload URL ----------
@@ -36,7 +37,6 @@ mediaRouter.post('/upload-url', asyncHandler(async (req, res) => {
     Bucket: config.s3.bucket,
     Key: key,
     ContentType: data.mime_type,
-    ContentLength: data.size_bytes,
   });
 
   const url = await getSignedUrl(s3, command, { expiresIn: 3600 });
