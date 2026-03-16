@@ -80,13 +80,9 @@ async function uploadToTwitter(
   const uploadUrl = 'https://upload.twitter.com/1.1/media/upload.json';
 
   // ── INIT ──
-  const initForm = new URLSearchParams({
-    command: 'INIT',
-    total_bytes: String(totalBytes),
-    media_type: mimeType,
-    media_category: mediaCategory,
-  });
-  const initHeader = await twitterOAuthHeader(token, uploadUrl, 'POST');
+  const initParams = { command: 'INIT', total_bytes: String(totalBytes), media_type: mimeType, media_category: mediaCategory };
+  const initForm = new URLSearchParams(initParams);
+  const initHeader = await twitterOAuthHeader(token, uploadUrl, 'POST', initParams);
   const initRes = await fetch(uploadUrl, {
     method: 'POST',
     headers: { ...initHeader, 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -127,8 +123,9 @@ async function uploadToTwitter(
   }
 
   // ── FINALIZE ──
-  const finalizeForm = new URLSearchParams({ command: 'FINALIZE', media_id: mediaId });
-  const finalizeHeader = await twitterOAuthHeader(token, uploadUrl, 'POST');
+  const finalizeParams = { command: 'FINALIZE', media_id: mediaId };
+  const finalizeForm = new URLSearchParams(finalizeParams);
+  const finalizeHeader = await twitterOAuthHeader(token, uploadUrl, 'POST', finalizeParams);
   const finalizeRes = await fetch(uploadUrl, {
     method: 'POST',
     headers: { ...finalizeHeader, 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -153,7 +150,8 @@ async function pollTwitterMediaProcessing(
 ): Promise<void> {
   const deadline = Date.now() + maxWaitMs;
   while (Date.now() < deadline) {
-    const statusHeader = await twitterOAuthHeader(token, uploadUrl, 'GET');
+    const statusParams = { command: 'STATUS', media_id: mediaId };
+    const statusHeader = await twitterOAuthHeader(token, uploadUrl, 'GET', statusParams);
     const statusRes = await fetch(
       `${uploadUrl}?command=STATUS&media_id=${mediaId}`,
       { headers: statusHeader },
@@ -383,14 +381,13 @@ export function startPostProcessor() {
 
         // Post to platform
         let result: { id: string; url: string };
+        let resolvedMediaId: string | undefined;
 
         switch (platform) {
           case 'twitter': {
-            let twitterMediaId: string | undefined;
-
             if (mediaFileId) {
               try {
-                twitterMediaId = await resolveTwitterMedia(token, mediaFileId) ?? undefined;
+                resolvedMediaId = await resolveTwitterMedia(token, mediaFileId) ?? undefined;
               } catch (mediaErr: any) {
                 console.error(`[Post] Media upload failed, posting text-only: ${mediaErr.message}`);
               }
@@ -398,8 +395,8 @@ export function startPostProcessor() {
 
             // If caption_source='none' and no body text, need at least an empty string
             // Twitter requires text unless media_id is present; send empty string if media-only
-            const finalText = ms.include_body_text ? postText : (twitterMediaId ? '' : postText);
-            result = await postToTwitter(token, finalText || postText, twitterMediaId);
+            const finalText = ms.include_body_text ? postText : (resolvedMediaId ? '' : postText);
+            result = await postToTwitter(token, finalText || postText, resolvedMediaId);
             break;
           }
 
@@ -427,7 +424,7 @@ export function startPostProcessor() {
           [agent_id],
         );
 
-        console.log(`[Post] Published to ${platform}: ${result.url}${mediaFileId ? ' (with media)' : ''}`);
+        console.log(`[Post] Published to ${platform}: ${result.url}${resolvedMediaId ? ' (with media)' : mediaFileId ? ' (media upload failed, text-only)' : ''}`);
 
       } catch (err: any) {
         console.error(`[Post] Failed action ${action_id}:`, err.message);

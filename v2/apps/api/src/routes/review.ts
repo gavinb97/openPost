@@ -3,11 +3,20 @@
 // ============================================================
 
 import { Router } from 'express';
+import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { query, queryOne } from '../db';
 import { requireAuth } from '../middleware/auth';
 import { asyncHandler, AppError } from '../middleware/errorHandler';
 import { ReviewActionSchema, BulkReviewSchema } from '@onlyposts/shared';
 import { queueForAction } from '../queues';
+import { config } from '../config';
+
+const s3 = new S3Client({
+  region: config.s3.region,
+  credentials: { accessKeyId: config.s3.accessKey, secretAccessKey: config.s3.secretKey },
+  requestChecksumCalculation: 'WHEN_REQUIRED',
+});
 
 export const reviewRouter = Router();
 reviewRouter.use(requireAuth);
@@ -19,11 +28,13 @@ reviewRouter.get('/', asyncHandler(async (req, res) => {
   const limit = Math.min(parseInt(req.query.limit as string) || 20, 100);
   const offset = (page - 1) * limit;
 
-  const items = await query(
-    `SELECT aa.*, a.name as agent_name, pa.handle as account_handle, pa.platform
+  const items = await query<any>(
+    `SELECT aa.*, a.name as agent_name, pa.handle as account_handle, pa.platform,
+            mf.s3_key as media_s3_key, mf.s3_bucket as media_s3_bucket, mf.mime_type as media_mime_type
      FROM agent_actions aa
      JOIN agents a ON a.id = aa.agent_id
      LEFT JOIN platform_accounts pa ON pa.id = aa.platform_account_id
+     LEFT JOIN media_files mf ON mf.id = aa.media_file_id
      WHERE a.user_id = $1 AND aa.status = 'review'
      ORDER BY aa.created_at ASC
      LIMIT $2 OFFSET $3`,
@@ -37,10 +48,20 @@ reviewRouter.get('/', asyncHandler(async (req, res) => {
     [req.user!.userId],
   );
 
+  // Generate presigned URLs for actions with media
+  const actionsWithMedia = await Promise.all(
+    items.map(async (item) => {
+      if (!item.media_s3_key) return item;
+      const cmd = new GetObjectCommand({ Bucket: item.media_s3_bucket, Key: item.media_s3_key });
+      const media_url = await getSignedUrl(s3, cmd, { expiresIn: 3600 });
+      return { ...item, media_url };
+    }),
+  );
+
   res.json({
     ok: true,
     data: {
-      actions: items,
+      actions: actionsWithMedia,
       total: parseInt(count),
       page,
       limit,

@@ -178,6 +178,25 @@ export default function ReviewPage() {
                     </div>
                   )}
 
+                  {/* Media preview */}
+                  {action.media_url && (
+                    <div className="rounded-xl overflow-hidden border border-white/[0.06] bg-black/20">
+                      {action.media_mime_type?.startsWith('video/') ? (
+                        <video
+                          src={action.media_url}
+                          controls
+                          className="max-h-64 w-full object-contain"
+                        />
+                      ) : (
+                        <img
+                          src={action.media_url}
+                          alt="Attached media"
+                          className="max-h-64 w-full object-contain"
+                        />
+                      )}
+                    </div>
+                  )}
+
                   {/* Content — editable (not shown for engage actions like retweet/like) */}
                   {action.action_type !== 'retweet' && action.action_type !== 'like' && action.action_type !== 'follow' && (
                     <div className="rounded-xl bg-white/[0.03] border border-white/[0.06] p-4">
