@@ -337,13 +337,14 @@ async function scheduleAction(
   const [action] = await query<any>(
     `INSERT INTO agent_actions (
       agent_id, platform_account_id, action_type, status,
-      target_post_id, target_user, target_subreddit, scheduled_at
-    ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *`,
+      target_post_id, target_user, target_subreddit, media_file_id, scheduled_at
+    ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING *`,
     [
       agent.id, account.id, actionType, 'queued',
       extra.target_post_id ?? null,
       extra.target_user ?? null,
       extra.target_subreddit ?? null,
+      extra.media_file_id ?? null,
       fireAt.toISOString(),
     ],
   );
@@ -489,16 +490,21 @@ async function schedulerTick() {
 // START
 // ============================================================
 
-export function startScheduler() {
-  const worker = new Worker(QUEUES.SCHEDULER, async () => { await schedulerTick(); }, { connection: redis });
+export async function startScheduler() {
+  // Remove any stale repeat jobs from previous worker instances
+  const staleJobs = await schedulerQueue.getRepeatableJobs();
+  for (const job of staleJobs) {
+    await schedulerQueue.removeRepeatableByKey(job.key);
+  }
 
-  // Tick every 60 seconds — next_action_at guard prevents redundant work
-  schedulerQueue.add('tick', {}, {
+  // Re-add exactly one 60s repeat tick
+  await schedulerQueue.add('tick', {}, {
     repeat: { every: 60_000 },
     removeOnComplete: true,
     removeOnFail: 50,
   });
 
+  const worker = new Worker(QUEUES.SCHEDULER, async () => { await schedulerTick(); }, { connection: redis });
   console.log('[Scheduler] Started — 60s tick, guarded by next_action_at');
   return worker;
 }

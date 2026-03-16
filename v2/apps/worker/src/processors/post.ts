@@ -338,7 +338,16 @@ export function startPostProcessor() {
           [action_id],
         );
         const preApprovedText = (job.data as any).override_content || existingAction?.content_text;
-        const mediaFileId: string | null = (job.data as any).media_file_id ?? existingAction?.media_file_id ?? null;
+        let mediaFileId: string | null = (job.data as any).media_file_id ?? existingAction?.media_file_id ?? null;
+
+        // Validate mediaFileId still exists — file may have been deleted after scheduling
+        if (mediaFileId) {
+          const fileExists = await queryOne<{ id: string }>('SELECT id FROM media_files WHERE id = $1', [mediaFileId]);
+          if (!fileExists) {
+            console.warn(`[Post] media_file_id ${mediaFileId} no longer exists in DB, posting without media`);
+            mediaFileId = null;
+          }
+        }
 
         const ms: MediaSettings = (agent as any).media_settings ?? {
           order: 'random', frequency: 'always', frequency_pct: 100,
@@ -433,6 +442,12 @@ export function startPostProcessor() {
            retry_count = retry_count + 1, executed_at = now() WHERE id = $2`,
           [err.message, action_id],
         );
+        // Don't retry on permission/auth errors — they won't resolve with more attempts
+        const msg = err.message ?? '';
+        if (msg.includes('403') || msg.includes('not permitted') || msg.includes('Forbidden') || msg.includes('401') || msg.includes('Could not authenticate')) {
+          console.warn(`[Post] Non-retriable error for action ${action_id}, skipping retries`);
+          return;
+        }
         throw err;
       }
     },
