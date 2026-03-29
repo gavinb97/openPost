@@ -112,6 +112,8 @@ export const mediaApi = {
     api.put<{ media: any }>(`/media/${id}`, { original_name: name }),
   moveFile: (id: string, folder_id: string | null) =>
     api.put<{ media: any }>(`/media/${id}`, { folder_id }),
+  updateMetadata: (id: string, data: { description?: string | null; context_notes?: string | null }) =>
+    api.put<{ media: any }>(`/media/${id}`, data),
   register: (data: { s3_key: string; original_name: string; mime_type: string; size_bytes: number; width?: number; height?: number; duration_seconds?: number; description?: string; categories?: string[]; nsfw?: boolean; folder_id?: string }) =>
     api.post<{ media: any }>('/media/register', data),
   list: (params?: { page?: number; category?: string }) => {

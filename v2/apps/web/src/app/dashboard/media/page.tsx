@@ -27,6 +27,8 @@ interface MediaItem {
   url: string;
   folder_id: string | null;
   created_at: string;
+  description: string | null;
+  context_notes: string | null;
 }
 
 // ─── Folder Sidebar ───────────────────────────────────────────────────────────
@@ -268,6 +270,117 @@ function FolderSidebar({
   );
 }
 
+// ─── Media Info Modal ─────────────────────────────────────────────────────────
+
+interface MediaInfoModalProps {
+  item: MediaItem;
+  onClose: () => void;
+  onSaved: (id: string, description: string | null, context_notes: string | null) => void;
+}
+
+function MediaInfoModal({ item, onClose, onSaved }: MediaInfoModalProps) {
+  const [description, setDescription] = useState(item.description ?? '');
+  const [contextNotes, setContextNotes] = useState(item.context_notes ?? '');
+  const [saving, setSaving] = useState(false);
+
+  const isVideo = item.mime_type?.startsWith('video/');
+  const isImage = item.mime_type?.startsWith('image/');
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      await mediaApi.updateMetadata(item.id, {
+        description: description.trim() || null,
+        context_notes: contextNotes.trim() || null,
+      });
+      onSaved(item.id, description.trim() || null, contextNotes.trim() || null);
+      toast.success('Media info saved');
+      onClose();
+    } catch {
+      toast.error('Failed to save');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+      <div
+        className="relative z-10 w-full max-w-lg rounded-2xl border border-white/[0.10] bg-zinc-950 shadow-2xl overflow-hidden"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Preview strip */}
+        <div className="h-36 bg-black/40 relative overflow-hidden">
+          {isImage && (
+            <img src={item.url} alt={item.original_name} className="w-full h-full object-cover opacity-60" />
+          )}
+          {isVideo && (
+            <video src={item.url} muted preload="metadata" className="w-full h-full object-cover opacity-60" />
+          )}
+          <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 to-transparent" />
+          <div className="absolute bottom-3 left-4 right-12">
+            <p className="text-sm font-medium truncate">{item.original_name}</p>
+            <p className="text-xs text-muted-foreground font-mono mt-0.5">{item.mime_type}</p>
+          </div>
+          <button
+            onClick={onClose}
+            className="absolute top-3 right-3 text-muted-foreground hover:text-foreground transition-colors text-lg leading-none"
+          >
+            ✕
+          </button>
+        </div>
+
+        {/* Fields */}
+        <div className="p-5 space-y-4">
+          {/* How it's used hint */}
+          <div className="rounded-xl border border-primary/20 bg-primary/[0.04] px-3 py-2 text-xs text-primary/70">
+            ✦ When an agent posts this media, it reads these fields to write a relevant caption instead of a generic one.
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+              About this file
+            </label>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              rows={2}
+              placeholder="What is this video/image about? e.g. 'Apple donated $2.3M to Republican PACs in 2024'"
+              className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-white/20 resize-none leading-relaxed"
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+              Talking points
+            </label>
+            <textarea
+              value={contextNotes}
+              onChange={(e) => setContextNotes(e.target.value)}
+              rows={4}
+              placeholder={"Key facts or angles the agent should work into the post:\n• Company spent more on politics than R&D\n• Donations went to candidates who voted against workers\n• Data sourced from FEC filings"}
+              className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-white/20 resize-none leading-relaxed font-mono text-xs"
+            />
+            <p className="text-[10px] text-muted-foreground">
+              Write bullet points, facts, or any context the AI should reference when crafting the tweet.
+            </p>
+          </div>
+
+          <div className="flex gap-2 pt-1">
+            <Button variant="glow" className="flex-1" onClick={handleSave} disabled={saving}>
+              {saving ? <Spinner size="sm" /> : 'Save'}
+            </Button>
+            <Button variant="outline" onClick={onClose}>
+              Cancel
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Media Card ───────────────────────────────────────────────────────────────
 
 interface MediaCardProps {
@@ -278,9 +391,10 @@ interface MediaCardProps {
   onDelete: (id: string) => void;
   onRenamed: (id: string, name: string) => void;
   onMoved: (id: string, folder_id: string | null) => void;
+  onEditInfo: (item: MediaItem) => void;
 }
 
-function MediaCard({ item, folders, index, showMoveFooter, onDelete, onRenamed, onMoved }: MediaCardProps) {
+function MediaCard({ item, folders, index, showMoveFooter, onDelete, onRenamed, onMoved, onEditInfo }: MediaCardProps) {
   const [renaming, setRenaming] = useState(false);
   const [nameVal, setNameVal] = useState(item.original_name);
   const [moving, setMoving] = useState(false);
@@ -394,6 +508,14 @@ function MediaCard({ item, folders, index, showMoveFooter, onDelete, onRenamed, 
               size="sm"
               variant="outline"
               className="flex-1 h-6 text-[10px]"
+              onClick={() => onEditInfo(item)}
+            >
+              ✦ Info
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              className="flex-1 h-6 text-[10px]"
               onClick={() => setRenaming(true)}
             >
               Rename
@@ -487,6 +609,7 @@ export default function MediaPage() {
 
   const [folders, setFolders] = useState<MediaFolder[]>([]);
   const [selectedFolder, setSelectedFolder] = useState<FolderFilter>(null);
+  const [infoItem, setInfoItem] = useState<MediaItem | null>(null);
 
   // Load folders on mount
   useEffect(() => {
@@ -586,6 +709,10 @@ export default function MediaPage() {
     setMedia((prev) => prev.map((m) => (m.id === id ? { ...m, original_name: name } : m)));
   };
 
+  const handleInfoSaved = (id: string, description: string | null, context_notes: string | null) => {
+    setMedia((prev) => prev.map((m) => (m.id === id ? { ...m, description, context_notes } : m)));
+  };
+
   const handleMoved = (id: string, folder_id: string | null) => {
     if (selectedFolder !== null) {
       // Remove from current filtered view when file leaves it
@@ -614,6 +741,7 @@ export default function MediaPage() {
     : `${total} files · Upload images and videos for your agents`;
 
   return (
+    <>
     <div className="flex gap-6 h-full">
       {/* Sidebar */}
       <div className="pt-1">
@@ -710,6 +838,7 @@ export default function MediaPage() {
                   onDelete={handleDelete}
                   onRenamed={handleRenamed}
                   onMoved={handleMoved}
+                  onEditInfo={setInfoItem}
                 />
               ))}
             </div>
@@ -724,5 +853,14 @@ export default function MediaPage() {
         )}
       </div>
     </div>
+
+    {infoItem && (
+      <MediaInfoModal
+        item={infoItem}
+        onClose={() => setInfoItem(null)}
+        onSaved={handleInfoSaved}
+      />
+    )}
+    </>
   );
 }

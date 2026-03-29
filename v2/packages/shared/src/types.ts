@@ -87,6 +87,7 @@ export interface MediaFile {
   height: number | null;
   duration_seconds: number | null;
   description: string | null;
+  context_notes: string | null;
   categories: string[];
   nsfw: boolean;
   created_at: string;

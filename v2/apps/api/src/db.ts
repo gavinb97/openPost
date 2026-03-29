@@ -4,7 +4,7 @@
 
 import { Pool, type PoolClient } from 'pg';
 import { config } from './config';
-
+ 
 export const pool = new Pool({
   connectionString: config.postgres.url,
   max: 20,

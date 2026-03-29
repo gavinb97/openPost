@@ -252,20 +252,22 @@ mediaRouter.put('/:id', asyncHandler(async (req, res) => {
   );
   if (!media) throw new AppError(404, 'Media not found');
 
-  const { original_name, folder_id } = req.body;
+  const { original_name, folder_id, description, context_notes } = req.body;
 
   // folder_id can be null (move to "All Files"), a UUID, or absent (no change)
   const newName = original_name !== undefined ? original_name.trim() : media.original_name;
   const newFolder = Object.prototype.hasOwnProperty.call(req.body, 'folder_id')
     ? (folder_id || null)
     : (media as any).folder_id;
+  const newDesc = description !== undefined ? (description?.trim() || null) : media.description;
+  const newNotes = context_notes !== undefined ? (context_notes?.trim() || null) : (media as any).context_notes;
 
   const updated = await queryOne(
     `UPDATE media_files
-     SET original_name = $1, folder_id = $2, updated_at = now()
-     WHERE id = $3
+     SET original_name = $1, folder_id = $2, description = $3, context_notes = $4, updated_at = now()
+     WHERE id = $5
      RETURNING *`,
-    [newName, newFolder, req.params.id],
+    [newName, newFolder, newDesc, newNotes, req.params.id],
   );
 
   res.json({ ok: true, data: { media: updated } });

@@ -8,7 +8,7 @@ import { query, queryOne } from '../db';
 import { generatePostContent } from '../ai';
 import { QUEUES } from '@onlyposts/shared';
 import type { Agent, OAuthToken, PlatformAccount, PostJobPayload, Platform, MediaFile, MediaSettings } from '@onlyposts/shared';
-
+ 
 import crypto from 'crypto';
 import { config } from '../config';
 import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
@@ -354,13 +354,28 @@ export function startPostProcessor() {
           include_body_text: true, caption_source: 'ai_generated', caption_prefix: '',
         };
 
+        // Build media context from file metadata so AI writes relevant captions
+        let mediaContext: string | undefined;
+        if (mediaFileId) {
+          const mediaFile = await queryOne<{ description: string | null; context_notes: string | null }>(
+            'SELECT description, context_notes FROM media_files WHERE id = $1',
+            [mediaFileId],
+          );
+          if (mediaFile) {
+            const parts: string[] = [];
+            if (mediaFile.description) parts.push(`This post is about: ${mediaFile.description}`);
+            if (mediaFile.context_notes) parts.push(`Key talking points to reference:\n${mediaFile.context_notes}`);
+            if (parts.length > 0) mediaContext = parts.join('\n\n');
+          }
+        }
+
         let postText: string;
 
         if (preApprovedText) {
           postText = preApprovedText;
           console.log(`[Post] Action ${action_id} using pre-approved content`);
         } else {
-          const generated = await generatePostContent(agent, platform as Platform);
+          const generated = await generatePostContent(agent, platform as Platform, mediaContext);
 
           if (generated.needsReview || agent.approval_mode === 'review') {
             await query(

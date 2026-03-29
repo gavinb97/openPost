@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Spinner, EmptyState } from '@/components/ui/spinner';
 import { platformIcon, platformColor, formatRelative } from '@/lib/utils';
 import { toast } from 'sonner';
-
+ 
 const platforms = [
   { id: 'twitter', name: 'Twitter / X', icon: '𝕏', comingSoon: false, gradient: 'from-white/10 to-white/5' },
   { id: 'reddit', name: 'Reddit', icon: '●', comingSoon: false, gradient: 'from-orange-500/15 to-orange-600/5' },
